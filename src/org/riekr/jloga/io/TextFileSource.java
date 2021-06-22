@@ -175,6 +175,8 @@ public class TextFileSource implements TextSource {
 
 	public void setIndexingListener(@Nullable ProgressListener indexingListener) {
 		_indexingListener = indexingListener == null ? ProgressListener.NOP : indexingListener;
+		if (_indexing.isDone())
+			_indexingListener.onProgressChanged(100, 100);
 	}
 
 	@Override
