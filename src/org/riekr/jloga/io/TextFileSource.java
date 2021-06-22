@@ -123,6 +123,18 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
+	private String[] loadPage(int fromLine, int toLine, long pos) throws IOException {
+		String[] lines = new String[toLine - fromLine];
+		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
+			fileChannel.position(pos);
+			try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), PAGE_SIZE)) {
+				for (int i = 0; i < lines.length; i++)
+					lines[i] = br.readLine();
+				return lines;
+			}
+		}
+	}
+
 	@Override
 	public String getText(int line) throws ExecutionException, InterruptedException {
 		if (_lines == null || line < _fromLine || line >= (_fromLine + _lines.length)) {
@@ -134,25 +146,17 @@ public class TextFileSource implements TextSource {
 				Integer toLine = _index.ceilingKey(line + 1);
 				if (toLine == null)
 					toLine = _lineCount;
-				String[] lines = new String[toLine - fromLine];
-				try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
-					fileChannel.position(indexData.startPos);
-					try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), PAGE_SIZE)) {
-						for (int i = 0; i < lines.length; i++)
-							lines[i] = br.readLine();
-						_fromLine = fromLine;
-						_lines = lines;
-						indexData.data = new WeakReference<>(lines);
-					}
-				} catch (ClosedByInterruptException e) {
-					return "";
+				try {
+					_lines = loadPage(fromLine, toLine, indexData.startPos);
+					_fromLine = fromLine;
+					indexData.data = new WeakReference<>(_lines);
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 					return "";
 				}
 			} else {
-				_fromLine = fromLine;
 //				System.out.println("HIT");
+				_fromLine = fromLine;
 			}
 		}
 		int i = line - _fromLine;
