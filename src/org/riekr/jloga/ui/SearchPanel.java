@@ -3,17 +3,19 @@ package org.riekr.jloga.ui;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.io.ProgressListener;
+import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
+import static org.riekr.jloga.io.ProgressListener.newProgressListenerFor;
 
 public class SearchPanel extends JComponent {
 
@@ -28,6 +30,15 @@ public class SearchPanel extends JComponent {
 	private final AtomicBoolean _searching = new AtomicBoolean(false);
 
 	private final JProgressBar _progressBar;
+	private String _tag;
+
+	public SearchPanel(File file, Charset charset, JProgressBar progressBar) {
+		this(progressBar, 0);
+		_tag = file.getName();
+		add(new JLabel(file.getAbsolutePath()), BorderLayout.NORTH);
+		TextSource src = new TextFileSource(file.toPath(), charset);
+		setTextSource(src);
+	}
 
 	public SearchPanel(JProgressBar progressBar, int level) {
 		_level = level;
@@ -60,21 +71,6 @@ public class SearchPanel extends JComponent {
 		_bottomArea.add(searchHeader, BorderLayout.NORTH);
 	}
 
-	public ProgressListener newProgressListener(String op) {
-		return ProgressListener.limit(200, (pos, size) -> {
-			float perc = (pos * 100.0f) / size;
-			int progress = Math.round((pos * 3840.0f) / size);
-			EventQueue.invokeLater(() -> {
-				_progressBar.setString(String.format(op + " %.2f%%", perc));
-				_progressBar.setMaximum(3840);
-				_progressBar.setValue(progress);
-			});
-		}).andThen(() -> UIUtils.invokeAfter(() -> {
-			_progressBar.setString(null);
-			_progressBar.setVisible(false);
-		}, 1000)).atFirst(() -> _progressBar.setVisible(true));
-	}
-
 	private void saveResults() {
 		if (_resultTextSource == null)
 			return;
@@ -85,14 +81,9 @@ public class SearchPanel extends JComponent {
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-			_resultTextSource.requestSave(fileToSave, newProgressListener("Saving"));
+			_resultTextSource.requestSave(fileToSave, newProgressListenerFor(_progressBar, "Saving"));
 			Preferences.save(LAST_SAVE_PATH, fileToSave.getParentFile());
 		}
-	}
-
-	public void setTextSource(@NotNull TextSource textSource) {
-		_textArea.setTextSource(textSource);
-		textSource.setIndexingListener(newProgressListener("Indexing"));
 	}
 
 	private synchronized void search(String regex) {
@@ -103,7 +94,7 @@ public class SearchPanel extends JComponent {
 				_searching.set(true);
 				_textArea.getTextSource().requestSearch(
 						searchPattern,
-						newProgressListener("Searching").andThen(() -> _regex.setEnabled(true)),
+						newProgressListenerFor(_progressBar, "Searching").andThen(() -> _regex.setEnabled(true)),
 						_searching,
 						(res) -> {
 							_resultTextSource = res;
@@ -119,6 +110,11 @@ public class SearchPanel extends JComponent {
 				_regex.setEnabled(true);
 			}
 		}
+	}
+
+	public void setTextSource(TextSource src) {
+		_textArea.setTextSource(src);
+		src.setIndexingListener(newProgressListenerFor(_progressBar, "Indexing"));
 	}
 
 	@NotNull
@@ -161,4 +157,8 @@ public class SearchPanel extends JComponent {
 			_resultTextArea.setFont(f);
 	}
 
+	@Override
+	public String toString() {
+		return _tag == null ? super.toString() : _tag;
+	}
 }

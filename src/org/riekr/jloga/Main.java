@@ -1,9 +1,8 @@
 package org.riekr.jloga;
 
 import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.ui.CharsetCombo;
-import org.riekr.jloga.ui.TextFileAnalyzer;
+import org.riekr.jloga.ui.SearchPanel;
 import org.riekr.jloga.ui.UIUtils;
 
 import javax.swing.*;
@@ -62,7 +61,7 @@ public class Main extends JFrame {
 		try {
 			if (file.canRead() && _openFiles.add(file)) {
 				System.out.println("Load file: " + file.getAbsolutePath());
-				TextFileAnalyzer analyzer = new TextFileAnalyzer(new TextFileSource(file.toPath(), _charsetCombo.charset), _progressBar);
+				SearchPanel analyzer = new SearchPanel(file, _charsetCombo.charset, _progressBar);
 				_tabs.addTab(analyzer.toString(), analyzer);
 				analyzer.setFont(_font);
 				analyzer.addHierarchyListener(e -> {
