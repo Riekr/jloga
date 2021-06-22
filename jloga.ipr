@@ -179,4 +179,14 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
   </component>
+  <component name="libraryTable">
+    <library name="com.formdev:flatlaf:1.2" type="repository">
+      <properties maven-id="com.formdev:flatlaf:1.2" />
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/flatlaf-1.2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+  </component>
 </project>

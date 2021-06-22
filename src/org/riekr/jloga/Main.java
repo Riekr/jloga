@@ -83,7 +83,13 @@ public class Main extends JFrame {
 
 
 	@SuppressWarnings("SpellCheckingInspection")
-	private static void loadDarculaLaf() {
+	private static void loadLAF() {
+		try {
+			// https://www.formdev.com/flatlaf/themes/
+			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
+			return;
+		} catch (Throwable ignored) {
+		}
 		try {
 			UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
 		} catch (Throwable ignored) {
@@ -92,7 +98,7 @@ public class Main extends JFrame {
 
 	public static void main(String... args) {
 		try {
-			loadDarculaLaf();
+			loadLAF();
 			Main main = new Main();
 			main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			main.setExtendedState(main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
