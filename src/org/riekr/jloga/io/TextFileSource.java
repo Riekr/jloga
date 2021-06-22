@@ -15,7 +15,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -26,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.stream.Stream;
 
 import static java.nio.file.StandardOpenOption.READ;
 
@@ -122,16 +120,6 @@ public class TextFileSource implements TextSource {
 					}
 				}
 			});
-		}
-	}
-
-	@Override
-	public Stream<String> allLines() throws ExecutionException, InterruptedException {
-		_indexing.get();
-		try {
-			return Files.lines(_file, _charset);
-		} catch (IOException e) {
-			throw new ExecutionException(e);
 		}
 	}
 
