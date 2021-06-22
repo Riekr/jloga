@@ -27,7 +27,7 @@ public final class UIUtils {
 		JButton btn = new JButton(text);
 		btn.setBorderPainted(false);
 		btn.setContentAreaFilled(false);
-		btn.setBorder(new EmptyBorder(3, 3, 3, 3));
+		btn.setBorder(new EmptyBorder(6, 8, 6, 8));
 		btn.addActionListener((e) -> action.run());
 		return btn;
 	}

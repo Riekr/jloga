@@ -33,8 +33,11 @@ public class Main extends JFrame {
 		_progressBar.setMaximum(0);
 		_progressBar.setStringPainted(true);
 		JToolBar toolBar = new JToolBar();
+		_charsetCombo = new CharsetCombo();
+		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
+
 		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog));
-		toolBar.add(_charsetCombo = new CharsetCombo());
+		toolBar.add(_charsetCombo);
 
 		// layout
 		setLayout(new BorderLayout());
