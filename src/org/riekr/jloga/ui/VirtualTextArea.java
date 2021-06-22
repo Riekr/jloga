@@ -168,7 +168,7 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = Math.max(1, (int) Math.ceil(getHeight() / (double) _lineHeight));
+		final int newValue = Math.max(1, (int) Math.floor(getHeight() / (double) _lineHeight) - 1);
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);

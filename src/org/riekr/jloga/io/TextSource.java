@@ -46,7 +46,7 @@ public interface TextSource {
 	default String getText(int fromLine, int count) throws ExecutionException, InterruptedException {
 		StringBuilder buf = new StringBuilder(32768);
 		int toLinePlus1 = fromLine + Math.min(count, getLineCount());
-		for (int line = fromLine; line < toLinePlus1; line++)
+		for (int line = fromLine; line <= toLinePlus1; line++)
 			buf.append(getText(line)).append('\n');
 		return buf.toString();
 	}
