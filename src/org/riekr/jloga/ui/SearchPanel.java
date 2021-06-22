@@ -22,7 +22,6 @@ public class SearchPanel extends JComponent {
 	private final int _level;
 	private final VirtualTextArea _textArea;
 	private @Nullable SearchPanel _resultTextArea;
-	private TextSource _resultTextSource;
 
 	private final JSplitPane _splitPane;
 	private final JPanel _bottomArea;
@@ -72,7 +71,7 @@ public class SearchPanel extends JComponent {
 	}
 
 	private void saveResults() {
-		if (_resultTextSource == null)
+		if (_resultTextArea == null)
 			return;
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(Preferences.loadFile(LAST_SAVE_PATH, () -> new File(".")));
@@ -81,7 +80,7 @@ public class SearchPanel extends JComponent {
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-			_resultTextSource.requestSave(fileToSave, newProgressListenerFor(_progressBar, "Saving"));
+			_resultTextArea.getTextSource().requestSave(fileToSave, newProgressListenerFor(_progressBar, "Saving"));
 			Preferences.save(LAST_SAVE_PATH, fileToSave.getParentFile());
 		}
 	}
@@ -97,7 +96,6 @@ public class SearchPanel extends JComponent {
 						newProgressListenerFor(_progressBar, "Searching").andThen(() -> _regex.setEnabled(true)),
 						_searching,
 						(res) -> {
-							_resultTextSource = res;
 							getResultTextArea().setTextSource(res);
 							if (_splitPane.getResizeWeight() == 1.0) {
 								_splitPane.setResizeWeight(.5);
@@ -117,6 +115,10 @@ public class SearchPanel extends JComponent {
 		src.setIndexingListener(newProgressListenerFor(_progressBar, "Indexing"));
 	}
 
+	public TextSource getTextSource() {
+		return _textArea.getTextSource();
+	}
+
 	@NotNull
 	private SearchPanel getResultTextArea() {
 		if (_resultTextArea == null) {
@@ -124,11 +126,9 @@ public class SearchPanel extends JComponent {
 			_resultTextArea.setFont(getFont());
 			_resultTextArea.setMinimumSize(new Dimension(0, 0));
 			_resultTextArea._textArea.setLineListener((line) -> {
-				if (_resultTextSource != null) {
-					Integer srcLine = _resultTextSource.getSrcLine(line);
-					if (srcLine != null)
-						_textArea.centerOn(srcLine);
-				}
+				Integer srcLine = _resultTextArea.getTextSource().getSrcLine(line);
+				if (srcLine != null)
+					_textArea.centerOn(srcLine);
 			});
 			_bottomArea.add(_resultTextArea, BorderLayout.CENTER);
 		}
@@ -142,7 +142,6 @@ public class SearchPanel extends JComponent {
 			_bottomArea.remove(_resultTextArea);
 			_bottomArea.repaint();
 			_resultTextArea = null;
-			_resultTextSource = null;
 			_regex.requestFocus();
 			_splitPane.setResizeWeight(1.0);
 			_splitPane.setDividerLocation(-1);
