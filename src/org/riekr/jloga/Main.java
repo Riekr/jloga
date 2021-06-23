@@ -101,6 +101,7 @@ public class Main extends JFrame {
 			loadLAF();
 			Main main = new Main();
 			main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			main.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			main.setExtendedState(main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 			main.setTitle("JLogA");
 			main.setVisible(true);

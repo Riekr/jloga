@@ -23,10 +23,10 @@ public class MRUTextCombo extends JComboBox<String> {
 					_model.removeElement(elem);
 					_model.insertElementAt(elem, 0);
 					Preferences.save(key, _model);
-					break;
+					setSelectedIndex(0);
 				case "comboBoxChanged":
 					if (_listener != null)
-						_listener.accept((String) getSelectedItem());
+						_listener.accept(elem);
 					break;
 				default:
 					System.err.println(e);
