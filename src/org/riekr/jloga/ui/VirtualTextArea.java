@@ -3,6 +3,7 @@ package org.riekr.jloga.ui;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
@@ -58,6 +59,7 @@ public class VirtualTextArea extends JComponent {
 		_text.setLineWrap(false);
 		setLayout(new BorderLayout());
 		JScrollPane scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		scrollPane.setWheelScrollingEnabled(false);
 		add(scrollPane, BorderLayout.CENTER);
 		_lineNumbers = new JTextArea();
