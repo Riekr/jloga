@@ -5,6 +5,7 @@
       <output-path>$PROJECT_DIR$/out/artifacts/jloga_jar</output-path>
       <root id="archive" name="jloga.jar">
         <element id="module-output" name="jloga" />
+        <element id="library" level="project" name="org.drjekyll:fontchooser:2.4" />
       </root>
     </artifact>
   </component>
@@ -187,6 +188,16 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES />
+    </library>
+    <library name="org.drjekyll:fontchooser:2.4" type="repository">
+      <properties maven-id="org.drjekyll:fontchooser:2.4" />
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/fontchooser-2.4.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/lib/fontchooser-2.4-sources.jar!/" />
+      </SOURCES>
     </library>
   </component>
 </project>

@@ -26,5 +26,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" scope="RUNTIME" name="com.formdev:flatlaf:1.2" level="project" />
+    <orderEntry type="library" name="org.drjekyll:fontchooser:2.4" level="project" />
   </component>
 </module>

@@ -1,5 +1,6 @@
 package org.riekr.jloga;
 
+import org.drjekyll.fontchooser.FontDialog;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
 import org.riekr.jloga.ui.SearchPanel;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.riekr.jloga.io.Preferences.FONT;
 import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
 import static org.riekr.jloga.ui.UIUtils.newButton;
 import static org.riekr.jloga.ui.UIUtils.newTabHeader;
@@ -21,10 +23,12 @@ public class Main extends JFrame {
 	private final CharsetCombo _charsetCombo;
 	private final JTabbedPane _tabs;
 	private final JProgressBar _progressBar;
-	private final Font _font = new Font("monospaced", Font.PLAIN, 12);
 	private final Set<File> _openFiles = new HashSet<>();
 
+	private Font _font;
+
 	public Main() {
+		_font = Preferences.load(FONT, () -> new Font("monospaced", Font.PLAIN, 12));
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane();
 		_progressBar = new JProgressBar();
@@ -36,6 +40,8 @@ public class Main extends JFrame {
 		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
 
 		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog));
+		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont));
+		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(_charsetCombo);
 
 		// layout
@@ -43,6 +49,25 @@ public class Main extends JFrame {
 		add(toolBar, BorderLayout.NORTH);
 		add(_tabs);
 		add(_progressBar, BorderLayout.SOUTH);
+	}
+
+	public void selectFont() {
+		FontDialog dialog = new FontDialog(this, "Select Font", true);
+		dialog.setSelectedFont(_font);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
+		if (!dialog.isCancelSelected()) {
+			Font selectedFont = dialog.getSelectedFont();
+			System.out.println("Selected font is: " + selectedFont);
+			if (!selectedFont.equals(_font)) {
+				_font = selectedFont;
+				for (int i = 0; i < _tabs.getTabCount(); i++) {
+					SearchPanel analyzer = (SearchPanel) _tabs.getComponentAt(i);
+					analyzer.setFont(selectedFont);
+				}
+				Preferences.save(FONT, selectedFont);
+			}
+		}
 	}
 
 	public void openFileDialog() {
