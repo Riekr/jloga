@@ -37,7 +37,8 @@ public class SearchPanelBottomArea extends JPanel {
 		JToolBar searchToolbar = new JToolBar();
 		searchToolbar.add(UIUtils.newButton("\u274C", () -> {
 			if (!_searching.compareAndExchange(true, false))
-				this.removeResultTextArea();
+				if (!this.removeResultTextArea())
+					_parent.removeBottomArea(this);
 		}));
 		searchToolbar.add(UIUtils.newButton("\uD83D\uDDAB", this::saveResults));
 		searchHeader.add(_regex, BorderLayout.CENTER);
@@ -99,15 +100,16 @@ public class SearchPanelBottomArea extends JPanel {
 		return _resultTextArea;
 	}
 
-	public void removeResultTextArea() {
+	public boolean removeResultTextArea() {
 		if (_resultTextArea != null) {
 			_resultTextArea.getTextArea().setLineListener(null);
-			_resultTextArea.removeResultTextArea();
 			remove(_resultTextArea);
 			_resultTextArea = null;
 			_regex.requestFocus();
 			_parent.collapseBottomArea();
+			return true;
 		}
+		return false;
 	}
 
 	@Override

@@ -4,20 +4,29 @@ import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.riekr.jloga.io.ProgressListener.newProgressListenerFor;
 
 public class SearchPanel extends JComponent {
 
+	private static final String _TAB_ADD = " + ";
+	private static final String _TAB_PREFIX = "Search ";
+
 	private final VirtualTextArea _textArea;
 	private final JSplitPane _splitPane;
-	private final SearchPanelBottomArea _bottomArea;
+	private final JTabbedPane _bottomTabs;
 
 	private final JProgressBar _progressBar;
 	private String _tag;
+	private int _searchId = 0;
 
 	public SearchPanel(File file, Charset charset, JProgressBar progressBar) {
 		this(progressBar, 0);
@@ -34,12 +43,28 @@ public class SearchPanel extends JComponent {
 		_splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		_splitPane.setResizeWeight(1);
 		_progressBar = progressBar;
-		_bottomArea = new SearchPanelBottomArea(this, progressBar, level);
 
 		// layout
 		add(_splitPane, BorderLayout.CENTER);
 		_splitPane.add(_textArea);
-		_splitPane.add(_bottomArea);
+		_bottomTabs = new JTabbedPane();
+		Supplier<String> titleSupplier = () -> _TAB_PREFIX + (char) ('A' + level) + (++_searchId);
+		_bottomTabs.addTab(titleSupplier.get(), new SearchPanelBottomArea(this, progressBar, level));
+		_bottomTabs.addTab(_TAB_ADD, null);
+		_bottomTabs.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_bottomTabs.removeChangeListener(this);
+				int idx = _bottomTabs.indexOfTab(_TAB_ADD);
+				if (_bottomTabs.getSelectedIndex() == idx) {
+					SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
+					_bottomTabs.insertTab(titleSupplier.get(), null, body, null, idx);
+					_bottomTabs.setSelectedIndex(idx);
+				}
+				EventQueue.invokeLater(() -> _bottomTabs.addChangeListener(this));
+			}
+		});
+		_splitPane.add(_bottomTabs);
 	}
 
 	public void setTextSource(TextSource src) {
@@ -51,15 +76,19 @@ public class SearchPanel extends JComponent {
 		return _textArea.getTextSource();
 	}
 
-	public void removeResultTextArea() {
-		_bottomArea.removeResultTextArea();
+	private Stream<SearchPanelBottomArea> searchPanelBottomAreaStream() {
+		return IntStream.range(0, _bottomTabs.getTabCount() - 1)
+				.mapToObj(_bottomTabs::getComponentAt)
+				.filter((c) -> c instanceof SearchPanelBottomArea)
+				.map((c) -> (SearchPanelBottomArea) c);
 	}
 
 	@Override
 	public void setFont(Font f) {
 		super.setFont(f);
 		_textArea.setFont(f);
-		_bottomArea.setFont(f);
+		searchPanelBottomAreaStream()
+				.forEach((ba) -> ba.setFont(f));
 	}
 
 	@Override
@@ -83,5 +112,11 @@ public class SearchPanel extends JComponent {
 
 	public VirtualTextArea getTextArea() {
 		return _textArea;
+	}
+
+	public void removeBottomArea(SearchPanelBottomArea bottomArea) {
+		int idx = _bottomTabs.indexOfComponent(bottomArea);
+		_bottomTabs.setSelectedIndex(Math.max(0, idx - 1));
+		_bottomTabs.removeTabAt(idx);
 	}
 }
