@@ -12,6 +12,9 @@ import java.awt.event.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
+
 public class VirtualTextArea extends JComponent {
 
 	private int _lineHeight;
@@ -54,7 +57,9 @@ public class VirtualTextArea extends JComponent {
 		_text.setAutoscrolls(false);
 		_text.setLineWrap(false);
 		setLayout(new BorderLayout());
-		add(_text, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setWheelScrollingEnabled(false);
+		add(scrollPane, BorderLayout.CENTER);
 		_lineNumbers = new JTextArea();
 		_lineNumbers.setEditable(false);
 		_lineNumbers.setEnabled(false);
@@ -75,9 +80,12 @@ public class VirtualTextArea extends JComponent {
 				recalcLineCount();
 			}
 		});
-		_text.addMouseWheelListener(new MouseAdapter() {
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
+		_text.addMouseWheelListener((e) -> {
+			if (e.isShiftDown()) {
+				JScrollBar scrollBar = scrollPane.getHorizontalScrollBar();
+				int incr = (scrollBar.getMaximum() - scrollBar.getMinimum()) / 10;
+				scrollBar.setValue(scrollBar.getValue() + (e.getWheelRotation() * incr));
+			} else {
 				if (e.getWheelRotation() < 0)
 					pageUp();
 				else
