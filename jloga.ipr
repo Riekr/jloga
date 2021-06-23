@@ -5,7 +5,8 @@
       <output-path>$PROJECT_DIR$/out/artifacts/jloga_jar</output-path>
       <root id="archive" name="jloga.jar">
         <element id="module-output" name="jloga" />
-        <element id="library" level="project" name="org.drjekyll:fontchooser:2.4" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/lib/flatlaf-1.2.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="$PROJECT_DIR$/lib/fontchooser-2.4.jar" path-in-jar="/" />
       </root>
     </artifact>
   </component>
