@@ -25,6 +25,7 @@ public class VirtualTextArea extends JComponent {
 	private int _fromLine = 0;
 	private int _lineCount = 0;
 	private int _allLinesCount = 0;
+	private Integer _highlightedLine = null;
 
 	private final JScrollPane _scrollPane;
 	private final JTextArea _text;
@@ -129,22 +130,7 @@ public class VirtualTextArea extends JComponent {
 
 	public void centerOn(int line) {
 		setFromLine(line - (_lineCount / 2));
-		EventQueue.invokeLater(() -> {
-			int _highlightedLine = line - _fromLine;
-			try {
-				Highlighter highlighter = _text.getHighlighter();
-				highlighter.removeAllHighlights();
-				highlighter.addHighlight(
-						_text.getLineStartOffset(_highlightedLine),
-						_text.getLineEndOffset(_highlightedLine),
-						new DefaultHighlightPainter(_text.getForeground().darker())
-				);
-				if (_lineListener != null)
-					_lineListener.accept(line);
-			} catch (BadLocationException e) {
-				e.printStackTrace(System.err);
-			}
-		});
+		EventQueue.invokeLater(() -> _highlightedLine = line - _fromLine);
 	}
 
 	@Override
@@ -201,8 +187,27 @@ public class VirtualTextArea extends JComponent {
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				}
-				EventQueue.invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
 				reNumerate();
+				Highlighter highlighter = _text.getHighlighter();
+				highlighter.removeAllHighlights();
+				EventQueue.invokeLater(() -> {
+					_scrollPane.getHorizontalScrollBar().setValue(0);
+					if (_highlightedLine != null) {
+						int line = _highlightedLine;
+						_highlightedLine = null;
+						try {
+							highlighter.addHighlight(
+									_text.getLineStartOffset(line),
+									_text.getLineEndOffset(line),
+									new DefaultHighlightPainter(_text.getForeground().darker())
+							);
+							if (_lineListener != null)
+								_lineListener.accept(line);
+						} catch (BadLocationException e) {
+							e.printStackTrace(System.err);
+						}
+					}
+				});
 			});
 		}
 	}
