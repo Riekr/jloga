@@ -15,7 +15,7 @@ public class CharSequenceReader extends Reader {
 
 	@Override
 	public int read(char @NotNull [] cbuf, int off, int len) {
-		int avail = _buf.length() - 1 - _pos;
+		int avail = _buf.length() - _pos;
 		if (avail == 0)
 			return -1;
 		int readLen = Math.min(avail, len);
