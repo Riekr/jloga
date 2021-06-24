@@ -106,7 +106,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void requestText(int fromLine, int count, Consumer<String> consumer) {
+	public void requestText(int fromLine, int count, Consumer<CharSequence> consumer) {
 		if (_indexing.isDone())
 			TextSource.super.requestText(fromLine, count, consumer);
 		else {
@@ -118,9 +118,10 @@ public class TextFileSource implements TextSource {
 						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null) {
 							_indexChangeListeners.remove(this);
 							StringBuilder buf = new StringBuilder(32768);
-							for (int line = fromLine; line <= toLinePlus1; line++)
+							for (int line = fromLine; line < toLinePlus1; line++)
 								buf.append(getText(line)).append('\n');
-							EventQueue.invokeLater(() -> consumer.accept(buf.toString()));
+							buf.append(getText(toLinePlus1));
+							EventQueue.invokeLater(() -> consumer.accept(buf));
 						}
 					} catch (ExecutionException | InterruptedException ignored) {
 					}

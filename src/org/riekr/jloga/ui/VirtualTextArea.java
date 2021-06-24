@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import org.riekr.jloga.io.CharSequenceReader;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
@@ -10,6 +11,7 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 
@@ -193,7 +195,13 @@ public class VirtualTextArea extends JComponent {
 			_text.setText("");
 		else {
 			_textSource.requestText(_fromLine, _lineCount, (text) -> {
-				_text.setText(text);
+				try {
+					// _text.setText(text); simply does not work every time
+					_text.read(new CharSequenceReader(text), _fromLine);
+				} catch (IOException e) {
+					e.printStackTrace(System.err);
+				}
+				EventQueue.invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
 				reNumerate();
 			});
 		}

@@ -33,10 +33,10 @@ public interface TextSource {
 			oldFuture.cancel(true);
 	}
 
-	default void requestText(int fromLine, int count, Consumer<String> consumer) {
+	default void requestText(int fromLine, int count, Consumer<CharSequence> consumer) {
 		executeRequestText(() -> {
 			try {
-				String text = getText(fromLine, count);
+				CharSequence text = getText(fromLine, count);
 				EventQueue.invokeLater(() -> consumer.accept(text));
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
@@ -44,12 +44,13 @@ public interface TextSource {
 		});
 	}
 
-	default String getText(int fromLine, int count) throws ExecutionException, InterruptedException {
+	default CharSequence getText(int fromLine, int count) throws ExecutionException, InterruptedException {
 		StringBuilder buf = new StringBuilder(32768);
 		int toLinePlus1 = fromLine + Math.min(count, getLineCount());
-		for (int line = fromLine; line <= toLinePlus1; line++)
+		for (int line = fromLine; line < toLinePlus1; line++)
 			buf.append(getText(line)).append('\n');
-		return buf.toString();
+		buf.append(getText(toLinePlus1));
+		return buf;
 	}
 
 	String getText(int line) throws ExecutionException, InterruptedException;
