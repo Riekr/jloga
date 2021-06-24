@@ -9,13 +9,8 @@ import static java.util.Objects.requireNonNull;
 
 public class IntBehaviourSubject extends BehaviourSubject<Integer> {
 
-
 	public IntBehaviourSubject() {
 		super(0);
-	}
-
-	public IntBehaviourSubject(int initialValue) {
-		super(initialValue);
 	}
 
 	@NotNull
@@ -32,11 +27,4 @@ public class IntBehaviourSubject extends BehaviourSubject<Integer> {
 		super.next(requireNonNull(item));
 	}
 
-	public void increment() {
-		next(get() + 1);
-	}
-
-	public void decrement() {
-		next(get() - 1);
-	}
 }

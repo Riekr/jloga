@@ -1,8 +1,12 @@
 package org.riekr.jloga.io;
 
+import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Unsubscribable;
+
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.IntConsumer;
 
 public class FilteredTextSource implements TextSource {
 
@@ -24,7 +28,9 @@ public class FilteredTextSource implements TextSource {
 
 	private final TextSource _tie;
 	private final TreeMap<Integer, Range> _lines = new TreeMap<>();
-	private int _size = 0;
+
+	private int _lineCount = 0;
+	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
 	public FilteredTextSource(TextSource tie) {
 		_tie = tie;
@@ -33,17 +39,33 @@ public class FilteredTextSource implements TextSource {
 	public void addLine(int line) {
 		Map.Entry<Integer, Range> entry = _lines.floorEntry(line);
 		if (entry == null) {
-			_lines.put(_size++, new Range(line));
+			_lines.put(_lineCount++, new Range(line));
+			_lineCountSubject.next(_lineCount);
 			return;
 		}
 		Range range = entry.getValue();
 		Integer tieLine = range.getSrcLine(entry.getKey(), line - 1);
 		if (tieLine == null) {
-			_lines.put(_size++, new Range(line));
+			_lines.put(_lineCount++, new Range(line));
+			_lineCountSubject.next(_lineCount);
 			return;
 		}
 		range.to++;
-		_size++;
+		_lineCount++;
+		_lineCountSubject.next(_lineCount);
+	}
+
+	public void dispatchLineCount() {
+		_lineCountSubject.next(_lineCount);
+	}
+
+	public void complete() {
+		_lineCountSubject.last();
+	}
+
+	@Override
+	public Unsubscribable requestLineCount(IntConsumer consumer) {
+		return _lineCountSubject.subscribe(consumer);
 	}
 
 	@Override
@@ -56,7 +78,7 @@ public class FilteredTextSource implements TextSource {
 
 	@Override
 	public int getLineCount() {
-		return _size;
+		return _lineCount;
 	}
 
 	public Integer getSrcLine(int line) {

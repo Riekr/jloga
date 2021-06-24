@@ -7,7 +7,7 @@ import org.riekr.jloga.io.Preferences;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -21,9 +21,10 @@ public class SearchPanelBottomArea extends JPanel {
 	private @Nullable SearchPanel _resultTextArea;
 
 	private final MRUTextCombo _regex;
-	private final AtomicBoolean _searching = new AtomicBoolean(false);
 	private final SearchPanel _parent;
 	private final JProgressBar _progressBar;
+
+	private Future<?> _searching;
 
 	public SearchPanelBottomArea(SearchPanel parent, JProgressBar progressBar, int level) {
 		_parent = parent;
@@ -36,9 +37,11 @@ public class SearchPanelBottomArea extends JPanel {
 		_regex.setListener(this::search);
 		JToolBar searchToolbar = new JToolBar();
 		searchToolbar.add(UIUtils.newButton("\u274C", () -> {
-			if (!_searching.compareAndExchange(true, false))
-				if (!this.removeResultTextArea())
-					_parent.removeBottomArea(this);
+			if (_searching != null && !_searching.isDone()) {
+				_searching.cancel(true);
+			} else if (!this.removeResultTextArea()) {
+				_parent.removeBottomArea(this);
+			}
 		}));
 		searchToolbar.add(UIUtils.newButton("\uD83D\uDDAB", this::saveResults));
 		searchHeader.add(_regex, BorderLayout.CENTER);
@@ -66,15 +69,14 @@ public class SearchPanelBottomArea extends JPanel {
 			_regex.setEnabled(false);
 			try {
 				Pattern searchPattern = Pattern.compile(regex);
-				_searching.set(true);
+				if (_searching != null && !_searching.isDone())
+					_searching.cancel(true);
 				_parent.getTextSource().requestSearch(
 						searchPattern,
 						newProgressListenerFor(_progressBar, "Searching").andThen(() -> _regex.setEnabled(true)),
-						_searching,
 						(res) -> {
 							getResultTextArea().setTextSource(res);
 							_parent.expandBottomArea();
-							_searching.compareAndSet(true, false);
 						}
 				);
 			} catch (PatternSyntaxException pse) {

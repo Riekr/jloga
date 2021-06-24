@@ -148,10 +148,12 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	private void setFileLineCount(int lineCount) {
-		_allLinesCount = lineCount;
-		recalcScrollBarMaximum();
-		_scrollBar.setEnabled(true);
-		reNumerate();
+		if (_allLinesCount != lineCount) {
+			_allLinesCount = lineCount;
+			recalcScrollBarMaximum();
+			_scrollBar.setEnabled(true);
+			requireText();
+		}
 	}
 
 	private void recalcScrollBarMaximum() {

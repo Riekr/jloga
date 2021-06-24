@@ -13,8 +13,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
@@ -72,15 +72,24 @@ public interface TextSource {
 	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
 	}
 
-	default void requestSearch(Pattern pat, ProgressListener progressListener, AtomicBoolean running, Consumer<TextSource> consumer) {
-		EXECUTOR.execute(() -> {
+	default Future<?> requestSearch(Pattern pat, ProgressListener progressListener, Consumer<TextSource> consumer) {
+		AtomicReference<Future<?>> resRef = new AtomicReference<>();
+		BooleanSupplier running = () -> {
+			Future<?> future = resRef.get();
+			return future == null || !future.isCancelled();
+		};
+		Future<?> res = Executors.newSingleThreadExecutor().submit(() -> {
 			try {
-				TextSource searchResult = search(pat, progressListener, running);
+				FilteredTextSource searchResult = new FilteredTextSource(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
+				search(pat, searchResult, progressListener, running);
+				searchResult.complete();
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 			}
 		});
+		resRef.set(res);
+		return res;
 	}
 
 	default Stream<? extends CharSequence> allLines() throws ExecutionException, InterruptedException {
@@ -95,22 +104,22 @@ public interface TextSource {
 				.filter(Objects::nonNull);
 	}
 
-	default TextSource search(Pattern pat, ProgressListener progressListener, AtomicBoolean running) throws ExecutionException, InterruptedException {
+	default void search(Pattern pat, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
+		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
 		long start = System.currentTimeMillis();
 		int lineCount = getLineCount();
 		try {
-			FilteredTextSource res = new FilteredTextSource(this);
 			Matcher m = pat.matcher("");
 			Iterator<? extends CharSequence> i = allLines().iterator();
 			int line = 0;
-			while (running.get() && i.hasNext()) {
+			while (running.getAsBoolean() && i.hasNext()) {
 				m.reset(i.next());
 				if (m.find())
-					res.addLine(line);
+					out.addLine(line);
 				line++;
 				progressListener.onProgressChanged(line, lineCount);
 			}
-			return res;
 		} finally {
 			progressListener.onProgressChanged(lineCount, lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
