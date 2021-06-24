@@ -25,7 +25,7 @@ public class VirtualTextArea extends JComponent {
 	private int _allLinesCount = 0;
 
 	private final JTextArea _text;
-	private final JTextArea _lineNumbers;
+	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar _scrollBar;
 
 	private TextSource _textSource;
@@ -62,9 +62,7 @@ public class VirtualTextArea extends JComponent {
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		scrollPane.setWheelScrollingEnabled(false);
 		add(scrollPane, BorderLayout.CENTER);
-		_lineNumbers = new JTextArea();
-		_lineNumbers.setEditable(false);
-		_lineNumbers.setEnabled(false);
+		_lineNumbers = new LineNumbersTextArea();
 		add(_lineNumbers, BorderLayout.LINE_START);
 		_scrollBar = new JScrollBar(JScrollBar.VERTICAL);
 		_scrollBar.setMinimum(0);
@@ -95,7 +93,6 @@ public class VirtualTextArea extends JComponent {
 			}
 		});
 	}
-
 
 	public void setFromLine(int fromLine) {
 		if (fromLine < 0)
@@ -163,6 +160,7 @@ public class VirtualTextArea extends JComponent {
 		_allLinesCount = lineCount;
 		recalcScrollBarMaximum();
 		_scrollBar.setEnabled(true);
+		reNumerate();
 	}
 
 	private void recalcScrollBarMaximum() {
@@ -191,24 +189,19 @@ public class VirtualTextArea extends JComponent {
 		if (_textSource == null)
 			_text.setText("");
 		else {
-			int from = _fromLine;
-			int to = _fromLine + _lineCount;
 			_textSource.requestText(_fromLine, _lineCount, (text) -> {
 				_text.setText(text);
-				reNumerate(from, to);
+				reNumerate();
 			});
 		}
 	}
 
-	private void reNumerate(int from, int to) {
-		if (to >= _allLinesCount)
-			to = _allLinesCount - 1;
-		int width = Integer.toString(_allLinesCount).length();
-		String fmt = "%0" + width + "d ";
-		StringBuilder buf = new StringBuilder(String.format(fmt, from++));
-		for (int i = from; i <= to; i++)
-			buf.append('\n').append(String.format(fmt, i));
-		_lineNumbers.setText(buf.toString());
+	private void reNumerate() {
+		_lineNumbers.reNumerate(
+				_fromLine,
+				_fromLine + _lineCount,
+				_allLinesCount
+		);
 	}
 
 	public TextSource getTextSource() {

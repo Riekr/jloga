@@ -1,6 +1,7 @@
 package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.react.Unsubscribable;
 
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -55,8 +56,8 @@ public interface TextSource {
 
 	int getLineCount() throws ExecutionException, InterruptedException;
 
-	default void requestLineCount(IntConsumer consumer) {
-		EXECUTOR.execute(() -> {
+	default Unsubscribable requestLineCount(IntConsumer consumer) {
+		Future<?> future = EXECUTOR.submit(() -> {
 			try {
 				int lineCount = getLineCount();
 				EventQueue.invokeLater(() -> consumer.accept(lineCount));
@@ -64,6 +65,7 @@ public interface TextSource {
 				e.printStackTrace(System.err);
 			}
 		});
+		return () -> future.cancel(true);
 	}
 
 	default void setIndexingListener(@NotNull ProgressListener indexingListener) {

@@ -2,6 +2,8 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Unsubscribable;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -10,7 +12,6 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -37,7 +38,9 @@ public class TextFileSource implements TextSource {
 
 	private Future<?> _indexing;
 	private NavigableMap<Integer, IndexData> _index;
+
 	private int _lineCount;
+	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
 	private @NotNull ProgressListener _indexingListener = ProgressListener.NOP;
 	private final Set<Runnable> _indexChangeListeners = new CopyOnWriteArraySet<>();
@@ -61,6 +64,7 @@ public class TextFileSource implements TextSource {
 		System.out.println("Reindexing " + _file);
 		final long start = System.currentTimeMillis();
 		_lineCount = 0;
+		_lineCountSubject.first(0);
 		_index = new TreeMap<>();
 		_index.put(0, new IndexData(0));
 		ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
@@ -87,8 +91,10 @@ public class TextFileSource implements TextSource {
 					_indexChangeListeners.forEach(Runnable::run);
 					charBuffer.flip();
 					byteBuffer.flip();
+					_lineCountSubject.next(_lineCount);
 				}
 			} finally {
+				_lineCountSubject.last();
 				_indexingListener.onProgressChanged(totalSize, totalSize);
 				_indexChangeListeners.forEach(Runnable::run);
 				_indexChangeListeners.clear();
@@ -164,11 +170,8 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void requestLineCount(IntConsumer consumer) {
-		if (_indexing.isDone())
-			TextSource.super.requestLineCount(consumer);
-		else
-			_indexChangeListeners.add(() -> EventQueue.invokeLater(() -> consumer.accept(_lineCount)));
+	public Unsubscribable requestLineCount(IntConsumer consumer) {
+		return _lineCountSubject.subscribe(consumer);
 	}
 
 	@Override
