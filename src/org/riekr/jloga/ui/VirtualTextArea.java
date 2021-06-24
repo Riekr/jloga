@@ -80,7 +80,7 @@ public class VirtualTextArea extends JComponent {
 		add(_scrollBar, BorderLayout.EAST);
 
 		recalcLineHeight();
-		_text.addComponentListener(new ComponentAdapter() {
+		_scrollPane.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				recalcLineCount();
@@ -129,8 +129,8 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	public void centerOn(int line) {
+		_highlightedLine = line;
 		setFromLine(line - (_lineCount / 2));
-		EventQueue.invokeLater(() -> _highlightedLine = line - _fromLine);
 	}
 
 	@Override
@@ -193,7 +193,8 @@ public class VirtualTextArea extends JComponent {
 				EventQueue.invokeLater(() -> {
 					_scrollPane.getHorizontalScrollBar().setValue(0);
 					if (_highlightedLine != null) {
-						int line = _highlightedLine;
+						int highlightedLine = _highlightedLine;
+						int line = highlightedLine - _fromLine;
 						_highlightedLine = null;
 						try {
 							highlighter.addHighlight(
@@ -202,7 +203,7 @@ public class VirtualTextArea extends JComponent {
 									new DefaultHighlightPainter(_text.getForeground().darker())
 							);
 							if (_lineListener != null)
-								_lineListener.accept(line);
+								_lineListener.accept(highlightedLine);
 						} catch (BadLocationException e) {
 							e.printStackTrace(System.err);
 						}
