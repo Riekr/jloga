@@ -1,12 +1,14 @@
 package org.riekr.jloga.ui;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class LineNumbersTextArea extends JTextArea {
 
 	private int _from = 0, _to = 0, _width = 0;
 
 	public LineNumbersTextArea() {
+		setBorder(new EmptyBorder(0, 0, 0, 0));
 		setEditable(false);
 		setEnabled(false);
 	}
