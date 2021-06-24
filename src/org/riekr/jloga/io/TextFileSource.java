@@ -118,7 +118,7 @@ public class TextFileSource implements TextSource {
 						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null) {
 							_indexChangeListeners.remove(this);
 							StringBuilder buf = new StringBuilder(32768);
-							for (int line = fromLine; line < toLinePlus1; line++)
+							for (int line = fromLine; line <= toLinePlus1; line++)
 								buf.append(getText(line)).append('\n');
 							EventQueue.invokeLater(() -> consumer.accept(buf.toString()));
 						}
