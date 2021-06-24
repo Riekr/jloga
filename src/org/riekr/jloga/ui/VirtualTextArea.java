@@ -24,6 +24,7 @@ public class VirtualTextArea extends JComponent {
 	private int _lineCount = 0;
 	private int _allLinesCount = 0;
 
+	private final JScrollPane _scrollPane;
 	private final JTextArea _text;
 	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar _scrollBar;
@@ -58,10 +59,12 @@ public class VirtualTextArea extends JComponent {
 		_text.setAutoscrolls(false);
 		_text.setLineWrap(false);
 		setLayout(new BorderLayout());
-		JScrollPane scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		scrollPane.setWheelScrollingEnabled(false);
-		add(scrollPane, BorderLayout.CENTER);
+		_scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		_scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		_scrollPane.setWheelScrollingEnabled(false);
+		BoundedRangeModel vscrollModel = _scrollPane.getVerticalScrollBar().getModel();
+		vscrollModel.addChangeListener(e -> vscrollModel.setValue(0));
+		add(_scrollPane, BorderLayout.CENTER);
 		_lineNumbers = new LineNumbersTextArea();
 		add(_lineNumbers, BorderLayout.LINE_START);
 		_scrollBar = new JScrollBar(JScrollBar.VERTICAL);
@@ -82,7 +85,7 @@ public class VirtualTextArea extends JComponent {
 		});
 		_text.addMouseWheelListener((e) -> {
 			if (e.isShiftDown()) {
-				JScrollBar scrollBar = scrollPane.getHorizontalScrollBar();
+				JScrollBar scrollBar = _scrollPane.getHorizontalScrollBar();
 				int incr = (scrollBar.getMaximum() - scrollBar.getMinimum()) / 10;
 				scrollBar.setValue(scrollBar.getValue() + (e.getWheelRotation() * incr));
 			} else {
