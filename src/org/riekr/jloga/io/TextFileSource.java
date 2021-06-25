@@ -14,10 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
+import java.nio.charset.*;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -71,19 +68,18 @@ public class TextFileSource implements TextSource {
 		_index.put(0, new IndexData(0));
 		ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
 		CharBuffer charBuffer = CharBuffer.allocate(PAGE_SIZE);
-		CharsetDecoder decoder = _charset.newDecoder();
+		CharsetDecoder decoder = _charset.newDecoder()
+				.onMalformedInput(CodingErrorAction.REPLACE)
+				.onUnmappableCharacter(CodingErrorAction.REPLACE);
 		CharsetEncoder encoder = _charset.newEncoder();
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			long totalSize = fileChannel.size();
 			try {
 				while (fileChannel.read(byteBuffer) > 0) {
-					CoderResult res = decoder.decode(byteBuffer.flip(), charBuffer, false);
-					if (res != null && res.isError())
-						System.err.println(res);
+					decoder.decode(byteBuffer.flip(), charBuffer, false);
 					charBuffer.flip();
 					while (charBuffer.hasRemaining()) {
-						char ch = charBuffer.get();
-						if (ch == '\n') {
+						if (charBuffer.get() == '\n') {
 							_lineCount++;
 							charBuffer.mark();
 						}
