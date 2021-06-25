@@ -8,6 +8,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -15,6 +16,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.file.Path;
 import java.util.Map;
@@ -70,6 +72,7 @@ public class TextFileSource implements TextSource {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
 		CharBuffer charBuffer = CharBuffer.allocate(PAGE_SIZE);
 		CharsetDecoder decoder = _charset.newDecoder();
+		CharsetEncoder encoder = _charset.newEncoder();
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			long totalSize = fileChannel.size();
 			try {
@@ -86,7 +89,7 @@ public class TextFileSource implements TextSource {
 						}
 					}
 					long pos = fileChannel.position();
-					_index.put(_lineCount, new IndexData(pos - _charset.encode(charBuffer.reset()).limit()));
+					_index.put(_lineCount, new IndexData(pos - encoder.encode(charBuffer.reset()).limit()));
 					_indexingListener.onProgressChanged(pos, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
 					charBuffer.flip();
@@ -106,7 +109,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void requestText(int fromLine, int count, Consumer<CharSequence> consumer) {
+	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		if (_indexing.isDone())
 			TextSource.super.requestText(fromLine, count, consumer);
 		else {
@@ -117,11 +120,10 @@ public class TextFileSource implements TextSource {
 						int toLinePlus1 = fromLine + count;
 						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null) {
 							_indexChangeListeners.remove(this);
-							StringBuilder buf = new StringBuilder(32768);
-							for (int line = fromLine; line < toLinePlus1; line++)
-								buf.append(getText(line)).append('\n');
-							buf.append(getText(toLinePlus1));
-							EventQueue.invokeLater(() -> consumer.accept(buf));
+							String[] lines = new String[toLinePlus1 - fromLine + 1];
+							for (int line = fromLine; line <= toLinePlus1; line++)
+								lines[line - fromLine] = getText(line);
+							EventQueue.invokeLater(() -> consumer.accept(new StringsReader(lines)));
 						}
 					} catch (ExecutionException | InterruptedException ignored) {
 					}

@@ -1,6 +1,5 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.io.CharSequenceReader;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
@@ -182,10 +181,10 @@ public class VirtualTextArea extends JComponent {
 		if (_textSource == null)
 			_text.setText("");
 		else {
-			_textSource.requestText(_fromLine, _lineCount, (text) -> {
+			_textSource.requestText(_fromLine, _lineCount, (reader) -> {
 				try {
 					// _text.setText(text); simply does not work every time
-					_text.read(new CharSequenceReader(text), _fromLine);
+					_text.read(reader, _fromLine);
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				}

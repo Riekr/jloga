@@ -7,6 +7,7 @@ import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Reader;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -33,24 +34,23 @@ public interface TextSource {
 			oldFuture.cancel(true);
 	}
 
-	default void requestText(int fromLine, int count, Consumer<CharSequence> consumer) {
+	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		executeRequestText(() -> {
 			try {
-				CharSequence text = getText(fromLine, count);
-				EventQueue.invokeLater(() -> consumer.accept(text));
+				StringsReader reader = new StringsReader(getText(fromLine, count));
+				EventQueue.invokeLater(() -> consumer.accept(reader));
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 			}
 		});
 	}
 
-	default CharSequence getText(int fromLine, int count) throws ExecutionException, InterruptedException {
-		StringBuilder buf = new StringBuilder(32768);
+	default String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
 		int toLinePlus1 = fromLine + Math.min(count, getLineCount());
-		for (int line = fromLine; line < toLinePlus1; line++)
-			buf.append(getText(line)).append('\n');
-		buf.append(getText(toLinePlus1));
-		return buf;
+		String[] lines = new String[toLinePlus1 - fromLine + 1];
+		for (int i = fromLine; i <= toLinePlus1; i++)
+			lines[i - fromLine] = getText(i);
+		return lines;
 	}
 
 	String getText(int line) throws ExecutionException, InterruptedException;
