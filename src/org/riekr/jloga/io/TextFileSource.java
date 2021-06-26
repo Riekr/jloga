@@ -13,6 +13,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.*;
 import java.nio.file.Path;
@@ -155,6 +156,8 @@ public class TextFileSource implements TextSource {
 					_lines = loadPage(fromLine, toLine, indexData.startPos);
 					_fromLine = fromLine;
 					indexData.data = new WeakReference<>(_lines);
+				} catch (ClosedByInterruptException ignored) {
+					return "";
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 					return "";

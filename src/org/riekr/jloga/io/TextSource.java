@@ -39,6 +39,7 @@ public interface TextSource {
 			try {
 				StringsReader reader = new StringsReader(getText(fromLine, count));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
+			} catch (InterruptedException ignored) {
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 			}

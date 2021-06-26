@@ -5,7 +5,6 @@ import org.riekr.jloga.react.BehaviourSubject;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.Highlighter;
@@ -35,7 +34,6 @@ public class VirtualTextArea extends JComponent {
 
 	private TextSource _textSource;
 	private Runnable _lineListenerUnsubscribe;
-	private Consumer<Integer> _lineListener;
 
 	public VirtualTextArea() {
 		_text = new JTextArea();
@@ -212,8 +210,6 @@ public class VirtualTextArea extends JComponent {
 							_text.getLineEndOffset(line),
 							new DefaultHighlightPainter(_text.getForeground().darker())
 					);
-					if (_lineListener != null)
-						_lineListener.accept(highlightedLine);
 				}
 			} catch (BadLocationException e) {
 				e.printStackTrace(System.err);
@@ -233,27 +229,20 @@ public class VirtualTextArea extends JComponent {
 		return _textSource;
 	}
 
-	public void setLineClickListener(Consumer<Integer> listener) {
+	public void setLineClickListener(IntConsumer listener) {
 		if (_lineListenerUnsubscribe != null) {
 			_lineListenerUnsubscribe.run();
 			_lineListenerUnsubscribe = null;
-			_lineListener = null;
 		}
 		if (listener != null) {
-			_lineListener = listener;
 			AtomicInteger caretLine = new AtomicInteger();
-			CaretListener caretListener = e -> {
-				try {
-					int line = _text.getLineOfOffset(e.getDot());
-					caretLine.set(line);
-				} catch (BadLocationException badLocationException) {
-					badLocationException.printStackTrace(System.err);
-				}
-			};
 			MouseListener mouseListener = new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					listener.accept(_fromLine + caretLine.intValue());
+					if (e.getButton() == MouseEvent.BUTTON1)
+						listener.accept(_fromLine + caretLine.intValue());
+					else
+						_highlightedLine.next(null);
 				}
 			};
 			MouseListener mouseListener2 = new MouseAdapter() {
@@ -264,19 +253,13 @@ public class VirtualTextArea extends JComponent {
 					mouseListener.mouseClicked(e);
 				}
 			};
-			_text.addCaretListener(caretListener);
 			_text.addMouseListener(mouseListener);
 			_lineNumbers.addMouseListener(mouseListener2);
 			_lineListenerUnsubscribe = () -> {
-				_text.removeCaretListener(caretListener);
 				_text.removeMouseListener(mouseListener);
 				_lineNumbers.removeMouseListener(mouseListener2);
 			};
 		}
-	}
-
-	public Integer getHilightedLine() {
-		return _highlightedLine.get();
 	}
 
 	public void setHighlightedLine(Integer line) {
