@@ -19,12 +19,12 @@ public class IntBehaviourSubject extends BehaviourSubject<Integer> {
 	}
 
 	public void next(int item) {
-		super.next(item);
+		super.updateUI(item);
 	}
 
 	@Override
-	public void next(Integer item) {
-		super.next(requireNonNull(item));
+	public void updateUI(Integer item) {
+		super.updateUI(requireNonNull(item));
 	}
 
 }

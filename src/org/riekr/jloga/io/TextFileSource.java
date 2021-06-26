@@ -63,7 +63,7 @@ public class TextFileSource implements TextSource {
 		System.out.println("Reindexing " + _file);
 		final long start = System.currentTimeMillis();
 		_lineCount = 0;
-		_lineCountSubject.first(0);
+		_lineCountSubject.next(0);
 		_index = new TreeMap<>();
 		_index.put(0, new IndexData(0));
 		ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
@@ -141,7 +141,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public String getText(int line) throws ExecutionException, InterruptedException {
+	public synchronized String getText(int line) throws ExecutionException, InterruptedException {
 		if (_lines == null || line < _fromLine || line >= (_fromLine + _lines.length)) {
 			Map.Entry<Integer, IndexData> fromLineE = _index.floorEntry(line);
 			IndexData indexData = fromLineE.getValue();
@@ -165,7 +165,7 @@ public class TextFileSource implements TextSource {
 			}
 		}
 		int i = line - _fromLine;
-		return i < _lines.length ? _lines[i] : "";
+		return i >= 0 && i < _lines.length ? _lines[i] : "";
 	}
 
 	@Override

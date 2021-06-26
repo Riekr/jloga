@@ -71,7 +71,7 @@ public class SearchPanelBottomArea extends JPanel {
 				Pattern searchPattern = Pattern.compile(regex);
 				if (_searching != null && !_searching.isDone())
 					_searching.cancel(true);
-				_parent.getTextSource().requestSearch(
+				_searching = _parent.getTextSource().requestSearch(
 						searchPattern,
 						newProgressListenerFor(_progressBar, "Searching").andThen(() -> _regex.setEnabled(true)),
 						(res) -> {
@@ -92,10 +92,12 @@ public class SearchPanelBottomArea extends JPanel {
 			_resultTextArea = new SearchPanel(_progressBar, _level + 1);
 			_resultTextArea.setFont(getFont());
 			_resultTextArea.setMinimumSize(new Dimension(0, 0));
-			_resultTextArea.getTextArea().setLineListener((line) -> {
+			_resultTextArea.getTextArea().setLineClickListener((line) -> {
 				Integer srcLine = _resultTextArea.getTextSource().getSrcLine(line);
-				if (srcLine != null)
+				if (srcLine != null) {
 					_parent.getTextArea().centerOn(srcLine);
+					_resultTextArea.getTextArea().setHighlightedLine(line);
+				}
 			});
 			add(_resultTextArea, BorderLayout.CENTER);
 		}
@@ -104,7 +106,7 @@ public class SearchPanelBottomArea extends JPanel {
 
 	public boolean removeResultTextArea() {
 		if (_resultTextArea != null) {
-			_resultTextArea.getTextArea().setLineListener(null);
+			_resultTextArea.getTextArea().setLineClickListener(null);
 			remove(_resultTextArea);
 			_resultTextArea = null;
 			_regex.requestFocus();

@@ -22,15 +22,15 @@ public class BehaviourSubject<T> extends Subject<T> implements Supplier<T> {
 	}
 
 	@Override
-	public void next(T item) {
+	public void updateUI(T item) {
 		_value = item;
-		super.next(item);
+		super.updateUI(item);
 	}
 
 	@Override
-	public void first(T item) {
+	public void next(T item) {
 		_value = item;
-		super.first(item);
+		super.next(item);
 	}
 
 	@Override

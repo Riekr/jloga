@@ -24,7 +24,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 	private long _next = 0L;
 
 	@Override
-	public void next(T item) {
+	public void updateUI(T item) {
 		long now = System.currentTimeMillis();
 		if (_next < now) {
 			_next = now + 200L;
@@ -35,7 +35,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 		}
 	}
 
-	public void first(T item) {
+	public void next(T item) {
 		_next = System.currentTimeMillis() + 200L;
 		EventQueue.invokeLater(() -> {
 			for (Observer<? super T> observer : _observers)

@@ -1,6 +1,7 @@
 package org.riekr.jloga.ui;
 
 import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.react.BehaviourSubject;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -24,7 +26,7 @@ public class VirtualTextArea extends JComponent {
 	private int _fromLine = 0;
 	private int _lineCount = 0;
 	private int _allLinesCount = 0;
-	private Integer _highlightedLine = null;
+	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
 
 	private final JScrollPane _scrollPane;
 	private final JTextArea _text;
@@ -33,7 +35,7 @@ public class VirtualTextArea extends JComponent {
 
 	private TextSource _textSource;
 	private Runnable _lineListenerUnsubscribe;
-	private IntConsumer _lineListener;
+	private Consumer<Integer> _lineListener;
 
 	public VirtualTextArea() {
 		_text = new JTextArea();
@@ -97,6 +99,7 @@ public class VirtualTextArea extends JComponent {
 					pageDn();
 			}
 		});
+		_highlightedLine.subscribe((Consumer<? super Integer>) this::highlightLine);
 	}
 
 	public void setFromLine(int fromLine) {
@@ -128,7 +131,7 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	public void centerOn(int line) {
-		_highlightedLine = line;
+		_highlightedLine.next(line);
 		setFromLine(line - (_lineCount / 2));
 	}
 
@@ -189,28 +192,32 @@ public class VirtualTextArea extends JComponent {
 					e.printStackTrace(System.err);
 				}
 				reNumerate();
-				Highlighter highlighter = _text.getHighlighter();
-				highlighter.removeAllHighlights();
 				EventQueue.invokeLater(() -> {
 					_scrollPane.getHorizontalScrollBar().setValue(0);
-					if (_highlightedLine != null) {
-						int highlightedLine = _highlightedLine;
-						int line = highlightedLine - _fromLine;
-						_highlightedLine = null;
-						try {
-							highlighter.addHighlight(
-									_text.getLineStartOffset(line),
-									_text.getLineEndOffset(line),
-									new DefaultHighlightPainter(_text.getForeground().darker())
-							);
-							if (_lineListener != null)
-								_lineListener.accept(highlightedLine);
-						} catch (BadLocationException e) {
-							e.printStackTrace(System.err);
-						}
-					}
+					highlightLine(_highlightedLine.get());
 				});
 			});
+		}
+	}
+
+	private void highlightLine(Integer highlightedLine) {
+		if (highlightedLine != null) {
+			int line = highlightedLine - _fromLine;
+			try {
+				Highlighter highlighter = _text.getHighlighter();
+				highlighter.removeAllHighlights();
+				if (line >= 0 && line <= _lineCount) {
+					highlighter.addHighlight(
+							_text.getLineStartOffset(line),
+							_text.getLineEndOffset(line),
+							new DefaultHighlightPainter(_text.getForeground().darker())
+					);
+					if (_lineListener != null)
+						_lineListener.accept(highlightedLine);
+				}
+			} catch (BadLocationException e) {
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 
@@ -226,7 +233,7 @@ public class VirtualTextArea extends JComponent {
 		return _textSource;
 	}
 
-	public void setLineListener(IntConsumer listener) {
+	public void setLineClickListener(Consumer<Integer> listener) {
 		if (_lineListenerUnsubscribe != null) {
 			_lineListenerUnsubscribe.run();
 			_lineListenerUnsubscribe = null;
@@ -266,5 +273,13 @@ public class VirtualTextArea extends JComponent {
 				_lineNumbers.removeMouseListener(mouseListener2);
 			};
 		}
+	}
+
+	public Integer getHilightedLine() {
+		return _highlightedLine.get();
+	}
+
+	public void setHighlightedLine(Integer line) {
+		_highlightedLine.next(line);
 	}
 }
