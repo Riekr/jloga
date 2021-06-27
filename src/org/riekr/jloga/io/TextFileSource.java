@@ -15,7 +15,10 @@ import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
-import java.nio.charset.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -141,6 +144,46 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
+	/*
+//	@Override
+//	public void search(Pattern pat, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+//		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
+//		ProgressListener pl = progressListener.andThen((pos, of) -> out.dispatchLineCount());
+//		int lineCount = getLineCount();
+//		long start = System.currentTimeMillis();
+//		_index.entrySet().stream()
+//				.sequential()
+//				.map((e) -> {
+//					IndexData data = e.getValue();
+//					Page page = new Page();
+//					page.startLine = e.getKey();
+//					if (data.data == null || (page.lines = data.data.get()) == null) {
+//						try {
+//							synchronized (this) {
+//								page.lines = loadPage(page.startLine, _index.higherKey(page.startLine), data.startPos);
+//							}
+//						} catch (IOException ioException) {
+//							ioException.printStackTrace(System.err);
+//							return null;
+//						}
+//					}
+//					return page;
+//				}).filter(Objects::nonNull)
+//				.flatMapToInt((page) -> {
+//					Predicate<String> pred = pat.asPredicate();
+//					return IntStream.range(0, page.lines.length)
+//							.sequential()
+//							.filter((i) -> pred.test(page.lines[i]));
+//				})
+//				.forEachOrdered((line) -> {
+//					out.addLine(line);
+//					pl.onProgressChanged(line, lineCount);
+//				});
+//		pl.onProgressChanged(lineCount, lineCount);
+//		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
+//	}
+	 */
+
 	@Override
 	public synchronized String getText(int line) throws ExecutionException, InterruptedException {
 		if (_lines == null || line < _fromLine || line >= (_fromLine + _lines.length)) {
@@ -149,7 +192,7 @@ public class TextFileSource implements TextSource {
 			int fromLine = fromLineE.getKey();
 			if (indexData.data == null || (_lines = indexData.data.get()) == null) {
 //				System.out.println("MISS");
-				Integer toLine = _index.ceilingKey(line + 1);
+				Integer toLine = _index.higherKey(line);
 				if (toLine == null)
 					toLine = _lineCount;
 				try {

@@ -8,8 +8,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
-import java.util.Iterator;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,8 +18,6 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public interface TextSource {
 
@@ -93,18 +89,6 @@ public interface TextSource {
 		return res;
 	}
 
-	default Stream<? extends CharSequence> allLines() throws ExecutionException, InterruptedException {
-		return IntStream.range(0, getLineCount())
-				.mapToObj(line -> {
-					try {
-						return getText(line);
-					} catch (ExecutionException | InterruptedException e) {
-						return null;
-					}
-				})
-				.filter(Objects::nonNull);
-	}
-
 	default void search(Pattern pat, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
 		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
@@ -112,13 +96,10 @@ public interface TextSource {
 		int lineCount = getLineCount();
 		try {
 			Matcher m = pat.matcher("");
-			Iterator<? extends CharSequence> i = allLines().iterator();
-			int line = 0;
-			while (running.getAsBoolean() && i.hasNext()) {
-				m.reset(i.next());
+			for (int line = 0; line <= getLineCount() && running.getAsBoolean(); line++) {
+				m.reset(getText(line));
 				if (m.find())
 					out.addLine(line);
-				line++;
 				progressListener.onProgressChanged(line, lineCount);
 			}
 		} finally {
