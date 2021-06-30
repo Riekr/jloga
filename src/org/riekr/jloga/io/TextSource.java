@@ -96,8 +96,7 @@ public interface TextSource {
 		try {
 			predicate.start();
 			for (int line = 0; line <= getLineCount() && running.getAsBoolean(); line++) {
-				if (predicate.accept(line, getText(line)))
-					out.addLine(line);
+				predicate.verify(line, getText(line), out::addLine);
 				progressListener.onProgressChanged(line, lineCount);
 			}
 			predicate.end().forEach(out::addLine);

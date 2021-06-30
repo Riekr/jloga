@@ -39,6 +39,7 @@ public class SearchSelector extends JPanel {
 					_searchUI = searchComp;
 					add(_searchUI, BorderLayout.CENTER);
 					_selectBtn.setText(_searchComponent.getLabel());
+					_searchComponent.onSearch(_onSearchConsumer);
 				}
 		);
 	}

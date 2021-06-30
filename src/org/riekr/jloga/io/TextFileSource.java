@@ -157,8 +157,7 @@ public class TextFileSource implements TextSource {
 			int lineNumber = 0;
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if (predicate.accept(lineNumber, line))
-					out.addLine(lineNumber);
+				predicate.verify(lineNumber, line, out::addLine);
 				progressListener.onProgressChanged(lineNumber++, _lineCount);
 			}
 			predicate.end().forEach(out::addLine);

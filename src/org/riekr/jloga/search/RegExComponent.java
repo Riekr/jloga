@@ -10,7 +10,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class RegExComponent extends MRUTextCombo implements SearchComponent {
 
-	private static class RegExSearch implements SearchPredicate {
+	private static class RegExSearch extends SearchPredicate.Simple {
 
 		private final Pattern _pattern;
 		private Matcher _matcher;

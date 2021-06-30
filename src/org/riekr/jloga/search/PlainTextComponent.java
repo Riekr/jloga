@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 public class PlainTextComponent extends MRUTextCombo implements SearchComponent {
 
-	private static class PlainTextSearch implements SearchPredicate {
+	private static class PlainTextSearch extends SearchPredicate.Simple {
 
 		private final String _pattern;
 
