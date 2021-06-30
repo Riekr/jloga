@@ -2,6 +2,7 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.SearchPredicate;
 
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -16,8 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public interface TextSource {
 
@@ -69,7 +68,7 @@ public interface TextSource {
 	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
 	}
 
-	default Future<?> requestSearch(Pattern pat, ProgressListener progressListener, Consumer<TextSource> consumer) {
+	default Future<?> requestSearch(SearchPredicate predicate, ProgressListener progressListener, Consumer<TextSource> consumer) {
 		AtomicReference<Future<?>> resRef = new AtomicReference<>();
 		BooleanSupplier running = () -> {
 			Future<?> future = resRef.get();
@@ -79,7 +78,7 @@ public interface TextSource {
 			try {
 				FilteredTextSource searchResult = new FilteredTextSource(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
-				search(pat, searchResult, progressListener, running);
+				search(predicate, searchResult, progressListener, running);
 				searchResult.complete();
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
@@ -89,19 +88,19 @@ public interface TextSource {
 		return res;
 	}
 
-	default void search(Pattern pat, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+	default void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
 		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
 		long start = System.currentTimeMillis();
 		int lineCount = getLineCount();
 		try {
-			Matcher m = pat.matcher("");
+			predicate.start();
 			for (int line = 0; line <= getLineCount() && running.getAsBoolean(); line++) {
-				m.reset(getText(line));
-				if (m.find())
+				if (predicate.accept(line, getText(line)))
 					out.addLine(line);
 				progressListener.onProgressChanged(line, lineCount);
 			}
+			predicate.end().forEach(out::addLine);
 		} finally {
 			progressListener.onProgressChanged(lineCount, lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");

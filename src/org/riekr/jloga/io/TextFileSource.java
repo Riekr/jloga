@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.SearchPredicate;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -25,12 +26,12 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.nio.file.StandardOpenOption.READ;
 
@@ -147,21 +148,20 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void search(Pattern pat, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException {
+	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException {
 		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
 		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
 		long start = System.currentTimeMillis();
 		try (BufferedReader reader = Files.newBufferedReader(_file, _charset)) {
-			Matcher m = pat.matcher("");
+			predicate.start();
 			int lineNumber = 0;
 			String line;
 			while ((line = reader.readLine()) != null) {
-				m.reset(line);
-				if (m.find())
+				if (predicate.accept(lineNumber, line))
 					out.addLine(lineNumber);
 				progressListener.onProgressChanged(lineNumber++, _lineCount);
 			}
-
+			predicate.end().forEach(out::addLine);
 		} catch (IOException e) {
 			throw new ExecutionException(e);
 		} finally {

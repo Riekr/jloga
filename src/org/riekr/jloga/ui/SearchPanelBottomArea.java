@@ -3,12 +3,14 @@ package org.riekr.jloga.ui;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.search.RegExComponent;
+import org.riekr.jloga.search.SearchComponent;
+import org.riekr.jloga.search.SearchPredicate;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
@@ -20,10 +22,11 @@ public class SearchPanelBottomArea extends JPanel {
 
 	private @Nullable SearchPanel _resultTextArea;
 
-	private final MRUTextCombo _regex;
 	private final SearchPanel _parent;
 	private final JProgressBar _progressBar;
+	private final JPanel _searchHeader;
 
+	private JComponent _searchUI;
 	private Future<?> _searching;
 
 	public SearchPanelBottomArea(SearchPanel parent, JProgressBar progressBar, int level) {
@@ -31,10 +34,9 @@ public class SearchPanelBottomArea extends JPanel {
 		_level = level;
 		setLayout(new BorderLayout());
 		_progressBar = progressBar;
-		JPanel searchHeader = new JPanel();
-		searchHeader.setLayout(new BorderLayout());
-		_regex = new MRUTextCombo("regex." + level);
-		_regex.setListener(this::search);
+		_searchHeader = new JPanel();
+		_searchHeader.setLayout(new BorderLayout());
+		setSearchUI(new RegExComponent(level));
 		JToolBar searchToolbar = new JToolBar();
 		searchToolbar.add(UIUtils.newButton("\u274C", () -> {
 			if (_searching != null && !_searching.isDone()) {
@@ -44,9 +46,18 @@ public class SearchPanelBottomArea extends JPanel {
 			}
 		}));
 		searchToolbar.add(UIUtils.newButton("\uD83D\uDDAB", this::saveResults));
-		searchHeader.add(_regex, BorderLayout.CENTER);
-		searchHeader.add(searchToolbar, BorderLayout.LINE_END);
-		add(searchHeader, BorderLayout.NORTH);
+		_searchHeader.add(searchToolbar, BorderLayout.LINE_END);
+		add(_searchHeader, BorderLayout.NORTH);
+	}
+
+	private <T extends JComponent & SearchComponent> void setSearchUI(T comp) {
+		if (_searchUI != null)
+			_searchHeader.remove(_searchUI);
+		if (comp != null) {
+			_searchUI = comp;
+			comp.onSearch(this::search);
+			_searchHeader.add(comp, BorderLayout.CENTER);
+		}
 	}
 
 	private void saveResults() {
@@ -64,25 +75,19 @@ public class SearchPanelBottomArea extends JPanel {
 		}
 	}
 
-	private synchronized void search(String regex) {
-		if (regex != null && !regex.isEmpty() && _regex.isEnabled()) {
-			_regex.setEnabled(false);
-			try {
-				Pattern searchPattern = Pattern.compile(regex);
-				if (_searching != null && !_searching.isDone())
-					_searching.cancel(true);
-				_searching = _parent.getTextSource().requestSearch(
-						searchPattern,
-						newProgressListenerFor(_progressBar, "Searching").andThen(() -> _regex.setEnabled(true)),
-						(res) -> {
-							getResultTextArea().setTextSource(res);
-							_parent.expandBottomArea();
-						}
-				);
-			} catch (PatternSyntaxException pse) {
-				JOptionPane.showMessageDialog(this, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
-				_regex.setEnabled(true);
-			}
+	private synchronized void search(SearchPredicate predicate) {
+		if (predicate != null && _searchUI.isEnabled()) {
+			_searchUI.setEnabled(false);
+			if (_searching != null && !_searching.isDone())
+				_searching.cancel(true);
+			_searching = _parent.getTextSource().requestSearch(
+					predicate,
+					newProgressListenerFor(_progressBar, "Searching").andThen(() -> _searchUI.setEnabled(true)),
+					(res) -> {
+						getResultTextArea().setTextSource(res);
+						_parent.expandBottomArea();
+					}
+			);
 		}
 	}
 
@@ -109,7 +114,7 @@ public class SearchPanelBottomArea extends JPanel {
 			_resultTextArea.getTextArea().setLineClickListener(null);
 			remove(_resultTextArea);
 			_resultTextArea = null;
-			_regex.requestFocus();
+			_searchUI.requestFocus();
 			_parent.collapseBottomArea();
 			return true;
 		}
