@@ -18,7 +18,7 @@ public class BehaviourSubject<T> extends Subject<T> implements Supplier<T> {
 	@Override
 	protected void onSubscribe(Observer<? super T> observer) {
 		super.onSubscribe(observer);
-		observer.onNext(_value);
+		dispatch(_value, observer);
 	}
 
 	@Override

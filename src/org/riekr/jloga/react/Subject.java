@@ -9,6 +9,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 
+	protected static <T> void dispatch(T value, Observer<T> observer) {
+		try {
+			observer.onNext(value);
+		} catch (Throwable t) {
+			try {
+				observer.onError(t);
+			} catch (Throwable ignored) {
+			}
+		}
+	}
+
 	private final ConcurrentLinkedQueue<Observer<? super T>> _observers = new ConcurrentLinkedQueue<>();
 
 	@Override
@@ -30,7 +41,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 			_next = now + 200L;
 			EventQueue.invokeLater(() -> {
 				for (Observer<? super T> observer : _observers)
-					observer.onNext(item);
+					dispatch(item, observer);
 			});
 		}
 	}
@@ -39,7 +50,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 		_next = System.currentTimeMillis() + 200L;
 		EventQueue.invokeLater(() -> {
 			for (Observer<? super T> observer : _observers)
-				observer.onNext(item);
+				dispatch(item, observer);
 		});
 	}
 
@@ -48,7 +59,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 		EventQueue.invokeLater(() -> {
 			Iterator<Observer<? super T>> i = _observers.iterator();
 			while (i.hasNext()) {
-				i.next().onNext(item);
+				dispatch(item, i.next());
 				i.remove();
 			}
 		});
