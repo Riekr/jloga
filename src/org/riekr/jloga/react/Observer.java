@@ -26,7 +26,7 @@ public interface Observer<T> {
 		};
 	}
 
-	static <T> Observer<T> aync(Observer<T> observer) {
+	static <T> Observer<T> async(Observer<T> observer) {
 		return new Observer<>() {
 			private final AtomicBoolean _enqueued = new AtomicBoolean();
 			private T _value;

@@ -1,6 +1,7 @@
 package org.riekr.jloga.io;
 
 import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 
 import java.util.Map;
@@ -70,7 +71,7 @@ public class FilteredTextSource implements TextSource {
 
 	@Override
 	public Unsubscribable requestLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(consumer);
+		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
 	}
 
 	@Override
