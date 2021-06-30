@@ -1,6 +1,7 @@
 package org.riekr.jloga.react;
 
-import java.awt.*;
+import org.riekr.jloga.ui.UIUtils;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -34,10 +35,10 @@ public interface Observer<T> {
 			public void onNext(T item) {
 				_value = item;
 				if (_enqueued.compareAndSet(false, true))
-					EventQueue.invokeLater(() -> {
+					UIUtils.invokeAfter(() -> {
 						if (_enqueued.compareAndSet(true, false))
 							observer.onNext(_value);
-					});
+					}, 200);
 			}
 
 			@Override
