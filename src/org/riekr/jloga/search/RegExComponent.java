@@ -37,12 +37,22 @@ public class RegExComponent extends MRUTextCombo implements SearchComponent {
 
 	@Override
 	public void onSearch(Consumer<SearchPredicate> consumer) {
-		setListener((regex) -> {
-			try {
-				consumer.accept(new RegExSearch(Pattern.compile(regex)));
-			} catch (PatternSyntaxException pse) {
-				JOptionPane.showMessageDialog(this, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
-			}
-		});
+		if (consumer == null)
+			setListener(null);
+		else {
+			setListener((regex) -> {
+				try {
+					consumer.accept(new RegExSearch(Pattern.compile(regex)));
+				} catch (PatternSyntaxException pse) {
+					JOptionPane.showMessageDialog(this, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
+				}
+			});
+		}
+	}
+
+	@Override
+	public String getLabel() {
+		return ".*";
+//		return "\uD83C\uDD41";
 	}
 }

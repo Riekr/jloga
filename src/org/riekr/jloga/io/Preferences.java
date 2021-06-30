@@ -13,6 +13,7 @@ public class Preferences {
 	public static final String LAST_SAVE_PATH = "LastSave";
 	public static final String CHARSET = "CharsetCombo";
 	public static final String FONT = "Font";
+	public static final String SEARCH_TYPE = "SearchType";
 
 	private static final java.util.prefs.Preferences _PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
 

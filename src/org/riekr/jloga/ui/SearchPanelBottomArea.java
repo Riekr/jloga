@@ -3,15 +3,12 @@ package org.riekr.jloga.ui;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.search.RegExComponent;
-import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.concurrent.Future;
-import java.util.regex.PatternSyntaxException;
 
 import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
 import static org.riekr.jloga.io.ProgressListener.newProgressListenerFor;
@@ -24,9 +21,8 @@ public class SearchPanelBottomArea extends JPanel {
 
 	private final SearchPanel _parent;
 	private final JProgressBar _progressBar;
-	private final JPanel _searchHeader;
 
-	private JComponent _searchUI;
+	private final SearchSelector _searchUI;
 	private Future<?> _searching;
 
 	public SearchPanelBottomArea(SearchPanel parent, JProgressBar progressBar, int level) {
@@ -34,9 +30,11 @@ public class SearchPanelBottomArea extends JPanel {
 		_level = level;
 		setLayout(new BorderLayout());
 		_progressBar = progressBar;
-		_searchHeader = new JPanel();
-		_searchHeader.setLayout(new BorderLayout());
-		setSearchUI(new RegExComponent(level));
+		JPanel searchHeader = new JPanel();
+		searchHeader.setLayout(new BorderLayout());
+		_searchUI = new SearchSelector(level, this::search);
+		searchHeader.add(_searchUI, BorderLayout.CENTER);
+
 		JToolBar searchToolbar = new JToolBar();
 		searchToolbar.add(UIUtils.newButton("\u274C", () -> {
 			if (_searching != null && !_searching.isDone()) {
@@ -46,18 +44,8 @@ public class SearchPanelBottomArea extends JPanel {
 			}
 		}));
 		searchToolbar.add(UIUtils.newButton("\uD83D\uDDAB", this::saveResults));
-		_searchHeader.add(searchToolbar, BorderLayout.LINE_END);
-		add(_searchHeader, BorderLayout.NORTH);
-	}
-
-	private <T extends JComponent & SearchComponent> void setSearchUI(T comp) {
-		if (_searchUI != null)
-			_searchHeader.remove(_searchUI);
-		if (comp != null) {
-			_searchUI = comp;
-			comp.onSearch(this::search);
-			_searchHeader.add(comp, BorderLayout.CENTER);
-		}
+		searchHeader.add(searchToolbar, BorderLayout.LINE_END);
+		add(searchHeader, BorderLayout.NORTH);
 	}
 
 	private void saveResults() {
