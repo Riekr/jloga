@@ -18,8 +18,14 @@ public class IntBehaviourSubject extends BehaviourSubject<Integer> {
 		return super.subscribe((Consumer<? super Integer>) onNext::accept);
 	}
 
-	public void next(int item) {
-		super.updateUI(item);
+	@Override
+	public void next(Integer item) {
+		super.next(requireNonNull(item));
+	}
+
+	@Override
+	public void last(Integer item) {
+		super.last(requireNonNull(item));
 	}
 
 	@Override
