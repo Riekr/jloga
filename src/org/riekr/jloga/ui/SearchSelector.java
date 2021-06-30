@@ -32,7 +32,7 @@ public class SearchSelector extends JPanel {
 		add(_selectBtn, BorderLayout.LINE_START);
 
 		SearchRegistry.get(
-				Preferences.load(SEARCH_TYPE, () -> RegExComponent.class),
+				Preferences.loadClass(SEARCH_TYPE, () -> RegExComponent.class),
 				level,
 				(searchComp) -> {
 					_searchComponent = searchComp;

@@ -24,6 +24,10 @@ public class Preferences {
 		save(key, data);
 	}
 
+	public static void save(String key, Class<?> o) {
+		save(key, o.getCanonicalName());
+	}
+
 	public static void save(String key, File o) {
 		save(key, o.getAbsolutePath());
 	}
@@ -60,6 +64,18 @@ public class Preferences {
 		if (path == null)
 			return deflt == null ? null : deflt.get();
 		return new File(path);
+	}
+
+	public static <T> Class<T> loadClass(String key, Supplier<Class<T>> deflt) {
+		try {
+			String name = load(key, null);
+			if (name != null) {
+				//noinspection unchecked
+				return (Class<T>) Class.forName(name);
+			}
+		} catch (ClassNotFoundException | ClassCastException ignored) {
+		}
+		return deflt == null ? null : deflt.get();
 	}
 
 	public static <T> T load(String key, Supplier<T> deflt) {

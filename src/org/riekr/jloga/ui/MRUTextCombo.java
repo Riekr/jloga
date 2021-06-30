@@ -3,6 +3,8 @@ package org.riekr.jloga.ui;
 import org.riekr.jloga.io.Preferences;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 public class MRUTextCombo extends JComboBox<String> {
@@ -36,5 +38,17 @@ public class MRUTextCombo extends JComboBox<String> {
 
 	public void setListener(Consumer<String> listener) {
 		_listener = listener;
+	}
+
+	@Override
+	public synchronized void addMouseListener(MouseListener l) {
+		super.addMouseListener(l);
+		getEditor().getEditorComponent().addMouseListener(l);
+		for (Component child : getComponents()) {
+			if (child instanceof JButton) {
+				child.addMouseListener(l);
+				break;
+			}
+		}
 	}
 }
