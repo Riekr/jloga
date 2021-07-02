@@ -7,8 +7,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -75,8 +77,9 @@ public final class UIUtils {
 						patDate,
 						new DateTimeFormatterBuilder()
 								.appendPattern(patDate)
-								// .parseDefaulting(ChronoField.NANO_OF_DAY, 0)
 								.toFormatter()
+								.withLocale(Locale.ENGLISH)
+								.withZone(ZoneId.systemDefault())
 				);
 			} catch (IllegalArgumentException iae) {
 				JOptionPane.showMessageDialog(parentComponent, iae.getLocalizedMessage(), "Date/time pattern error", JOptionPane.ERROR_MESSAGE);
