@@ -16,22 +16,24 @@ public class StringsReader extends Reader {
 
 	@Override
 	public int read(char @NotNull [] cbuf, int off, int len) {
+		if (_start == -1) {
+			_start = 0;
+			cbuf[0] = '\n';
+			return 1;
+		}
 		if (_i == _strings.length)
 			return -1;
 		String string = _strings[_i];
 		int strLen = string.length();
+		int strAvail = strLen - _start;
+		if (strAvail < len)
+			len = strAvail;
+		string.getChars(_start, _start + len, cbuf, off);
+		_start += len;
 		if (_start == strLen) {
 			_i++;
-			if (_i == _strings.length)
-				return -1;
-			_start = 0;
-			cbuf[off] = '\n';
-			return 1;
+			_start = -1;
 		}
-		final int readLen = strLen - _start;
-		final int end = _start + Math.min(len, readLen);
-		string.getChars(_start, end, cbuf, off);
-		_start = end;
 		return len;
 	}
 
