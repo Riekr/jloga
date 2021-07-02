@@ -1,11 +1,12 @@
 package org.riekr.jloga.search;
 
+import org.riekr.jloga.io.PropsIO;
 import org.riekr.jloga.misc.TaggedHolder;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.react.BoolConsumer;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
-import org.riekr.jloga.ui.MRUTextCombo;
+import org.riekr.jloga.ui.MRUTextComboWithLabel;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -20,20 +21,24 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static org.riekr.jloga.ui.UIUtils.*;
-
 public class DurationAnalysisComponent extends JLabel implements SearchComponent {
+
+	private static final String _F_EXT = "jloga-dap";
+	private static final String _F_DESCR = "Duration analysis project";
 
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();
 	private final JFrame _configFrame;
 
-	private Pattern _patDateExtract;
-	private TaggedHolder<DateTimeFormatter> _patDate;
-	private Pattern _patFunc;
-	private Pattern _patStart;
-	private Pattern _patEnd;
-	private Pattern _patRestart;
-	private Duration _minDuration;
+	private final MRUTextComboWithLabel<Pattern> fDateExtractor;
+	private final MRUTextComboWithLabel<TaggedHolder<DateTimeFormatter>> fDate;
+	private final MRUTextComboWithLabel<Pattern> fFunc;
+	private final MRUTextComboWithLabel<Pattern> fStart;
+	private final MRUTextComboWithLabel<Pattern> fEnd;
+	private final MRUTextComboWithLabel<Pattern> fRestart;
+	private final MRUTextComboWithLabel<Duration> fMinDuration;
+
+
+	private final DurationAnalysisProject _project = new DurationAnalysisProject(this);
 	private Consumer<SearchPredicate> _onSearchConsumer;
 
 	private boolean _mouseListenerEnabled = true;
@@ -61,18 +66,22 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 
 		Container configPane = _configFrame.getContentPane();
 		configPane.setLayout(new BoxLayout(configPane, BoxLayout.Y_AXIS));
-		configPane.add(newEditableField(level + ".DateExtractor", "Date extractor pattern:", this::setPatDateExtract, (pat) -> toPattern(this, pat, 1)));
-		configPane.add(newEditableField(level + ".Date", "Date pattern:", this::setPatDate, (pat) -> toDateTimeFormatter(this, pat)));
-		configPane.add(newEditableField(level + ".Func", "Function pattern:", this::setPatFunc, (pat) -> toPattern(this, pat, 1)));
-		configPane.add(newEditableField(level + ".Start", "Start pattern:", this::setPatStart, (pat) -> toPattern(this, pat, 0)));
-		configPane.add(newEditableField(level + ".End", "End pattern:", this::setPatEnd, (pat) -> toPattern(this, pat, 0)));
-		configPane.add(newEditableField(level + ".Restart", "Restart pattern:", this::setPatRestart, (pat) -> toPattern(this, pat, 0)));
-		configPane.add(newEditableField(level + ".MinDuration", "Minimum duration:", this::setMinDuration, (pat) -> toDuration(this, pat)));
+		configPane.add(fDateExtractor = newEditableField(level + ".DateExtractor", "Date extractor pattern:", _project::setPatDateExtract, _project.patDateExtract));
+		configPane.add(fDate = newEditableField(level + ".Date", "Date pattern:", _project::setPatDate, _project.patDate));
+		configPane.add(fFunc = newEditableField(level + ".Func", "Function pattern:", _project::setPatFunc, _project.patFunc));
+		configPane.add(fStart = newEditableField(level + ".Start", "Start pattern:", _project::setPatStart, _project.patStart));
+		configPane.add(fEnd = newEditableField(level + ".End", "End pattern:", _project::setPatEnd, _project.patEnd));
+		configPane.add(fRestart = newEditableField(level + ".Restart", "Restart pattern:", _project::setPatRestart, _project.patRestart));
+		configPane.add(fMinDuration = newEditableField(level + ".MinDuration", "Minimum duration:", _project::setMinDuration, _project.minDuration));
 
-		JButton start = new JButton("Start analysis");
-		start.addMouseListener(_mouseListener);
-		start.addActionListener((e) -> this.search());
-		configPane.add(start);
+		Box configPaneButtons = new Box(BoxLayout.X_AXIS);
+		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, _project, _F_EXT, _F_DESCR, this::updateConfigPanel)));
+		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, _project, _F_EXT, _F_DESCR)));
+		configPaneButtons.add(Box.createRigidArea(new Dimension(16, 16)));
+		configPaneButtons.add(newButton("Reset!", () -> PropsIO.reset(_project, this::updateConfigPanel)));
+		configPaneButtons.add(Box.createGlue());
+		configPaneButtons.add(newButton("Start analysis", this::search));
+		configPane.add(configPaneButtons);
 
 		calcTitle();
 
@@ -86,13 +95,10 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 		_configVisible.subscribe(Observer.async(Observer.uniq(this::setExpanded)));
 	}
 
-	private <T> JComponent newEditableField(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
-		JPanel container = new JPanel();
-		container.setLayout(new BorderLayout());
-		container.add(new JLabel(label + " "), BorderLayout.LINE_START);
-		MRUTextCombo combo = new MRUTextCombo("DurationAnalysisComponent." + key);
-		combo.addMouseListener(_mouseListener);
-		combo.addPopupMenuListener(new PopupMenuListener() {
+	private <T> MRUTextComboWithLabel<T> newEditableField(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
+		MRUTextComboWithLabel<T> editableField = new MRUTextComboWithLabel<>("DurationAnalysisComponent." + key, label, onResult, mapper);
+		editableField.combo.addMouseListener(_mouseListener);
+		editableField.combo.addPopupMenuListener(new PopupMenuListener() {
 			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				_mouseListenerEnabled = false;
@@ -108,31 +114,35 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 				_mouseListenerEnabled = true;
 			}
 		});
-		Consumer<String> onText = (text) -> {
-			T res = mapper.apply(text);
-			if (res == null)
-				combo.setSelectedIndex(-1);
-			onResult.accept(res);
-		};
 		_configVisible.subscribe((BoolConsumer) (visible) -> {
 			if (!visible)
-				onText.accept((String) combo.getSelectedItem());
+				editableField.combo.getListener().accept((String) editableField.combo.getSelectedItem());
 		});
-		combo.setListener(onText);
-		container.add(combo, BorderLayout.CENTER);
-		return container;
+		return editableField;
+	}
+
+	private JComponent newButton(String label, Runnable action) {
+		JButton button = new JButton(label);
+		button.addMouseListener(_mouseListener);
+		button.addActionListener((e) -> action.run());
+		return button;
+	}
+
+	private void updateConfigPanel() {
+		fDateExtractor.combo.set(_project.getPatDateExtract());
+		fDate.combo.set(_project.getPatDate());
+		fFunc.combo.set(_project.getPatFunc());
+		fStart.combo.set(_project.getPatStart());
+		fEnd.combo.set(_project.getPatEnd());
+		fRestart.combo.set(_project.getPatRestart());
+		fMinDuration.combo.set(_project.getMinDuration());
 	}
 
 	private void calcTitle() {
-		if (_patDate == null && _patStart == null && _patEnd == null && _patFunc == null)
+		if (_project.isReady())
+			setText(_project.toString());
+		else
 			setText("Hey! Hover here!");
-		else {
-			setText("Date: " + (_patDate == null ? "-" : _patDate.toString())
-					+ " | Start: " + (_patStart == null ? "-" : _patStart.pattern())
-					+ " | End: " + (_patEnd == null ? "-" : _patEnd.pattern())
-					+ " | Func: " + (_patFunc == null ? "-" : _patFunc.pattern())
-			);
-		}
 	}
 
 	public void setExpanded(boolean expanded) {
@@ -162,12 +172,9 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 	}
 
 	private void search() {
-		if (_onSearchConsumer != null &&
-				// is it ready?
-				_patDateExtract != null && _patDate != null && _patDate.value != null && _patStart != null && _patEnd != null && _patFunc != null
-		) {
+		if (_onSearchConsumer != null && _project.isReady()) {
 			_configVisible.next(false);
-			_onSearchConsumer.accept(new DurationAnalysis(_patDateExtract, _patDate.value, _patFunc, _patStart, _patEnd, _patRestart, _minDuration));
+			_onSearchConsumer.accept(_project.get());
 		}
 	}
 
@@ -176,31 +183,4 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 		return "\u0394";
 	}
 
-	public void setPatDateExtract(Pattern patDateExtract) {
-		_patDateExtract = patDateExtract;
-	}
-
-	public void setPatDate(TaggedHolder<DateTimeFormatter> patDate) {
-		_patDate = patDate;
-	}
-
-	public void setPatStart(Pattern patStart) {
-		_patStart = patStart;
-	}
-
-	public void setPatEnd(Pattern patEnd) {
-		_patEnd = patEnd;
-	}
-
-	public void setPatFunc(Pattern patFunc) {
-		_patFunc = patFunc;
-	}
-
-	public void setPatRestart(Pattern patRestart) {
-		_patRestart = patRestart;
-	}
-
-	public void setMinDuration(Duration minDuration) {
-		_minDuration = minDuration;
-	}
 }

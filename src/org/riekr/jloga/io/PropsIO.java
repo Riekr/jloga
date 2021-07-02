@@ -1,0 +1,126 @@
+package org.riekr.jloga.io;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+
+public class PropsIO {
+
+	private static final String PATH_PREFS_PREFIX = "PropsIO.";
+
+	private static class GetterAndSetter {
+		private final Method getter, setter;
+
+		private GetterAndSetter(Method getter, Method setter) {
+			this.getter = getter;
+			this.setter = setter;
+		}
+	}
+
+	private static Map<String, GetterAndSetter> map(Object obj) {
+		TreeMap<String, GetterAndSetter> res = new TreeMap<>();
+		Class<?> cl = obj.getClass();
+		for (Method getter : cl.getMethods()) {
+			if (getter.getName().startsWith("get")
+					&& getter.getParameterCount() == 0
+					&& getter.getReturnType() == String.class) {
+				try {
+					String key = getter.getName().substring(3);
+					Method setter = cl.getMethod("set" + key, String.class);
+					if (setter.getReturnType() == Void.TYPE)
+						res.put(key, new GetterAndSetter(getter, setter));
+				} catch (NoSuchMethodException ignored) {
+				}
+			}
+		}
+		return res;
+	}
+
+	public static void save(File dest, Object pojo) throws InvocationTargetException, IllegalAccessException, IOException {
+		Properties props = new Properties();
+		for (Map.Entry<String, GetterAndSetter> entry : map(pojo).entrySet()) {
+			String val = (String) entry.getValue().getter.invoke(pojo);
+			if (val != null)
+				props.setProperty(entry.getKey(), val);
+		}
+		try (Writer writer = new FileWriter(dest, false)) {
+			props.store(writer, pojo.getClass().getSimpleName());
+		}
+	}
+
+	public static void load(File src, Object dest) throws IOException, InvocationTargetException, IllegalAccessException {
+		Properties props = new Properties();
+		try (Reader reader = new FileReader(src)) {
+			props.load(reader);
+		}
+		for (Map.Entry<String, GetterAndSetter> entry : map(dest).entrySet())
+			entry.getValue().setter.invoke(dest, props.getProperty(entry.getKey()));
+
+	}
+
+	public static void reset(Object dest, Runnable... onSuccess) {
+		for (Map.Entry<String, GetterAndSetter> entry : map(dest).entrySet()) {
+			try {
+				entry.getValue().setter.invoke(dest, (Object) null);
+			} catch (Throwable e) {
+				e.printStackTrace(System.err);
+			}
+		}
+		if (onSuccess != null)
+			for (Runnable task : onSuccess)
+				task.run();
+	}
+
+	public static void requestSave(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
+		JFileChooser fileChooser = new JFileChooser();
+		if (ext != null && !ext.isBlank())
+			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
+		fileChooser.setCurrentDirectory(Preferences.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
+		fileChooser.setDialogTitle("Specify a file to open");
+		int userSelection = fileChooser.showSaveDialog(owner);
+		if (userSelection == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = fileChooser.getSelectedFile();
+			try {
+				save(selectedFile, pojo);
+			} catch (Throwable e) {
+				JOptionPane.showMessageDialog(owner, e.getLocalizedMessage(), "Error saving file", JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace(System.err);
+				return;
+			}
+			Preferences.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
+			if (onSuccess != null)
+				for (Runnable task : onSuccess)
+					task.run();
+		}
+	}
+
+	public static void requestLoad(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
+		JFileChooser fileChooser = new JFileChooser();
+		if (ext != null && !ext.isBlank())
+			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
+		fileChooser.setCurrentDirectory(Preferences.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
+		fileChooser.setDialogTitle("Specify a file to open");
+		int userSelection = fileChooser.showOpenDialog(owner);
+		if (userSelection == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = fileChooser.getSelectedFile();
+			try {
+				load(selectedFile, pojo);
+			} catch (Throwable e) {
+				JOptionPane.showMessageDialog(owner, e.getLocalizedMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace(System.err);
+				return;
+			}
+			Preferences.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
+			if (onSuccess != null)
+				for (Runnable task : onSuccess)
+					task.run();
+		}
+	}
+
+}

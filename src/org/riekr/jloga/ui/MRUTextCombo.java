@@ -40,6 +40,10 @@ public class MRUTextCombo extends JComboBox<String> {
 		_listener = listener;
 	}
 
+	public Consumer<String> getListener() {
+		return _listener;
+	}
+
 	@Override
 	public synchronized void addMouseListener(MouseListener l) {
 		super.addMouseListener(l);
@@ -50,5 +54,11 @@ public class MRUTextCombo extends JComboBox<String> {
 				break;
 			}
 		}
+	}
+
+	public void set(String str) {
+		setSelectedItem(str);
+		if (_listener != null)
+			_listener.accept(str);
 	}
 }
