@@ -81,6 +81,7 @@ public class DurationAnalysis implements SearchPredicate {
 	private final Pattern _patStart;          // "] INFO VAM - .+: Start "
 	private final Pattern _patEnd;            // "] INFO VAM - .+: Stop "
 	private final Pattern _patRestart;
+	private final Duration _minDuration;
 
 	private Matchers _matchers;
 	private Map<String, Instant> _funcStarts;
@@ -90,13 +91,14 @@ public class DurationAnalysis implements SearchPredicate {
 	private ChildTextSource _dest;
 	private final Map<Integer, Duration> _durations = new HashMap<>();
 
-	public DurationAnalysis(Pattern patDateExtract, DateTimeFormatter patDate, Pattern patFunc, Pattern patStart, Pattern patEnd, Pattern patRestart) {
+	public DurationAnalysis(Pattern patDateExtract, DateTimeFormatter patDate, Pattern patFunc, Pattern patStart, Pattern patEnd, Pattern patRestart, Duration minDuration) {
 		_patDateExtract = patDateExtract;
 		_patDate = patDate;
 		_patFunc = patFunc;
 		_patStart = patStart;
 		_patEnd = patEnd;
 		_patRestart = patRestart;
+		_minDuration = minDuration;
 	}
 
 	@Override
@@ -158,10 +160,12 @@ public class DurationAnalysis implements SearchPredicate {
 					Instant start = _funcStarts.remove(func);
 					if (start != null) {
 						Duration dur = Duration.between(start, end);
-						_durations.put(line, dur);
-						_dest.addLine(line);
-						_maxFuncLength = max(_maxFuncLength, func.length());
-						_maxDurationLength = max(_maxDurationLength, dur.toString().length());
+						if (_minDuration == null || dur.compareTo(_minDuration) >= 0) {
+							_durations.put(line, dur);
+							_dest.addLine(line);
+							_maxFuncLength = max(_maxFuncLength, func.length());
+							_maxDurationLength = max(_maxDurationLength, dur.toString().length());
+						}
 					}
 				},
 				(instant) -> {

@@ -7,9 +7,11 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -65,6 +67,17 @@ public final class UIUtils {
 					return pat;
 			} catch (PatternSyntaxException pse) {
 				JOptionPane.showMessageDialog(parentComponent, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return null;
+	}
+
+	public static Duration toDuration(Component parentComponent, String text) {
+		if (text != null && !text.isBlank()) {
+			try {
+				return Duration.parse(text);
+			} catch (DateTimeParseException e) {
+				JOptionPane.showMessageDialog(parentComponent, e.getLocalizedMessage(), "Duration syntax error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		return null;

@@ -14,13 +14,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static org.riekr.jloga.ui.UIUtils.toDateTimeFormatter;
-import static org.riekr.jloga.ui.UIUtils.toPattern;
+import static org.riekr.jloga.ui.UIUtils.*;
 
 public class DurationAnalysisComponent extends JLabel implements SearchComponent {
 
@@ -33,6 +33,7 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 	private Pattern _patStart;
 	private Pattern _patEnd;
 	private Pattern _patRestart;
+	private Duration _minDuration;
 	private Consumer<SearchPredicate> _onSearchConsumer;
 
 	private boolean _mouseListenerEnabled = true;
@@ -66,6 +67,7 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 		configPane.add(newEditableField(level + ".Start", "Start pattern:", this::setPatStart, (pat) -> toPattern(this, pat, 0)));
 		configPane.add(newEditableField(level + ".End", "End pattern:", this::setPatEnd, (pat) -> toPattern(this, pat, 0)));
 		configPane.add(newEditableField(level + ".Restart", "Restart pattern:", this::setPatRestart, (pat) -> toPattern(this, pat, 0)));
+		configPane.add(newEditableField(level + ".MinDuration", "Minimum duration:", this::setMinDuration, (pat) -> toDuration(this, pat)));
 
 		JButton start = new JButton("Start analysis");
 		start.addMouseListener(_mouseListener);
@@ -165,7 +167,7 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 				_patDateExtract != null && _patDate != null && _patDate.value != null && _patStart != null && _patEnd != null && _patFunc != null
 		) {
 			_configVisible.next(false);
-			_onSearchConsumer.accept(new DurationAnalysis(_patDateExtract, _patDate.value, _patFunc, _patStart, _patEnd, _patRestart));
+			_onSearchConsumer.accept(new DurationAnalysis(_patDateExtract, _patDate.value, _patFunc, _patStart, _patEnd, _patRestart, _minDuration));
 		}
 	}
 
@@ -198,4 +200,7 @@ public class DurationAnalysisComponent extends JLabel implements SearchComponent
 		_patRestart = patRestart;
 	}
 
+	public void setMinDuration(Duration minDuration) {
+		_minDuration = minDuration;
+	}
 }

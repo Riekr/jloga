@@ -58,6 +58,7 @@ public class SearchPanel extends JComponent {
 				int idx = _bottomTabs.indexOfTab(_TAB_ADD);
 				if (_bottomTabs.getSelectedIndex() == idx) {
 					SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
+					body.setFont(getFont());
 					_bottomTabs.insertTab(titleSupplier.get(), null, body, null, idx);
 					_bottomTabs.setSelectedIndex(idx);
 				}
