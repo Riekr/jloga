@@ -7,6 +7,10 @@ import java.util.function.Function;
 
 public class MRUTextComboWithLabel<T> extends JPanel {
 
+	public static MRUTextComboWithLabel<String> forString(String key, String label, Consumer<String> onResult) {
+		return new MRUTextComboWithLabel<>(key, label, onResult, Function.identity());
+	}
+
 	public final MRUTextCombo combo;
 
 	public MRUTextComboWithLabel(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {

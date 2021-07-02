@@ -19,13 +19,9 @@ public final class SearchRegistry {
 		public T newInstance(int level) {
 			try {
 				return comp.getConstructor(Integer.TYPE).newInstance(level);
-			} catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException ignored) {
+			} catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+				throw new UnsupportedOperationException("No constructor found", e);
 			}
-			try {
-				return comp.getConstructor().newInstance();
-			} catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException ignored) {
-			}
-			throw new UnsupportedOperationException("No constructor found");
 		}
 
 		@Override
