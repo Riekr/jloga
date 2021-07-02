@@ -1,5 +1,7 @@
 package org.riekr.jloga.ui;
 
+import org.riekr.jloga.misc.TaggedHolder;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -66,13 +68,16 @@ public final class UIUtils {
 		return null;
 	}
 
-	public static DateTimeFormatter toDateTimeFormatter(Component parentComponent, String patDate) {
+	public static TaggedHolder<DateTimeFormatter> toDateTimeFormatter(Component parentComponent, String patDate) {
 		if (patDate != null && !patDate.isBlank()) {
 			try {
-				return new DateTimeFormatterBuilder()
-						.appendPattern(patDate)
-//						.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
-						.toFormatter();
+				return new TaggedHolder<>(
+						patDate,
+						new DateTimeFormatterBuilder()
+								.appendPattern(patDate)
+								// .parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+								.toFormatter()
+				);
 			} catch (IllegalArgumentException iae) {
 				JOptionPane.showMessageDialog(parentComponent, iae.getLocalizedMessage(), "Date/time pattern error", JOptionPane.ERROR_MESSAGE);
 			}

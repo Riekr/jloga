@@ -3,6 +3,7 @@ package org.riekr.jloga.ui;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
 
 import javax.swing.*;
@@ -74,7 +75,17 @@ public class SearchPanelBottomArea extends JPanel {
 					(res) -> {
 						getResultTextArea().setTextSource(res);
 						_parent.expandBottomArea();
-					}
+					},
+					(err) -> EventQueue.invokeLater(() -> {
+						if (err instanceof SearchException) {
+							JOptionPane.showMessageDialog(this,
+									err.getCause() == null ? err.getLocalizedMessage() : err.getCause().getLocalizedMessage(),
+									err.getLocalizedMessage(),
+									JOptionPane.ERROR_MESSAGE
+							);
+						} else
+							JOptionPane.showMessageDialog(this, err.getLocalizedMessage(), "Search error", JOptionPane.ERROR_MESSAGE);
+					})
 			);
 		}
 	}

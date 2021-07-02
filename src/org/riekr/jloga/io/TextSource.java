@@ -2,6 +2,7 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
 
 import java.awt.*;
@@ -68,7 +69,7 @@ public interface TextSource {
 	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
 	}
 
-	default Future<?> requestSearch(SearchPredicate predicate, ProgressListener progressListener, Consumer<TextSource> consumer) {
+	default Future<?> requestSearch(SearchPredicate predicate, ProgressListener progressListener, Consumer<TextSource> consumer, Consumer<Throwable> onError) {
 		AtomicReference<Future<?>> resRef = new AtomicReference<>();
 		BooleanSupplier running = () -> {
 			Future<?> future = resRef.get();
@@ -80,8 +81,11 @@ public interface TextSource {
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
 				search(predicate, searchResult, progressListener, running);
 				searchResult.complete();
+			} catch (SearchException e) {
+				onError.accept(e);
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
+				onError.accept(e);
 			}
 		});
 		resRef.set(res);
