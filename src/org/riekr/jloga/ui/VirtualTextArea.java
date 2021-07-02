@@ -11,7 +11,6 @@ import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -235,29 +234,20 @@ public class VirtualTextArea extends JComponent {
 			_lineListenerUnsubscribe = null;
 		}
 		if (listener != null) {
-			AtomicInteger caretLine = new AtomicInteger();
 			MouseListener mouseListener = new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON1)
-						listener.accept(_fromLine + caretLine.intValue());
+						listener.accept(_fromLine + (e.getY() / _lineHeight));
 					else
 						_highlightedLine.next(null);
 				}
 			};
-			MouseListener mouseListener2 = new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					int line = e.getY() / _lineHeight;
-					caretLine.set(line);
-					mouseListener.mouseClicked(e);
-				}
-			};
 			_text.addMouseListener(mouseListener);
-			_lineNumbers.addMouseListener(mouseListener2);
+			_lineNumbers.addMouseListener(mouseListener);
 			_lineListenerUnsubscribe = () -> {
 				_text.removeMouseListener(mouseListener);
-				_lineNumbers.removeMouseListener(mouseListener2);
+				_lineNumbers.removeMouseListener(mouseListener);
 			};
 		}
 	}

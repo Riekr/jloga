@@ -51,7 +51,7 @@ public class SearchSelector extends JPanel {
 				.findFirst()
 				.orElseGet(() -> choices[0]);
 		SearchRegistry.Entry<?> input = (SearchRegistry.Entry<?>) JOptionPane.showInputDialog(
-				_selectBtn,
+				this.getRootPane(),
 				"Select a search type between those available:",
 				"Choose search type",
 				JOptionPane.QUESTION_MESSAGE,
