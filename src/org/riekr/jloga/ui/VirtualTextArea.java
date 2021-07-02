@@ -2,6 +2,7 @@ package org.riekr.jloga.ui;
 
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.react.BehaviourSubject;
+import org.riekr.jloga.react.Unsubscribable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -32,6 +33,7 @@ public class VirtualTextArea extends JComponent {
 	private final JScrollBar _scrollBar;
 
 	private TextSource _textSource;
+	private Unsubscribable _textSourceUnsubscribable;
 	private Runnable _lineListenerUnsubscribe;
 
 	public VirtualTextArea() {
@@ -141,9 +143,13 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	public void setTextSource(TextSource textSource) {
+		if (_textSourceUnsubscribable != null)
+			_textSourceUnsubscribable.unsubscribe();
 		_textSource = textSource;
-		_textSource.requestLineCount(this::setFileLineCount);
-		requireText();
+		if (textSource != null) {
+			_textSourceUnsubscribable = textSource.requestLineCount(this::setFileLineCount);
+			requireText();
+		}
 	}
 
 	private void setFileLineCount(int lineCount) {
