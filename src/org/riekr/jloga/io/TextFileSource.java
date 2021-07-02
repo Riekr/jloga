@@ -153,17 +153,16 @@ public class TextFileSource implements TextSource {
 		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
 		long start = System.currentTimeMillis();
 		try (BufferedReader reader = Files.newBufferedReader(_file, _charset)) {
-			predicate.start();
 			int lineNumber = 0;
 			String line;
 			while (running.getAsBoolean() && (line = reader.readLine()) != null) {
-				predicate.verify(lineNumber, line, out::addLine);
+				predicate.verify(lineNumber, line);
 				progressListener.onProgressChanged(lineNumber++, _lineCount);
 			}
-			predicate.end().forEach(out::addLine);
 		} catch (IOException e) {
 			throw new ExecutionException(e);
 		} finally {
+			predicate.end();
 			progressListener.onProgressChanged(_lineCount, _lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
 		}

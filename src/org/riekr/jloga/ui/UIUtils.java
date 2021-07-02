@@ -5,6 +5,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public final class UIUtils {
 
@@ -47,4 +51,32 @@ public final class UIUtils {
 		return label;
 	}
 
+	public static Pattern toPattern(Component parentComponent, String text, int minGroups) {
+		if (text != null && !text.isBlank()) {
+			try {
+				Pattern pat = Pattern.compile(text);
+				if (minGroups > 0 && pat.matcher("").groupCount() < minGroups)
+					JOptionPane.showMessageDialog(parentComponent, "This field requires " + minGroups + " groups", "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
+				else
+					return pat;
+			} catch (PatternSyntaxException pse) {
+				JOptionPane.showMessageDialog(parentComponent, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return null;
+	}
+
+	public static DateTimeFormatter toDateTimeFormatter(Component parentComponent, String patDate) {
+		if (patDate != null && !patDate.isBlank()) {
+			try {
+				return new DateTimeFormatterBuilder()
+						.appendPattern(patDate)
+//						.parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+						.toFormatter();
+			} catch (IllegalArgumentException iae) {
+				JOptionPane.showMessageDialog(parentComponent, iae.getLocalizedMessage(), "Date/time pattern error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return null;
+	}
 }

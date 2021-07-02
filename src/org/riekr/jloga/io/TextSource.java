@@ -76,7 +76,7 @@ public interface TextSource {
 		};
 		Future<?> res = Executors.newSingleThreadExecutor().submit(() -> {
 			try {
-				FilteredTextSource searchResult = new FilteredTextSource(this);
+				FilteredTextSource searchResult = predicate.start(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
 				search(predicate, searchResult, progressListener, running);
 				searchResult.complete();
@@ -94,13 +94,12 @@ public interface TextSource {
 		long start = System.currentTimeMillis();
 		int lineCount = getLineCount();
 		try {
-			predicate.start();
 			for (int line = 0; line <= getLineCount() && running.getAsBoolean(); line++) {
-				predicate.verify(line, getText(line), out::addLine);
+				predicate.verify(line, getText(line));
 				progressListener.onProgressChanged(line, lineCount);
 			}
-			predicate.end().forEach(out::addLine);
 		} finally {
+			predicate.end();
 			progressListener.onProgressChanged(lineCount, lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
 		}

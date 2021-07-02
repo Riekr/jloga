@@ -1,12 +1,13 @@
 package org.riekr.jloga.search;
 
+import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.ui.MRUTextCombo;
+import org.riekr.jloga.ui.UIUtils;
 
-import javax.swing.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class RegExComponent extends MRUTextCombo implements SearchComponent {
 
@@ -20,8 +21,9 @@ public class RegExComponent extends MRUTextCombo implements SearchComponent {
 		}
 
 		@Override
-		public void start() {
+		public FilteredTextSource start(TextSource master) {
 			_matcher = _pattern.matcher("");
+			return super.start(master);
 		}
 
 		@Override
@@ -41,11 +43,9 @@ public class RegExComponent extends MRUTextCombo implements SearchComponent {
 			setListener(null);
 		else {
 			setListener((regex) -> {
-				try {
-					consumer.accept(new RegExSearch(Pattern.compile(regex)));
-				} catch (PatternSyntaxException pse) {
-					JOptionPane.showMessageDialog(this, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
-				}
+				Pattern pat = UIUtils.toPattern(this, regex, 0);
+				if (pat != null)
+					consumer.accept(new RegExSearch(pat));
 			});
 		}
 	}

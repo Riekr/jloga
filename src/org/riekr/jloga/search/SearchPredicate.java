@@ -1,27 +1,41 @@
 package org.riekr.jloga.search;
 
-import java.util.Collections;
-import java.util.NavigableSet;
+import org.riekr.jloga.io.ChildTextSource;
+import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.TextSource;
+
 import java.util.function.IntConsumer;
 
 public interface SearchPredicate {
 
 	abstract class Simple implements SearchPredicate {
+		private IntConsumer _accumulator;
+
+		@Override
+		public FilteredTextSource start(TextSource master) {
+			ChildTextSource res = new ChildTextSource(master);
+			_accumulator = res::addLine;
+			return res;
+		}
+
 		protected abstract boolean accept(int line, String text);
 
-		public final void verify(int line, String text, IntConsumer accumulator) {
+		public final void verify(int line, String text) {
 			if (accept(line, text))
-				accumulator.accept(line);
+				_accumulator.accept(line);
+		}
+
+		@Override
+		public void end() {
+			_accumulator = null;
 		}
 	}
 
-	default void start() {
-	}
+	FilteredTextSource start(TextSource master);
 
-	void verify(int line, String text, IntConsumer accumulator);
+	void verify(int line, String text);
 
-	default NavigableSet<Integer> end() {
-		return Collections.emptyNavigableSet();
+	default void end() {
 	}
 
 }
