@@ -1,9 +1,8 @@
 package org.riekr.jloga.misc;
 
-import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.ui.UIUtils;
 
-import javax.swing.*;
+import java.awt.*;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -14,9 +13,9 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public abstract class Project implements Supplier<SearchPredicate> {
+public interface Project {
 
-	public static class Field<T> implements Supplier<T>, Consumer<String> {
+	class Field<T> implements Supplier<T>, Consumer<String> {
 
 		public final String key;
 		public final String label;
@@ -52,41 +51,27 @@ public abstract class Project implements Supplier<SearchPredicate> {
 		}
 	}
 
-	public class PatternField extends Field<Pattern> {
-		public PatternField(String key, String label) {
-			this(key, label, 0);
-		}
-
-		public PatternField(String key, String label, int minGroups) {
-			super(key, label, (pattern) -> UIUtils.toPattern(_owner, pattern, minGroups));
-		}
+	default Field<Pattern> newPatternField(String key, String label) {
+		return newPatternField(key, label, 0);
 	}
 
-	public class DurationField extends Field<Duration> {
-		public DurationField(String key, String label) {
-			super(key, label, (duration) -> UIUtils.toDuration(_owner, duration));
-		}
+	default Field<Pattern> newPatternField(String key, String label, int minGroups) {
+		return new Field<>(key, label, (pattern) -> UIUtils.toPattern(getDialogParentComponent(), pattern, minGroups));
 	}
 
-	public class DateTimeFormatterField extends Field<DateTimeFormatter> {
-		public DateTimeFormatterField(String key, String label) {
-			super(key, label, (format) -> UIUtils.toDateTimeFormatter(_owner, format));
-		}
+	default Field<Duration> newDurationField(String key, String label) {
+		return new Field<>(key, label, (pattern) -> UIUtils.toDuration(getDialogParentComponent(), pattern));
 	}
 
-	protected final JComponent _owner;
-
-	protected Project(JComponent owner) {
-		_owner = owner;
+	default Field<DateTimeFormatter> newDateTimeFormatterField(String key, String label) {
+		return new Field<>(key, label, (pattern) -> UIUtils.toDateTimeFormatter(getDialogParentComponent(), pattern));
 	}
 
-	protected JComponent getOwner() {
-		return _owner;
-	}
+	Component getDialogParentComponent();
 
-	public abstract boolean isReady();
+	boolean isReady();
 
-	public Stream<? extends Field<?>> fields() {
+	default Stream<? extends Field<?>> fields() {
 		return Arrays.stream(getClass().getFields())
 				.filter((f) -> Field.class.isAssignableFrom(f.getType()))
 				.map((f) -> {
@@ -99,5 +84,11 @@ public abstract class Project implements Supplier<SearchPredicate> {
 				})
 				.filter(Objects::nonNull);
 	}
+
+	default void clear() {
+		fields().forEach((f) -> f.accept(null));
+	}
+
+	String getDescription();
 
 }

@@ -1,5 +1,7 @@
 package org.riekr.jloga.io;
 
+import org.riekr.jloga.misc.Project;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -43,6 +45,10 @@ public class PropsIO {
 	}
 
 	public static void save(File dest, Object pojo) throws InvocationTargetException, IllegalAccessException, IOException {
+		if (pojo instanceof Project) {
+			save(dest, (Project) pojo);
+			return;
+		}
 		Properties props = new Properties();
 		for (Map.Entry<String, GetterAndSetter> entry : map(pojo).entrySet()) {
 			String val = (String) entry.getValue().getter.invoke(pojo);
@@ -55,6 +61,10 @@ public class PropsIO {
 	}
 
 	public static void load(File src, Object dest) throws IOException, InvocationTargetException, IllegalAccessException {
+		if (dest instanceof Project) {
+			load(src, (Project) dest);
+			return;
+		}
 		Properties props = new Properties();
 		try (Reader reader = new FileReader(src)) {
 			props.load(reader);
@@ -64,17 +74,27 @@ public class PropsIO {
 
 	}
 
-	public static void reset(Object dest, Runnable... onSuccess) {
-		for (Map.Entry<String, GetterAndSetter> entry : map(dest).entrySet()) {
-			try {
-				entry.getValue().setter.invoke(dest, (Object) null);
-			} catch (Throwable e) {
-				e.printStackTrace(System.err);
-			}
+	public static void save(File dest, Project project) throws IOException {
+		Properties props = new Properties();
+		project.fields()
+				.filter(Project.Field::hasValue)
+				.forEach((f) -> props.setProperty(f.key, f.toString()));
+		try (Writer writer = new FileWriter(dest, false)) {
+			props.store(writer, project.getClass().getSimpleName());
 		}
-		if (onSuccess != null)
-			for (Runnable task : onSuccess)
-				task.run();
+	}
+
+	public static void load(File src, Project project) throws IOException {
+		Properties props = new Properties();
+		try (Reader reader = new FileReader(src)) {
+			props.load(reader);
+		}
+		project.fields()
+				.forEach((f) -> f.accept(props.getProperty(f.key)));
+	}
+
+	public static void requestSave(Project project, String ext, String extDescription, Runnable... onSuccess) {
+		requestSave(project.getDialogParentComponent(), project, ext, extDescription, onSuccess);
 	}
 
 	public static void requestSave(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
@@ -98,6 +118,10 @@ public class PropsIO {
 				for (Runnable task : onSuccess)
 					task.run();
 		}
+	}
+
+	public static void requestLoad(Project project, String ext, String extDescription, Runnable... onSuccess) {
+		requestLoad(project.getDialogParentComponent(), project, ext, extDescription, onSuccess);
 	}
 
 	public static void requestLoad(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
