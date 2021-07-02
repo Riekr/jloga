@@ -209,7 +209,7 @@ public class VirtualTextArea extends JComponent {
 			try {
 				Highlighter highlighter = _text.getHighlighter();
 				highlighter.removeAllHighlights();
-				if (line >= 0 && line <= _lineCount) {
+				if (line >= 0 && line < _lineCount) {
 					highlighter.addHighlight(
 							_text.getLineStartOffset(line),
 							_text.getLineEndOffset(line),
