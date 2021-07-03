@@ -48,12 +48,12 @@ public class Preferences {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> DefaultComboBoxModel<T> loadDefaultComboBoxModel(String key) {
 		Object[] data = load(key, null);
 		DefaultComboBoxModel<T> res = new DefaultComboBoxModel<>();
 		if (data != null) {
 			for (Object o : data)
-				//noinspection unchecked
 				res.addElement((T) o);
 		}
 		return res;
@@ -66,11 +66,11 @@ public class Preferences {
 		return new File(path);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> Class<T> loadClass(String key, Supplier<Class<T>> deflt) {
 		try {
 			String name = load(key, null);
 			if (name != null) {
-				//noinspection unchecked
 				return (Class<T>) Class.forName(name);
 			}
 		} catch (ClassNotFoundException | ClassCastException ignored) {
@@ -78,13 +78,13 @@ public class Preferences {
 		return deflt == null ? null : deflt.get();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> T load(String key, Supplier<T> deflt) {
 		byte[] buf = _PREFS.getByteArray(key, null);
 		if (buf == null)
 			return deflt == null ? null : deflt.get();
 		ByteArrayInputStream bais = new ByteArrayInputStream(buf);
 		try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-			//noinspection unchecked
 			return (T) ois.readObject();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

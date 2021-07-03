@@ -29,6 +29,7 @@ compileJava {
 	options.warnings = true
 	options.deprecation = true
 	options.debug = false
+	options.compilerArgs = ["-Xlint:unchecked"]
 }
 
 dependencies {

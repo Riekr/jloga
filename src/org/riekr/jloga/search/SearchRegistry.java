@@ -60,6 +60,7 @@ public final class SearchRegistry {
 		return _ENTRIES.toArray(new Entry[0]);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends JComponent & SearchComponent> void get(Class<?> cl, int level, Consumer<? super T> consumer) {
 		for (Entry<?> e : _ENTRIES) {
 			if (e.comp == cl) {
