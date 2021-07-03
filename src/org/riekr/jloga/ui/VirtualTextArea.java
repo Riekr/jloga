@@ -154,7 +154,8 @@ public class VirtualTextArea extends JComponent {
 
 	private void setFileLineCount(int lineCount) {
 		if (_allLinesCount != lineCount) {
-			_allLinesCount = lineCount;
+			// +1 to ensure last line is shown even if window borders fall across it
+			_allLinesCount = lineCount + 1;
 			recalcScrollBarMaximum();
 			_scrollBar.setEnabled(true);
 			requireText();
