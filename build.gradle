@@ -8,7 +8,7 @@ repositories {
 }
 
 application {
-	setMainClassName('org.riekr.jloga.Main')
+	mainClassName 'org.riekr.jloga.Main'
 }
 
 java {
