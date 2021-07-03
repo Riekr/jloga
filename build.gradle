@@ -1,9 +1,20 @@
 plugins {
 	id 'java'
+	id 'application'
 }
 
 repositories {
 	mavenCentral()
+}
+
+application {
+	setMainClassName('org.riekr.jloga.Main')
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(11)
+	}
 }
 
 sourceSets {
@@ -21,9 +32,9 @@ compileJava {
 }
 
 dependencies {
-	compile 'com.formdev:flatlaf:1.2'
-	compile 'org.drjekyll:fontchooser:2.4'
-	compile 'org.jetbrains:annotations:21.0.1'
+	implementation 'com.formdev:flatlaf:1.2'
+	implementation 'org.drjekyll:fontchooser:2.4'
+	compileOnly 'org.jetbrains:annotations:21.0.1'
 }
 
 jar {
