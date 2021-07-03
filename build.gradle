@@ -14,8 +14,24 @@ sourceSets {
 	}
 }
 
+compileJava {
+	options.warnings = true
+	options.deprecation = true
+	options.debug = false
+}
+
 dependencies {
 	compile 'com.formdev:flatlaf:1.2'
 	compile 'org.drjekyll:fontchooser:2.4'
 	compile 'org.jetbrains:annotations:21.0.1'
+}
+
+jar {
+	manifest {
+		attributes "Main-Class": "org.riekr.jloga.Main"
+	}
+
+	from {
+		configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+	}
 }
