@@ -10,3 +10,8 @@
 /lib/fontchooser-2.4.jar
 /lib/fontchooser-2.4-sources.jar
 /.shelf/
+/.gradle/
+/build/
+/*.iml
+/*.ipr
+/.idea/

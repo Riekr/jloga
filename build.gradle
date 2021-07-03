@@ -1,0 +1,21 @@
+plugins {
+	id 'java'
+}
+
+repositories {
+	mavenCentral()
+}
+
+sourceSets {
+	'main' {
+		java {
+			srcDirs = ['src']
+		}
+	}
+}
+
+dependencies {
+	compile 'com.formdev:flatlaf:1.2'
+	compile 'org.drjekyll:fontchooser:2.4'
+	compile 'org.jetbrains:annotations:21.0.1'
+}
