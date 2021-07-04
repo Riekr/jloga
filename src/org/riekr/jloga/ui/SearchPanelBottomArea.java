@@ -127,4 +127,11 @@ public class SearchPanelBottomArea extends JPanel {
 			_resultTextArea.setFont(f);
 	}
 
+	public void onClose() {
+		if (_resultTextArea != null)
+			_resultTextArea.onClose();
+		if (_searching != null)
+			_searching.cancel(true);
+	}
+
 }

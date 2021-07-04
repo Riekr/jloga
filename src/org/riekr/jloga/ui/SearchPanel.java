@@ -120,4 +120,9 @@ public class SearchPanel extends JComponent {
 		_bottomTabs.setSelectedIndex(Math.max(0, idx - 1));
 		_bottomTabs.removeTabAt(idx);
 	}
+
+	public void onClose() {
+		_textArea.onClose();
+		searchPanelBottomAreaStream().forEach(SearchPanelBottomArea::onClose);
+	}
 }

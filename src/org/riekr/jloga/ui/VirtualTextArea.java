@@ -262,4 +262,12 @@ public class VirtualTextArea extends JComponent {
 	public void setHighlightedLine(Integer line) {
 		_highlightedLine.next(line);
 	}
+
+	public void onClose() {
+		_textSource.onClose();
+		if (_lineListenerUnsubscribe != null)
+			_lineListenerUnsubscribe.run();
+		if (_textSourceUnsubscribable != null)
+			_textSourceUnsubscribable.unsubscribe();
+	}
 }

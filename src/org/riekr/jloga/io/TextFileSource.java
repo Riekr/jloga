@@ -105,10 +105,12 @@ public class TextFileSource implements TextSource {
 				_indexChangeListeners.forEach(Runnable::run);
 				_indexChangeListeners.clear();
 			}
+			System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms");
+		} catch (ClosedByInterruptException ignored) {
+			System.out.println("Indexing cancelled");
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
-		System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	@Override
@@ -218,5 +220,10 @@ public class TextFileSource implements TextSource {
 	@Override
 	public String toString() {
 		return _file.toString();
+	}
+
+	@Override
+	public void onClose() {
+		_indexing.cancel(true);
 	}
 }

@@ -86,19 +86,20 @@ public class Main extends JFrame {
 		try {
 			if (file.canRead() && _openFiles.add(file)) {
 				System.out.println("Load file: " + file.getAbsolutePath());
-				SearchPanel analyzer = new SearchPanel(file, _charsetCombo.charset, _progressBar);
-				_tabs.addTab(analyzer.toString(), analyzer);
-				analyzer.setFont(_font);
-				analyzer.addHierarchyListener(e -> {
-					if (e.getID() == HierarchyEvent.PARENT_CHANGED && analyzer.getParent() == null)
+				SearchPanel searchPanel = new SearchPanel(file, _charsetCombo.charset, _progressBar);
+				_tabs.addTab(searchPanel.toString(), searchPanel);
+				searchPanel.setFont(_font);
+				searchPanel.addHierarchyListener(e -> {
+					if (e.getID() == HierarchyEvent.PARENT_CHANGED && searchPanel.getParent() == null)
 						_openFiles.remove(file);
 				});
 				int idx = _tabs.getTabCount() - 1;
 				_tabs.setSelectedIndex(idx);
-				_tabs.setTabComponentAt(idx, newTabHeader(analyzer.toString(), () -> {
-					_tabs.remove(analyzer);
+				_tabs.setTabComponentAt(idx, newTabHeader(searchPanel.toString(), () -> {
+					searchPanel.onClose();
+					_tabs.remove(searchPanel);
 					_openFiles.remove(file);
-				}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(analyzer))));
+				}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel))));
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

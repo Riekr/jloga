@@ -10,10 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -35,7 +32,8 @@ public interface TextSource {
 			try {
 				StringsReader reader = new StringsReader(getText(fromLine, count));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
-			} catch (InterruptedException ignored) {
+			} catch (InterruptedException | CancellationException ignored) {
+				System.out.println("Text request cancelled");
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 			}
@@ -132,6 +130,9 @@ public interface TextSource {
 					System.err.println("Unable to delete " + file);
 			}
 		});
+	}
+
+	default void onClose() {
 	}
 
 }
