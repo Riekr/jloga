@@ -7,19 +7,21 @@ import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
+import static org.riekr.jloga.misc.StdFields.*;
+
 public class DurationAnalysisComponent extends SearchProjectComponentWithExpandablePanel {
 
-	public final Project.Field<Pattern> patDateExtract = newPatternField("DateExtractor", "Date extractor pattern:", 1);
-	public final Project.Field<DateTimeFormatter> patDate = newDateTimeFormatterField("Date", "Date pattern:");
-	public final Project.Field<Pattern> patFunc = newPatternField("Func", "Function pattern:", 1);
-	public final Project.Field<Pattern> patStart = newPatternField("Start", "Start pattern:");
-	public final Project.Field<Pattern> patEnd = newPatternField("End", "End pattern:");
-	public final Project.Field<Pattern> patRestart = newPatternField("Restart", "Restart pattern:");
-	public final Project.Field<Duration> minDuration = newDurationField("MinDuration", "Minimum duration:");
+	public final Project.Field<Pattern> patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
+	public final Project.Field<DateTimeFormatter> patDate = newDateTimeFormatterField(Date, "Date pattern:");
+	public final Project.Field<Pattern> patFunc = newPatternField(Func, "Function pattern:", 1);
+	public final Project.Field<Pattern> patStart = newPatternField(Start, "Start pattern:");
+	public final Project.Field<Pattern> patEnd = newPatternField(End, "End pattern:");
+	public final Project.Field<Pattern> patRestart = newPatternField(Restart, "Restart pattern:");
+	public final Project.Field<Duration> minDuration = newDurationField(MinDuration, "Minimum duration:");
 
 	public DurationAnalysisComponent(int level) {
 		super("DurationAnalysisComponent." + level,
-				"jloga-dap",
+				"jloga",
 				"Duration analysis project");
 		buildUI();
 	}
