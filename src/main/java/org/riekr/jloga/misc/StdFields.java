@@ -9,5 +9,6 @@ public interface StdFields {
 	String End = "End";
 	String Restart = "Restart";
 	String MinDuration = "MinDuration";
+	String Period = "Period";
 
 }

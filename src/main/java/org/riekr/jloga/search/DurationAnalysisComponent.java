@@ -46,16 +46,6 @@ public class DurationAnalysisComponent extends SearchProjectComponentWithExpanda
 	}
 
 	@Override
-	public String getDescription() {
-		return "Date: " + patDate
-				+ " | Start: " + patStart
-				+ " | End: " + patEnd
-				+ " | Func: " + patFunc
-				+ " | Restart: " + patRestart
-				+ " | Minimum duration: " + minDuration;
-	}
-
-	@Override
 	protected SearchPredicate getSearchPredicate() {
 		if (isReady()) {
 			return new DurationAnalysis(

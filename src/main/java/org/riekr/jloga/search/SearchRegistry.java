@@ -49,6 +49,7 @@ public final class SearchRegistry {
 		_ENTRIES.add(new Entry<>(RegExComponent.class, "Regular Expressions"));
 		_ENTRIES.add(new Entry<>(PlainTextComponent.class, "Plain Text"));
 		_ENTRIES.add(new Entry<>(DurationAnalysisComponent.class, "Duration Analysis"));
+//		_ENTRIES.add(new Entry<>(FrequencyAnalysisComponent.class, "Frequency Analysis"));
 	}
 
 	@SuppressWarnings("unused")

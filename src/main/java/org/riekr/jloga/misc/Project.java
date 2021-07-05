@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
+
 public interface Project {
 
 	class Field<T> implements Supplier<T>, Consumer<String> {
@@ -43,6 +45,10 @@ public interface Project {
 		public void accept(String s) {
 			_value = mapper.apply(s);
 			_src = s;
+		}
+
+		public String getDescription() {
+			return label.trim() + ' ' + _src;
 		}
 
 		@Override
@@ -89,6 +95,10 @@ public interface Project {
 		fields().forEach((f) -> f.accept(null));
 	}
 
-	String getDescription();
+	default String getDescription() {
+		return fields()
+				.map(Field::getDescription)
+				.collect(joining(" | "));
+	}
 
 }
