@@ -31,6 +31,12 @@ public final class UIUtils {
 		return d;
 	}
 
+	public static JButton newButton(String text, Runnable action, String tooltip) {
+		JButton res = newButton(text, action);
+		res.setToolTipText(tooltip);
+		return res;
+	}
+
 	public static JButton newButton(String text, Runnable action) {
 		JButton btn = new JButton(text);
 		btn.setBorderPainted(false);

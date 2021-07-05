@@ -1,6 +1,8 @@
 package org.riekr.jloga;
 
 import org.drjekyll.fontchooser.FontDialog;
+import org.riekr.jloga.help.AboutPane;
+import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
 import org.riekr.jloga.ui.SearchPanel;
@@ -26,6 +28,7 @@ public class Main extends JFrame {
 	private final Set<File> _openFiles = new HashSet<>();
 
 	private Font _font;
+	private MainDesktopHelp _help;
 
 	public Main() {
 		_font = Preferences.load(FONT, () -> new Font("monospaced", Font.PLAIN, 12));
@@ -35,20 +38,24 @@ public class Main extends JFrame {
 		_progressBar.setMinimum(0);
 		_progressBar.setMaximum(0);
 		_progressBar.setStringPainted(true);
+		_progressBar.setVisible(false);
 		JToolBar toolBar = new JToolBar();
 		_charsetCombo = new CharsetCombo();
 		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
+		_charsetCombo.setToolTipText("Select next file charset");
 
-		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog));
-		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont));
+		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog, "Open file in new tab"));
+		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont, "Select text font"));
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(_charsetCombo);
+		toolBar.add(newButton("\uD83D\uDEC8", () -> new AboutPane().createDialog("About").setVisible(true)));
 
 		// layout
 		setLayout(new BorderLayout());
 		add(toolBar, BorderLayout.NORTH);
-		add(_tabs);
 		add(_progressBar, BorderLayout.SOUTH);
+
+		add(_help = new MainDesktopHelp(toolBar));
 	}
 
 	public void selectFont() {
@@ -85,6 +92,11 @@ public class Main extends JFrame {
 	public void openFile(File file) {
 		try {
 			if (file.canRead() && _openFiles.add(file)) {
+				if (_help != null) {
+					remove(_help);
+					_help = null;
+					add(_tabs);
+				}
 				System.out.println("Load file: " + file.getAbsolutePath());
 				SearchPanel searchPanel = new SearchPanel(file, _charsetCombo.charset, _progressBar);
 				_tabs.addTab(searchPanel.toString(), searchPanel);

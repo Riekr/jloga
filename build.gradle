@@ -17,14 +17,6 @@ java {
 	}
 }
 
-sourceSets {
-	'main' {
-		java {
-			srcDirs = ['src']
-		}
-	}
-}
-
 compileJava {
 	options.warnings = true
 	options.deprecation = true
