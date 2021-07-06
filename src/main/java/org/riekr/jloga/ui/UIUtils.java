@@ -61,42 +61,60 @@ public final class UIUtils {
 		return label;
 	}
 
-	public static Pattern toPattern(Component parentComponent, String text, int minGroups) {
+	private static void dispatchErrorMessage(Component component, String message, String title) {
+		if (component instanceof MRUComboWithLabels)
+			((MRUComboWithLabels<?>) component).setError(title + ": " + message);
+		else
+			JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
+	}
+
+	private static void dispatchErrorCleared(Component component) {
+		if (component instanceof MRUComboWithLabels)
+			((MRUComboWithLabels<?>) component).setError(null);
+	}
+
+	public static Pattern toPattern(Component component, String text, int minGroups) {
 		if (text != null && !text.isBlank()) {
 			try {
 				Pattern pat = Pattern.compile(text);
 				if (minGroups > 0 && pat.matcher("").groupCount() < minGroups)
-					JOptionPane.showMessageDialog(parentComponent, "This field requires " + minGroups + " groups", "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
-				else
+					dispatchErrorMessage(component, "This field requires " + minGroups + " groups", "RegEx syntax error");
+				else {
+					dispatchErrorCleared(component);
 					return pat;
+				}
 			} catch (PatternSyntaxException pse) {
-				JOptionPane.showMessageDialog(parentComponent, pse.getLocalizedMessage(), "RegEx syntax error", JOptionPane.ERROR_MESSAGE);
+				dispatchErrorMessage(component, pse.getLocalizedMessage(), "RegEx syntax error");
 			}
 		}
 		return null;
 	}
 
-	public static Duration toDuration(Component parentComponent, String text) {
+	public static Duration toDuration(Component component, String text) {
 		if (text != null && !text.isBlank()) {
 			try {
-				return Duration.parse(text);
+				Duration res = Duration.parse(text);
+				dispatchErrorCleared(component);
+				return res;
 			} catch (DateTimeParseException e) {
-				JOptionPane.showMessageDialog(parentComponent, e.getLocalizedMessage(), "Duration syntax error", JOptionPane.ERROR_MESSAGE);
+				dispatchErrorMessage(component, e.getLocalizedMessage(), "Duration syntax error");
 			}
 		}
 		return null;
 	}
 
-	public static DateTimeFormatter toDateTimeFormatter(Component parentComponent, String patDate) {
+	public static DateTimeFormatter toDateTimeFormatter(Component component, String patDate) {
 		if (patDate != null && !patDate.isBlank()) {
 			try {
-				return new DateTimeFormatterBuilder()
+				DateTimeFormatter res = new DateTimeFormatterBuilder()
 						.appendPattern(patDate)
 						.toFormatter()
 						.withLocale(Locale.ENGLISH)
 						.withZone(ZoneId.systemDefault());
+				dispatchErrorCleared(component);
+				return res;
 			} catch (IllegalArgumentException iae) {
-				JOptionPane.showMessageDialog(parentComponent, iae.getLocalizedMessage(), "Date/time pattern error", JOptionPane.ERROR_MESSAGE);
+				dispatchErrorMessage(component, iae.getLocalizedMessage(), "Date/time pattern error");
 			}
 		}
 		return null;

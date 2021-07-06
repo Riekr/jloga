@@ -4,7 +4,7 @@ import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.react.BoolConsumer;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
-import org.riekr.jloga.ui.MRUTextComboWithLabel;
+import org.riekr.jloga.ui.MRUComboWithLabels;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -77,8 +77,8 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 	protected abstract void setupConfigPaneButtons(Container configPaneButtons);
 
-	protected MRUTextComboWithLabel<String> newEditableField(String key, String label, Consumer<String> onResult) {
-		MRUTextComboWithLabel<String> editableField = MRUTextComboWithLabel.forString(_prefsPrefix + '.' + key, label, onResult);
+	protected MRUComboWithLabels<String> newEditableField(String key, String label, Consumer<String> onResult) {
+		MRUComboWithLabels<String> editableField = MRUComboWithLabels.forString(_prefsPrefix + '.' + key, label, onResult);
 		editableField.combo.addMouseListener(_mouseListener);
 		editableField.combo.addPopupMenuListener(new PopupMenuListener() {
 			@Override
@@ -96,10 +96,10 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 				_mouseListenerEnabled = true;
 			}
 		});
-		_configVisible.subscribe((BoolConsumer) (visible) -> {
+		EventQueue.invokeLater(() -> _configVisible.subscribe((BoolConsumer) (visible) -> {
 			if (!visible)
 				editableField.combo.getListener().accept((String) editableField.combo.getSelectedItem());
-		});
+		}));
 		return editableField;
 	}
 

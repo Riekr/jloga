@@ -2,7 +2,6 @@ package org.riekr.jloga.search;
 
 import org.riekr.jloga.misc.Project;
 
-import java.awt.*;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -29,11 +28,6 @@ public class DurationAnalysisComponent extends SearchProjectComponentWithExpanda
 	@Override
 	public String getLabel() {
 		return "\u0394";
-	}
-
-	@Override
-	public Component getDialogParentComponent() {
-		return this;
 	}
 
 	@Override

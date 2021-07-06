@@ -93,10 +93,6 @@ public class PropsIO {
 				.forEach((f) -> f.accept(props.getProperty(f.key)));
 	}
 
-	public static void requestSave(Project project, String ext, String extDescription, Runnable... onSuccess) {
-		requestSave(project.getDialogParentComponent(), project, ext, extDescription, onSuccess);
-	}
-
 	public static void requestSave(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
 		JFileChooser fileChooser = new JFileChooser();
 		if (ext != null && !ext.isBlank())
@@ -118,10 +114,6 @@ public class PropsIO {
 				for (Runnable task : onSuccess)
 					task.run();
 		}
-	}
-
-	public static void requestLoad(Project project, String ext, String extDescription, Runnable... onSuccess) {
-		requestLoad(project.getDialogParentComponent(), project, ext, extDescription, onSuccess);
 	}
 
 	public static void requestLoad(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {

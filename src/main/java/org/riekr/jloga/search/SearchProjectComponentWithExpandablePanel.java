@@ -2,7 +2,7 @@ package org.riekr.jloga.search;
 
 import org.riekr.jloga.io.PropsIO;
 import org.riekr.jloga.misc.Project;
-import org.riekr.jloga.ui.MRUTextComboWithLabel;
+import org.riekr.jloga.ui.MRUComboWithLabels;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public abstract class SearchProjectComponentWithExpandablePanel extends SearchComponentWithExpandablePanel implements Project {
 
-	private final Map<String, MRUTextComboWithLabel<String>> _combos = new HashMap<>();
+	private final Map<String, MRUComboWithLabels<String>> _combos = new HashMap<>();
 
 	private final String _fileExt;
 	private final String _fileDescr;
@@ -23,17 +23,18 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 
 	@Override
 	protected void setupConfigPane(Container configPane) {
-		fields().forEach((f) -> {
-			MRUTextComboWithLabel<String> combo = newEditableField(f.key, f.label, f);
+		fields().forEach((Field<?> f) -> {
+			MRUComboWithLabels<String> combo = newEditableField(f.key, f.label, f);
 			configPane.add(combo);
 			_combos.put(f.key, combo);
+			f.ui = combo;
 		});
 	}
 
 	@Override
 	protected void setupConfigPaneButtons(Container configPaneButtons) {
-		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, _fileExt, _fileDescr, this::updateConfigPanel)));
-		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, _fileExt, _fileDescr)));
+		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, this, _fileExt, _fileDescr, this::updateConfigPanel)));
+		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, this, _fileExt, _fileDescr)));
 		configPaneButtons.add(newButtonSpacer());
 		configPaneButtons.add(newButton("Reset!", this::clear));
 	}
@@ -46,7 +47,7 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 
 	protected void updateConfigPanel() {
 		fields().forEach((field) -> {
-			MRUTextComboWithLabel<String> combo = _combos.get(field.key);
+			MRUComboWithLabels<String> combo = _combos.get(field.key);
 			if (combo != null)
 				combo.combo.set(field.toString());
 		});

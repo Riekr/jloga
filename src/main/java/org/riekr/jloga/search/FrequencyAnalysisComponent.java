@@ -1,6 +1,5 @@
 package org.riekr.jloga.search;
 
-import java.awt.*;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -11,7 +10,7 @@ public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpand
 
 	public final Field<Pattern> patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
 	public final Field<DateTimeFormatter> patDate = newDateTimeFormatterField(Date, "Date pattern:");
-	public final Field<Pattern> patFunc = newPatternField(Func, "Function pattern:", 1);
+	public final Field<Pattern> patFunc = newPatternField(Func, "Function pattern:", 0);
 	public final Field<Duration> periodDuration = newDurationField(Period, "Period:");
 
 	public FrequencyAnalysisComponent(int level) {
@@ -24,11 +23,6 @@ public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpand
 	@Override
 	public String getLabel() {
 		return "f";
-	}
-
-	@Override
-	public Component getDialogParentComponent() {
-		return this;
 	}
 
 	@Override
