@@ -93,7 +93,7 @@ public class FrequencyAnalysis implements SearchPredicate {
 		_matchers = new Matchers();
 		// transient data
 		_counters = new HashMap<>();
-		_maxFuncLength = 4; // "null"
+		_maxFuncLength = 0; // ""
 		_maxFreqLength = 1; // "0"
 		// destination data
 		_dest = new ChildTextSource(master) {
@@ -106,9 +106,11 @@ public class FrequencyAnalysis implements SearchPredicate {
 				matchers.match(origText,
 						(instant, func) -> {
 							buf.setLength(0);
-							buf.append(func);
-							buf.append(" ".repeat(_maxFuncLength - func.length()));
-							buf.append(" | ");
+							if (_maxFuncLength > 0) {
+								buf.append(func);
+								buf.append(" ".repeat(_maxFuncLength - func.length()));
+								buf.append(" | ");
+							}
 							String count = String.valueOf(_results.get(getSrcLine(line)));
 							buf.append(count);
 							buf.append(" ".repeat(_maxFreqLength - count.length()));

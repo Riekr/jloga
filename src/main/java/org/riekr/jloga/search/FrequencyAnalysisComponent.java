@@ -2,6 +2,7 @@ package org.riekr.jloga.search;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
 
 import static org.riekr.jloga.misc.StdFields.*;
@@ -11,7 +12,7 @@ public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpand
 	public final Field<Pattern> patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
 	public final Field<DateTimeFormatter> patDate = newDateTimeFormatterField(Date, "Date pattern:");
 	public final Field<Pattern> patFunc = newPatternField(Func, "Function pattern:", 0);
-	public final Field<Duration> periodDuration = newDurationField(Period, "Period:");
+	public final Field<Duration> periodDuration = newDurationField(Period, "Period:", Duration.of(1, ChronoUnit.MINUTES));
 
 	public FrequencyAnalysisComponent(int level) {
 		super("FrequencyAnalysisComponent." + level,

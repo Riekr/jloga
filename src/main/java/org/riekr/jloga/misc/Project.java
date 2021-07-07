@@ -1,5 +1,6 @@
 package org.riekr.jloga.misc;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.ui.UIUtils;
 
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.joining;
 
 public interface Project {
@@ -22,6 +24,7 @@ public interface Project {
 		public final String key;
 		public final String label;
 		public final BiFunction<String, Component, T> mapper;
+		public final String deflt;
 
 		public Component ui;
 
@@ -29,18 +32,23 @@ public interface Project {
 		private T _value;
 
 		public Field(String key, String label, BiFunction<String, Component, T> mapper) {
+			this(key, label, mapper, null);
+		}
+
+		public Field(String key, String label, BiFunction<String, Component, T> mapper, String deflt) {
 			this.key = key;
 			this.label = label;
 			this.mapper = mapper;
+			this.deflt = deflt;
 		}
 
 		@Override
 		public T get() {
-			return _value;
+			return _value == null ? mapper.apply(deflt, ui) : _value;
 		}
 
 		public boolean hasValue() {
-			return _value != null;
+			return get() != null;
 		}
 
 		@Override
@@ -50,7 +58,7 @@ public interface Project {
 		}
 
 		public String getDescription() {
-			return label.trim() + ' ' + _src;
+			return label.trim() + ' ' + requireNonNullElse(_src == null ? deflt : _src, "-");
 		}
 
 		@Override
@@ -69,6 +77,10 @@ public interface Project {
 
 	default Field<Duration> newDurationField(String key, String label) {
 		return new Field<>(key, label, (pattern, ui) -> UIUtils.toDuration(ui, pattern));
+	}
+
+	default Field<Duration> newDurationField(String key, String label, @NotNull Duration deflt) {
+		return new Field<>(key, label, (pattern, ui) -> UIUtils.toDuration(ui, pattern), deflt.toString());
 	}
 
 	default Field<DateTimeFormatter> newDateTimeFormatterField(String key, String label) {
