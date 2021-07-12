@@ -4,8 +4,6 @@ import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.io.File;
 import java.nio.charset.Charset;
@@ -36,6 +34,12 @@ public class SearchPanel extends JComponent {
 		setTextSource(src);
 	}
 
+	private Component newTabHeader(String title, SearchPanelBottomArea tabContent) {
+		return UIUtils.newTabHeader(title,
+				() -> removeBottomArea(tabContent),
+				() -> _bottomTabs.setSelectedComponent(tabContent));
+	}
+
 	public SearchPanel(JProgressBar progressBar, int level) {
 		setLayout(new BorderLayout());
 		_textArea = new VirtualTextArea();
@@ -49,22 +53,20 @@ public class SearchPanel extends JComponent {
 		_splitPane.add(_textArea);
 		_bottomTabs = new JTabbedPane();
 		Supplier<String> titleSupplier = () -> _TAB_PREFIX + (char) ('A' + level) + (++_searchId);
-		_bottomTabs.addTab(titleSupplier.get(), new SearchPanelBottomArea(this, progressBar, level));
+		SearchPanelBottomArea tabContent = new SearchPanelBottomArea(this, progressBar, level);
+		_bottomTabs.addTab(titleSupplier.get(), tabContent);
+		_bottomTabs.setTabComponentAt(0, newTabHeader(titleSupplier.get(), tabContent));
 		_bottomTabs.addTab(_TAB_ADD, null);
-		_bottomTabs.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				_bottomTabs.removeChangeListener(this);
-				int idx = _bottomTabs.indexOfTab(_TAB_ADD);
-				if (_bottomTabs.getSelectedIndex() == idx) {
-					SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
-					body.setFont(getFont());
-					_bottomTabs.insertTab(titleSupplier.get(), null, body, null, idx);
-					_bottomTabs.setSelectedIndex(idx);
-				}
-				EventQueue.invokeLater(() -> _bottomTabs.addChangeListener(this));
-			}
-		});
+		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, () -> {
+		}, () -> {
+			SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
+			body.setFont(getFont());
+			int idx = _bottomTabs.indexOfTab(_TAB_ADD);
+			_bottomTabs.insertTab(null, null, body, null, idx);
+			_bottomTabs.setTabComponentAt(idx, newTabHeader(titleSupplier.get(), body));
+			_bottomTabs.setSelectedIndex(idx);
+			invalidate();
+		}));
 		_splitPane.add(_bottomTabs);
 	}
 
@@ -119,6 +121,8 @@ public class SearchPanel extends JComponent {
 		int idx = _bottomTabs.indexOfComponent(bottomArea);
 		_bottomTabs.setSelectedIndex(Math.max(0, idx - 1));
 		_bottomTabs.removeTabAt(idx);
+		if (_bottomTabs.getTabCount() == 1) // + button is a tab!
+			collapseBottomArea();
 	}
 
 	public void onClose() {
