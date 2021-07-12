@@ -57,8 +57,7 @@ public class SearchPanel extends JComponent {
 		_bottomTabs.addTab(titleSupplier.get(), tabContent);
 		_bottomTabs.setTabComponentAt(0, newTabHeader(titleSupplier.get(), tabContent));
 		_bottomTabs.addTab(_TAB_ADD, null);
-		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, () -> {
-		}, () -> {
+		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, null, () -> {
 			SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
 			body.setFont(getFont());
 			int idx = _bottomTabs.indexOfTab(_TAB_ADD);

@@ -1,5 +1,7 @@
 package org.riekr.jloga.ui;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -46,19 +48,33 @@ public final class UIUtils {
 		return btn;
 	}
 
-	public static Component newTabHeader(String text, Runnable onClose, Runnable onSelect) {
+	public static Component newTabHeader(String text, @Nullable Runnable onClose, @Nullable Runnable onSelect) {
 		JLabel label = new JLabel(text);
-		label.addMouseListener(new MouseAdapter() {
+		if (onClose == null) {
+			if (onSelect != null) {
+				label.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						onSelect.run();
+					}
+				});
+			}
+			return label;
+		}
+		Box box = new Box(BoxLayout.LINE_AXIS);
+		box.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-//				System.out.println(e);
 				if (e.getButton() == MouseEvent.BUTTON2 && e.isAltDown() && e.getClickCount() == 1)
 					onClose.run();
-				else
+				else if (onSelect != null)
 					onSelect.run();
 			}
 		});
-		return label;
+		box.add(label);
+		box.add(Box.createHorizontalStrut(5));
+		box.add(newButton("\u274C", onClose, "Close " + text));
+		return box;
 	}
 
 	private static void dispatchErrorMessage(Component component, String message, String title) {
