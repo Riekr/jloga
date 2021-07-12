@@ -1,8 +1,10 @@
 package org.riekr.jloga.ui;
 
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.react.BoolConsumer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -17,6 +19,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class UIUtils {
+
+	public static final Border BUTTON_BORDER = new EmptyBorder(6, 8, 6, 8);
 
 	private UIUtils() {
 	}
@@ -43,8 +47,18 @@ public final class UIUtils {
 		JButton btn = new JButton(text);
 		btn.setBorderPainted(false);
 		btn.setContentAreaFilled(false);
-		btn.setBorder(new EmptyBorder(6, 8, 6, 8));
+		btn.setBorder(BUTTON_BORDER);
 		btn.addActionListener((e) -> action.run());
+		return btn;
+	}
+
+	public static JToggleButton newToggleButton(String text, String tooltip, boolean initialValue, BoolConsumer consumer) {
+		JToggleButton btn = new JToggleButton(text);
+		btn.setBorder(BUTTON_BORDER);
+		btn.setToolTipText(tooltip);
+		btn.setSelected(initialValue);
+		if (consumer != null)
+			btn.addActionListener((e) -> consumer.accept(btn.isSelected()));
 		return btn;
 	}
 
@@ -90,9 +104,13 @@ public final class UIUtils {
 	}
 
 	public static Pattern toPattern(Component component, String text, int minGroups) {
+		return toPattern(component, text, minGroups, 0);
+	}
+
+	public static Pattern toPattern(Component component, String text, int minGroups, int flags) {
 		if (text != null && !text.isBlank()) {
 			try {
-				Pattern pat = Pattern.compile(text);
+				Pattern pat = Pattern.compile(text, flags);
 				if (minGroups > 0 && pat.matcher("").groupCount() < minGroups)
 					dispatchErrorMessage(component, "This field requires " + minGroups + " groups", "RegEx syntax error");
 				else {

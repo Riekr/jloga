@@ -3,10 +3,20 @@ package org.riekr.jloga.search;
 import org.riekr.jloga.io.ChildTextSource;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.IntObjPredicate;
 
 import java.util.function.IntConsumer;
 
 public interface SearchPredicate {
+
+	static SearchPredicate simple(IntObjPredicate<String> predicate) {
+		return new Simple() {
+			@Override
+			protected boolean accept(int line, String text) {
+				return predicate.test(line, text);
+			}
+		};
+	}
 
 	abstract class Simple implements SearchPredicate {
 		private IntConsumer _accumulator;
