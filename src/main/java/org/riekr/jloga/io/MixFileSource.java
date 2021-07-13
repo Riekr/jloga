@@ -47,6 +47,7 @@ public class MixFileSource implements TextSource {
 		final int len;
 		int pos;
 		Instant instant;
+		int pass = 0;
 
 		ScanData(int idx, TextSource src, Config config, int len) {
 			this.idx = idx;
@@ -55,14 +56,14 @@ public class MixFileSource implements TextSource {
 			this.len = len;
 		}
 
-		boolean hasNext() {
+		boolean hasData() {
 			return pos < len;
 		}
 
 		@Override
 		public int compareTo(@NotNull MixFileSource.ScanData o) {
-			return requireNonNullElse(instant, Instant.EPOCH)
-					.compareTo(requireNonNullElse(o.instant, Instant.EPOCH));
+			return requireNonNullElse(instant, hasData() ? Instant.MIN : Instant.MAX)
+					.compareTo(requireNonNullElse(o.instant, o.hasData() ? Instant.MIN : Instant.MAX));
 		}
 	}
 
@@ -89,29 +90,50 @@ public class MixFileSource implements TextSource {
 					data[idx] = new ScanData(idx, textSource, entry.getValue(), lineCount);
 					idx++;
 				}
-				BooleanSupplier hasNext = () -> {
+				BooleanSupplier hasData = () -> {
 					for (ScanData sd : data) {
-						if (sd.hasNext())
+						if (sd.hasData())
 							return true;
 					}
 					return false;
 				};
-				while (hasNext.getAsBoolean()) {
-					// TODO: correctly handle lines without date
-					// fill instants
+				while (hasData.getAsBoolean()) {
+					// fill instants, I may do it only for the 1st entry in "data"
+					// but i'm lazy to initialize it before the enclosing while
 					for (ScanData sd : data) {
-						if (sd.hasNext()) {
+						// collect all lines until we have an instant
+						while (sd.instant == null && sd.hasData()) {
 							String line = sd.src.getText(sd.pos);
 							sd.instant = sd.config.getInstant(line);
+							if (sd.instant == null)
+								sd.pos++;
 						}
 					}
 					// sort by instant
 					Arrays.sort(data);
-					// fill index
-					for (ScanData sd : data) {
+					ScanData sd = data[0];
+					if (sd.hasData()) {
+						// fill index
+						if (sd.pass == 0 && sd.pos > 0) {
+							// recovery of lines without date at the beginning of file
+							for (int l = 0; l < sd.pos; l++)
+								_index.add(sd.idx, l);
+						}
 						_index.add(sd.idx, sd.pos);
-						if (sd.hasNext())
-							sd.pos++;
+						sd.pos++;
+						// collect adjacent lines without instant
+						while (sd.hasData()) {
+							String line = sd.src.getText(sd.pos);
+							Instant instant = sd.config.getInstant(line);
+							if (instant == null) {
+								_index.add(sd.idx, sd.pos);
+								sd.pos++;
+							} else
+								break;
+						}
+						// mark for seek
+						sd.instant = null;
+						sd.pass++;
 					}
 				}
 				System.out.println("Mixed " + _index.size() + " lines of " + _lineCount + " using " + _index.pages() + " pages");
