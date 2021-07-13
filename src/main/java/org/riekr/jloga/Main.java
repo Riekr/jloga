@@ -7,10 +7,7 @@ import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.ui.CharsetCombo;
-import org.riekr.jloga.ui.PickNMixDialogEntry;
-import org.riekr.jloga.ui.SearchPanel;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +27,7 @@ public class Main extends JFrame {
 
 	private final CharsetCombo _charsetCombo;
 	private final JTabbedPane _tabs;
-	private final JProgressBar _progressBar;
+	private final JobProgressBar _progressBar;
 	private final Map<Object, TextSource> _openFiles = new LinkedHashMap<>();
 
 	private Font _font;
@@ -40,11 +37,7 @@ public class Main extends JFrame {
 		_font = Preferences.load(FONT, () -> new Font("monospaced", Font.PLAIN, 12));
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane();
-		_progressBar = new JProgressBar();
-		_progressBar.setMinimum(0);
-		_progressBar.setMaximum(0);
-		_progressBar.setStringPainted(true);
-		_progressBar.setVisible(false);
+		_progressBar = new JobProgressBar();
 		JToolBar toolBar = new JToolBar();
 		_charsetCombo = new CharsetCombo();
 		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());

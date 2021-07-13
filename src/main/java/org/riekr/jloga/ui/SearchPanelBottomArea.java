@@ -12,7 +12,6 @@ import java.io.File;
 import java.util.concurrent.Future;
 
 import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
-import static org.riekr.jloga.io.ProgressListener.newProgressListenerFor;
 
 public class SearchPanelBottomArea extends JPanel {
 
@@ -21,12 +20,12 @@ public class SearchPanelBottomArea extends JPanel {
 	private @Nullable SearchPanel _resultTextArea;
 
 	private final SearchPanel _parent;
-	private final JProgressBar _progressBar;
+	private final JobProgressBar _progressBar;
 
 	private final SearchSelector _searchUI;
 	private Future<?> _searching;
 
-	public SearchPanelBottomArea(SearchPanel parent, JProgressBar progressBar, int level) {
+	public SearchPanelBottomArea(SearchPanel parent, JobProgressBar progressBar, int level) {
 		_parent = parent;
 		_level = level;
 		setLayout(new BorderLayout());
@@ -59,7 +58,7 @@ public class SearchPanelBottomArea extends JPanel {
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-			_resultTextArea.getTextSource().requestSave(fileToSave, newProgressListenerFor(_progressBar, "Saving"));
+			_resultTextArea.getTextSource().requestSave(fileToSave, _progressBar.addJob("Saving"));
 			Preferences.save(LAST_SAVE_PATH, fileToSave.getParentFile());
 		}
 	}
@@ -71,7 +70,7 @@ public class SearchPanelBottomArea extends JPanel {
 				_searching.cancel(true);
 			_searching = _parent.getTextSource().requestSearch(
 					predicate,
-					newProgressListenerFor(_progressBar, "Searching").andThen(() -> _searchUI.setEnabled(true)),
+					_progressBar.addJob("Searching").afterAll(() -> _searchUI.setEnabled(true)),
 					(res) -> {
 						getResultTextArea().setTextSource(res);
 						_parent.expandBottomArea();

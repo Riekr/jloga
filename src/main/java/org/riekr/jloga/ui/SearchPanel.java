@@ -8,8 +8,6 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.riekr.jloga.io.ProgressListener.newProgressListenerFor;
-
 public class SearchPanel extends JComponent {
 
 	private static final String _TAB_ADD = " + ";
@@ -19,24 +17,19 @@ public class SearchPanel extends JComponent {
 	private final JSplitPane _splitPane;
 	private final JTabbedPane _bottomTabs;
 
-	private final JProgressBar _progressBar;
+	private final JobProgressBar _progressBar;
 	private String _title;
 	private int _searchId = 0;
 
-	public SearchPanel(String title, String description, TextSource src, JProgressBar progressBar) {
+	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar) {
 		this(progressBar, 0);
 		_title = title;
 		add(new JLabel(description), BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
-	private Component newTabHeader(String title, SearchPanelBottomArea tabContent) {
-		return UIUtils.newTabHeader(title,
-				() -> removeBottomArea(tabContent),
-				() -> _bottomTabs.setSelectedComponent(tabContent));
-	}
 
-	public SearchPanel(JProgressBar progressBar, int level) {
+	public SearchPanel(JobProgressBar progressBar, int level) {
 		setLayout(new BorderLayout());
 		_textArea = new VirtualTextArea();
 		_textArea.setMinimumSize(new Dimension(0, 0));
@@ -65,9 +58,15 @@ public class SearchPanel extends JComponent {
 		_splitPane.add(_bottomTabs);
 	}
 
+	private Component newTabHeader(String title, SearchPanelBottomArea tabContent) {
+		return UIUtils.newTabHeader(title,
+				() -> removeBottomArea(tabContent),
+				() -> _bottomTabs.setSelectedComponent(tabContent));
+	}
+
 	public void setTextSource(TextSource src) {
 		_textArea.setTextSource(src);
-		src.setIndexingListener(newProgressListenerFor(_progressBar, "Indexing"));
+		src.setIndexingListener(_progressBar.addJob("Indexing"));
 	}
 
 	public TextSource getTextSource() {

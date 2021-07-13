@@ -1,7 +1,6 @@
 package org.riekr.jloga.search;
 
 import org.riekr.jloga.react.BoolBehaviourSubject;
-import org.riekr.jloga.react.BoolConsumer;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.MRUComboWithLabels;
@@ -97,7 +96,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 			}
 		});
 		// TODO: ugly!
-		EventQueue.invokeLater(() -> _configVisible.subscribe((BoolConsumer) (visible) -> {
+		EventQueue.invokeLater(() -> _configVisible.subscribe((visible) -> {
 			if (!visible)
 				editableField.combo.subject.next((String) editableField.combo.getSelectedItem());
 		}));
