@@ -39,10 +39,20 @@ public class TextFileSource implements TextSource {
 
 	private static final int PAGE_SIZE = 1024 * 1024 * 2; // 2MB
 
+	static final class IndexData {
+		final long startPos;
+		WeakReference<String[]> data;
+
+		public IndexData(long startPos) {
+			this.startPos = startPos;
+		}
+	}
+
+
 	private final Path _file;
 	private final Charset _charset;
 
-	private Future<?> _indexing;
+	private final Future<?> _indexing;
 	private NavigableMap<Integer, IndexData> _index;
 
 	private int _lineCount;
@@ -57,60 +67,52 @@ public class TextFileSource implements TextSource {
 	public TextFileSource(Path file, Charset charset) {
 		_file = file;
 		_charset = charset;
-		reindex();
-	}
-
-	public synchronized void reindex() {
-		if (_indexing != null && !_indexing.isDone())
-			_indexing.cancel(true);
-		_indexing = EXECUTOR.submit(this::getIndex);
-	}
-
-	private void getIndex() {
-		System.out.println("Reindexing " + _file);
-		final long start = System.currentTimeMillis();
-		_lineCount = 0;
-		_lineCountSubject.next(0);
-		_index = new TreeMap<>();
-		_index.put(0, new IndexData(0));
-		ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
-		CharBuffer charBuffer = CharBuffer.allocate(PAGE_SIZE);
-		CharsetDecoder decoder = _charset.newDecoder()
-				.onMalformedInput(CodingErrorAction.REPLACE)
-				.onUnmappableCharacter(CodingErrorAction.REPLACE);
-		CharsetEncoder encoder = _charset.newEncoder();
-		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
-			long totalSize = fileChannel.size();
-			try {
-				while (fileChannel.read(byteBuffer) > 0) {
-					decoder.decode(byteBuffer.flip(), charBuffer, false);
-					charBuffer.flip();
-					while (charBuffer.hasRemaining()) {
-						if (charBuffer.get() == '\n') {
-							_lineCount++;
-							charBuffer.mark();
+		_indexing = EXECUTOR.submit(() -> {
+			System.out.println("Indexing " + _file);
+			final long start = System.currentTimeMillis();
+			_lineCount = 0;
+			_lineCountSubject.next(0);
+			_index = new TreeMap<>();
+			_index.put(0, new IndexData(0));
+			ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
+			CharBuffer charBuffer = CharBuffer.allocate(PAGE_SIZE);
+			CharsetDecoder decoder = _charset.newDecoder()
+					.onMalformedInput(CodingErrorAction.REPLACE)
+					.onUnmappableCharacter(CodingErrorAction.REPLACE);
+			CharsetEncoder encoder = _charset.newEncoder();
+			try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
+				long totalSize = fileChannel.size();
+				try {
+					while (fileChannel.read(byteBuffer) > 0) {
+						decoder.decode(byteBuffer.flip(), charBuffer, false);
+						charBuffer.flip();
+						while (charBuffer.hasRemaining()) {
+							if (charBuffer.get() == '\n') {
+								_lineCount++;
+								charBuffer.mark();
+							}
 						}
+						long pos = fileChannel.position();
+						_index.put(_lineCount, new IndexData(pos - encoder.encode(charBuffer.reset()).limit()));
+						_indexingListener.onProgressChanged(pos, totalSize);
+						_indexChangeListeners.forEach(Runnable::run);
+						charBuffer.flip();
+						byteBuffer.flip();
+						_lineCountSubject.next(_lineCount);
 					}
-					long pos = fileChannel.position();
-					_index.put(_lineCount, new IndexData(pos - encoder.encode(charBuffer.reset()).limit()));
-					_indexingListener.onProgressChanged(pos, totalSize);
+				} finally {
+					_lineCountSubject.last();
+					_indexingListener.onProgressChanged(totalSize, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
-					charBuffer.flip();
-					byteBuffer.flip();
-					_lineCountSubject.next(_lineCount);
+					_indexChangeListeners.clear();
 				}
-			} finally {
-				_lineCountSubject.last();
-				_indexingListener.onProgressChanged(totalSize, totalSize);
-				_indexChangeListeners.forEach(Runnable::run);
-				_indexChangeListeners.clear();
+				System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms");
+			} catch (ClosedByInterruptException ignored) {
+				System.out.println("Indexing cancelled");
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
 			}
-			System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms");
-		} catch (ClosedByInterruptException ignored) {
-			System.out.println("Indexing cancelled");
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
+		});
 	}
 
 	@Override

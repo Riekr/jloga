@@ -1,12 +1,9 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,14 +20,13 @@ public class SearchPanel extends JComponent {
 	private final JTabbedPane _bottomTabs;
 
 	private final JProgressBar _progressBar;
-	private String _tag;
+	private String _title;
 	private int _searchId = 0;
 
-	public SearchPanel(File file, Charset charset, JProgressBar progressBar) {
+	public SearchPanel(String title, String description, TextSource src, JProgressBar progressBar) {
 		this(progressBar, 0);
-		_tag = file.getName();
-		add(new JLabel(file.getAbsolutePath()), BorderLayout.NORTH);
-		TextSource src = new TextFileSource(file.toPath(), charset);
+		_title = title;
+		add(new JLabel(description), BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
@@ -95,7 +91,7 @@ public class SearchPanel extends JComponent {
 
 	@Override
 	public String toString() {
-		return _tag == null ? super.toString() : _tag;
+		return _title == null ? super.toString() : _title;
 	}
 
 	public void expandBottomArea() {

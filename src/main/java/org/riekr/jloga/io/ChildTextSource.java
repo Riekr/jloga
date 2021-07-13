@@ -83,7 +83,8 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public int getLineCount() {
+	public int getLineCount() throws ExecutionException, InterruptedException {
+		_tie.getLineCount(); // wait for indexing
 		return _lineCount;
 	}
 
