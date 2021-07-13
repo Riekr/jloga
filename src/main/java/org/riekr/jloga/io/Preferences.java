@@ -19,7 +19,7 @@ public class Preferences {
 
 	public static void save(String key, DefaultComboBoxModel<?> o) {
 		Object[] data = new Object[o.getSize()];
-		for (int i = 0; i < Math.max(20, data.length); i++)
+		for (int i = 0; i < Math.min(20, data.length); i++)
 			data[i] = o.getElementAt(i);
 		save(key, data);
 	}
