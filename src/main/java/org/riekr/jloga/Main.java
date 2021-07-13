@@ -44,7 +44,9 @@ public class Main extends JFrame {
 		_charsetCombo.setToolTipText("Select next file charset");
 
 		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog, "Open file in new tab"));
+		toolBar.addSeparator();
 		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont, "Select text font"));
+		toolBar.add(newButton("\u21C5", this::selectPagingSize, "Select page scroll size"));
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(_charsetCombo);
 		toolBar.add(newButton("\uD83D\uDEC8", () -> new AboutPane().createDialog("About").setVisible(true)));
