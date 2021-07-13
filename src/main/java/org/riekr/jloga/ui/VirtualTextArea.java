@@ -12,7 +12,6 @@ import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -98,7 +97,7 @@ public class VirtualTextArea extends JComponent {
 					pageDn();
 			}
 		});
-		_highlightedLine.subscribe((Consumer<? super Integer>) this::highlightLine);
+		_highlightedLine.subscribe(this::highlightLine);
 	}
 
 	public void setFromLine(int fromLine) {

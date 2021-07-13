@@ -2,8 +2,6 @@ package org.riekr.jloga.react;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
-
 import static java.util.Objects.requireNonNull;
 
 public class BoolBehaviourSubject extends BehaviourSubject<Boolean> {
@@ -14,7 +12,7 @@ public class BoolBehaviourSubject extends BehaviourSubject<Boolean> {
 
 	@NotNull
 	public Unsubscribable subscribe(BoolConsumer onNext) {
-		return super.subscribe((Consumer<? super Boolean>) onNext::accept);
+		return super.subscribe(onNext::accept);
 	}
 
 	@Override

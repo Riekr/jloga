@@ -5,20 +5,22 @@ import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.riekr.jloga.ui.MRUTextCombo.newMRUTextCombo;
+
 public class MRUComboWithLabels<T> extends JPanel {
 
 	public static MRUComboWithLabels<String> forString(String key, String label, Consumer<String> onResult) {
 		return new MRUComboWithLabels<>(key, label, onResult, Function.identity());
 	}
 
-	public final MRUTextCombo combo;
+	public final MRUTextCombo<String> combo;
 	public final JLabel error;
 
 	public MRUComboWithLabels(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
 		this.setLayout(new BorderLayout());
 		this.add(new JLabel(label.trim() + " "), BorderLayout.LINE_START);
 
-		this.combo = new MRUTextCombo(key);
+		this.combo = newMRUTextCombo(key);
 		this.add(combo, BorderLayout.CENTER);
 
 		this.error = new JLabel();
@@ -27,13 +29,12 @@ public class MRUComboWithLabels<T> extends JPanel {
 		error.setVisible(false);
 		this.add(error, BorderLayout.SOUTH);
 
-		Consumer<String> onText = (text) -> {
+		combo.subject.subscribe((text) -> {
 			T res = mapper.apply(text);
 			if (res == null)
 				combo.setSelectedIndex(-1);
 			onResult.accept(res);
-		};
-		combo.setListener(onText);
+		});
 	}
 
 	public void setError(String text) {

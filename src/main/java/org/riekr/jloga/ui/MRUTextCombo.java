@@ -1,47 +1,78 @@
 package org.riekr.jloga.ui;
 
 import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.react.Subject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseListener;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
 
-public class MRUTextCombo extends JComboBox<String> {
+public class MRUTextCombo<T> extends JComboBox<T> {
 
-	private final DefaultComboBoxModel<String> _model;
+	public static MRUTextCombo<String> newMRUTextCombo(String key) {
+		return new MRUTextCombo<>(key, (newValue, oldValue) -> newValue);
+	}
 
-	private Consumer<String> _listener;
+	private final String _key;
+	private final DefaultComboBoxModel<T> _model;
+	private final BiFunction<String, T, T> _mapper;
 
-	public MRUTextCombo(String key) {
-		super();
-		_model = Preferences.loadDefaultComboBoxModel(key);
+	private T _value;
+	private int _valueIndex;
+
+	public final Subject<T> subject = new Subject<>();
+
+	public MRUTextCombo(String key, BiFunction<String, T, T> mapper) {
+		_key = key;
+		_value = mapper.apply(null, null);
+		subject.subscribe((value) -> {
+			_value = value;
+			_valueIndex = getSelectedIndex();
+		});
+		_model = Preferences.loadDefaultComboBoxModel(_key);
+		_mapper = mapper;
 		setModel(_model);
 		setEditable(true);
 		addActionListener(e -> {
-			String elem = (String) getSelectedItem();
+			Object elem = getSelectedItem();
 			switch (e.getActionCommand()) {
 				case "comboBoxEdited":
 					_model.removeElement(elem);
-					_model.insertElementAt(elem, 0);
-					Preferences.save(key, _model);
+					_model.insertElementAt(convert(elem), 0);
+					save();
 					setSelectedIndex(0);
 				case "comboBoxChanged":
-					if (_listener != null)
-						_listener.accept(elem);
+					subject.next(convert(elem));
 					break;
 				default:
 					System.err.println(e);
 			}
 		});
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				subject.next(convert(getSelectedItem()));
+			}
+		});
+		addHierarchyListener(e -> {
+			if (e.getID() == HierarchyEvent.PARENT_CHANGED && getParent() == null)
+				subject.close();
+		});
 	}
 
-	public void setListener(Consumer<String> listener) {
-		_listener = listener;
+	public void save() {
+		Preferences.save(_key, _model);
 	}
 
-	public Consumer<String> getListener() {
-		return _listener;
+	@SuppressWarnings("unchecked")
+	private T convert(Object elem) {
+		if (elem instanceof String)
+			return _mapper.apply((String) elem, _valueIndex == getSelectedIndex() ? _value : null);
+		return (T) elem;
 	}
 
 	@Override
@@ -56,9 +87,13 @@ public class MRUTextCombo extends JComboBox<String> {
 		}
 	}
 
-	public void set(String str) {
+	public T getValue() {
+		return _value;
+	}
+
+	public void setValue(T str) {
 		setSelectedItem(str);
-		if (_listener != null)
-			_listener.accept(str);
+		subject.next(str);
+		save();
 	}
 }

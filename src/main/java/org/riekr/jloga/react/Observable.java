@@ -14,9 +14,4 @@ public interface Observable<T> {
 		return subscribe(Observer.from(onNext, onError));
 	}
 
-	@NotNull
-	default Unsubscribable subscribe(Consumer<? super T> onNext) {
-		return subscribe((Observer<T>) onNext::accept);
-	}
-
 }

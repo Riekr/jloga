@@ -49,7 +49,7 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 		fields().forEach((field) -> {
 			MRUComboWithLabels<String> combo = _combos.get(field.key);
 			if (combo != null)
-				combo.combo.set(field.toString());
+				combo.combo.setValue(field.toString());
 		});
 	}
 

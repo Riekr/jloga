@@ -2,7 +2,6 @@ package org.riekr.jloga.react;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import static java.util.Objects.requireNonNull;
@@ -15,7 +14,7 @@ public class IntBehaviourSubject extends BehaviourSubject<Integer> {
 
 	@NotNull
 	public Unsubscribable subscribe(IntConsumer onNext) {
-		return super.subscribe((Consumer<? super Integer>) onNext::accept);
+		return super.subscribe(onNext::accept);
 	}
 
 	@Override
