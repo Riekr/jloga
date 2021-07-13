@@ -77,6 +77,24 @@ public class Main extends JFrame {
 		}
 	}
 
+	private void selectPagingSize() {
+		String[] options = {"Full page", "\u00BD page", "\u2153 of page", "\u00BC of page", "\u2155 of page"};
+		Object x = JOptionPane.showInputDialog(this,
+				"<html>Select how many of the visible lines<br>" +
+						"should be scrolled when paging text:<br>&nbsp;</html>",
+				"Page scrolling size",
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options,
+				options[Math.min(options.length, Preferences.getPageDivider() - 1)]
+		);
+		if (x != null) {
+			int idx = Arrays.binarySearch(options, x);
+			if (idx != -1)
+				Preferences.setPageDivider(idx + 1);
+		}
+	}
+
 	public void openFileDialog() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(Preferences.loadFile(LAST_OPEN_PATH, () -> new File(".")));

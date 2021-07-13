@@ -14,8 +14,19 @@ public class Preferences {
 	public static final String CHARSET = "CharsetCombo";
 	public static final String FONT = "Font";
 	public static final String SEARCH_TYPE = "SearchType";
+	public static final String PAGE_DIVIDER = "PageDivider";
 
 	private static final java.util.prefs.Preferences _PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
+
+	static {
+		_PREFS.addPreferenceChangeListener(evt -> {
+			if (PAGE_DIVIDER.equals(evt.getKey())) {
+				_PAGE_DIVIDER = null;
+			}
+		});
+	}
+
+	private static Integer _PAGE_DIVIDER;
 
 	public static void save(String key, DefaultComboBoxModel<?> o) {
 		Object[] data = new Object[o.getSize()];
@@ -90,5 +101,17 @@ public class Preferences {
 			e.printStackTrace(System.err);
 			return deflt == null ? null : deflt.get();
 		}
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	public static int getPageDivider() {
+		if (_PAGE_DIVIDER == null)
+			_PAGE_DIVIDER = Math.max(1, load(PAGE_DIVIDER, () -> 3));
+		return _PAGE_DIVIDER;
+	}
+
+	public static void setPageDivider(int divider) {
+		_PAGE_DIVIDER = Math.max(1, divider);
+		save(PAGE_DIVIDER, _PAGE_DIVIDER);
 	}
 }

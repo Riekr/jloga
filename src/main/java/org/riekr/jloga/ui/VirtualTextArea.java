@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
@@ -113,11 +114,11 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	public void pageUp() {
-		setFromLine(_fromLine - _lineCount);
+		setFromLine(_fromLine - (_lineCount / Preferences.getPageDivider()));
 	}
 
 	public void pageDn() {
-		setFromLine(_fromLine + _lineCount);
+		setFromLine(_fromLine + (_lineCount / Preferences.getPageDivider()));
 	}
 
 	public void toBeginning() {
