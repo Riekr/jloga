@@ -153,4 +153,8 @@ public final class UIUtils {
 		}
 		return null;
 	}
+
+	public static int getComponentHorizontalCenter(Component component) {
+		return component.getX() + (component.getWidth() / 2);
+	}
 }

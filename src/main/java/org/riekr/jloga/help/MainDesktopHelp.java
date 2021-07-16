@@ -2,16 +2,22 @@ package org.riekr.jloga.help;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.IntStream;
+
+import static org.riekr.jloga.ui.UIUtils.getComponentHorizontalCenter;
 
 public class MainDesktopHelp extends JComponent {
 
-	private static final int _MARGIN = 64;
 	private static final char[] _ARROW = new char[]{'\u25B2'};
 
-	private final JToolBar _toolBar;
+	private final JComponent[] _components;
 
 	public MainDesktopHelp(JToolBar toolBar) {
-		_toolBar = toolBar;
+		_components = IntStream.range(0, toolBar.getComponentCount())
+				.mapToObj(toolBar::getComponentAtIndex)
+				.map((c) -> c instanceof JComponent ? (JComponent) c : null)
+				.filter((c) -> c != null && c.getToolTipText() != null)
+				.toArray(JComponent[]::new);
 	}
 
 	@Override
@@ -19,15 +25,11 @@ public class MainDesktopHelp extends JComponent {
 		if (g instanceof Graphics2D)
 			((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(Color.GRAY);
-		for (int i = _toolBar.getComponentCount() - 1; i >= 0; i--) {
-			Component component = _toolBar.getComponentAtIndex(i);
-			if (component instanceof JComponent) {
-				String tooltip = ((JComponent) component).getToolTipText();
-				if (tooltip != null) {
-					int x = component.getX() + (component.getWidth() / 2);
-					drawCallout(g, x, tooltip);
-				}
-			}
+		for (JComponent component : _components) {
+			drawCallout(g,
+					getComponentHorizontalCenter(component),
+					component.getToolTipText()
+			);
 		}
 	}
 
@@ -38,11 +40,12 @@ public class MainDesktopHelp extends JComponent {
 		FontMetrics f = g.getFontMetrics();
 		int width = getWidth();
 		if (x <= (width / 2)) {
-			int radius = _MARGIN - x;
+			int leftMargin = getComponentHorizontalCenter(_components[_components.length - 3]) + 56;
+			int radius = leftMargin - x;
 			int diameter = radius * 2;
 			g.drawArc(x, -radius + dy + my, diameter, diameter, 270, -90);
 			g.drawChars(chars, 0, chars.length,
-					_MARGIN + 6,
+					leftMargin + 6,
 					dy + radius + (f.getAscent() / 2) - 1 + my
 			);
 			g.drawChars(_ARROW, 0, 1,
@@ -50,7 +53,8 @@ public class MainDesktopHelp extends JComponent {
 					g.getFont().getSize() - 4 + my
 			);
 		} else {
-			int radius = width - _MARGIN - x;
+			int margin = 56;
+			int radius = width - margin - x;
 			int diameter = radius * 2;
 			g.drawArc(x - diameter, -radius + dy + my, diameter, diameter, -90, 90);
 			g.drawChars(chars, 0, chars.length,
