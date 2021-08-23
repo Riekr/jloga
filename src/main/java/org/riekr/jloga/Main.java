@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.riekr.jloga.io.Preferences.FONT;
 import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
@@ -224,8 +225,12 @@ public class Main extends JFrame {
 			main.setExtendedState(main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 			main.setTitle("JLogA");
 			main.setVisible(true);
-			if (args.length > 0)
-				main.openFile(new File(args[0]));
+			if (args != null) {
+				Stream.of(args)
+						.map(File::new)
+						.filter(File::canRead)
+						.forEach(main::openFile);
+			}
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}
