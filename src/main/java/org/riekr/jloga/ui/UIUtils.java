@@ -1,19 +1,26 @@
 package org.riekr.jloga.ui;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.Main;
 import org.riekr.jloga.react.BoolConsumer;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -156,5 +163,26 @@ public final class UIUtils {
 
 	public static int getComponentHorizontalCenter(Component component) {
 		return component.getX() + (component.getWidth() / 2);
+	}
+
+	public static void setIcon(@NotNull JFrame frame, @NotNull String name, boolean invert) throws IOException {
+		URL resource = Main.class.getResource(name);
+		if (resource == null)
+			return;
+		BufferedImage image = ImageIO.read(resource);
+		if (invert) {
+			final int w = image.getWidth(), h = image.getHeight();
+			for (int x = 0; x < w; x++) {
+				for (int y = 0; y < h; y++) {
+					int rgba = image.getRGB(x, y);
+					rgba ^= 0x00FFFFFF;
+					image.setRGB(x, y, rgba);
+				}
+			}
+		}
+		frame.setIconImages(Arrays.asList(
+				image.getScaledInstance(32, 32, Image.SCALE_SMOOTH),
+				image.getScaledInstance(64, 64, Image.SCALE_SMOOTH)
+		));
 	}
 }

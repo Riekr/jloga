@@ -203,28 +203,37 @@ public class Main extends JFrame {
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")
-	private static void loadLAF() {
+	private static boolean loadLAF() {
 		try {
 			// https://www.formdev.com/flatlaf/themes/
 			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
-			return;
+			return true;
 		} catch (Throwable ignored) {
 		}
 		try {
 			UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
+			return true;
 		} catch (Throwable ignored) {
 		}
+		// https://stackoverflow.com/a/65805346/1326326
+		return false;
 	}
 
 	public static void main(String... args) {
 		try {
-			loadLAF();
+			// init themes
+			boolean dark = loadLAF();
+
+			// init ui
 			Main main = new Main();
 			main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			main.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			main.setExtendedState(main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 			main.setTitle("JLogA");
+			UIUtils.setIcon(main, "icon.png", dark);
 			main.setVisible(true);
+
+			// load files
 			if (args != null) {
 				Stream.of(args)
 						.map(File::new)

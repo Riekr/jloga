@@ -25,9 +25,9 @@ compileJava {
 }
 
 dependencies {
-	implementation 'com.formdev:flatlaf:1.2'
+	implementation 'com.formdev:flatlaf:1.5'
 	implementation 'org.drjekyll:fontchooser:2.4'
-	compileOnly 'org.jetbrains:annotations:21.0.1'
+	compileOnly 'org.jetbrains:annotations:22.0.0'
 }
 
 jar {
