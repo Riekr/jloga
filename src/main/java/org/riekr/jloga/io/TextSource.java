@@ -135,4 +135,8 @@ public interface TextSource {
 	default void onClose() {
 	}
 
+	default boolean isIndexing() {
+		return false;
+	}
+
 }

@@ -70,7 +70,8 @@ public class SearchPanel extends JComponent {
 
 	public void setTextSource(TextSource src) {
 		_textArea.setTextSource(src);
-		src.setIndexingListener(_progressBar.addJob("Indexing"));
+		if (src.isIndexing())
+			src.setIndexingListener(_progressBar.addJob("Indexing"));
 	}
 
 	public TextSource getTextSource() {

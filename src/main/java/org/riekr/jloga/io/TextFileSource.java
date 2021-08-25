@@ -228,4 +228,9 @@ public class TextFileSource implements TextSource {
 	public void onClose() {
 		_indexing.cancel(true);
 	}
+
+	@Override
+	public boolean isIndexing() {
+		return !_indexing.isDone();
+	}
 }
