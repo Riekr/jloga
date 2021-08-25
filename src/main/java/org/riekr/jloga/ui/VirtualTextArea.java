@@ -37,7 +37,7 @@ public class VirtualTextArea extends JComponent {
 	private Runnable _lineListenerUnsubscribe;
 
 	public VirtualTextArea() {
-		_text = new JTextArea();
+		_text = ContextMenu.addActionCopy(new JTextArea());
 		_text.addKeyListener(new ROKeyListener() {
 			@Override
 			protected void onPageUp() {

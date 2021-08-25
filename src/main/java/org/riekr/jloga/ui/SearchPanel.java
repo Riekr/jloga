@@ -24,7 +24,8 @@ public class SearchPanel extends JComponent {
 	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar) {
 		this(progressBar, 0);
 		_title = title;
-		add(new JLabel(description), BorderLayout.NORTH);
+		JLabel descriptionLabel = ContextMenu.addActionCopy(new JLabel(description));
+		add(descriptionLabel, BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
