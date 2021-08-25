@@ -5,10 +5,7 @@ import org.riekr.jloga.react.Subject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.function.BiFunction;
 
 public class MRUTextCombo<T> extends JComboBox<T> {
@@ -23,6 +20,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 
 	private T _value;
 	private int _valueIndex;
+	private boolean _propagateMouseListener = true;
 
 	public final Subject<T> subject = new Subject<>();
 
@@ -62,6 +60,13 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 			if (e.getID() == HierarchyEvent.PARENT_CHANGED && getParent() == null)
 				subject.close();
 		});
+		getEditor().getEditorComponent().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3)
+					showPopup();
+			}
+		});
 	}
 
 	public void save() {
@@ -76,13 +81,25 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	}
 
 	@Override
+	public void updateUI() {
+		try {
+			_propagateMouseListener = false;
+			super.updateUI();
+		} finally {
+			_propagateMouseListener = true;
+		}
+	}
+
+	@Override
 	public synchronized void addMouseListener(MouseListener l) {
 		super.addMouseListener(l);
-		getEditor().getEditorComponent().addMouseListener(l);
-		for (Component child : getComponents()) {
-			if (child instanceof JButton) {
-				child.addMouseListener(l);
-				break;
+		if (_propagateMouseListener) {
+			getEditor().getEditorComponent().addMouseListener(l);
+			for (Component child : getComponents()) {
+				if (child instanceof JButton) {
+					child.addMouseListener(l);
+					break;
+				}
 			}
 		}
 	}
