@@ -92,7 +92,7 @@ public class SearchPanelBottomArea extends JPanel {
 	@NotNull
 	private SearchPanel getResultTextArea() {
 		if (_resultTextArea == null) {
-			_resultTextArea = new SearchPanel(_progressBar, _level + 1);
+			_resultTextArea = new SearchPanel(_progressBar, _level + 1, _parent.getBottomTabsNavigation());
 			_resultTextArea.setFont(getFont());
 			_resultTextArea.setMinimumSize(new Dimension(0, 0));
 			_resultTextArea.getTextArea().setLineClickListener((line) -> {

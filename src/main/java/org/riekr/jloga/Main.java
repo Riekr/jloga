@@ -182,7 +182,7 @@ public class Main extends JFrame {
 				_help = null;
 				add(_tabs);
 			}
-			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar);
+			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
 			_tabs.addTab(searchPanel.toString(), searchPanel);
 			searchPanel.setFont(_font);
 			searchPanel.addHierarchyListener(e -> {

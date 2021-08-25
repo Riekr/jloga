@@ -23,10 +23,16 @@ public class ROKeyListener implements KeyListener {
 //		System.out.println(e);
 		switch (e.getKeyCode()) {
 			case 33: // pgup
-				onPageUp();
+				if (e.isControlDown())
+					onPreviousTab();
+				else
+					onPageUp();
 				break;
 			case 34: // pgdown
-				onPageDn();
+				if (e.isControlDown())
+					onNextTab();
+				else
+					onPageDn();
 				break;
 			case 35: // end
 				if (e.isControlDown()) {
@@ -70,5 +76,11 @@ public class ROKeyListener implements KeyListener {
 	}
 
 	protected void onPageDn() {
+	}
+
+	protected void onPreviousTab() {
+	}
+
+	protected void onNextTab() {
 	}
 }

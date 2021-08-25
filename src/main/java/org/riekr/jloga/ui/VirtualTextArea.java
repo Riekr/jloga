@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.react.BehaviourSubject;
@@ -36,7 +37,7 @@ public class VirtualTextArea extends JComponent {
 	private Unsubscribable _textSourceUnsubscribable;
 	private Runnable _lineListenerUnsubscribe;
 
-	public VirtualTextArea() {
+	public VirtualTextArea(@Nullable TabNavigation tabNavigation) {
 		_text = ContextMenu.addActionCopy(new JTextArea());
 		_text.addKeyListener(new ROKeyListener() {
 			@Override
@@ -57,6 +58,18 @@ public class VirtualTextArea extends JComponent {
 			@Override
 			protected void onDocumentEnd() {
 				toEnding();
+			}
+
+			@Override
+			protected void onPreviousTab() {
+				if (tabNavigation != null)
+					tabNavigation.goToPreviousTab();
+			}
+
+			@Override
+			protected void onNextTab() {
+				if (tabNavigation != null)
+					tabNavigation.goToNextTab();
 			}
 		});
 		_text.setAutoscrolls(false);

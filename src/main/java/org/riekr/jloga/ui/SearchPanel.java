@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
@@ -16,13 +17,14 @@ public class SearchPanel extends JComponent {
 	private final VirtualTextArea _textArea;
 	private final JSplitPane _splitPane;
 	private final JTabbedPane _bottomTabs;
+	private final TabNavigation _bottomTabsNavigation;
 
 	private final JobProgressBar _progressBar;
 	private String _title;
 	private int _searchId = 0;
 
-	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar) {
-		this(progressBar, 0);
+	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
+		this(progressBar, 0, tabNavigation);
 		_title = title;
 		JLabel descriptionLabel = ContextMenu.addActionCopy(new JLabel(description));
 		add(descriptionLabel, BorderLayout.NORTH);
@@ -30,9 +32,9 @@ public class SearchPanel extends JComponent {
 	}
 
 
-	public SearchPanel(JobProgressBar progressBar, int level) {
+	public SearchPanel(JobProgressBar progressBar, int level, @Nullable TabNavigation tabNavigation) {
 		setLayout(new BorderLayout());
-		_textArea = new VirtualTextArea();
+		_textArea = new VirtualTextArea(tabNavigation);
 		_textArea.setMinimumSize(new Dimension(0, 0));
 		_splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		_splitPane.setResizeWeight(1);
@@ -56,6 +58,7 @@ public class SearchPanel extends JComponent {
 			_bottomTabs.setSelectedIndex(idx);
 			invalidate();
 		}));
+		_bottomTabsNavigation = TabNavigation.createFor(_bottomTabs);
 		_splitPane.add(_bottomTabs);
 	}
 
@@ -123,5 +126,9 @@ public class SearchPanel extends JComponent {
 	public void onClose() {
 		_textArea.onClose();
 		searchPanelBottomAreaStream().forEach(SearchPanelBottomArea::onClose);
+	}
+
+	public TabNavigation getBottomTabsNavigation() {
+		return _bottomTabsNavigation;
 	}
 }
