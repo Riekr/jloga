@@ -2,6 +2,7 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.Reader;
 
 public class StringsReader extends Reader {
@@ -9,18 +10,21 @@ public class StringsReader extends Reader {
 	private String[] _strings;
 	private int _i = 0;
 	private int _start = 0;
+	private int[] _mark;
 
-	public StringsReader(String[] strings) {
+	public StringsReader(@NotNull String[] strings) {
 		_strings = strings;
 	}
 
 	@Override
-	public int read(char @NotNull [] cbuf, int off, int len) {
+	public int read(char @NotNull [] cbuf, int off, int len) throws IOException {
 		if (_start == -1) {
 			_start = 0;
 			cbuf[0] = '\n';
 			return 1;
 		}
+		if (_strings == null)
+			throw new IOException("Reader has been closed");
 		if (_i == _strings.length)
 			return -1;
 		String string = _strings[_i];
@@ -35,6 +39,22 @@ public class StringsReader extends Reader {
 			_start = -1;
 		}
 		return len;
+	}
+
+	@Override
+	public void mark(int readAheadLimit) {
+		_mark = new int[]{_i, _start};
+	}
+
+	@Override
+	public void reset() {
+		if (_mark == null) {
+			_i = 0;
+			_start = 0;
+		} else {
+			_i = _mark[0];
+			_start = _mark[1];
+		}
 	}
 
 	@Override

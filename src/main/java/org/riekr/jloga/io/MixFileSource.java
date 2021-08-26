@@ -160,4 +160,12 @@ public class MixFileSource implements TextSource {
 		return _lineCount;
 	}
 
+	@Override
+	public boolean isIndexing() {
+		for (TextSource ts : _sources) {
+			if (ts.isIndexing())
+				return true;
+		}
+		return false;
+	}
 }

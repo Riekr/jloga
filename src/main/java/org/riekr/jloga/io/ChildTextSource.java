@@ -94,4 +94,9 @@ public class ChildTextSource implements FilteredTextSource {
 			return null;
 		return entry.getValue().getSrcLine(entry.getKey(), line);
 	}
+
+	@Override
+	public boolean isIndexing() {
+		return _tie.isIndexing();
+	}
 }
