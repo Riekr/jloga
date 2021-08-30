@@ -82,7 +82,7 @@ public class PickNMixDialogEntry extends JComponent {
 		_consumer.accept(_checkBox.isSelected(), this);
 	}
 
-	public MixFileSource.Config getConfig() {
-		return new MixFileSource.Config(_dateExtract, _dateFormatter, _offset);
+	public MixFileSource.SourceConfig getConfig(File file) {
+		return new MixFileSource.SourceConfig(file, _dateExtract, _dateFormatter, _offset);
 	}
 }

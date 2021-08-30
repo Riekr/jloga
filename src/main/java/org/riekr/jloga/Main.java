@@ -13,7 +13,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -63,50 +66,22 @@ public class Main extends JFrame {
 	}
 
 	private void openMixDialog() {
-		String title = "Pick'n'mix (EXPERIMENTAL)"; // TODO
-		if (_openFiles.size() < 2) {
-			JOptionPane.showMessageDialog(this, "Please open more than 1 log file first", title, JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
-		HashMap<File, PickNMixDialogEntry> files = new HashMap<>();
-		JOptionPane optionPane = new JOptionPane(null, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		JDialog dialog = optionPane.createDialog(this, title);
-		optionPane.setMessage(_openFiles.keySet().stream()
-				.filter((f) -> f instanceof File).map(f -> (File) f)
-				.map((f) -> new PickNMixDialogEntry(f, (selected, entry) -> {
-					if (selected)
-						files.put(f, entry);
-					else
-						files.remove(f);
-					EventQueue.invokeLater(dialog::pack);
-				}))
-				.toArray(JComponent[]::new));
-		EventQueue.invokeLater(dialog::pack);
-		dialog.setMinimumSize(new Dimension(480, 0));
-//		dialog.setResizable(true);
-		dialog.setVisible(true);
-		dialog.dispose();
-		if (optionPane.getValue() == (Integer) JOptionPane.OK_OPTION) {
-			if (files.size() < 2) {
-				JOptionPane.showMessageDialog(this, "Please select more than 1 log file", title, JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			Set<File> fileSet = files.keySet();
-			String tabTitle = fileSet.stream()
-					.map(File::getName)
+		Map<File, TextSource> inputFiles = new HashMap<>();
+		_openFiles.forEach((k, v) -> {
+			if (k instanceof File)
+				inputFiles.put((File) k, v);
+		});
+		MixFileSource.Config config = PickNMixOptionPane.show(inputFiles, this);
+		if (config != null) {
+			String tabTitle = config.sources.values().stream()
+					.map((sc) -> sc.file.getName())
 					.collect(Collectors.joining("+"));
 			AtomicInteger idx = new AtomicInteger();
-			String tabDescr = fileSet.stream()
-					.map((f) -> idx.getAndIncrement() + " = " + f.getAbsolutePath())
+			String tabDescr = config.sources.values().stream()
+					.map((sc) -> idx.getAndIncrement() + " = " + sc.file.getAbsolutePath())
 					.collect(Collectors.joining("<br>"));
-			open(fileSet, tabTitle, "<html>" + tabDescr + "</html>", () -> {
-				Map<TextSource, MixFileSource.Config> sources = new LinkedHashMap<>();
-				for (File f : fileSet)
-					sources.put(_openFiles.get(f), files.get(f).getConfig());
-				return new MixFileSource(sources);
-			});
+			open(config, tabTitle, "<html>" + tabDescr + "</html>", () -> new MixFileSource(config));
 		}
-
 	}
 
 	private void selectFont() {

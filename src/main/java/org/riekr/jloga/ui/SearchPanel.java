@@ -1,6 +1,7 @@
 package org.riekr.jloga.ui;
 
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 
 import javax.swing.*;
@@ -71,7 +72,7 @@ public class SearchPanel extends JComponent {
 	public void setTextSource(TextSource src) {
 		_textArea.setTextSource(src);
 		if (src.isIndexing())
-			src.setIndexingListener(_progressBar.addJob("Indexing"));
+			src.setIndexingListener(_progressBar.addJob(src instanceof MixFileSource ? "Mixing" : "Indexing"));
 	}
 
 	public TextSource getTextSource() {

@@ -16,6 +16,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.function.IntConsumer;
 
+import static java.lang.Math.max;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
 
@@ -118,7 +119,7 @@ public class VirtualTextArea extends JComponent {
 		if (fromLine < 0)
 			fromLine = 0;
 		else if (fromLine >= _allLinesCount - _lineCount)
-			fromLine = _allLinesCount - _lineCount - 1;
+			fromLine = max(0, _allLinesCount - _lineCount - 1);
 		if (fromLine != _fromLine) {
 			_fromLine = fromLine;
 			_scrollBar.setValue(_fromLine);
@@ -188,7 +189,7 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = Math.max(1, (int) Math.floor(getHeight() / (double) _lineHeight) - 1);
+		final int newValue = max(1, (int) Math.floor(getHeight() / (double) _lineHeight) - 1);
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);
