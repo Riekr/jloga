@@ -18,7 +18,7 @@ import java.util.function.IntConsumer;
 
 public interface TextSource {
 
-	ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 2, 10L, TimeUnit.SECONDS, new SynchronousQueue<>());
+	ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 2, 10L, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
 	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
 
 	private static void executeRequestText(Runnable task) {
