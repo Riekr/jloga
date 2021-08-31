@@ -172,7 +172,7 @@ public class MixFileSource implements TextSource {
 					if (_indexingListener != null)
 						_indexingListener.onProgressChanged(parsedLines, totLineCount);
 				}
-				_index.save();
+				_index.seal();
 				System.out.println("Mixed " + _index.size() + " lines of " + totLineCount + " using " + _index.pages() + " pages");
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
