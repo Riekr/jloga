@@ -4,20 +4,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.InstantRange;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PickNMixOptionPane {
 
@@ -25,29 +31,13 @@ public class PickNMixOptionPane {
 
 	private static final ZoneId _ZONE_ID = ZoneId.systemDefault();
 
-	private static final DateTimeFormatter _FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")
+	private static final DateTimeFormatter _DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 			.withZone(_ZONE_ID)
 			.withLocale(Locale.ENGLISH);
 
-
-	/**
-	 * Will repropose preview values until the app is restarted, this is intended behaviour as saving
-	 * dates across different days may be more usless than useful.
-	 */
-	private static final Map<TemporalAdjuster, String> _INITIAL_VALUES = new HashMap<>() {
-		private static final long serialVersionUID = -5550699003856362764L;
-
-		@Override
-		public String get(Object key) {
-			String res = super.get(key);
-			if (res == null && key instanceof TemporalAdjuster) {
-				res = LocalDateTime.now(_ZONE_ID).with((TemporalAdjuster) key).format(_FORMATTER);
-				put((TemporalAdjuster) key, res);
-			}
-			return res;
-		}
-	};
-
+	private static final DateTimeFormatter _TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss:SSS")
+			.withZone(_ZONE_ID)
+			.withLocale(Locale.ENGLISH);
 
 	@Nullable
 	public static MixFileSource.Config show(@NotNull Map<File, TextSource> inputFiles, @Nullable Component parentComponent) {
@@ -68,10 +58,12 @@ public class PickNMixOptionPane {
 					EventQueue.invokeLater(dialog::pack);
 				}))
 				.forEachOrdered(options::add);
-		AtomicReference<Instant> from = new AtomicReference<>();
-		AtomicReference<Instant> to = new AtomicReference<>();
-		options.add(getDateTimePicker("From:", LocalTime.MIN, from::set));
-		options.add(getDateTimePicker("To:", LocalTime.MAX, to::set));
+		AtomicReference<LocalDate> fromDate = new AtomicReference<>();
+		AtomicReference<LocalTime> fromTime = new AtomicReference<>();
+		AtomicReference<LocalDate> toDate = new AtomicReference<>();
+		AtomicReference<LocalTime> toTime = new AtomicReference<>();
+		options.add(getDateTimePicker("From:", LocalTime.MIN, fromDate::set, fromTime::set));
+		options.add(getDateTimePicker("To:", LocalTime.MAX, toDate::set, toTime::set));
 		optionPane.setMessage(options.toArray());
 		EventQueue.invokeLater(dialog::pack);
 		dialog.setMinimumSize(new Dimension(480, 0));
@@ -83,7 +75,10 @@ public class PickNMixOptionPane {
 			if (selectedFiles.size() >= 2) {
 				Map<TextSource, MixFileSource.SourceConfig> res = new HashMap<>();
 				selectedFiles.forEach((k, v) -> res.put(inputFiles.get(k), v.getConfig(k)));
-				return new MixFileSource.Config(res, from.get(), to.get());
+				return new MixFileSource.Config(res, InstantRange.from(
+						fromDate.get(), fromTime.get(),
+						toDate.get(), toTime.get()
+				));
 			}
 			JOptionPane.showMessageDialog(parentComponent, "Please select more than 1 log file", _TITLE, JOptionPane.INFORMATION_MESSAGE);
 		}
@@ -91,7 +86,7 @@ public class PickNMixOptionPane {
 		return null;
 	}
 
-	private static JComponent getDateTimePicker(String label, TemporalAdjuster adjuster, Consumer<Instant> consumer) {
+	private static <T extends TemporalAccessor> JComponent getPicker(String label, Consumer<T> consumer, TemporalQuery<T> query, Supplier<T> initialValueSupplier, DateTimeFormatter formatter) {
 		Box box = Box.createVerticalBox();
 		Box textFieldBox = Box.createHorizontalBox();
 
@@ -107,7 +102,7 @@ public class PickNMixOptionPane {
 		error.setAlignmentX(Component.CENTER_ALIGNMENT);
 		error.setForeground(Color.RED);
 
-		String initialValue = _INITIAL_VALUES.get(adjuster);
+		String initialValue = formatter.format(initialValueSupplier.get());
 		checkBox.addActionListener((e) -> {
 			textField.setEnabled(checkBox.isSelected());
 			if (textField.isEnabled()) {
@@ -122,8 +117,8 @@ public class PickNMixOptionPane {
 				String text = textField.getText();
 				if (text.length() < initialValue.length())
 					text += initialValue.substring(text.length());
-				Instant instant = _FORMATTER.parse(text, LocalDateTime::from).toInstant(ZoneOffset.UTC);
-				consumer.accept(instant);
+				T date = formatter.parse(text, query);
+				consumer.accept(date);
 				textField.setForeground(fg);
 				error.setVisible(false);
 			} catch (DateTimeParseException ex) {
@@ -136,6 +131,18 @@ public class PickNMixOptionPane {
 		});
 		box.add(textFieldBox);
 		box.add(error);
+		return box;
+	}
+
+	private static JComponent getDateTimePicker(String label, TemporalAdjuster timeAdjuster, Consumer<LocalDate> dateConsumer, Consumer<LocalTime> timeConsumer) {
+		Box box = Box.createHorizontalBox();
+		box.add(getPicker(label, dateConsumer, LocalDate::from, LocalDate::now, _DATE_FORMATTER));
+		box.add(getPicker("time:", timeConsumer, LocalTime::from, () -> {
+			LocalTime initialValue = LocalTime.now();
+			if (timeAdjuster != null)
+				initialValue = initialValue.with(timeAdjuster);
+			return initialValue;
+		}, _TIME_FORMATTER));
 		return box;
 	}
 

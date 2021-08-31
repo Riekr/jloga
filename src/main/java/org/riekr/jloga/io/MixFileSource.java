@@ -2,7 +2,6 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.misc.InstantRange;
 import org.riekr.jloga.misc.PagedIntBag;
 
 import java.io.File;
@@ -50,12 +49,12 @@ public class MixFileSource implements TextSource {
 
 	public static final class Config {
 		public final @NotNull Map<TextSource, SourceConfig> sources;
-		public final @Nullable Instant from, to;
+		public final @Nullable Predicate<Instant> predicate;
 
-		public Config(@NotNull Map<TextSource, SourceConfig> sources, @Nullable Instant from, @Nullable Instant to) {
+		public Config(
+				@NotNull Map<TextSource, SourceConfig> sources, @Nullable Predicate<Instant> predicate) {
 			this.sources = sources;
-			this.from = from;
-			this.to = to;
+			this.predicate = predicate;
 		}
 	}
 
@@ -120,7 +119,7 @@ public class MixFileSource implements TextSource {
 					return false;
 				};
 				int parsedLines = 0;
-				final Predicate<Instant> predicate = InstantRange.from(config.from, config.to);
+				final Predicate<Instant> predicate = config.predicate == null ? (i) -> true : config.predicate;
 				while (hasData.getAsBoolean()) {
 					// fill instants, I may do it only for the 1st entry in "data"
 					// but I'm lazy to initialize it before the enclosing while
