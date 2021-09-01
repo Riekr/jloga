@@ -12,17 +12,17 @@ import java.util.stream.Stream;
 
 public class SearchPanel extends JComponent {
 
-	private static final String _TAB_ADD = " + ";
+	private static final String _TAB_ADD    = " + ";
 	private static final String _TAB_PREFIX = "Search ";
 
 	private final VirtualTextArea _textArea;
-	private final JSplitPane _splitPane;
-	private final JTabbedPane _bottomTabs;
-	private final TabNavigation _bottomTabsNavigation;
+	private final JSplitPane      _splitPane;
+	private final JTabbedPane     _bottomTabs;
+	private final TabNavigation   _bottomTabsNavigation;
 
 	private final JobProgressBar _progressBar;
-	private String _title;
-	private int _searchId = 0;
+	private       String         _title;
+	private       int            _searchId = 0;
 
 	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
 		this(progressBar, 0, tabNavigation);
@@ -45,7 +45,7 @@ public class SearchPanel extends JComponent {
 		add(_splitPane, BorderLayout.CENTER);
 		_splitPane.add(_textArea);
 		_bottomTabs = new JTabbedPane();
-		Supplier<String> titleSupplier = () -> _TAB_PREFIX + (char) ('A' + level) + (++_searchId);
+		Supplier<String> titleSupplier = () -> _TAB_PREFIX + (char)('A' + level) + (++_searchId);
 		SearchPanelBottomArea tabContent = new SearchPanelBottomArea(this, progressBar, level);
 		_bottomTabs.addTab(titleSupplier.get(), tabContent);
 		_bottomTabs.setTabComponentAt(0, newTabHeader(titleSupplier.get(), tabContent));
@@ -58,6 +58,8 @@ public class SearchPanel extends JComponent {
 			_bottomTabs.setTabComponentAt(idx, newTabHeader(titleSupplier.get(), body));
 			_bottomTabs.setSelectedIndex(idx);
 			invalidate();
+			if (_splitPane.getDividerLocation() >= _splitPane.getMaximumDividerLocation())
+				collapseBottomArea();
 		}));
 		_bottomTabsNavigation = TabNavigation.createFor(_bottomTabs);
 		_splitPane.add(_bottomTabs);
@@ -83,7 +85,7 @@ public class SearchPanel extends JComponent {
 		return IntStream.range(0, _bottomTabs.getTabCount() - 1)
 				.mapToObj(_bottomTabs::getComponentAt)
 				.filter((c) -> c instanceof SearchPanelBottomArea)
-				.map((c) -> (SearchPanelBottomArea) c);
+				.map((c) -> (SearchPanelBottomArea)c);
 	}
 
 	@Override
@@ -107,10 +109,8 @@ public class SearchPanel extends JComponent {
 	}
 
 	public void collapseBottomArea() {
-		if (_splitPane.getResizeWeight() != 1.0) {
-			_splitPane.setResizeWeight(1.0);
-			_splitPane.setDividerLocation(-1);
-		}
+		_splitPane.setResizeWeight(1.0);
+		_splitPane.setDividerLocation(-1);
 	}
 
 	public VirtualTextArea getTextArea() {
