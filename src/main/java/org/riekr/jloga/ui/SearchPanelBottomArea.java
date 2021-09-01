@@ -1,17 +1,17 @@
 package org.riekr.jloga.ui;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.search.SearchException;
-import org.riekr.jloga.search.SearchPredicate;
+import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.concurrent.Future;
 
-import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.search.SearchException;
+import org.riekr.jloga.search.SearchPredicate;
 
 public class SearchPanelBottomArea extends JPanel {
 
@@ -19,11 +19,11 @@ public class SearchPanelBottomArea extends JPanel {
 
 	private @Nullable SearchPanel _resultTextArea;
 
-	private final SearchPanel _parent;
+	private final SearchPanel    _parent;
 	private final JobProgressBar _progressBar;
 
 	private final SearchSelector _searchUI;
-	private Future<?> _searching;
+	private       Future<?>      _searching;
 
 	public SearchPanelBottomArea(SearchPanel parent, JobProgressBar progressBar, int level) {
 		_parent = parent;
@@ -32,7 +32,7 @@ public class SearchPanelBottomArea extends JPanel {
 		_progressBar = progressBar;
 		JPanel searchHeader = new JPanel();
 		searchHeader.setLayout(new BorderLayout());
-		_searchUI = new SearchSelector(level, this::search);
+		_searchUI = new SearchSelector(level, this::search, parent::getTextSource);
 		searchHeader.add(_searchUI, BorderLayout.CENTER);
 
 		JToolBar searchToolbar = new JToolBar();

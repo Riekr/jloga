@@ -1,6 +1,7 @@
 package org.riekr.jloga.search;
 
 import org.riekr.jloga.io.PropsIO;
+import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.misc.Project;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
@@ -33,6 +34,10 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 
 	@Override
 	protected void setupConfigPaneButtons(Container configPaneButtons) {
+		if (AutoDetect.Wizard.class.isAssignableFrom(getClass())) {
+			configPaneButtons.add(newButton(AutoDetect.GLYPH, ((AutoDetect.Wizard)this)::onWizard));
+			configPaneButtons.add(newButtonSpacer());
+		}
 		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, this, _fileExt, _fileDescr, this::updateConfigPanel)));
 		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, this, _fileExt, _fileDescr)));
 		configPaneButtons.add(newButtonSpacer());

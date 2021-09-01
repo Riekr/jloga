@@ -1,11 +1,7 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.react.BoolBehaviourSubject;
-import org.riekr.jloga.react.Observer;
-import org.riekr.jloga.ui.FitOnScreenComponentListener;
-import org.riekr.jloga.ui.MRUComboWithLabels;
-
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
@@ -14,15 +10,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
+import org.riekr.jloga.react.BoolBehaviourSubject;
+import org.riekr.jloga.react.Observer;
+import org.riekr.jloga.ui.FitOnScreenComponentListener;
+import org.riekr.jloga.ui.MRUComboWithLabels;
+
 public abstract class SearchComponentWithExpandablePanel extends JLabel implements SearchComponent {
 
-	private final String _prefsPrefix;
+	private final String               _prefsPrefix;
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();
-	private JFrame _configFrame;
 
+	private JFrame                    _configFrame;
 	private Consumer<SearchPredicate> _onSearchConsumer;
+	private boolean                   _mouseListenerEnabled = true;
 
-	private boolean _mouseListenerEnabled = true;
 	private final MouseListener _mouseListener = new MouseAdapter() {
 		@Override
 		public void mouseEntered(MouseEvent e) {
@@ -49,15 +50,18 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 			_configFrame.setVisible(false);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
-			Container configPane = _configFrame.getContentPane();
-			configPane.setLayout(new BoxLayout(configPane, BoxLayout.Y_AXIS));
+			Box configPane = Box.createVerticalBox();
+			configPane.setBorder(new EmptyBorder(8, 8, 8, 8));
 			setupConfigPane(configPane);
+			_configFrame.getContentPane().add(configPane);
 
-			Box configPaneButtons = new Box(BoxLayout.X_AXIS);
+			Box configPaneButtons = Box.createHorizontalBox();
 			configPane.add(configPaneButtons);
 			setupConfigPaneButtons(configPaneButtons);
-			configPaneButtons.add(Box.createGlue());
+			configPaneButtons.add(newButtonSpacer());
+			configPaneButtons.add(newButtonSpacer());
 			configPaneButtons.add(newButton("Start analysis", this::search));
+			configPaneButtons.add(Box.createGlue());
 
 			addMouseListener(_mouseListener);
 			addMouseListener(new MouseAdapter() {
@@ -98,7 +102,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 		// TODO: ugly!
 		EventQueue.invokeLater(() -> _configVisible.subscribe((visible) -> {
 			if (!visible)
-				editableField.combo.subject.next((String) editableField.combo.getSelectedItem());
+				editableField.combo.subject.next((String)editableField.combo.getSelectedItem());
 		}));
 		return editableField;
 	}
@@ -122,11 +126,9 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 				_configVisible.next(false);
 				return;
 			}
-			Point loc = getLocationOnScreen();
-			Dimension size = getSize();
-			_configFrame.setLocation(loc);
-			_configFrame.setMinimumSize(size);
+			_configFrame.setMinimumSize(getSize());
 			_configFrame.pack();
+			_configFrame.setLocation(getLocationOnScreen());
 			removeMouseListener(_mouseListener);
 			_configFrame.addMouseListener(_mouseListener);
 		} else {

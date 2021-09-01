@@ -1,7 +1,7 @@
 package org.riekr.jloga.misc;
 
-import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.ui.UIUtils;
+import static java.util.Objects.requireNonNullElse;
+import static java.util.stream.Collectors.joining;
 
 import java.awt.*;
 import java.time.Duration;
@@ -14,22 +14,23 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNullElse;
-import static java.util.stream.Collectors.joining;
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.ui.MRUComboWithLabels;
+import org.riekr.jloga.ui.UIUtils;
 
 public interface Project {
 
 	class Field<T> implements Supplier<T>, Consumer<String> {
 
-		public final String key;
-		public final String label;
+		public final String                           key;
+		public final String                           label;
 		public final BiFunction<String, Component, T> mapper;
-		public final String deflt;
+		public final String                           deflt;
 
-		public Component ui;
+		public MRUComboWithLabels<?> ui;
 
 		private String _src;
-		private T _value;
+		private T      _value;
 
 		public Field(String key, String label, BiFunction<String, Component, T> mapper) {
 			this(key, label, mapper, null);
@@ -94,7 +95,7 @@ public interface Project {
 				.filter((f) -> Field.class.isAssignableFrom(f.getType()))
 				.map((f) -> {
 					try {
-						return (Field<?>) f.get(this);
+						return (Field<?>)f.get(this);
 					} catch (IllegalAccessException e) {
 						e.printStackTrace(System.err);
 						return null;

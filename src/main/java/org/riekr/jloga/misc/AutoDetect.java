@@ -6,7 +6,9 @@ import javax.swing.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +23,8 @@ public final class AutoDetect implements Predicate<String> {
 
 	public interface Wizard {
 		void onWizard();
+
+		void setTextSourceSupplier(Supplier<TextSource> textSource);
 	}
 
 	public static final  String                    GLYPH         = "\uD83D\uDD0D";
@@ -47,21 +51,29 @@ public final class AutoDetect implements Predicate<String> {
 	@NotNull
 	public static JButton newButtonFor(TextSource textSource, MRUComboWithLabels<Pattern> patternCombo, MRUComboWithLabels<DateTimeFormatter> formatterCombo) {
 		return UIUtils.newButton(GLYPH, () -> {
+			AutoDetect res = from(textSource);
+			if (res != null) {
+				patternCombo.combo.setValue(res.pattern.pattern());
+				formatterCombo.combo.setValue(res.formatterString);
+			} else {
+				patternCombo.combo.setValue(null);
+				formatterCombo.combo.setValue(null);
+			}
+		});
+	}
+
+	@Nullable
+	public static AutoDetect from(TextSource textSource) {
+		if (textSource != null) {
 			try {
 				for (int i = 0; i < Math.min(_HEAD_LIMIT, textSource.getLineCount()); i++) {
 					AutoDetect res = from(textSource.getText(i));
-					if (res != null) {
-						patternCombo.combo.setValue(res.pattern.pattern());
-						formatterCombo.combo.setValue(res.formatterString);
-						return;
-					}
+					if (res != null)
+						return res;
 				}
-				patternCombo.combo.setValue(null);
-				formatterCombo.combo.setValue(null);
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
-			}
-		});
+			} catch (ExecutionException | InterruptedException ignored) {}
+		}
+		return null;
 	}
 
 	@Nullable
