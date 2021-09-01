@@ -20,7 +20,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 	private final String               _prefsPrefix;
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();
 
-	private JWindow                   _configFrame;
+	private JFrame                    _configFrame;
 	private Consumer<SearchPredicate> _onSearchConsumer;
 	private boolean                   _mouseListenerEnabled = true;
 
@@ -44,7 +44,8 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 	protected void buildUI() {
 		if (_configFrame == null) {
-			_configFrame = new JWindow(SwingUtilities.getWindowAncestor(this));
+			_configFrame = new JFrame();
+			_configFrame.setUndecorated(true);
 			_configFrame.setVisible(false);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
