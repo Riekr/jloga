@@ -8,8 +8,7 @@ public class FitOnScreenComponentListener extends ComponentAdapter {
 
 	public static final FitOnScreenComponentListener INSTANCE = new FitOnScreenComponentListener();
 
-	private FitOnScreenComponentListener() {
-	}
+	private FitOnScreenComponentListener() {}
 
 	@Override
 	public void componentShown(ComponentEvent e) {
@@ -21,13 +20,10 @@ public class FitOnScreenComponentListener extends ComponentAdapter {
 		if (origin.y < 0)
 			dy -= origin.y;
 		Dimension size = comp.getSize();
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = toolkit.getScreenSize();
-		Insets insets = toolkit.getScreenInsets(comp.getGraphicsConfiguration());
-		// try to fix hidpi monitor
-		float k = toolkit.getScreenResolution() / 96.0f;
-		screenSize.width -= (insets.left + insets.right) / k;
-		screenSize.height -= (insets.top + insets.bottom) / k;
+		Dimension screenSize = comp.getGraphicsConfiguration().getBounds().getSize();
+		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(comp.getGraphicsConfiguration());
+		screenSize.width -= insets.left + insets.right;
+		screenSize.height -= insets.top + insets.bottom;
 		// working if it fits only!
 		dx -= Math.max(0, origin.x + dx + size.width - screenSize.width);
 		dy -= Math.max(0, origin.y + dy + size.height - screenSize.height);
