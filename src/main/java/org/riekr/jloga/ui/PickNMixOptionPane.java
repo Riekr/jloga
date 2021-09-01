@@ -50,11 +50,11 @@ public class PickNMixOptionPane {
 		JOptionPane optionPane = new JOptionPane(null, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		JDialog dialog = optionPane.createDialog(parentComponent, _TITLE);
 		ArrayList<Object> options = new ArrayList<>();
-		inputFiles.keySet().stream().map((f) -> new PickNMixDialogEntry(f, (selected, entry) -> {
+		inputFiles.entrySet().stream().map((e) -> new PickNMixDialogEntry(e.getKey(), e.getValue(), (selected, entry) -> {
 					if (selected)
-						selectedFiles.put(f, entry);
+						selectedFiles.put(e.getKey(), entry);
 					else
-						selectedFiles.remove(f);
+						selectedFiles.remove(e.getKey());
 					EventQueue.invokeLater(dialog::pack);
 				}))
 				.forEachOrdered(options::add);
@@ -67,11 +67,11 @@ public class PickNMixOptionPane {
 		optionPane.setMessage(options.toArray());
 		EventQueue.invokeLater(dialog::pack);
 		dialog.setMinimumSize(new Dimension(480, 0));
-//		dialog.setResizable(true);
+		//		dialog.setResizable(true);
 		dialog.setVisible(true);
 		dialog.dispose();
 
-		if (optionPane.getValue() == (Integer) JOptionPane.OK_OPTION) {
+		if (optionPane.getValue() == (Integer)JOptionPane.OK_OPTION) {
 			if (selectedFiles.size() >= 2) {
 				Map<TextSource, MixFileSource.SourceConfig> res = new HashMap<>();
 				selectedFiles.forEach((k, v) -> res.put(inputFiles.get(k), v.getConfig(k)));
@@ -112,7 +112,7 @@ public class PickNMixOptionPane {
 				consumer.accept(null);
 		});
 		Color fg = textField.getForeground();
-		textField.getDocument().addDocumentListener((SimpleDocumentListener) e -> {
+		textField.getDocument().addDocumentListener((SimpleDocumentListener)e -> {
 			try {
 				String text = textField.getText();
 				if (text.length() < initialValue.length())

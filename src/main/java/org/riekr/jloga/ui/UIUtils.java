@@ -1,10 +1,5 @@
 package org.riekr.jloga.ui;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.Main;
-import org.riekr.jloga.react.BoolConsumer;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,14 +11,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.Main;
+import org.riekr.jloga.misc.Formatters;
+import org.riekr.jloga.react.BoolConsumer;
 
 public final class UIUtils {
 
@@ -100,14 +98,14 @@ public final class UIUtils {
 
 	private static void dispatchErrorMessage(Component component, String message, String title) {
 		if (component instanceof MRUComboWithLabels)
-			((MRUComboWithLabels<?>) component).setError(title + ": " + message);
+			((MRUComboWithLabels<?>)component).setError(title + ": " + message);
 		else
 			JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
 	}
 
 	private static void dispatchErrorCleared(Component component) {
 		if (component instanceof MRUComboWithLabels)
-			((MRUComboWithLabels<?>) component).setError(null);
+			((MRUComboWithLabels<?>)component).setError(null);
 	}
 
 	public static Pattern toPattern(Component component, String text, int minGroups) {
@@ -147,11 +145,7 @@ public final class UIUtils {
 	public static DateTimeFormatter toDateTimeFormatter(Component component, String patDate) {
 		if (patDate != null && !patDate.isBlank()) {
 			try {
-				DateTimeFormatter res = new DateTimeFormatterBuilder()
-						.appendPattern(patDate)
-						.toFormatter()
-						.withLocale(Locale.ENGLISH)
-						.withZone(ZoneId.systemDefault());
+				DateTimeFormatter res = Formatters.newDefaultDateTimeFormatter(patDate);
 				dispatchErrorCleared(component);
 				return res;
 			} catch (IllegalArgumentException iae) {

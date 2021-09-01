@@ -1,7 +1,5 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.io.MixFileSource;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -13,27 +11,34 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import org.riekr.jloga.io.MixFileSource;
+import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.AutoDetect;
+
 public class PickNMixDialogEntry extends JComponent {
 
 	private final BiConsumer<Boolean, PickNMixDialogEntry> _consumer;
 
-	private final JCheckBox _checkBox;
-	private Pattern _dateExtract;
-	private DateTimeFormatter _dateFormatter;
-	private Duration _offset;
+	private final JCheckBox         _checkBox;
+	private       Pattern           _dateExtract;
+	private       DateTimeFormatter _dateFormatter;
+	private       Duration          _offset;
 
-	public PickNMixDialogEntry(File f, BiConsumer<Boolean, PickNMixDialogEntry> consumer) {
+	public PickNMixDialogEntry(File f, TextSource textSource, BiConsumer<Boolean, PickNMixDialogEntry> consumer) {
 		_consumer = consumer;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		JComponent dateExtractComp = newCombo("dateExtract", "Date extract pattern:", this::setDateExtract, (ui, text) -> UIUtils.toPattern(ui, text, 1));
+		MRUComboWithLabels<Pattern> dateExtractComp = newCombo("dateExtract", "Date extract pattern:", this::setDateExtract, (ui, text) -> UIUtils.toPattern(ui, text, 1));
 		dateExtractComp.setVisible(false);
 
-		JComponent dateFormatterComp = newCombo("dateFormat", "Date format pattern:", this::setDateFormat, UIUtils::toDateTimeFormatter);
+		MRUComboWithLabels<DateTimeFormatter> dateFormatterComp = newCombo("dateFormat", "Date format pattern:", this::setDateFormat, UIUtils::toDateTimeFormatter);
 		dateFormatterComp.setVisible(false);
 
 		JComponent offsetComp = newCombo("offset", "Date offset:", this::setOffset, UIUtils::toDuration);
 		offsetComp.setVisible(false);
+
+		JButton wizard = AutoDetect.newButtonFor(textSource, dateExtractComp, dateFormatterComp);
+		wizard.setVisible(false);
 
 		_checkBox = new JCheckBox(f.getName());
 		_checkBox.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -43,17 +48,20 @@ public class PickNMixDialogEntry extends JComponent {
 				dateExtractComp.setVisible(true);
 				dateFormatterComp.setVisible(true);
 				offsetComp.setVisible(true);
+				wizard.setVisible(true);
 			} else {
 				consumer.accept(false, this);
 				dateExtractComp.setVisible(false);
 				dateFormatterComp.setVisible(false);
 				offsetComp.setVisible(false);
+				wizard.setVisible(false);
 			}
 		});
 
-		JComponent checkBoxCont = new JPanel();
-		checkBoxCont.setLayout(new BorderLayout());
-		checkBoxCont.add(_checkBox, BorderLayout.LINE_START);
+		Box checkBoxCont = Box.createHorizontalBox();
+		checkBoxCont.add(_checkBox);
+		checkBoxCont.add(Box.createHorizontalGlue());
+		checkBoxCont.add(wizard);
 		add(checkBoxCont);
 		add(dateExtractComp);
 		add(dateFormatterComp);
@@ -63,7 +71,7 @@ public class PickNMixDialogEntry extends JComponent {
 	private <T> MRUComboWithLabels<T> newCombo(String key, String label, Consumer<T> consumer, BiFunction<Component, String, T> mapper) {
 		AtomicReference<MRUComboWithLabels<T>> ref = new AtomicReference<>();
 		ref.set(new MRUComboWithLabels<>("PickNMix." + key, label, consumer, (text) -> mapper.apply(ref.get(), text)));
-		EventQueue.invokeLater(() -> ref.get().combo.subject.next((String) ref.get().combo.getSelectedItem()));
+		EventQueue.invokeLater(() -> ref.get().combo.subject.next((String)ref.get().combo.getSelectedItem()));
 		return ref.get();
 	}
 
