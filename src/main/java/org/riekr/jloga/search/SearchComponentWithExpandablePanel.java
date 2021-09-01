@@ -44,14 +44,14 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 	protected void buildUI() {
 		if (_configFrame == null) {
-			_configFrame = new JWindow();
+			_configFrame = new JWindow(SwingUtilities.getWindowAncestor(this));
 			_configFrame.setVisible(false);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
 			Box configPane = Box.createVerticalBox();
 			configPane.setBorder(new EmptyBorder(8, 8, 8, 8));
 			setupConfigPane(configPane);
-			_configFrame.getContentPane().add(configPane);
+			_configFrame.add(configPane);
 
 			Box configPaneButtons = Box.createHorizontalBox();
 			configPane.add(configPaneButtons);
