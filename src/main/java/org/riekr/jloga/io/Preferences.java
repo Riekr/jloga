@@ -1,20 +1,26 @@
 package org.riekr.jloga.io;
 
-import org.riekr.jloga.Main;
-
 import javax.swing.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.function.Supplier;
 import java.util.prefs.BackingStoreException;
+
+import org.riekr.jloga.Main;
 
 public class Preferences {
 
 	public static final String LAST_OPEN_PATH = "LastOpen";
 	public static final String LAST_SAVE_PATH = "LastSave";
-	public static final String CHARSET = "CharsetCombo";
-	public static final String FONT = "Font";
-	public static final String SEARCH_TYPE = "SearchType";
-	public static final String PAGE_DIVIDER = "PageDivider";
+	public static final String CHARSET        = "CharsetCombo";
+	public static final String FONT           = "Font";
+	public static final String SEARCH_TYPE    = "SearchType";
+	public static final String PAGE_DIVIDER   = "PageDivider";
 
 	private static final java.util.prefs.Preferences _PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
 
@@ -65,7 +71,7 @@ public class Preferences {
 		DefaultComboBoxModel<T> res = new DefaultComboBoxModel<>();
 		if (data != null) {
 			for (Object o : data)
-				res.addElement((T) o);
+				res.addElement((T)o);
 		}
 		return res;
 	}
@@ -82,7 +88,7 @@ public class Preferences {
 		try {
 			String name = load(key, null);
 			if (name != null) {
-				return (Class<T>) Class.forName(name);
+				return (Class<T>)Class.forName(name);
 			}
 		} catch (ClassNotFoundException | ClassCastException ignored) {
 		}
@@ -91,16 +97,18 @@ public class Preferences {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T load(String key, Supplier<T> deflt) {
-		byte[] buf = _PREFS.getByteArray(key, null);
-		if (buf == null)
-			return deflt == null ? null : deflt.get();
-		ByteArrayInputStream bais = new ByteArrayInputStream(buf);
-		try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-			return (T) ois.readObject();
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			return deflt == null ? null : deflt.get();
+		if (!Boolean.getBoolean("jloga.prefs.ignore")) {
+			byte[] buf = _PREFS.getByteArray(key, null);
+			if (buf != null) {
+				ByteArrayInputStream bais = new ByteArrayInputStream(buf);
+				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+					return (T)ois.readObject();
+				} catch (Exception e) {
+					e.printStackTrace(System.err);
+				}
+			}
 		}
+		return deflt == null ? null : deflt.get();
 	}
 
 	@SuppressWarnings("ConstantConditions")
