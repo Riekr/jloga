@@ -1,5 +1,7 @@
 package org.riekr.jloga.ui;
 
+import org.riekr.jloga.react.Observer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
@@ -14,7 +16,7 @@ public class MRUComboWithLabels<T> extends JPanel {
 	}
 
 	public final MRUTextCombo<String> combo;
-	public final JLabel error;
+	public final JLabel               error;
 
 	public MRUComboWithLabels(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
 		this.setLayout(new BorderLayout());
@@ -29,12 +31,12 @@ public class MRUComboWithLabels<T> extends JPanel {
 		error.setVisible(false);
 		this.add(error, BorderLayout.SOUTH);
 
-		combo.subject.subscribe((text) -> {
+		combo.subject.subscribe(Observer.uniq((text) -> {
 			T res = mapper.apply(text);
 			if (res == null)
 				combo.setSelectedIndex(-1);
 			onResult.accept(res);
-		});
+		}));
 	}
 
 	public void setError(String text) {
