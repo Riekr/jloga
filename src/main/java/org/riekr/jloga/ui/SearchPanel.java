@@ -1,16 +1,21 @@
 package org.riekr.jloga.ui;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.FileDropListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class SearchPanel extends JComponent {
+public class SearchPanel extends JComponent implements FileDropListener {
 
 	private static final String _TAB_ADD    = " + ";
 	private static final String _TAB_PREFIX = "Search ";
@@ -132,5 +137,10 @@ public class SearchPanel extends JComponent {
 
 	public TabNavigation getBottomTabsNavigation() {
 		return _bottomTabsNavigation;
+	}
+
+	@Override
+	public void setFileDropListener(@NotNull Consumer<List<File>> consumer) {
+		_textArea.setFileDropListener(consumer);
 	}
 }

@@ -5,15 +5,25 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.TooManyListenersException;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -178,5 +188,29 @@ public final class UIUtils {
 				image.getScaledInstance(32, 32, Image.SCALE_SMOOTH),
 				image.getScaledInstance(64, 64, Image.SCALE_SMOOTH)
 		));
+	}
+
+	public static void setFileDropListener(@NotNull Component component, Consumer<List<File>> consumer) {
+		try {
+			DropTarget dropTarget = new DropTarget();
+			dropTarget.addDropTargetListener(new DropTargetAdapter() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void drop(DropTargetDropEvent dtde) {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY);
+					try {
+						Object data = dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+						if (data instanceof List) {
+							consumer.accept((List<File>)data);
+						}
+					} catch (UnsupportedFlavorException | IOException | ClassCastException e) {
+						e.printStackTrace(System.err);
+					}
+				}
+			});
+			component.setDropTarget(dropTarget);
+		} catch (TooManyListenersException e) {
+			e.printStackTrace(System.err);
+		}
 	}
 }

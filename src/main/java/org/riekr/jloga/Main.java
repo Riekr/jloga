@@ -1,13 +1,9 @@
 package org.riekr.jloga;
 
-import org.drjekyll.fontchooser.FontDialog;
-import org.riekr.jloga.help.AboutPane;
-import org.riekr.jloga.help.MainDesktopHelp;
-import org.riekr.jloga.io.MixFileSource;
-import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.io.TextFileSource;
-import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.ui.*;
+import static org.riekr.jloga.io.Preferences.FONT;
+import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
+import static org.riekr.jloga.ui.UIUtils.newButton;
+import static org.riekr.jloga.ui.UIUtils.newTabHeader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,25 +12,38 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.riekr.jloga.io.Preferences.FONT;
-import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
-import static org.riekr.jloga.ui.UIUtils.newButton;
-import static org.riekr.jloga.ui.UIUtils.newTabHeader;
+import org.drjekyll.fontchooser.FontDialog;
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.help.AboutPane;
+import org.riekr.jloga.help.MainDesktopHelp;
+import org.riekr.jloga.io.MixFileSource;
+import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.io.TextFileSource;
+import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.ui.CharsetCombo;
+import org.riekr.jloga.ui.JobProgressBar;
+import org.riekr.jloga.ui.PickNMixOptionPane;
+import org.riekr.jloga.ui.SearchPanel;
+import org.riekr.jloga.ui.TabNavigation;
+import org.riekr.jloga.ui.UIUtils;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements FileDropListener {
 
-	private final CharsetCombo _charsetCombo;
-	private final JTabbedPane _tabs;
-	private final JobProgressBar _progressBar;
+	private final CharsetCombo            _charsetCombo;
+	private final JTabbedPane             _tabs;
+	private final JobProgressBar          _progressBar;
 	private final Map<Object, TextSource> _openFiles = new LinkedHashMap<>();
 
-	private Font _font;
+	private Font            _font;
 	private MainDesktopHelp _help;
 
 	public Main() {
@@ -63,13 +72,15 @@ public class Main extends JFrame {
 		add(_progressBar, BorderLayout.SOUTH);
 
 		add(_help = new MainDesktopHelp(toolBar));
+
+		setFileDropListener(this::openFiles);
 	}
 
 	private void openMixDialog() {
 		Map<File, TextSource> inputFiles = new HashMap<>();
 		_openFiles.forEach((k, v) -> {
 			if (k instanceof File)
-				inputFiles.put((File) k, v);
+				inputFiles.put((File)k, v);
 		});
 		MixFileSource.Config config = PickNMixOptionPane.show(inputFiles, this);
 		if (config != null) {
@@ -95,7 +106,7 @@ public class Main extends JFrame {
 			if (!selectedFont.equals(_font)) {
 				_font = selectedFont;
 				for (int i = 0; i < _tabs.getTabCount(); i++) {
-					SearchPanel analyzer = (SearchPanel) _tabs.getComponentAt(i);
+					SearchPanel analyzer = (SearchPanel)_tabs.getComponentAt(i);
 					analyzer.setFont(selectedFont);
 				}
 				Preferences.save(FONT, selectedFont);
@@ -138,6 +149,10 @@ public class Main extends JFrame {
 		}
 	}
 
+	public void openFiles(@NotNull List<File> files) {
+		files.forEach(this::openFile);
+	}
+
 	public void openFile(File file) {
 		if (file.canRead())
 			open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset));
@@ -158,6 +173,7 @@ public class Main extends JFrame {
 				add(_tabs);
 			}
 			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
+			searchPanel.setFileDropListener(this::openFiles);
 			_tabs.addTab(searchPanel.toString(), searchPanel);
 			searchPanel.setFont(_font);
 			searchPanel.addHierarchyListener(e -> {
@@ -220,4 +236,9 @@ public class Main extends JFrame {
 		}
 	}
 
+	@Override
+	public void setFileDropListener(@NotNull Consumer<List<File>> consumer) {
+		UIUtils.setFileDropListener(this, this::openFiles);
+		UIUtils.setFileDropListener(_help, this::openFiles);
+	}
 }

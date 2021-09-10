@@ -1,10 +1,8 @@
 package org.riekr.jloga.ui;
 
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.react.BehaviourSubject;
-import org.riekr.jloga.react.Unsubscribable;
+import static java.lang.Math.max;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,31 +10,42 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.Highlighter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-import static java.lang.Math.max;
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.react.BehaviourSubject;
+import org.riekr.jloga.react.Unsubscribable;
 
-public class VirtualTextArea extends JComponent {
+public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private int _lineHeight;
 
-	private int _fromLine = 0;
-	private int _lineCount = 0;
-	private int _allLinesCount = 0;
+	private       int                       _fromLine        = 0;
+	private       int                       _lineCount       = 0;
+	private       int                       _allLinesCount   = 0;
 	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
 
-	private final JScrollPane _scrollPane;
-	private final JTextArea _text;
+	private final JScrollPane         _scrollPane;
+	private final JTextArea           _text;
 	private final LineNumbersTextArea _lineNumbers;
-	private final JScrollBar _scrollBar;
+	private final JScrollBar          _scrollBar;
 
-	private TextSource _textSource;
+	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
-	private Runnable _lineListenerUnsubscribe;
+	private Runnable       _lineListenerUnsubscribe;
 
 	public VirtualTextArea(@Nullable TabNavigation tabNavigation) {
 		_text = ContextMenu.addActionCopy(new JTextArea());
@@ -189,7 +198,7 @@ public class VirtualTextArea extends JComponent {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = max(1, (int) Math.floor(getHeight() / (double) _lineHeight) - 1);
+		final int newValue = max(1, (int)Math.floor(getHeight() / (double)_lineHeight) - 1);
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);
@@ -283,5 +292,11 @@ public class VirtualTextArea extends JComponent {
 			_lineListenerUnsubscribe.run();
 		if (_textSourceUnsubscribable != null)
 			_textSourceUnsubscribable.unsubscribe();
+	}
+
+	@Override
+	public void setFileDropListener(@NotNull Consumer<List<File>> consumer) {
+		UIUtils.setFileDropListener(_text, consumer);
+		UIUtils.setFileDropListener(_lineNumbers, consumer);
 	}
 }
