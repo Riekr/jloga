@@ -1,6 +1,8 @@
 package org.riekr.jloga.ui;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -12,7 +14,27 @@ public class ContextMenu {
 	}
 
 	public static <T extends JTextArea> T addActionCopy(T component) {
-		return addActionCopy(component, component::getSelectedText);
+		return addActionCopy(component, () -> {
+			String text = component.getSelectedText();
+			if (text == null) {
+				// try to fetch first highlight
+				Highlighter highlighter = component.getHighlighter();
+				if (highlighter != null) {
+					Highlighter.Highlight[] highlights = highlighter.getHighlights();
+					if (highlights != null && highlights.length > 0) {
+						Highlighter.Highlight highlight = highlights[0];
+						int start = highlight.getStartOffset();
+						int end = highlight.getEndOffset();
+						try {
+							text = component.getText(start, end - start);
+						} catch (BadLocationException e) {
+							e.printStackTrace(System.err);
+						}
+					}
+				}
+			}
+			return text;
+		});
 	}
 
 	public static <T extends JLabel> T addActionCopy(T component) {

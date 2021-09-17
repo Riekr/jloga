@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import static java.lang.Integer.min;
 import static java.lang.Math.max;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
@@ -7,17 +8,20 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
+import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -45,7 +49,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
-	private Runnable       _lineListenerUnsubscribe;
+
+	private @Nullable IntConsumer _lineListener;
+	private @Nullable Runnable    _lineListenerUnsubscribe;
 
 	public VirtualTextArea(@Nullable TabNavigation tabNavigation) {
 		_text = ContextMenu.addActionCopy(new JTextArea());
@@ -80,6 +86,28 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			protected void onNextTab() {
 				if (tabNavigation != null)
 					tabNavigation.goToNextTab();
+			}
+		});
+		_text.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (_lineListener == null || e.getModifiersEx() != 0)
+					return;
+				Integer line = null;
+				switch (e.getKeyCode()) {
+					case 38: // up
+						if ((line = _highlightedLine.get()) != null)
+							line = max(0, line - 1);
+						break;
+					case 40: // down
+						if ((line = _highlightedLine.get()) != null)
+							line = min(_allLinesCount - 1, line + 1);
+						break;
+				}
+				if (line != null) {
+					setHighlightedLine(line);
+					_lineListener.accept(line);
+				}
 			}
 		});
 		_text.setAutoscrolls(false);
@@ -145,11 +173,30 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void toBeginning() {
-		setFromLine(0);
+		setHighlightedLine(0);
 	}
 
 	public void toEnding() {
-		setFromLine(_allLinesCount - _lineCount);
+		if (_textSource.isIndexing())
+			setHighlightedLine(_allLinesCount);
+		else {
+			int limit = _allLinesCount - 100;
+			TextSource.EXECUTOR.submit(() -> {
+				for (int line = _allLinesCount; line > limit; line--) {
+					try {
+						String text = _textSource.getText(line);
+						if (text != null && !text.isEmpty()) {
+							setHighlightedLine(line);
+							return;
+						}
+					} catch (ExecutionException | InterruptedException e) {
+						e.printStackTrace(System.err);
+						break;
+					}
+				}
+				setHighlightedLine(_allLinesCount);
+			});
+		}
 	}
 
 	public void centerOn(int line) {
@@ -233,12 +280,14 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			try {
 				Highlighter highlighter = _text.getHighlighter();
 				highlighter.removeAllHighlights();
-				if (line >= 0 && line < _lineCount) {
+				if (line >= 0 && line <= _lineCount) {
+					int start = _text.getLineStartOffset(line);
 					highlighter.addHighlight(
-							_text.getLineStartOffset(line),
+							start,
 							_text.getLineEndOffset(line),
-							new DefaultHighlightPainter(_text.getForeground().darker())
+							new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
 					);
+					_text.setCaretPosition(start);
 				}
 			} catch (BadLocationException e) {
 				e.printStackTrace(System.err);
@@ -263,6 +312,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_lineListenerUnsubscribe.run();
 			_lineListenerUnsubscribe = null;
 		}
+		_lineListener = listener;
 		if (listener != null) {
 			MouseListener mouseListener = new MouseAdapter() {
 				@Override
@@ -284,6 +334,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	public void setHighlightedLine(Integer line) {
 		_highlightedLine.next(line);
+		if (line != null) {
+			if (line < _fromLine)
+				setFromLine(line);
+			else if (line > (_fromLine + _lineCount))
+				setFromLine(line - _lineCount);
+		}
 	}
 
 	public void onClose() {
