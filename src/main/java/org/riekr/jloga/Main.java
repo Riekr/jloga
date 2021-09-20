@@ -3,12 +3,14 @@ package org.riekr.jloga;
 import static org.riekr.jloga.io.Preferences.FONT;
 import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
 import static org.riekr.jloga.ui.UIUtils.newButton;
+import static org.riekr.jloga.ui.UIUtils.newRadioButton;
 import static org.riekr.jloga.ui.UIUtils.newTabHeader;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,6 +31,7 @@ import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.CharsetCombo;
 import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
@@ -60,6 +63,7 @@ public class Main extends JFrame implements FileDropListener {
 		toolBar.addSeparator();
 		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont, "Select text font"));
 		toolBar.add(newButton("\u21C5", this::selectPagingSize, "Select page scroll size"));
+		toolBar.add(newButton("\uD83D\uDD0B", this::openSystemConfigDialog, "System configuration"));
 		toolBar.addSeparator();
 		toolBar.add(newButton("\u292D", this::openMixDialog, "Pick'n'mix opened log files"));
 		toolBar.add(Box.createHorizontalGlue());
@@ -130,6 +134,27 @@ public class Main extends JFrame implements FileDropListener {
 			if (idx != -1)
 				Preferences.setPageDivider(idx + 1);
 		}
+	}
+
+	private void openSystemConfigDialog() {
+		JOptionPane optionPane = new JOptionPane(null, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
+		JDialog dialog = optionPane.createDialog(this, "System configuration");
+		ArrayList<Object> options = new ArrayList<>();
+		ButtonGroup threadingOptions = new ButtonGroup();
+		for (Map.Entry<String, String> e : SimpleSearchPredicate.getModels().entrySet()) {
+			options.add(newRadioButton(
+					threadingOptions,
+					e.getValue(),
+					e.getKey(),
+					() -> SimpleSearchPredicate.setModel(e.getKey()),
+					e.getKey().equals(SimpleSearchPredicate.getModel())
+			));
+		}
+		optionPane.setMessage(options.toArray());
+		EventQueue.invokeLater(dialog::pack);
+		dialog.setMinimumSize(new Dimension(480, 0));
+		dialog.setVisible(true);
+		dialog.dispose();
 	}
 
 	public void openFileDialog() {

@@ -213,4 +213,13 @@ public final class UIUtils {
 			e.printStackTrace(System.err);
 		}
 	}
+
+	public static JRadioButton newRadioButton(ButtonGroup group, String text, String tooltip, Runnable onSelection, boolean selected) {
+		JRadioButton radioButton = new JRadioButton(text);
+		radioButton.setSelected(selected);
+		radioButton.setToolTipText(tooltip);
+		radioButton.addActionListener((e) -> onSelection.run());
+		group.add(radioButton);
+		return radioButton;
+	}
 }

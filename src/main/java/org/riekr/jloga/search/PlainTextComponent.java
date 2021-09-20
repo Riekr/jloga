@@ -1,19 +1,19 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.misc.IntObjPredicate;
+import javax.swing.*;
+import java.util.function.Consumer;
+
+import org.riekr.jloga.misc.Predicates;
 import org.riekr.jloga.misc.SearchComboEntry;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.MRUTextCombo;
 import org.riekr.jloga.ui.UIUtils;
-
-import javax.swing.*;
-import java.util.Locale;
-import java.util.function.Consumer;
 
 public class PlainTextComponent extends Box implements SearchComponent {
 
 	private final MRUTextCombo<SearchComboEntry> _combo;
-	private Unsubscribable _comboListener;
+	private       Unsubscribable                 _comboListener;
 
 	public PlainTextComponent(int level) {
 		super(BoxLayout.LINE_AXIS);
@@ -45,16 +45,11 @@ public class PlainTextComponent extends Box implements SearchComponent {
 		if (consumer != null) {
 			_comboListener = _combo.subject.subscribe((value) -> {
 				if (value != null && value.pattern != null && !value.pattern.isEmpty()) {
-					final String pattern = value.pattern;
-					IntObjPredicate<String> predicate;
-					if (value.caseInsensitive) {
-						String upperPattern = pattern.toUpperCase(Locale.ROOT);
-						predicate = (line, text) -> text.toUpperCase(Locale.ROOT).contains(upperPattern);
-					} else
-						predicate = (line, text) -> text.contains(pattern);
-					if (value.negate)
-						predicate = predicate.negate();
-					consumer.accept(SearchPredicate.simple(predicate));
+					consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyContains(
+							value.pattern,
+							value.caseInsensitive,
+							value.negate
+					)));
 				}
 			});
 		}
