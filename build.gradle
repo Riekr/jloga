@@ -7,8 +7,9 @@ repositories {
 	mavenCentral()
 }
 
+def mainClassName = 'org.riekr.jloga.Main'
 application {
-	mainClassName 'org.riekr.jloga.Main'
+	mainClass = mainClassName
 }
 
 java {
@@ -25,7 +26,7 @@ compileJava {
 }
 
 dependencies {
-	implementation 'com.formdev:flatlaf:1.5'
+	implementation 'com.formdev:flatlaf:1.6'
 	implementation 'org.drjekyll:fontchooser:2.4'
 	compileOnly 'org.jetbrains:annotations:22.0.0'
 }
@@ -33,12 +34,8 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-				"Implementation-Version": "0.0.2",
-				"Main-Class": mainClassName,
+				"Implementation-Version": "0.0.3",
+				"Main-Class": mainClassName
 		)
-	}
-
-	from {
-		configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 }
