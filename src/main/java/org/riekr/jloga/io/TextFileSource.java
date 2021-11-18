@@ -1,10 +1,6 @@
 package org.riekr.jloga.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.react.IntBehaviourSubject;
-import org.riekr.jloga.react.Unsubscribable;
-import org.riekr.jloga.search.SearchPredicate;
+import static java.nio.file.StandardOpenOption.READ;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -20,7 +16,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -29,15 +24,18 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-import static java.nio.file.StandardOpenOption.READ;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Unsubscribable;
 
 public class TextFileSource implements TextSource {
 
-	private static final int PAGE_SIZE = 1024 * 1024 * 2; // 2MB
+	// private static final int PAGE_SIZE = 1024 * 1024 * 2; // 2MB
+	private static final int PAGE_SIZE = 1024 * 1024; // 1MB
 
 	static final class IndexData {
 		final long startPos;
@@ -49,19 +47,19 @@ public class TextFileSource implements TextSource {
 	}
 
 
-	private final Path _file;
+	private final Path    _file;
 	private final Charset _charset;
 
-	private final Future<?> _indexing;
-	private NavigableMap<Integer, IndexData> _index;
+	private final Future<?>                        _indexing;
+	private       NavigableMap<Integer, IndexData> _index;
 
-	private int _lineCount;
+	private       int                 _lineCount;
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
-	private @NotNull ProgressListener _indexingListener = ProgressListener.NOP;
-	private final Set<Runnable> _indexChangeListeners = new CopyOnWriteArraySet<>();
+	private @NotNull ProgressListener _indexingListener     = ProgressListener.NOP;
+	private final    Set<Runnable>    _indexChangeListeners = new CopyOnWriteArraySet<>();
 
-	private int _fromLine = Integer.MAX_VALUE;
+	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
 
 	public TextFileSource(Path file, Charset charset) {
@@ -106,7 +104,7 @@ public class TextFileSource implements TextSource {
 					_indexChangeListeners.forEach(Runnable::run);
 					_indexChangeListeners.clear();
 				}
-				System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms");
+				System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
 			} catch (ClosedByInterruptException ignored) {
 				System.out.println("Indexing cancelled");
 			} catch (IOException e) {
@@ -151,26 +149,27 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	@Override
-	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException {
-		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
-		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
-		long start = System.currentTimeMillis();
-		try (BufferedReader reader = Files.newBufferedReader(_file, _charset)) {
-			int lineNumber = 0;
-			String line;
-			while (running.getAsBoolean() && (line = reader.readLine()) != null) {
-				predicate.verify(lineNumber, line);
-				progressListener.onProgressChanged(lineNumber++, _lineCount);
-			}
-		} catch (IOException e) {
-			throw new ExecutionException(e);
-		} finally {
-			predicate.end();
-			progressListener.onProgressChanged(_lineCount, _lineCount);
-			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
-		}
-	}
+	// TODO: should fill search results while indexing but is causing search line corruptions, should investigate why
+	// @Override
+	// public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException {
+	// 	// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
+	// 	progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
+	// 	long start = System.currentTimeMillis();
+	// 	try (BufferedReader reader = Files.newBufferedReader(_file, _charset)) {
+	// 		int lineNumber = 0;
+	// 		String line;
+	// 		while (running.getAsBoolean() && (line = reader.readLine()) != null) {
+	// 			predicate.verify(lineNumber, line);
+	// 			progressListener.onProgressChanged(lineNumber++, _lineCount);
+	// 		}
+	// 	} catch (IOException e) {
+	// 		throw new ExecutionException(e);
+	// 	} finally {
+	// 		predicate.end();
+	// 		progressListener.onProgressChanged(_lineCount, _lineCount);
+	// 		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
+	// 	}
+	// }
 
 	@Override
 	public synchronized String getText(int line) throws ExecutionException, InterruptedException {
@@ -179,7 +178,7 @@ public class TextFileSource implements TextSource {
 			IndexData indexData = fromLineE.getValue();
 			int fromLine = fromLineE.getKey();
 			if (indexData.data == null || (_lines = indexData.data.get()) == null) {
-//				System.out.println("MISS");
+				//				System.out.println("MISS");
 				Integer toLine = _index.higherKey(line);
 				if (toLine == null)
 					toLine = _lineCount;
@@ -194,7 +193,7 @@ public class TextFileSource implements TextSource {
 					return "";
 				}
 			} else {
-//				System.out.println("HIT");
+				//				System.out.println("HIT");
 				_fromLine = fromLine;
 			}
 		}

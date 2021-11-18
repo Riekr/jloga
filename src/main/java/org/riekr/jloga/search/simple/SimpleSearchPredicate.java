@@ -88,7 +88,6 @@ public class SimpleSearchPredicate {
 	public static Factory FACTORY;
 
 	static {
-
 		String forcedValue = System.getProperty("jloga.search.multithreading");
 		if (forcedValue == null || (forcedValue = forcedValue.trim()).isEmpty())
 			FACTORY = Impl.valueOf(Preferences.load(_PREF_MODEL, () -> (Runtime.getRuntime().availableProcessors() > 1 ? Impl.EXECUTORS : Impl.SYNC).toString()));
