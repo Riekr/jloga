@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -130,7 +131,12 @@ public class TextFileSource implements TextSource {
 								lines[line - fromLine] = getText(line);
 							EventQueue.invokeLater(() -> consumer.accept(new StringsReader(lines)));
 						}
-					} catch (ExecutionException | InterruptedException ignored) {
+					} catch (Throwable e) {
+						_indexChangeListeners.remove(this);
+						consumer.accept(new StringsReader.ErrorReader(e));
+						if (e instanceof RuntimeException)
+							throw (RuntimeException)e;
+						throw new RuntimeException(e);
 					}
 				}
 			});
@@ -190,7 +196,7 @@ public class TextFileSource implements TextSource {
 					return "";
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
-					return "";
+					throw new UncheckedIOException(e);
 				}
 			} else {
 				//				System.out.println("HIT");

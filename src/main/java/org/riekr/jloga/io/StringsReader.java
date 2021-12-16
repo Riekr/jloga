@@ -1,16 +1,22 @@
 package org.riekr.jloga.io;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.Reader;
 
+import org.jetbrains.annotations.NotNull;
+
 public class StringsReader extends Reader {
 
+	public static class ErrorReader extends StringsReader {
+		public ErrorReader(@NotNull Throwable e) {
+			super(new String[]{e.getLocalizedMessage()});
+		}
+	}
+
 	private String[] _strings;
-	private int _i = 0;
-	private int _start = 0;
-	private int[] _mark;
+	private int      _i     = 0;
+	private int      _start = 0;
+	private int[]    _mark;
 
 	public StringsReader(@NotNull String[] strings) {
 		_strings = strings;
