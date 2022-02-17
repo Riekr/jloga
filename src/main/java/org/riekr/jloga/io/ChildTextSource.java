@@ -27,10 +27,10 @@ public class ChildTextSource implements FilteredTextSource {
 		}
 	}
 
-	private final TextSource _tie;
+	private final TextSource              _tie;
 	private final TreeMap<Integer, Range> _lines = new TreeMap<>();
 
-	private int _lineCount = 0;
+	private       int                 _lineCount        = 0;
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
 	private int _lastLine = -1;
@@ -40,9 +40,8 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	public void addLine(int line) {
-		if (line <= _lastLine)
-			throw new IllegalArgumentException("New line " + line + " must be <= of " + _lastLine);
-		_lastLine = line;
+		if (line > _lastLine)
+			_lastLine = line;
 		Map.Entry<Integer, Range> entry = _lines.floorEntry(line);
 		if (entry == null) {
 			_lines.put(_lineCount++, new Range(line));
