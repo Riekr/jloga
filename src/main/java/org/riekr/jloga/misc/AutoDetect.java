@@ -36,16 +36,16 @@ public final class AutoDetect implements Predicate<String> {
 		_AUTO_DETECTS.add(new AutoDetect(compile("^(\\d\\d\\d\\d/\\d\\d/\\d\\d \\| \\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d) \\| \\["), "uuuu/MM/dd | HH:mm:ss.SSS"));
 
 		// 30 Aug 2021 16:46:14,186 [Thread-1] INFO ...
-		_AUTO_DETECTS.add(new AutoDetect(compile("^(\\d+ \\w+ \\d+ \\d+:\\d+:\\d+,\\d+) \\["), "dd MMM uuuu HH\\:mm\\:ss,SSS"));
+		_AUTO_DETECTS.add(new AutoDetect(compile("^(\\d+ \\w+ \\d+ \\d+:\\d+:\\d+,\\d+) \\["), "dd MMM uuuu HH:mm:ss,SSS"));
 
 		// <rec><d>2021/08/30 16:46:24:099</d><u>...
-		_AUTO_DETECTS.add(new AutoDetect(compile("^<rec><d>(\\d\\d\\d\\d/\\d\\d/\\d\\d \\d\\d:\\d\\d:\\d\\d:\\d\\d\\d)</d>"), "uuuu/MM/dd HH\\:mm\\:ss\\:SSS"));
+		_AUTO_DETECTS.add(new AutoDetect(compile("^<rec><d>(\\d\\d\\d\\d/\\d\\d/\\d\\d \\d\\d:\\d\\d:\\d\\d:\\d\\d\\d)</d>"), "uuuu/MM/dd HH:mm:ss:SSS"));
 
 		// 2021-08-30 17:23:13,787 INFO  [http-nio-...
-		_AUTO_DETECTS.add(new AutoDetect(compile("^(\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d,\\d\\d\\d) \\w+\\s+\\["), "uuuu-MM-dd HH\\:mm\\:ss,SSS"));
+		_AUTO_DETECTS.add(new AutoDetect(compile("^(\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d,\\d\\d\\d) \\w+\\s+\\["), "uuuu-MM-dd HH:mm:ss,SSS"));
 
 		// 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-		_AUTO_DETECTS.add(new AutoDetect(compile("^[\\d\\.]+ - [\\w\\d\\.]+ \\[(\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d) (?:-)?\\d+\\] \""), "dd/MMM/uuuu\\:HH\\:mm\\:ss"));
+		_AUTO_DETECTS.add(new AutoDetect(compile("^[\\d\\.]+ - [\\w\\d\\.]+ \\[(\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d) (?:-)?\\d+\\] \""), "dd/MMM/uuuu:HH:mm:ss"));
 	}
 
 	@NotNull
