@@ -111,6 +111,17 @@ public class Preferences {
 		return deflt == null ? null : deflt.get();
 	}
 
+	public static <T extends Enum<T>> T load(String key, Supplier<T> deflt, Class<T> enumClass) {
+		String val = load(key, null);
+		if (val == null)
+			return deflt.get();
+		try {
+			return Enum.valueOf(enumClass, val);
+		} catch (IllegalArgumentException e) {
+			return deflt.get();
+		}
+	}
+
 	@SuppressWarnings("ConstantConditions")
 	public static int getPageDivider() {
 		if (_PAGE_DIVIDER == null)

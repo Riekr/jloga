@@ -17,6 +17,10 @@ import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchPredicate;
 
+/**
+ * @deprecated Not working as expected, miss matches in the tail
+ */
+@SuppressWarnings("unused") @Deprecated
 class MultiThreadSearchPredicate implements SearchPredicate {
 
 	private static final int _PSIZE = Integer.max(1, (Runtime.getRuntime().availableProcessors() / 2) - 1);

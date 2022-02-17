@@ -67,22 +67,22 @@ public class SimpleSearchPredicate {
 		},
 
 
-		EXECUTORS {
-			@Override
-			public String description() {
-				return "Executor thread-pool, fastest, highest memory use.";
-			}
-
-			@Override
-			public SearchPredicate from(@NotNull Predicate<String> predicate) {
-				return new MultiThreadSearchPredicate(predicate);
-			}
-
-			@Override
-			public SearchPredicate from(@NotNull Supplier<Predicate<String>> predicateSupplier) {
-				return new MultiThreadSearchPredicate(predicateSupplier);
-			}
-		},
+		// EXECUTORS {
+		// 	@Override
+		// 	public String description() {
+		// 		return "Executor thread-pool, fastest, highest memory use.";
+		// 	}
+		//
+		// 	@Override
+		// 	public SearchPredicate from(@NotNull Predicate<String> predicate) {
+		// 		return new MultiThreadSearchPredicate(predicate);
+		// 	}
+		//
+		// 	@Override
+		// 	public SearchPredicate from(@NotNull Supplier<Predicate<String>> predicateSupplier) {
+		// 		return new MultiThreadSearchPredicate(predicateSupplier);
+		// 	}
+		// }
 	}
 
 	public static Factory FACTORY;
@@ -90,7 +90,7 @@ public class SimpleSearchPredicate {
 	static {
 		String forcedValue = System.getProperty("jloga.search.multithreading");
 		if (forcedValue == null || (forcedValue = forcedValue.trim()).isEmpty())
-			FACTORY = Impl.valueOf(Preferences.load(_PREF_MODEL, () -> (Runtime.getRuntime().availableProcessors() > 1 ? Impl.EXECUTORS : Impl.SYNC).toString()));
+			FACTORY = Preferences.load(_PREF_MODEL, () -> (Runtime.getRuntime().availableProcessors() > 1 ? Impl.STREAM : Impl.SYNC), Impl.class);
 		else
 			FACTORY = Impl.valueOf(forcedValue.toUpperCase(Locale.ROOT));
 		System.out.println("SimpleSearchPredicate factory is " + FACTORY);
