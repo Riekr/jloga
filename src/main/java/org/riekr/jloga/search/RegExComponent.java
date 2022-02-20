@@ -46,8 +46,12 @@ public class RegExComponent extends Box implements SearchComponent {
 		if (consumer != null) {
 			_comboListener = _combo.subject.subscribe((value) -> {
 				Pattern pat = UIUtils.toPattern(this, value.pattern, 0, value.caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
-				if (pat != null)
-					consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyFind(pat, value.negate)));
+				if (pat != null) {
+					if (pat.matcher("").groupCount() == 0)
+						consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyFind(pat, value.negate)));
+					else
+						consumer.accept(new RegExExtract(pat));
+				}
 			});
 		}
 	}
