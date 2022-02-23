@@ -25,11 +25,14 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 
@@ -80,7 +83,13 @@ public class TextFileSource implements TextSource {
 					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			CharsetEncoder encoder = _charset.newEncoder();
 			try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
-				long totalSize = fileChannel.size();
+				final long totalSize = fileChannel.size();
+				final MutableLong pos = new MutableLong();
+				ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+					_indexingListener.onProgressChanged(pos.value, totalSize);
+					_indexChangeListeners.forEach(Runnable::run);
+					_lineCountSubject.next(_lineCount);
+				}, 0, 200, TimeUnit.MILLISECONDS);
 				try {
 					while (fileChannel.read(byteBuffer) > 0) {
 						decoder.decode(byteBuffer.flip(), charBuffer, false);
@@ -91,15 +100,13 @@ public class TextFileSource implements TextSource {
 								charBuffer.mark();
 							}
 						}
-						long pos = fileChannel.position();
-						_index.put(_lineCount, new IndexData(pos - encoder.encode(charBuffer.reset()).limit()));
-						_indexingListener.onProgressChanged(pos, totalSize);
-						_indexChangeListeners.forEach(Runnable::run);
+						pos.value = fileChannel.position();
+						_index.put(_lineCount, new IndexData(pos.value - encoder.encode(charBuffer.reset()).limit()));
 						charBuffer.flip();
 						byteBuffer.flip();
-						_lineCountSubject.next(_lineCount);
 					}
 				} finally {
+					updateTask.cancel(false);
 					_lineCountSubject.last();
 					_indexingListener.onProgressChanged(totalSize, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);

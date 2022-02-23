@@ -1,24 +1,32 @@
 package org.riekr.jloga.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.react.Unsubscribable;
-import org.riekr.jloga.search.SearchException;
-import org.riekr.jloga.search.SearchPredicate;
-
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.misc.MutableInt;
+import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.SearchException;
+import org.riekr.jloga.search.SearchPredicate;
+
 public interface TextSource {
 
-	ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 2, 10L, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(2);
 	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
 
 	private static void executeRequestText(Runnable task) {
@@ -92,17 +100,18 @@ public interface TextSource {
 
 	default void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
-		progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
+		ProgressListener fullProgressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
 		long start = System.currentTimeMillis();
-		int lineCount = getLineCount();
+		final int lineCount = getLineCount();
+		final MutableInt line = new MutableInt();
+		ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> fullProgressListener.onProgressChanged(line.value, lineCount), 0, 200, TimeUnit.MILLISECONDS);
 		try {
-			for (int line = 0; line <= getLineCount() && running.getAsBoolean(); line++) {
-				predicate.verify(line, getText(line));
-				progressListener.onProgressChanged(line, lineCount);
-			}
+			for (line.value = 0; line.value <= getLineCount() && running.getAsBoolean(); line.value++)
+				predicate.verify(line.value, getText(line.value));
 		} finally {
 			predicate.end();
-			progressListener.onProgressChanged(lineCount, lineCount);
+			updateTask.cancel(false);
+			fullProgressListener.onProgressChanged(lineCount, lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
 		}
 	}
@@ -114,14 +123,19 @@ public interface TextSource {
 	default void requestSave(File file, ProgressListener listener) {
 		EXECUTOR.execute(() -> {
 			try {
-				int lineCount = getLineCount();
+				final int lineCount = getLineCount();
+				final MutableInt ln = new MutableInt();
+				ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(
+						() -> listener.onProgressChanged(ln.value, lineCount),
+						0, 200, TimeUnit.MILLISECONDS
+				);
 				try (BufferedWriter w = new BufferedWriter(new FileWriter(file, false))) {
-					for (int ln = 0; ln < lineCount; ln++) {
-						w.write(getText(ln));
+					for (ln.value = 0; ln.value < lineCount; ln.value++) {
+						w.write(getText(ln.value));
 						w.newLine();
-						listener.onProgressChanged(ln, lineCount);
 					}
 				} finally {
+					updateTask.cancel(false);
 					listener.onProgressChanged(lineCount, lineCount);
 				}
 			} catch (Throwable e) {

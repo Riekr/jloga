@@ -2,6 +2,7 @@ package org.riekr.jloga.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.PagedIntBag;
 
 import java.io.File;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -24,10 +27,10 @@ import static java.util.Objects.requireNonNullElse;
 public class MixFileSource implements TextSource {
 
 	public static final class SourceConfig {
-		public final @NotNull File file;
-		private final Matcher _matcher;
-		private final DateTimeFormatter _formatter;
-		private final Duration _offset;
+		public final @NotNull File              file;
+		private final         Matcher           _matcher;
+		private final         DateTimeFormatter _formatter;
+		private final         Duration          _offset;
 
 		public SourceConfig(@NotNull File file, Pattern dateExtract, DateTimeFormatter formatter, Duration offset) {
 			this.file = file;
@@ -48,8 +51,8 @@ public class MixFileSource implements TextSource {
 	}
 
 	public static final class Config {
-		public final @NotNull Map<TextSource, SourceConfig> sources;
-		public final @Nullable Predicate<Instant> predicate;
+		public final @NotNull  Map<TextSource, SourceConfig> sources;
+		public final @Nullable Predicate<Instant>            predicate;
 
 		public Config(
 				@NotNull Map<TextSource, SourceConfig> sources, @Nullable Predicate<Instant> predicate) {
@@ -59,13 +62,13 @@ public class MixFileSource implements TextSource {
 	}
 
 	static final class ScanData implements Comparable<ScanData> {
-		final int idx;
-		final TextSource src;
+		final int          idx;
+		final TextSource   src;
 		final SourceConfig _sourceConfig;
-		final int len;
-		int pos;
+		final int          len;
+		int     pos;
 		Instant instant;
-		int pass = 0;
+		int     pass = 0;
 
 		ScanData(int idx, TextSource src, SourceConfig sourceConfig, int len) {
 			this.idx = idx;
@@ -85,32 +88,37 @@ public class MixFileSource implements TextSource {
 		}
 	}
 
-	private final TextSource[] _sources;
-	private final Future<?> _indexing;
-	private final PagedIntBag _index = new PagedIntBag(2);
-	private final int _padding;
+	private final     TextSource[]     _sources;
+	private final     Future<?>        _indexing;
+	private final     PagedIntBag      _index = new PagedIntBag(2);
+	private final     int              _padding;
 	private @Nullable ProgressListener _indexingListener;
 
 	public MixFileSource(@NotNull Config config) {
 		if (config.sources.size() < 2)
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
-		_padding = (int) (Math.log10(_sources.length)) + 1;
+		_padding = (int)(Math.log10(_sources.length)) + 1;
 		_indexing = EXECUTOR.submit(() -> {
-			int totLineCount = 0;
+			final MutableInt totLineCount = new MutableInt();
+			final MutableInt parsedLines = new MutableInt();
+			ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+				if (_indexingListener != null)
+					_indexingListener.onProgressChanged(parsedLines.value, totLineCount.value);
+			}, 0, 200, TimeUnit.MILLISECONDS);
 			try {
 				int idx = 0;
 				ScanData[] data = new ScanData[_sources.length];
 				for (Map.Entry<TextSource, SourceConfig> entry : config.sources.entrySet()) {
 					final TextSource textSource = entry.getKey();
 					int lineCount = textSource.getLineCount();
-					totLineCount += lineCount;
+					totLineCount.value += lineCount;
 					_sources[idx] = textSource;
 					data[idx] = new ScanData(idx, textSource, entry.getValue(), lineCount);
 					idx++;
 				}
 				if (_indexingListener != null)
-					_indexingListener.onProgressChanged(0, totLineCount);
+					_indexingListener.onProgressChanged(0, totLineCount.value);
 				final BooleanSupplier hasData = () -> {
 					for (ScanData sd : data) {
 						if (sd.hasData())
@@ -118,7 +126,6 @@ public class MixFileSource implements TextSource {
 					}
 					return false;
 				};
-				int parsedLines = 0;
 				final Predicate<Instant> predicate = config.predicate == null ? (i) -> true : config.predicate;
 				while (hasData.getAsBoolean()) {
 					// fill instants, I may do it only for the 1st entry in "data"
@@ -130,7 +137,7 @@ public class MixFileSource implements TextSource {
 							sd.instant = sd._sourceConfig.getInstant(line);
 							if (sd.instant == null) {
 								sd.pos++;
-								parsedLines++;
+								parsedLines.value++;
 							}
 						}
 					}
@@ -148,7 +155,7 @@ public class MixFileSource implements TextSource {
 							_index.add(sd.idx, sd.pos);
 						}
 						sd.pos++;
-						parsedLines++;
+						parsedLines.value++;
 						// collect adjacent lines without instant
 						if (sd.hasData()) {
 							do {
@@ -158,7 +165,7 @@ public class MixFileSource implements TextSource {
 									if (predicate.test(null))
 										_index.add(sd.idx, sd.pos);
 									sd.pos++;
-									parsedLines++;
+									parsedLines.value++;
 								} else
 									break;
 							} while (sd.hasData());
@@ -168,16 +175,15 @@ public class MixFileSource implements TextSource {
 						}
 						sd.pass++;
 					}
-					if (_indexingListener != null)
-						_indexingListener.onProgressChanged(parsedLines, totLineCount);
 				}
 				_index.seal();
 				System.out.println("Mixed " + _index.size() + " lines of " + totLineCount + " using " + _index.pages() + " pages");
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 			} finally {
+				updateTask.cancel(false);
 				if (_indexingListener != null) {
-					_indexingListener.onProgressChanged(totLineCount, totLineCount);
+					_indexingListener.onProgressChanged(totLineCount.value, totLineCount.value);
 					_indexingListener = null;
 				}
 			}
@@ -192,7 +198,7 @@ public class MixFileSource implements TextSource {
 		int srcId = data[0];
 		int srcLine = data[1];
 		String text = _sources[srcId].getText(srcLine);
-		return " ".repeat(Math.max(0, _padding - ((int) Math.log10(srcId) + 1))) +
+		return " ".repeat(Math.max(0, _padding - ((int)Math.log10(srcId) + 1))) +
 				srcId +
 				" | " +
 				text;
@@ -206,7 +212,7 @@ public class MixFileSource implements TextSource {
 	@Override
 	public int getLineCount() throws ExecutionException, InterruptedException {
 		_indexing.get();
-		return (int) _index.size() + 1;
+		return (int)_index.size() + 1;
 	}
 
 	@Override
