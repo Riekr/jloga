@@ -34,6 +34,8 @@ public class StringsReader extends Reader {
 		if (_i == _strings.length)
 			return -1;
 		String string = _strings[_i];
+		if (string == null)
+			return 0;
 		int strLen = string.length();
 		int strAvail = strLen - _start;
 		if (strAvail < len)
