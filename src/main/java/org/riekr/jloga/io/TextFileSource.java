@@ -107,7 +107,7 @@ public class TextFileSource implements TextSource {
 					}
 				} finally {
 					updateTask.cancel(false);
-					_lineCountSubject.last();
+					_lineCountSubject.last(_lineCount);
 					_indexingListener.onProgressChanged(totalSize, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
 					_indexChangeListeners.clear();
