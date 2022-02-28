@@ -50,7 +50,7 @@ public class RegExComponent extends Box implements SearchComponent {
 					if (pat.matcher("").groupCount() == 0)
 						consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyFind(pat, value.negate)));
 					else
-						consumer.accept(new RegExExtract(pat));
+						consumer.accept(new RegExSearch(pat));
 				}
 			});
 		}

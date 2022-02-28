@@ -9,7 +9,7 @@ public final class SearchRegistry {
 
 	public static class Entry<T extends JComponent & SearchComponent> {
 		public final Class<T> comp;
-		public final String description;
+		public final String   description;
 
 		public Entry(Class<T> comp, String description) {
 			this.comp = comp;
@@ -31,9 +31,11 @@ public final class SearchRegistry {
 
 		@Override
 		public final boolean equals(Object o) {
-			if (this == o) return true;
-			if (!(o instanceof Entry)) return false;
-			Entry<?> entry = (Entry<?>) o;
+			if (this == o)
+				return true;
+			if (!(o instanceof Entry))
+				return false;
+			Entry<?> entry = (Entry<?>)o;
 			return comp.equals(entry.comp);
 		}
 
@@ -50,6 +52,7 @@ public final class SearchRegistry {
 		_ENTRIES.add(new Entry<>(PlainTextComponent.class, "Plain Text"));
 		_ENTRIES.add(new Entry<>(DurationAnalysisComponent.class, "Duration Analysis"));
 		_ENTRIES.add(new Entry<>(FrequencyAnalysisComponent.class, "Frequency Analysis"));
+		_ENTRIES.add(new Entry<>(UniqueSearchComponent.class, "Unique pattern search"));
 	}
 
 	@SuppressWarnings("unused")
@@ -65,7 +68,7 @@ public final class SearchRegistry {
 	public static <T extends JComponent & SearchComponent> void get(Class<?> cl, int level, Consumer<? super T> consumer) {
 		for (Entry<?> e : _ENTRIES) {
 			if (e.comp == cl) {
-				consumer.accept((T) e.newInstance(level));
+				consumer.accept((T)e.newInstance(level));
 				return;
 			}
 		}

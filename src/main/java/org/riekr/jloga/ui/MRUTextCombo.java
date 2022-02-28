@@ -10,16 +10,20 @@ import java.util.function.BiFunction;
 
 public class MRUTextCombo<T> extends JComboBox<T> {
 
+	public static MRUTextCombo<String> newMRUTextCombo(String key, String deflt) {
+		return new MRUTextCombo<>(key, (newValue, oldValue) -> newValue == null ? deflt : newValue);
+	}
+
 	public static MRUTextCombo<String> newMRUTextCombo(String key) {
 		return new MRUTextCombo<>(key, (newValue, oldValue) -> newValue);
 	}
 
-	private final String _key;
-	private final DefaultComboBoxModel<T> _model;
+	private final String                   _key;
+	private final DefaultComboBoxModel<T>  _model;
 	private final BiFunction<String, T, T> _mapper;
 
-	private T _value;
-	private int _valueIndex;
+	private T       _value;
+	private int     _valueIndex;
 	private boolean _propagateMouseListener = true;
 
 	public final Subject<T> subject = new Subject<>();
@@ -76,8 +80,8 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	@SuppressWarnings("unchecked")
 	private T convert(Object elem) {
 		if (elem instanceof String)
-			return _mapper.apply((String) elem, _valueIndex == getSelectedIndex() ? _value : null);
-		return (T) elem;
+			return _mapper.apply((String)elem, _valueIndex == getSelectedIndex() ? _value : null);
+		return (T)elem;
 	}
 
 	@Override
