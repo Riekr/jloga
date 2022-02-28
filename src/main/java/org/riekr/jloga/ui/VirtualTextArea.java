@@ -124,10 +124,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_scrollBar = new JScrollBar(JScrollBar.VERTICAL);
 		_scrollBar.setMinimum(0);
 		_scrollBar.setEnabled(false);
-		_scrollBar.addAdjustmentListener(e -> {
-			if (!e.getValueIsAdjusting())
-				setFromLine(e.getValue());
-		});
+		_scrollBar.addAdjustmentListener(new HalfeningAdjustmentListener(this::setFromLineNoScroll));
 		add(_scrollBar, BorderLayout.EAST);
 
 		recalcLineHeight();
@@ -153,15 +150,21 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void setFromLine(int fromLine) {
+		if (setFromLineNoScroll(fromLine))
+			_scrollBar.setValue(_fromLine);
+	}
+
+	private boolean setFromLineNoScroll(int fromLine) {
 		if (fromLine < 0)
 			fromLine = 0;
 		else if (fromLine >= _allLinesCount - _lineCount)
 			fromLine = max(0, _allLinesCount - _lineCount - 1);
 		if (fromLine != _fromLine) {
 			_fromLine = fromLine;
-			_scrollBar.setValue(_fromLine);
 			requireText();
+			return true;
 		}
+		return false;
 	}
 
 	public void pageUp() {
