@@ -33,6 +33,7 @@ import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.CharsetCombo;
+import org.riekr.jloga.ui.ContextMenu;
 import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
 import org.riekr.jloga.ui.SearchPanel;
@@ -207,11 +208,13 @@ public class Main extends JFrame implements FileDropListener {
 			});
 			int idx = _tabs.getTabCount() - 1;
 			_tabs.setSelectedIndex(idx);
-			_tabs.setTabComponentAt(idx, newTabHeader(searchPanel.toString(), () -> {
+			JComponent tabHeader = newTabHeader(searchPanel.toString(), () -> {
 				searchPanel.onClose();
 				_tabs.remove(searchPanel);
 				_openFiles.remove(key);
-			}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel))));
+			}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
+			ContextMenu.addActionCopy(tabHeader, key);
+			_tabs.setTabComponentAt(idx, tabHeader);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			_openFiles.remove(key);

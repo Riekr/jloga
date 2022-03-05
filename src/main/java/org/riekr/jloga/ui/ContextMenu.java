@@ -5,7 +5,9 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.ui.utils.TextAreaUtils;
@@ -53,6 +55,24 @@ public class ContextMenu {
 
 	public static <T extends JLabel> T addActionCopy(T component) {
 		return addActionCopy(component, COPY, (p, a) -> component.getText());
+	}
+
+	public static void addActionCopy(JComponent component, Supplier<? extends CharSequence> value) {
+		addActionCopy(component, COPY, (p, a) -> {
+			CharSequence val = value.get();
+			return val == null || val.length() == 0 ? null : val.toString();
+		});
+	}
+
+	public static void addActionCopy(JComponent component, Object value) {
+		if (value == null || (value instanceof CharSequence && ((CharSequence)value).length() == 0))
+			return;
+		if (value instanceof File) {
+			addActionCopy(component, "Copy name", (p, a) -> ((File)value).getName());
+			addActionCopy(component, "Copy absolute name", (p, a) -> ((File)value).getAbsolutePath());
+			addActionCopy(component, "Copy parent dir", (p, a) -> ((File)value).getParentFile().getAbsolutePath());
+		} else
+			addActionCopy(component, COPY, (p, a) -> value.toString());
 	}
 
 	public static <T extends JComponent> T addActionCopy(T component, String label, BiFunction<Point, ActionEvent, String> stringSupplier) {

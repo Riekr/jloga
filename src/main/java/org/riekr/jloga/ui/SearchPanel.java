@@ -71,10 +71,12 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_splitPane.add(_bottomTabs);
 	}
 
-	private Component newTabHeader(String title, SearchPanelBottomArea tabContent) {
-		return UIUtils.newTabHeader(title,
+	private JComponent newTabHeader(String title, SearchPanelBottomArea tabContent) {
+		JComponent res = UIUtils.newTabHeader(title,
 				() -> removeBottomArea(tabContent),
 				() -> _bottomTabs.setSelectedComponent(tabContent));
+		ContextMenu.addActionCopy(res, title);
+		return res;
 	}
 
 	public void setTextSource(TextSource src) {

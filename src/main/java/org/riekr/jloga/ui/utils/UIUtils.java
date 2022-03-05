@@ -78,7 +78,7 @@ public final class UIUtils {
 		return btn;
 	}
 
-	public static Component newTabHeader(String text, @Nullable Runnable onClose, @Nullable Runnable onSelect) {
+	public static JComponent newTabHeader(String text, @Nullable Runnable onClose, @Nullable Runnable onSelect) {
 		JLabel label = new JLabel(text);
 		if (onClose == null) {
 			if (onSelect != null) {
