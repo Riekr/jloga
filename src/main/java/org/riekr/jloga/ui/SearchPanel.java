@@ -57,6 +57,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_bottomTabs.setTabComponentAt(0, newTabHeader(titleSupplier.get(), tabContent));
 		_bottomTabs.addTab(_TAB_ADD, null);
 		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, null, () -> {
+			// add new tab code
 			SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
 			body.setFont(getFont());
 			int idx = _bottomTabs.indexOfTab(_TAB_ADD);

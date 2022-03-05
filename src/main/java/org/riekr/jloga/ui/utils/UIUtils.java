@@ -13,6 +13,7 @@ import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -91,19 +92,26 @@ public final class UIUtils {
 			}
 			return label;
 		}
-		Box box = new Box(BoxLayout.LINE_AXIS);
-		box.addMouseListener(new MouseAdapter() {
+		MouseListener mouseListener = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON2 && e.isAltDown() && e.getClickCount() == 1)
+				if (e.getButton() == MouseEvent.BUTTON2 && e.getClickCount() == 1) {
 					onClose.run();
-				else if (onSelect != null)
+					e.consume();
+				} else if (onSelect != null) {
 					onSelect.run();
+					e.consume();
+				}
 			}
-		});
+		};
+		label.addMouseListener(mouseListener);
+		Box box = new Box(BoxLayout.LINE_AXIS);
+		box.addMouseListener(mouseListener);
 		box.add(label);
 		box.add(Box.createHorizontalStrut(5));
-		box.add(newButton("\u274C", onClose, "Close " + text));
+		JButton xBtn = newButton("\u274C", onClose, "Close " + text);
+		xBtn.addMouseListener(mouseListener);
+		box.add(xBtn);
 		return box;
 	}
 
