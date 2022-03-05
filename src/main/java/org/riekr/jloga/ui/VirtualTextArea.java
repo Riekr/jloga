@@ -20,7 +20,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -33,6 +32,7 @@ import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.ui.utils.SelectionHighlight;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
@@ -151,50 +151,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
 		// setup selection highlight
-		_text.addCaretListener(e -> {
-			int start = _text.getSelectionStart();
-			int length = _text.getSelectionEnd() - start;
-			if (length > 0) {
-				try {
-					String text = _text.getText(start, length);
-					if (text != null && !text.trim().isEmpty() && !text.equals(_hlText)) {
-						_hlText = text;
-						refreshSelectedHighlights();
-						return;
-					}
-				} catch (BadLocationException ex) {
-					ex.printStackTrace(System.err);
-				}
-			}
-			if (_hlText != null) {
-				_hlText = null;
-				refreshSelectedHighlights();
-			}
-		});
-	}
-
-	private final Highlighter.HighlightPainter _hlPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.blue);
-	private final ArrayList<Object>            _hlTags    = new ArrayList<>();
-	private       String                       _hlText;
-
-	private void refreshSelectedHighlights() {
-		// TODO: invoke when scrolling and ingnore selection change
-		Highlighter highlighter = _text.getHighlighter();
-		_hlTags.forEach(highlighter::removeHighlight);
-		String selection = _hlText;
-		if (selection != null) {
-			String text = _text.getText();
-			int next = 0;
-			int from;
-			while ((from = text.indexOf(selection, next)) != -1) {
-				next = from + selection.length();
-				try {
-					_hlTags.add(highlighter.addHighlight(from, next, _hlPainter));
-				} catch (BadLocationException e) {
-					e.printStackTrace(System.err);
-				}
-			}
-		}
+		new SelectionHighlight(_text);
 	}
 
 	public int getFromLine() {
