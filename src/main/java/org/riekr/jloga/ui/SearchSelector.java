@@ -16,6 +16,7 @@ import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.search.SearchRegistry;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchSelector extends JPanel {
 

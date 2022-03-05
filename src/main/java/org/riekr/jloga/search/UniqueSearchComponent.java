@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.MRUTextCombo;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class UniqueSearchComponent extends Box implements SearchComponent {
 

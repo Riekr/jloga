@@ -32,6 +32,7 @@ import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
 
@@ -54,7 +55,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private @Nullable Runnable    _lineListenerUnsubscribe;
 
 	public VirtualTextArea(@Nullable TabNavigation tabNavigation) {
-		_text = ContextMenu.addActionCopy(new JTextArea());
+		_text = new JTextArea();
 		_text.addKeyListener(new ROKeyListener() {
 			@Override
 			protected void onPageUp() {
@@ -147,6 +148,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			}
 		});
 		_highlightedLine.subscribe(this::highlightLine);
+		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+	}
+
+	public int getFromLine() {
+		return _fromLine;
 	}
 
 	public void setFromLine(int fromLine) {

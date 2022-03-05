@@ -2,9 +2,9 @@ package org.riekr.jloga;
 
 import static org.riekr.jloga.io.Preferences.FONT;
 import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
-import static org.riekr.jloga.ui.UIUtils.newButton;
-import static org.riekr.jloga.ui.UIUtils.newRadioButton;
-import static org.riekr.jloga.ui.UIUtils.newTabHeader;
+import static org.riekr.jloga.ui.utils.UIUtils.newButton;
+import static org.riekr.jloga.ui.utils.UIUtils.newRadioButton;
+import static org.riekr.jloga.ui.utils.UIUtils.newTabHeader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +37,7 @@ import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
 import org.riekr.jloga.ui.SearchPanel;
 import org.riekr.jloga.ui.TabNavigation;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class Main extends JFrame implements FileDropListener {
 

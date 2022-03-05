@@ -1,93 +1,71 @@
 package org.riekr.jloga.ui;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
+
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.ui.utils.TextAreaUtils;
 
 public class ContextMenu {
 
-	private ContextMenu() {
-	}
+	public static final String COPY   = "Copy";
+	public static final String COPYLN = "Copy line number";
 
-	public static <T extends JTextArea> T addActionCopy(T component) {
-		return addActionCopy(component, (p, a) -> {
-			String text = component.getSelectedText();
-			if (text != null && !text.isEmpty())
-				return text;
-			// try searching line number
-			int viewToModel = component.viewToModel2D(p);
-			if (viewToModel != -1) {
-				try {
-					int line = component.getLineOfOffset(viewToModel);
-					int start = component.getLineStartOffset(line);
-					int end = component.getLineEndOffset(line);
-					return component.getText(start, end - start);
-				} catch (BadLocationException e1) {
-					e1.printStackTrace(System.err);
+	private ContextMenu() {}
+
+	public static void addActionCopy(@NotNull VirtualTextArea virtualTextArea, @NotNull JTextArea... components) {
+		JTextArea component = components[0];
+		for (JTextArea target : components) {
+			addActionCopy(target, COPY, (p, a) -> {
+				String text = component.getSelectedText();
+				if (text != null && !text.isEmpty())
+					return text;
+				// try searching line number
+				if (p != null) {
+					text = TextAreaUtils.getTextAtMouseLocation(component, p);
+					if (text != null && !text.isEmpty())
+						return text;
 				}
-			}
-			// try to fetch first highlight (should not pass here)
-			Highlighter highlighter = component.getHighlighter();
-			if (highlighter != null) {
-				Highlighter.Highlight[] highlights = highlighter.getHighlights();
-				if (highlights != null && highlights.length > 0) {
-					Highlighter.Highlight highlight = highlights[0];
-					int start = highlight.getStartOffset();
-					int end = highlight.getEndOffset();
-					try {
-						return component.getText(start, end - start);
-					} catch (BadLocationException e) {
-						e.printStackTrace(System.err);
+				// try to fetch first highlight (should not pass here)
+				text = TextAreaUtils.getFirstHighlightedText(component);
+				if (text != null && !text.isEmpty())
+					return text;
+				// nothing found
+				return null;
+			});
+			addActionCopy(target, COPYLN, (p, a) -> {
+				if (p != null) {
+					int line = TextAreaUtils.getLineNumberAtMouseLocation(component, p);
+					if (line != -1) {
+						line += virtualTextArea.getFromLine();
+						return Integer.toString(line);
 					}
 				}
-			}
-			return null;
-		});
+				return null;
+			});
+		}
 	}
+
 
 	public static <T extends JLabel> T addActionCopy(T component) {
-		return addActionCopy(component, (p, a) -> component.getText());
+		return addActionCopy(component, COPY, (p, a) -> component.getText());
 	}
 
-	public static <T extends JComponent> T addActionCopy(T component, BiFunction<Point, ActionEvent, String> stringSupplier) {
-		AtomicReference<Point> lastClick = new AtomicReference<>();
-		JPopupMenu popupMenu = ensurePopupMenu(component, lastClick::set);
-		popupMenu.add("Copy").addActionListener((a) -> {
-			String text = stringSupplier.apply(lastClick.get(), a);
-			if (text == null)
-				text = "";
-			StringSelection stringSelection = new StringSelection(text);
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clipboard.setContents(stringSelection, null);
+	public static <T extends JComponent> T addActionCopy(T component, String label, BiFunction<Point, ActionEvent, String> stringSupplier) {
+		JPopupMenuWithMouseLoc popupMenu = JPopupMenuWithMouseLoc.ensurePopupMenu(component);
+		popupMenu.add(label).addActionListener((a) -> {
+			String text = stringSupplier.apply(popupMenu.getLastMouseClickPosition(), a);
+			if (text != null) {
+				StringSelection stringSelection = new StringSelection(text);
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(stringSelection, null);
+			}
 		});
 		return component;
-	}
-
-	public static JPopupMenu ensurePopupMenu(JComponent component, Consumer<Point> lastClickConsumer) {
-		JPopupMenu popupMenu = component.getComponentPopupMenu();
-		if (popupMenu == null) {
-			component.setInheritsPopupMenu(false);
-			component.setComponentPopupMenu(popupMenu = new JPopupMenu());
-			if (lastClickConsumer != null) {
-				component.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mousePressed(MouseEvent e) {
-						if (e.getButton() == MouseEvent.BUTTON3)
-							lastClickConsumer.accept(component.getMousePosition(false));
-					}
-				});
-			}
-		}
-		return popupMenu;
 	}
 
 }

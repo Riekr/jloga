@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;

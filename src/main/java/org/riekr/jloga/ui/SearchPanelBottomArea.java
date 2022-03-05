@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JPanel {
 

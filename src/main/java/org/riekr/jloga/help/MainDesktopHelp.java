@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-import static org.riekr.jloga.ui.UIUtils.getComponentHorizontalCenter;
+import static org.riekr.jloga.ui.utils.UIUtils.getComponentHorizontalCenter;
 
 public class MainDesktopHelp extends JComponent {
 

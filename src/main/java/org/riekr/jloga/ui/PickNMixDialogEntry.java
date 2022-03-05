@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class PickNMixDialogEntry extends JComponent {
 

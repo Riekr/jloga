@@ -1,4 +1,4 @@
-package org.riekr.jloga.ui;
+package org.riekr.jloga.ui.utils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.Main;
 import org.riekr.jloga.misc.Formatters;
 import org.riekr.jloga.react.BoolConsumer;
+import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public final class UIUtils {
 

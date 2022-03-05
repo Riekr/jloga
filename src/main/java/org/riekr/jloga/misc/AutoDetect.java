@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.ui.MRUComboWithLabels;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 @SuppressWarnings({"RegExpRedundantEscape", "RegExpUnnecessaryNonCapturingGroup"})
 public final class AutoDetect implements Predicate<String> {

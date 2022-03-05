@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.ui.MRUComboWithLabels;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public interface Project {
 

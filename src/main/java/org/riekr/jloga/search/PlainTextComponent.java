@@ -8,7 +8,7 @@ import org.riekr.jloga.misc.SearchComboEntry;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.MRUTextCombo;
-import org.riekr.jloga.ui.UIUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class PlainTextComponent extends Box implements SearchComponent {
 
