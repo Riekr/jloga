@@ -1,20 +1,22 @@
 package org.riekr.jloga.ui;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.MixFileSource;
-import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.misc.FileDropListener;
-import org.riekr.jloga.ui.utils.UIUtils;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.MixFileSource;
+import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchPanel extends JComponent implements FileDropListener {
 
@@ -56,8 +58,9 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_bottomTabs.addTab(titleSupplier.get(), tabContent);
 		_bottomTabs.setTabComponentAt(0, newTabHeader(titleSupplier.get(), tabContent));
 		_bottomTabs.addTab(_TAB_ADD, null);
-		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, null, () -> {
-			// add new tab code
+		// add new tab code: I can't use a change listener to avoid loops
+		// the "+" tab should never be selected and must stick as last tab
+		Runnable addNewTab = () -> {
 			SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, progressBar, level);
 			body.setFont(getFont());
 			int idx = _bottomTabs.indexOfTab(_TAB_ADD);
@@ -67,9 +70,18 @@ public class SearchPanel extends JComponent implements FileDropListener {
 			invalidate();
 			if (_splitPane.getDividerLocation() >= _splitPane.getMaximumDividerLocation())
 				collapseBottomArea();
-		}));
+		};
+		_bottomTabs.setTabComponentAt(1, UIUtils.newTabHeader(_TAB_ADD, null, addNewTab));
 		_bottomTabsNavigation = TabNavigation.createFor(_bottomTabs);
 		_splitPane.add(_bottomTabs);
+		// ugly but working (otherwise you have to hit "+" text)
+		_bottomTabs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == 1)
+					addNewTab.run();
+			}
+		});
 	}
 
 	private JComponent newTabHeader(String title, SearchPanelBottomArea tabContent) {

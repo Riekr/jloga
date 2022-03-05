@@ -85,23 +85,19 @@ public final class UIUtils {
 			if (onSelect != null) {
 				label.addMouseListener(new MouseAdapter() {
 					@Override
-					public void mouseClicked(MouseEvent e) {
-						onSelect.run();
-					}
+					public void mouseClicked(MouseEvent e) {onSelect.run();}
 				});
 			}
 			return label;
 		}
+		// If we have an onClose let's add an X button
 		MouseListener mouseListener = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON2 && e.getClickCount() == 1) {
+				if (e.getButton() == MouseEvent.BUTTON2 && e.getClickCount() == 1)
 					onClose.run();
-					e.consume();
-				} else if (onSelect != null) {
+				else if (onSelect != null)
 					onSelect.run();
-					e.consume();
-				}
 			}
 		};
 		label.addMouseListener(mouseListener);
