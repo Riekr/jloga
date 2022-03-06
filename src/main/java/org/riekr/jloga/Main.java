@@ -226,6 +226,7 @@ public class Main extends JFrame implements FileDropListener {
 		try {
 			// https://www.formdev.com/flatlaf/themes/
 			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
+			UIManager.put( "ScrollBar.minimumThumbSize", new Dimension( 8, 20) );
 			return true;
 		} catch (Throwable ignored) {
 		}

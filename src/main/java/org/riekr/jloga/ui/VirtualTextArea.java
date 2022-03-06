@@ -13,7 +13,6 @@ import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -89,26 +88,26 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				if (tabNavigation != null)
 					tabNavigation.goToNextTab();
 			}
-		});
-		_text.addKeyListener(new KeyAdapter() {
+
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (_lineListener == null || e.getModifiersEx() != 0)
-					return;
-				Integer line = null;
-				switch (e.getKeyCode()) {
-					case 38: // up
-						if ((line = _highlightedLine.get()) != null)
-							line = max(0, line - 1);
-						break;
-					case 40: // down
-						if ((line = _highlightedLine.get()) != null)
-							line = min(_allLinesCount - 1, line + 1);
-						break;
-				}
-				if (line != null) {
-					setHighlightedLine(line);
-					_lineListener.accept(line);
+				super.keyPressed(e);
+				if (!e.isConsumed() && _lineListener != null && e.getModifiersEx() == 0) {
+					Integer line = null;
+					switch (e.getKeyCode()) {
+						case 38: // up
+							if ((line = _highlightedLine.get()) != null)
+								line = max(0, line - 1);
+							break;
+						case 40: // down
+							if ((line = _highlightedLine.get()) != null)
+								line = min(_allLinesCount - 1, line + 1);
+							break;
+					}
+					if (line != null) {
+						setHighlightedLine(line);
+						_lineListener.accept(line);
+					}
 				}
 			}
 		});
@@ -127,7 +126,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_scrollBar.setMinimum(0);
 		_scrollBar.setEnabled(false);
 		_scrollBar.addAdjustmentListener(new HalfeningAdjustmentListener(this::setFromLineNoScroll));
-		add(_scrollBar, BorderLayout.EAST);
+		add(_scrollBar, BorderLayout.LINE_END);
 
 		recalcLineHeight();
 		_scrollPane.addComponentListener(new ComponentAdapter() {

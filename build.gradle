@@ -26,7 +26,7 @@ compileJava {
 }
 
 dependencies {
-	implementation 'com.formdev:flatlaf:1.6'
+	implementation 'com.formdev:flatlaf:2.0.2'
 	implementation 'org.drjekyll:fontchooser:2.4'
 	compileOnly 'org.jetbrains:annotations:22.0.0'
 }
@@ -34,7 +34,7 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-				"Implementation-Version": "0.0.3",
+				"Implementation-Version": "0.0.4",
 				"Main-Class": mainClassName
 		)
 	}
