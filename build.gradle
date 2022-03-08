@@ -18,6 +18,27 @@ java {
 	}
 }
 
+/* Would be nice to use javafx for finos perspective integration but as of now webassembly and workers are not supported
+   keeping definitions here for further reference */
+//	id "org.openjfx.javafxplugin" version "0.0.12"
+//javafx {
+////	version = '17.0.0.1'
+//	version = '19-ea+3'
+//	modules = ['javafx.swing', 'javafx.web']
+//}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/java'
+		}
+		resources {
+			srcDir 'src/main/resources'
+			srcDir 'src/main/html'
+		}
+	}
+}
+
 compileJava {
 	options.warnings = true
 	options.deprecation = true
@@ -28,6 +49,8 @@ compileJava {
 dependencies {
 	implementation 'com.formdev:flatlaf:2.0.2'
 	implementation 'org.drjekyll:fontchooser:2.4'
+//	implementation 'org.nanohttpd:nanohttpd:2.3.1'
+	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
 	compileOnly 'org.jetbrains:annotations:22.0.0'
 }
 
