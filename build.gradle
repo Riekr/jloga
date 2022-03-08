@@ -49,8 +49,8 @@ compileJava {
 dependencies {
 	implementation 'com.formdev:flatlaf:2.0.2'
 	implementation 'org.drjekyll:fontchooser:2.4'
-//	implementation 'org.nanohttpd:nanohttpd:2.3.1'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
+	testImplementation 'junit:junit:4.13.2'
 	compileOnly 'org.jetbrains:annotations:22.0.0'
 }
 
