@@ -19,6 +19,8 @@ public class JTextAreaGridView extends JTable {
 	public JTextAreaGridView(@NotNull JTextArea text, String header) {
 		_text = text;
 		_header = _splitter.apply(header);
+		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		setCellSelectionEnabled(true);
 		setModel(new AbstractTableModel() {
 			private static final long serialVersionUID = -937458072437359755L;
 
@@ -39,6 +41,22 @@ public class JTextAreaGridView extends JTable {
 			public Object getValueAt(int rowIndex, int columnIndex) {return _data[rowIndex][columnIndex];}
 		});
 		refresh();
+		ContextMenu.addActionCopy(this, this::getSelectedText);
+	}
+
+	public CharSequence getSelectedText() {
+		StringBuilder res = new StringBuilder();
+		String delim = Character.toString(_splitter.getDelim());
+		String escaped = "\\" + delim;
+		for (int row : getSelectedRows()) {
+			for (int col : getSelectedColumns()) {
+				if (isCellSelected(row, col))
+					res.append(_data[row][col].replace(delim, escaped));
+				res.append(delim);
+			}
+			res.append('\n');
+		}
+		return res;
 	}
 
 	public void refresh() {

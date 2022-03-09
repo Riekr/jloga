@@ -31,6 +31,12 @@ public class FastSplitOperation implements Function<String, String[]> {
 		setDelim(delim);
 	}
 
+	public char getDelim() {
+		if (_detect)
+			throw new IllegalStateException("Delimiter has not been autodetected yet");
+		return _delim;
+	}
+
 	public void setDelim(char delim) {
 		_detect = false;
 		_delim = delim;

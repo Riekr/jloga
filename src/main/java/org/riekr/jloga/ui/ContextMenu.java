@@ -57,13 +57,6 @@ public class ContextMenu {
 		return addActionCopy(component, COPY, (p, a) -> component.getText());
 	}
 
-	public static void addActionCopy(JComponent component, Supplier<? extends CharSequence> value) {
-		addActionCopy(component, COPY, (p, a) -> {
-			CharSequence val = value.get();
-			return val == null || val.length() == 0 ? null : val.toString();
-		});
-	}
-
 	public static void addActionCopy(JComponent component, Object value) {
 		if (value == null || (value instanceof CharSequence && ((CharSequence)value).length() == 0))
 			return;
@@ -73,6 +66,17 @@ public class ContextMenu {
 			addActionCopy(component, "Copy parent dir", (p, a) -> ((File)value).getParentFile().getAbsolutePath());
 		} else
 			addActionCopy(component, COPY, (p, a) -> value.toString());
+	}
+
+	public static void addActionCopy(JComponent component, Supplier<? extends CharSequence> value) {
+		addActionCopy(component, COPY, value);
+	}
+
+	public static void addActionCopy(JComponent component, String label, Supplier<? extends CharSequence> value) {
+		addActionCopy(component, label, (p, a) -> {
+			CharSequence val = value.get();
+			return val == null || val.length() == 0 ? null : val.toString();
+		});
 	}
 
 	public static <T extends JComponent> T addActionCopy(T component, String label, BiFunction<Point, ActionEvent, String> stringSupplier) {
