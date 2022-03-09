@@ -5,7 +5,8 @@ viewer.toggleConfig();
 let table;
 
 async function set(title, data) {
-    window.document.title = title;
+		if(title && title.length)
+      window.document.title = title;
     table && table.clear();
     table = await worker.table(data);
     await viewer.load(table);

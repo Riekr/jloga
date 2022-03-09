@@ -40,7 +40,7 @@ public class FinosPerspectiveServer extends ResourcesServer {
 			final String[] header = data.next();
 
 			void set() {
-				sendJS("set('" + title.replace("'", "\\'") + "'," + toArrowChunk(header, data) + ')', this::update);
+				sendJS("set('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(header, data) + ')', this::update);
 			}
 
 			void update(String res) {

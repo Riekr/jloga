@@ -16,7 +16,8 @@ import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JPanel {
 
-	private final int _level;
+	private final String _title;
+	private final int    _level;
 
 	private @Nullable SearchPanel _resultTextArea;
 
@@ -26,7 +27,8 @@ public class SearchPanelBottomArea extends JPanel {
 	private final SearchSelector _searchUI;
 	private       Future<?>      _searching;
 
-	public SearchPanelBottomArea(SearchPanel parent, JobProgressBar progressBar, int level) {
+	public SearchPanelBottomArea(String title, SearchPanel parent, JobProgressBar progressBar, int level) {
+		_title = title;
 		_parent = parent;
 		_level = level;
 		setLayout(new BorderLayout());
@@ -93,7 +95,7 @@ public class SearchPanelBottomArea extends JPanel {
 	@NotNull
 	private SearchPanel getResultTextArea() {
 		if (_resultTextArea == null) {
-			_resultTextArea = new SearchPanel(_progressBar, _level + 1, _parent.getBottomTabsNavigation());
+			_resultTextArea = new SearchPanel(_title, _progressBar, _level + 1, _parent.getBottomTabsNavigation());
 			_resultTextArea.setFont(getFont());
 			_resultTextArea.setMinimumSize(new Dimension(0, 0));
 			_resultTextArea.getTextArea().setLineClickListener((line) -> {

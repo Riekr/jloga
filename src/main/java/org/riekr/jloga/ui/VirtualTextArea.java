@@ -26,6 +26,7 @@ import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
@@ -43,6 +44,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private       int                       _allLinesCount   = 0;
 	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
 
+	private final String              _title;
 	private final JScrollPane         _scrollPane;
 	private final JTextArea           _text;
 	private final LineNumbersTextArea _lineNumbers;
@@ -54,7 +56,17 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
 
-	public VirtualTextArea(@Nullable TabNavigation tabNavigation) {
+	public VirtualTextArea(@Nullable TabNavigation tabNavigation, @Nullable String title) {
+		_title = title;
+
+		setOpaque(false);
+		JPanel root = new JPanel();
+		root.setLayout(new BorderLayout());
+		root.setOpaque(false);
+
+		_lineNumbers = new LineNumbersTextArea();
+		root.add(_lineNumbers, BorderLayout.LINE_START);
+
 		_text = new JTextArea();
 		_text.addKeyListener(new ROKeyListener() {
 			@Override
@@ -113,22 +125,13 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		});
 		_text.setAutoscrolls(false);
 		_text.setLineWrap(false);
-		setLayout(new BorderLayout());
+
 		_scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		_scrollPane.setWheelScrollingEnabled(false);
 		BoundedRangeModel vscrollModel = _scrollPane.getVerticalScrollBar().getModel();
 		vscrollModel.addChangeListener(e -> vscrollModel.setValue(0));
-		add(_scrollPane, BorderLayout.CENTER);
-		_lineNumbers = new LineNumbersTextArea();
-		add(_lineNumbers, BorderLayout.LINE_START);
-		_scrollBar = new JScrollBar(JScrollBar.VERTICAL);
-		_scrollBar.setMinimum(0);
-		_scrollBar.setEnabled(false);
-		_scrollBar.addAdjustmentListener(new HalfeningAdjustmentListener(this::setFromLineNoScroll));
-		add(_scrollBar, BorderLayout.LINE_END);
-
-		recalcLineHeight();
+		root.add(_scrollPane, BorderLayout.CENTER);
 		_scrollPane.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -147,10 +150,56 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					pageDn();
 			}
 		});
-		_highlightedLine.subscribe(this::highlightLine);
-		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+
+		_scrollBar = new JScrollBar(JScrollBar.VERTICAL);
+		_scrollBar.setMinimum(0);
+		_scrollBar.setEnabled(false);
+		_scrollBar.addAdjustmentListener(new HalfeningAdjustmentListener(this::setFromLineNoScroll));
+		root.add(_scrollBar, BorderLayout.LINE_END);
+
 		// setup selection highlight
 		new SelectionHighlight(_text);
+
+		// floating buttons
+		Box buttons = Box.createVerticalBox();
+		Box buttonsContainer = Box.createHorizontalBox();
+		buttons.add(buttonsContainer);
+		buttons.add(Box.createVerticalGlue());
+		buttonsContainer.add(Box.createHorizontalGlue());
+		// JToggleButton asGrid = new JToggleButton("#");
+		// buttonsContainer.add(asGrid);
+		JButton perspective = new JButton("\uD83D\uDCC8");
+		perspective.addActionListener(e -> openInPerspective());
+		buttonsContainer.add(perspective);
+		buttonsContainer.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
+
+		// overlay layout
+		setLayout(new OverlayLayout(this));
+		add(buttons);
+		add(root);
+
+		// finishing
+		recalcLineHeight();
+		_highlightedLine.subscribe(this::highlightLine);
+		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+	}
+
+	/** Will open finos perspective in a standalone browser window.*/
+	public void openInPerspective() {
+		_textSource.requestStream((stream) -> {
+			// the server will automatically close when the browser closes (websocket disconnected)
+			// the port is automatically determined in the constructor
+			FinosPerspectiveServer server = new FinosPerspectiveServer();
+			server.start(true);
+			server.load(_title, stream);
+		});
+	}
+
+	@Override
+	public boolean isOptimizedDrawingEnabled() {
+		// (not a bug, just for clarification)
+		// https://bugs.openjdk.java.net/browse/JDK-6459830
+		return false;
 	}
 
 	public int getFromLine() {

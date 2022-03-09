@@ -30,24 +30,24 @@ public class SearchPanel extends JComponent implements FileDropListener {
 
 	private final int _level;
 
-	private String _title;
-	private int    _searchId = 0;
+	private final String _title;
+	private       int    _searchId = 0;
 
 	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
-		this(progressBar, 0, tabNavigation);
-		_title = title;
+		this(title, progressBar, 0, tabNavigation);
 		JLabel descriptionLabel = ContextMenu.addActionCopy(new JLabel(description));
 		add(descriptionLabel, BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
 
-	public SearchPanel(JobProgressBar progressBar, int level, @Nullable TabNavigation tabNavigation) {
+	public SearchPanel(String title, JobProgressBar progressBar, int level, @Nullable TabNavigation tabNavigation) {
+		_title = title;
 		_progressBar = progressBar;
 		_level = level;
 
 		setLayout(new BorderLayout());
-		_textArea = new VirtualTextArea(tabNavigation);
+		_textArea = new VirtualTextArea(tabNavigation, title);
 		_textArea.setMinimumSize(new Dimension(0, 0));
 		_splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		_splitPane.setResizeWeight(1);
@@ -58,9 +58,10 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_bottomTabs = new JTabbedPane();
 
 		// add first empty tab
-		SearchPanelBottomArea tabContent = new SearchPanelBottomArea(this, _progressBar, _level);
+		String tabTitle = newTabTempTitle();
+		SearchPanelBottomArea tabContent = new SearchPanelBottomArea(getChildTitle(tabTitle), this, _progressBar, _level);
 		_bottomTabs.addTab(null, tabContent);
-		_bottomTabs.setTabComponentAt(0, newTabHeader(newTabTempTitle(), tabContent));
+		_bottomTabs.setTabComponentAt(0, newTabHeader(tabTitle, tabContent));
 
 		// add new tab code: I can't use a change listener to avoid loops
 		// the "+" tab should never be selected and must stick as last tab
@@ -77,12 +78,19 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		});
 	}
 
+	private String getChildTitle(String tabTitle) {
+		if (tabTitle == null || tabTitle.isBlank())
+			return _title;
+		return _title + " \uD83E\uDC06 " + tabTitle;
+	}
+
 	private String newTabTempTitle() {
 		return _TAB_PREFIX + (char)('A' + _level) + (++_searchId);
 	}
 
 	private void addNewTab() {
-		SearchPanelBottomArea body = new SearchPanelBottomArea(SearchPanel.this, _progressBar, _level);
+		String tabTitle = newTabTempTitle();
+		SearchPanelBottomArea body = new SearchPanelBottomArea(getChildTitle(tabTitle), SearchPanel.this, _progressBar, _level);
 		body.setFont(getFont());
 		int idx = _bottomTabs.indexOfTab(_TAB_ADD);
 		_bottomTabs.insertTab(null, null, body, null, idx);
@@ -167,5 +175,9 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	@Override
 	public void setFileDropListener(@NotNull Consumer<List<File>> consumer) {
 		_textArea.setFileDropListener(consumer);
+	}
+
+	public String getTitle() {
+		return _title;
 	}
 }

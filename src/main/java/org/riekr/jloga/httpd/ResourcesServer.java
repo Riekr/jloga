@@ -1,6 +1,5 @@
 package org.riekr.jloga.httpd;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
 
@@ -36,12 +35,17 @@ class ResourcesServer {
 		return _server.getURL();
 	}
 
-	public final void start(boolean daemon) throws IOException {
-		_server.start(-1, daemon);
-		Browser.open(_server.getURL());
+	public final void start(boolean daemon) {
+		try {
+			_server.start(-1, daemon);
+			Browser.open(_server.getURL());
+		} catch (Throwable e) {
+			e.printStackTrace(System.err);
+		}
 	}
 
 	public final void stop() {
+		System.out.println("Server stopping");
 		_server.stop();
 	}
 

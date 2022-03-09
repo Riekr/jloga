@@ -249,6 +249,10 @@ public class Main extends JFrame implements FileDropListener {
 				Collections.addAll(args, vargs);
 			for (Iterator<String> i = args.iterator(); i.hasNext(); ) {
 				final String arg = i.next();
+				if (arg.startsWith("#")) {
+					i.remove();
+					continue;
+				}
 				if (arg.equals("-perspective")) {
 					i.remove();
 					FinosPerspectiveServer.main(args.toArray(new String[0]));

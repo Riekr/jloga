@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -17,6 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.misc.MutableInt;
@@ -24,7 +28,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
 
-public interface TextSource {
+public interface TextSource extends Iterable<String> {
 
 	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(2);
 	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
@@ -58,6 +62,7 @@ public interface TextSource {
 
 	String getText(int line) throws ExecutionException, InterruptedException;
 
+	/** May block if indexing is not finished */
 	int getLineCount() throws ExecutionException, InterruptedException;
 
 	default Unsubscribable requestLineCount(IntConsumer consumer) {
@@ -120,13 +125,13 @@ public interface TextSource {
 		return line;
 	}
 
-	default void requestSave(File file, ProgressListener listener) {
+	default void requestSave(File file, ProgressListener progressListener) {
 		EXECUTOR.execute(() -> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
 				ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(
-						() -> listener.onProgressChanged(ln.value, lineCount),
+						() -> progressListener.onProgressChanged(ln.value, lineCount),
 						0, 200, TimeUnit.MILLISECONDS
 				);
 				try (BufferedWriter w = new BufferedWriter(new FileWriter(file, false))) {
@@ -136,7 +141,7 @@ public interface TextSource {
 					}
 				} finally {
 					updateTask.cancel(false);
-					listener.onProgressChanged(lineCount, lineCount);
+					progressListener.onProgressChanged(lineCount, lineCount);
 				}
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
@@ -146,8 +151,56 @@ public interface TextSource {
 		});
 	}
 
-	default void onClose() {
+	@NotNull
+	@Override
+	default Iterator<String> iterator() {
+		try {
+			return new Iterator<>() {
+				int line = 0;
+
+				private int lineCount() {
+					try {
+						return getLineCount();
+					} catch (RuntimeException e) {
+						throw e;
+					} catch (Exception e) {
+						throw new IllegalStateException(e);
+					}
+				}
+
+				@Override
+				public boolean hasNext() {
+					return line < lineCount();
+				}
+
+				@Override
+				public String next() {
+					if (line < lineCount()) {
+						try {
+							return getText(line++);
+						} catch (RuntimeException e) {
+							throw e;
+						} catch (Exception e) {
+							throw new IllegalStateException(e);
+						}
+					}
+					throw new NoSuchElementException();
+				}
+			};
+		} catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
 	}
+
+	default Stream<String> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
+
+	default void requestStream(Consumer<Stream<String>> streamConsumer) {
+		EXECUTOR.execute(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
+	}
+
+	default void onClose() {}
 
 	boolean isIndexing();
 
