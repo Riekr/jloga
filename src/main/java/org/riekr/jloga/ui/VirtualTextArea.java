@@ -49,6 +49,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final JTextArea           _text;
 	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar          _scrollBar;
+	private       JTextAreaGridView   _gridView;
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
@@ -138,7 +139,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				recalcLineCount();
 			}
 		});
-		_text.addMouseWheelListener((e) -> {
+		_scrollPane.addMouseWheelListener((e) -> {
 			if (e.isShiftDown()) {
 				JScrollBar scrollBar = _scrollPane.getHorizontalScrollBar();
 				int incr = (scrollBar.getMaximum() - scrollBar.getMinimum()) / 10;
@@ -166,8 +167,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		buttons.add(buttonsContainer);
 		buttons.add(Box.createVerticalGlue());
 		buttonsContainer.add(Box.createHorizontalGlue());
-		// JToggleButton asGrid = new JToggleButton("#");
-		// buttonsContainer.add(asGrid);
+		JToggleButton asGrid = new JToggleButton("\u25A6");
+		buttonsContainer.add(asGrid);
+		asGrid.addActionListener((e) -> setGridView(asGrid.isSelected()));
 		JButton perspective = new JButton("\uD83D\uDCC8");
 		perspective.addActionListener(e -> openInPerspective());
 		buttonsContainer.add(perspective);
@@ -182,6 +184,28 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		recalcLineHeight();
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+	}
+
+	public void setGridView(boolean active) {
+		System.out.println("setGridView:" + active);
+		if (active) {
+			if (_gridView == null) {
+				try {
+					_gridView = new JTextAreaGridView(_text, _textSource.getText(0));
+					_gridView.setRowHeight(_lineHeight);
+					_gridView.getTableHeader().setPreferredSize(new Dimension(_scrollPane.getWidth(), _lineHeight));
+					_scrollPane.setViewportView(_gridView);
+				} catch (ExecutionException | InterruptedException e) {
+					e.printStackTrace();
+					_gridView = null;
+				}
+			}
+		} else {
+			if (_gridView != null) {
+				_gridView = null;
+				_scrollPane.setViewportView(_text);
+			}
+		}
 	}
 
 	/** Will open finos perspective in a standalone browser window.*/
@@ -325,6 +349,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				}
+				if (_gridView != null)
+					_gridView.refresh();
 				reNumerate();
 				EventQueue.invokeLater(() -> {
 					_scrollPane.getHorizontalScrollBar().setValue(0);
