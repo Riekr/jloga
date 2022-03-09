@@ -12,7 +12,9 @@ import java.awt.event.HierarchyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.drjekyll.fontchooser.FontDialog;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
+import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextFileSource;
@@ -226,7 +228,7 @@ public class Main extends JFrame implements FileDropListener {
 		try {
 			// https://www.formdev.com/flatlaf/themes/
 			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
-			UIManager.put( "ScrollBar.minimumThumbSize", new Dimension( 8, 20) );
+			UIManager.put("ScrollBar.minimumThumbSize", new Dimension(8, 20));
 			return true;
 		} catch (Throwable ignored) {
 		}
@@ -239,8 +241,21 @@ public class Main extends JFrame implements FileDropListener {
 		return false;
 	}
 
-	public static void main(String... args) {
+	public static void main(String[] vargs) {
 		try {
+			// check args
+			ArrayList<String> args = new ArrayList<>();
+			if (vargs != null)
+				Collections.addAll(args, vargs);
+			for (Iterator<String> i = args.iterator(); i.hasNext(); ) {
+				final String arg = i.next();
+				if (arg.equals("-perspective")) {
+					i.remove();
+					FinosPerspectiveServer.main(args.toArray(new String[0]));
+					return;
+				}
+			}
+
 			// init themes
 			boolean dark = loadLAF();
 
@@ -254,12 +269,10 @@ public class Main extends JFrame implements FileDropListener {
 			main.setVisible(true);
 
 			// load files
-			if (args != null) {
-				Stream.of(args)
-						.map(File::new)
-						.filter(File::canRead)
-						.forEach(main::openFile);
-			}
+			args.stream().sequential()
+					.map(File::new)
+					.filter(File::canRead)
+					.forEach(main::openFile);
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}
