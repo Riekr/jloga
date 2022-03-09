@@ -1,6 +1,7 @@
 package org.riekr.jloga.search;
 
 import java.util.HashSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,11 +17,12 @@ public class UniqueSearch extends RegExSearch {
 	}
 
 	@Override
-	protected Predicate<String> getPredicate(Matcher searchMatcher) {
-		if (searchMatcher.groupCount() == 0)
+	protected Predicate<String> newPredicate(Matcher searchMatcher) {
+		if (_groupCount == 0)
 			throw new IllegalArgumentException("At least 1 capturing group must be supplied to UniqueSearch");
-		return super.getPredicate(searchMatcher).and((text) -> {
-			final String extractedText = _extractor.apply(searchMatcher);
+		Function<Matcher, String> extractor = newExtractor();
+		return super.newPredicate(searchMatcher).and((text) -> {
+			final String extractedText = extractor.apply(searchMatcher);
 			return _matches.add(extractedText);
 		});
 	}
