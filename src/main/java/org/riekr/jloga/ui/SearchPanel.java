@@ -33,21 +33,22 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	private final String _title;
 	private       int    _searchId = 0;
 
+	/** Main panel */
 	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
-		this(title, progressBar, 0, tabNavigation);
+		this(title, progressBar, 0, tabNavigation, null);
 		JLabel descriptionLabel = ContextMenu.addActionCopy(new JLabel(description));
 		add(descriptionLabel, BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
-
-	public SearchPanel(String title, JobProgressBar progressBar, int level, @Nullable TabNavigation tabNavigation) {
+	/** Child panel */
+	public SearchPanel(String title, JobProgressBar progressBar, int level, @Nullable TabNavigation tabNavigation, @Nullable SearchPanel parent) {
 		_title = title;
 		_progressBar = progressBar;
 		_level = level;
 
 		setLayout(new BorderLayout());
-		_textArea = new VirtualTextArea(tabNavigation, title);
+		_textArea = new VirtualTextArea(tabNavigation, title, parent == null ? null : parent.getTextArea());
 		_textArea.setMinimumSize(new Dimension(0, 0));
 		_splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		_splitPane.setResizeWeight(1);

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,12 +45,16 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private       int                       _allLinesCount   = 0;
 	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
 
-	private final String              _title;
+	private final String          _title;
+	private final VirtualTextArea _parent;
+
 	private final JScrollPane         _scrollPane;
 	private final JTextArea           _text;
 	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar          _scrollBar;
-	private       JTextAreaGridView   _gridView;
+
+	private JTextAreaGridView _gridView;
+	private String            _header;
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
@@ -57,8 +62,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
 
-	public VirtualTextArea(@Nullable TabNavigation tabNavigation, @Nullable String title) {
+	public VirtualTextArea(@Nullable TabNavigation tabNavigation, @Nullable String title, @Nullable VirtualTextArea parent) {
 		_title = title;
+		_parent = parent;
 
 		setOpaque(false);
 		JPanel root = new JPanel();
@@ -162,15 +168,15 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		new SelectionHighlight(_text);
 
 		// floating buttons
-		Box buttons = Box.createVerticalBox();
+		final Box buttons = Box.createVerticalBox();
 		Box buttonsContainer = Box.createHorizontalBox();
 		buttons.add(buttonsContainer);
 		buttons.add(Box.createVerticalGlue());
 		buttonsContainer.add(Box.createHorizontalGlue());
-		JToggleButton asGrid = new JToggleButton("\u25A6");
+		final JToggleButton asGrid = new JToggleButton("\u25A6");
 		buttonsContainer.add(asGrid);
 		asGrid.addActionListener((e) -> setGridView(asGrid.isSelected()));
-		JButton perspective = new JButton("\uD83D\uDCC8");
+		final JButton perspective = new JButton("\uD83D\uDCC8");
 		perspective.addActionListener(e -> openInPerspective());
 		buttonsContainer.add(perspective);
 		buttonsContainer.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
@@ -190,15 +196,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		System.out.println("setGridView:" + active);
 		if (active) {
 			if (_gridView == null) {
-				try {
-					_gridView = new JTextAreaGridView(_text, _textSource.getText(0));
-					_gridView.setRowHeight(_lineHeight);
-					_gridView.getTableHeader().setPreferredSize(new Dimension(_scrollPane.getWidth(), _lineHeight));
-					_scrollPane.setViewportView(_gridView);
-				} catch (ExecutionException | InterruptedException e) {
-					e.printStackTrace();
-					_gridView = null;
-				}
+				_gridView = new JTextAreaGridView(_text, getHeader());
+				_gridView.setRowHeight(_lineHeight);
+				_gridView.getTableHeader().setPreferredSize(new Dimension(_scrollPane.getWidth(), _lineHeight));
+				_scrollPane.setViewportView(_gridView);
 			}
 		} else {
 			if (_gridView != null) {
@@ -208,9 +209,30 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 	}
 
+	/**
+	 * Search for header recurively to parents as the search may have stripped it out
+	 */
+	public String getHeader() {
+		if (_header == null) {
+			if (_parent != null)
+				_header = _parent.getHeader();
+			else {
+				try {
+					_header = _textSource.getText(0);
+				} catch (ExecutionException | InterruptedException e) {
+					e.printStackTrace(System.err);
+					_header = "";
+				}
+			}
+		}
+		return _header;
+	}
+
 	/** Will open finos perspective in a standalone browser window.*/
 	public void openInPerspective() {
 		_textSource.requestStream((stream) -> {
+			if (_parent != null)
+				stream = Stream.concat(Stream.of(getHeader()), stream);
 			// the server will automatically close when the browser closes (websocket disconnected)
 			// the port is automatically determined in the constructor
 			FinosPerspectiveServer server = new FinosPerspectiveServer();
