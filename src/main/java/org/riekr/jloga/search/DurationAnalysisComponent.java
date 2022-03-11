@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import static org.riekr.jloga.misc.StdFields.*;
 
 public class DurationAnalysisComponent extends SearchProjectComponentWithExpandablePanel implements AutoDetect.Wizard {
+	public static final String ID = "DurationAnalysisComponent";
 
 	public final Project.Field<Pattern>           patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
 	public final Project.Field<DateTimeFormatter> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
@@ -31,7 +32,12 @@ public class DurationAnalysisComponent extends SearchProjectComponentWithExpanda
 	}
 
 	@Override
-	public String getLabel() {
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public String getSearchIconLabel() {
 		return "\u0394";
 	}
 

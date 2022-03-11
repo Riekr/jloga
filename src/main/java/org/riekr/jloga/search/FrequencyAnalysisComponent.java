@@ -15,6 +15,7 @@ import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
 
 public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpandablePanel implements AutoDetect.Wizard {
+	public static final String ID = "FrequencyAnalysisComponent";
 
 	public final Field<Pattern>           patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
 	public final Field<DateTimeFormatter> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
@@ -31,7 +32,12 @@ public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpand
 	}
 
 	@Override
-	public String getLabel() {
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public String getSearchIconLabel() {
 		return "f";
 	}
 

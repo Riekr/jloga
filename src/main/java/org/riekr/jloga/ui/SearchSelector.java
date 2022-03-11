@@ -39,7 +39,7 @@ public class SearchSelector extends JPanel {
 		add(_selectBtn, BorderLayout.LINE_START);
 
 		SearchRegistry.get(
-				Preferences.loadClass(SEARCH_TYPE, () -> RegExComponent.class),
+				Preferences.load(SEARCH_TYPE, () -> RegExComponent.ID),
 				level,
 				this::setSearchUI
 		);
@@ -48,7 +48,7 @@ public class SearchSelector extends JPanel {
 	private void openSelection() {
 		SearchRegistry.Entry<?>[] choices = SearchRegistry.getChoices();
 		SearchRegistry.Entry<?> initialSelectionValue = Arrays.stream(choices)
-				.filter((e) -> e.comp == _searchComponent.getClass())
+				.filter((e) -> e.id.equals(_searchComponent.getID()))
 				.findFirst()
 				.orElseGet(() -> choices[0]);
 		SearchRegistry.Entry<?> input = (SearchRegistry.Entry<?>)JOptionPane.showInputDialog(
@@ -64,7 +64,7 @@ public class SearchSelector extends JPanel {
 			Preferences.save(SEARCH_TYPE, setSearchUI(input.newInstance(_level)));
 	}
 
-	private <T extends JComponent & SearchComponent> Class<?> setSearchUI(T comp) {
+	private <T extends JComponent & SearchComponent> String setSearchUI(T comp) {
 		if (_searchComponent != null)
 			_searchComponent.onSearch(null);
 		if (_searchUI != null)
@@ -75,8 +75,8 @@ public class SearchSelector extends JPanel {
 			((AutoDetect.Wizard)comp).setTextSourceSupplier(_textSource);
 		comp.onSearch(_onSearchConsumer);
 		add(comp, BorderLayout.CENTER);
-		_selectBtn.setText(_searchComponent.getLabel());
-		return comp.getClass();
+		_selectBtn.setText(_searchComponent.getSearchIconLabel());
+		return comp.getID();
 	}
 
 	@Override

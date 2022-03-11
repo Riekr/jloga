@@ -13,6 +13,8 @@ import org.riekr.jloga.ui.utils.UIUtils;
 
 public class RegExComponent extends Box implements SearchComponent {
 
+	public static final String ID = "RegExComponent";
+
 	private final MRUTextCombo<SearchComboEntry> _combo;
 	private       Unsubscribable                 _comboListener;
 
@@ -57,7 +59,12 @@ public class RegExComponent extends Box implements SearchComponent {
 	}
 
 	@Override
-	public String getLabel() {
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public String getSearchIconLabel() {
 		return ".*";
 	}
 }

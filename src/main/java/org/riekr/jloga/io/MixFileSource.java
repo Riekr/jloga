@@ -3,7 +3,7 @@ package org.riekr.jloga.io;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.misc.MutableInt;
-import org.riekr.jloga.misc.PagedIntBag;
+import org.riekr.jloga.pmem.PagedIntBag;
 
 import java.io.File;
 import java.time.Duration;

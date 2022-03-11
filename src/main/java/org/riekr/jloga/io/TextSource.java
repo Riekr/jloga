@@ -77,9 +77,6 @@ public interface TextSource extends Iterable<String> {
 		return () -> future.cancel(true);
 	}
 
-	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
-	}
-
 	default Future<?> requestSearch(SearchPredicate predicate, ProgressListener progressListener, Consumer<TextSource> consumer, Consumer<Throwable> onError) {
 		AtomicReference<Future<?>> resRef = new AtomicReference<>();
 		BooleanSupplier running = () -> {
@@ -202,6 +199,8 @@ public interface TextSource extends Iterable<String> {
 
 	default void onClose() {}
 
-	boolean isIndexing();
+	default void setIndexingListener(@NotNull ProgressListener indexingListener) {}
+
+	default boolean isIndexing() {return false;}
 
 }

@@ -6,7 +6,9 @@ public interface SearchComponent {
 
 	void onSearch(Consumer<SearchPredicate> consumer);
 
-	default String getLabel() {
+	String getID();
+
+	default String getSearchIconLabel() {
 		String res = getClass().getSimpleName();
 		return res.replaceAll("([A-Z])", " $1").trim();
 	}

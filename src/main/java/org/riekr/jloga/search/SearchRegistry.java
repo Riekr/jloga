@@ -1,27 +1,31 @@
 package org.riekr.jloga.search;
 
 import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
+
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.search.custom.ExtSearchRegistry;
 
 public final class SearchRegistry {
 
-	public static class Entry<T extends JComponent & SearchComponent> {
-		public final Class<T> comp;
-		public final String   description;
+	private static final LinkedHashMap<String, Entry<?>> _ENTRIES = new LinkedHashMap<>();
 
-		public Entry(Class<T> comp, String description) {
-			this.comp = comp;
+	public static class Entry<T extends JComponent & SearchComponent> {
+		public final @NotNull String         id;
+		public final          IntFunction<T> factory;
+		public final          String         description;
+
+		public Entry(@NotNull String id, IntFunction<T> factory, String description) {
+			this.id = id;
+			this.factory = factory;
 			this.description = description;
 		}
 
 		public T newInstance(int level) {
-			try {
-				return comp.getConstructor(Integer.TYPE).newInstance(level);
-			} catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-				throw new UnsupportedOperationException("No constructor found", e);
-			}
+			return factory.apply(level);
 		}
 
 		@Override
@@ -29,52 +33,51 @@ public final class SearchRegistry {
 			return description;
 		}
 
-		@Override
-		public final boolean equals(Object o) {
+		@Override public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof Entry))
+			if (o == null || getClass() != o.getClass())
 				return false;
 			Entry<?> entry = (Entry<?>)o;
-			return comp.equals(entry.comp);
+			if (!id.equals(entry.id))
+				return false;
+			return Objects.equals(description, entry.description);
 		}
 
 		@Override
-		public final int hashCode() {
-			return comp.hashCode();
+		public int hashCode() {
+			int result = id.hashCode();
+			result = 31 * result + (description != null ? description.hashCode() : 0);
+			return result;
 		}
 	}
 
-	private static final LinkedHashSet<Entry<?>> _ENTRIES = new LinkedHashSet<>();
-
-	static {
-		_ENTRIES.add(new Entry<>(RegExComponent.class, "Regular Expressions"));
-		_ENTRIES.add(new Entry<>(PlainTextComponent.class, "Plain Text"));
-		_ENTRIES.add(new Entry<>(DurationAnalysisComponent.class, "Duration Analysis"));
-		_ENTRIES.add(new Entry<>(FrequencyAnalysisComponent.class, "Frequency Analysis"));
-		_ENTRIES.add(new Entry<>(UniqueSearchComponent.class, "Unique pattern search"));
+	public static void register(Entry<?> entry) {
+		_ENTRIES.put(entry.id, entry);
 	}
 
-	@SuppressWarnings("unused")
-	public static boolean add(Entry<?> entry) {
-		return _ENTRIES.add(entry);
+	static {
+		register(new Entry<>(RegExComponent.ID, RegExComponent::new, "Regular Expressions"));
+		register(new Entry<>(PlainTextComponent.ID, PlainTextComponent::new, "Plain Text"));
+		register(new Entry<>(DurationAnalysisComponent.ID, DurationAnalysisComponent::new, "Duration Analysis"));
+		register(new Entry<>(FrequencyAnalysisComponent.ID, FrequencyAnalysisComponent::new, "Frequency Analysis"));
+		register(new Entry<>(UniqueSearchComponent.ID, UniqueSearchComponent::new, "Unique pattern search"));
+		ExtSearchRegistry.forEach(SearchRegistry::register);
 	}
 
 	public static Entry<?>[] getChoices() {
-		return _ENTRIES.toArray(new Entry[0]);
+		return _ENTRIES.values().toArray(new Entry[0]);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends JComponent & SearchComponent> void get(Class<?> cl, int level, Consumer<? super T> consumer) {
-		for (Entry<?> e : _ENTRIES) {
-			if (e.comp == cl) {
-				consumer.accept((T)e.newInstance(level));
-				return;
-			}
+	public static <T extends JComponent & SearchComponent> void get(String id, int level, Consumer<? super T> consumer) {
+		Entry<?> res = _ENTRIES.get(id);
+		if (res == null) {
+			res = _ENTRIES.values().iterator().next();
+			System.err.println("ID " + id + " not registered");
 		}
-		throw new IllegalArgumentException("Class " + cl.getCanonicalName() + " not registered");
+		consumer.accept((T)res.newInstance(level));
 	}
 
-	private SearchRegistry() {
-	}
+	private SearchRegistry() {}
 }
