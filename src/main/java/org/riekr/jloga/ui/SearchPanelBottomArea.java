@@ -5,6 +5,7 @@ import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +36,10 @@ public class SearchPanelBottomArea extends JPanel {
 		_progressBar = progressBar;
 		JPanel searchHeader = new JPanel();
 		searchHeader.setLayout(new BorderLayout());
-		_searchUI = new SearchSelector(level, this::search, parent::getTextSource);
+		_searchUI = new SearchSelector(level, this::search, parent::getTextSource, Map.of(
+				"Title", title,
+				"RootTitle", parent.getRootTitle()
+		));
 		searchHeader.add(_searchUI, BorderLayout.CENTER);
 
 		JToolBar searchToolbar = new JToolBar();

@@ -5,6 +5,7 @@ import static org.riekr.jloga.io.Preferences.SEARCH_TYPE;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -23,15 +24,17 @@ public class SearchSelector extends JPanel {
 	private final int                       _level;
 	private final JButton                   _selectBtn;
 	private final Consumer<SearchPredicate> _onSearchConsumer;
+	private final Map<String, String>       _vars;
 
 	private                 SearchComponent      _searchComponent;
 	private                 JComponent           _searchUI;
 	private final @Nullable Supplier<TextSource> _textSource;
 
-	public SearchSelector(int level, Consumer<SearchPredicate> onSearchConsumer, @Nullable Supplier<TextSource> textSource) {
+	public SearchSelector(int level, Consumer<SearchPredicate> onSearchConsumer, @Nullable Supplier<TextSource> textSource, Map<String, String> vars) {
 		_level = level;
 		_onSearchConsumer = onSearchConsumer;
 		_textSource = textSource;
+		_vars = vars;
 
 		setLayout(new BorderLayout());
 
@@ -74,6 +77,7 @@ public class SearchSelector extends JPanel {
 		if (comp instanceof AutoDetect.Wizard && _textSource != null)
 			((AutoDetect.Wizard)comp).setTextSourceSupplier(_textSource);
 		comp.onSearch(_onSearchConsumer);
+		comp.setVariables(_vars);
 		add(comp, BorderLayout.CENTER);
 		_selectBtn.setText(_searchComponent.getSearchIconLabel());
 		return comp.getID();

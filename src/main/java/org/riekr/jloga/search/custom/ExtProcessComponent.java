@@ -11,26 +11,10 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessComponent extends JPanel implements SearchComponent {
 
-	private static String replace(String orig, Matcher matcher, Map<String, String> env) {
-		matcher.reset(orig);
-		if (matcher.find()) {
-			StringBuilder buf = new StringBuilder(orig.length());
-			do {
-				final String key = matcher.group(1);
-				final String val = env.get(key);
-				if (val == null)
-					throw new IllegalArgumentException("Invalid env name: " + key);
-				matcher.appendReplacement(buf, val);
-			} while (matcher.find());
-			matcher.appendTail(buf);
-			return buf.toString();
-		}
-		return orig;
-	}
-
 	private final String                    _id;
 	private final String                    _icon;
 	private       Consumer<SearchPredicate> _searchPredicateConsumer;
+	private       Map<String, String>       _vars;
 
 	public ExtProcessComponent(String id, String icon, String label, String[] command) {
 		_id = id;
@@ -49,6 +33,30 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 		});
 	}
 
+	private String replace(String orig, Matcher matcher, Map<String, String> env) {
+		matcher.reset(orig);
+		if (matcher.find()) {
+			StringBuilder buf = new StringBuilder(orig.length());
+			do {
+				String key = matcher.group(1);
+				String val;
+				if (_vars == null)
+					val = env.get(key);
+				else {
+					val = _vars.get(key);
+					if (val == null)
+						val = env.get(key);
+				}
+				if (val == null)
+					throw new IllegalArgumentException("Invalid env name: " + key);
+				matcher.appendReplacement(buf, val);
+			} while (matcher.find());
+			matcher.appendTail(buf);
+			return buf.toString();
+		}
+		return orig;
+	}
+
 	@Override
 	public void onSearch(Consumer<SearchPredicate> consumer) {
 		_searchPredicateConsumer = consumer;
@@ -62,5 +70,10 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 	@Override
 	public String getSearchIconLabel() {
 		return _icon;
+	}
+
+	@Override
+	public void setVariables(Map<String, String> vars) {
+		_vars = vars;
 	}
 }

@@ -35,6 +35,7 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 			throw new IllegalStateException("ExtProcessPipeSearch already started");
 		Process process;
 		try {
+			System.out.println("RUNNING EXT: " + String.join(" ", _command));
 			process = new ProcessBuilder(_command).start();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

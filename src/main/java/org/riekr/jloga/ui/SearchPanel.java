@@ -27,6 +27,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	private final JTabbedPane     _bottomTabs;
 	private final TabNavigation   _bottomTabsNavigation;
 	private final JobProgressBar  _progressBar;
+	private final SearchPanel     _parent;
 
 	private final int _level;
 
@@ -46,6 +47,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_title = title;
 		_progressBar = progressBar;
 		_level = level;
+		_parent = parent;
 
 		setLayout(new BorderLayout());
 		_textArea = new VirtualTextArea(tabNavigation, title, parent == null ? null : parent.getTextArea());
@@ -180,5 +182,9 @@ public class SearchPanel extends JComponent implements FileDropListener {
 
 	public String getTitle() {
 		return _title;
+	}
+
+	public String getRootTitle() {
+		return _parent == null ? _title : _parent.getRootTitle();
 	}
 }

@@ -1,9 +1,9 @@
 {
   "icon": "\uD83D\uDC4B",
-  "label": "Win32 FINDSTR sample",
+  "label": "Start Win32 FINDSTR sample",
   "description": "Description of Win32 FINDSTR sample",
   "command": [
     "%SystemRoot%\\system32\\findstr.exe",
-    "/C:\"Total\""
+    "/C:\"%RootTitle%\""
   ]
 }

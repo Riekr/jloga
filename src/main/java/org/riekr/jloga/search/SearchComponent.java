@@ -1,5 +1,6 @@
 package org.riekr.jloga.search;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public interface SearchComponent {
@@ -12,5 +13,7 @@ public interface SearchComponent {
 		String res = getClass().getSimpleName();
 		return res.replaceAll("([A-Z])", " $1").trim();
 	}
+
+	default void setVariables(Map<String, String> vars) {}
 
 }
