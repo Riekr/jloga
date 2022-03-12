@@ -90,7 +90,8 @@ public interface TextSource extends Iterable<String> {
 				search(predicate, searchResult, progressListener, running);
 				searchResult.complete();
 			} catch (SearchException e) {
-				onError.accept(e);
+				if (e.userHasAlreadyBeenNotified.compareAndSet(false, true))
+					onError.accept(e);
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
 				onError.accept(e);

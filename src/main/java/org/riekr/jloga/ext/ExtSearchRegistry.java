@@ -1,4 +1,4 @@
-package org.riekr.jloga.search.custom;
+package org.riekr.jloga.ext;
 
 import static java.util.stream.Collectors.toList;
 

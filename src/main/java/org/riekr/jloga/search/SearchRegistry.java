@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.search.custom.ExtSearchRegistry;
+import org.riekr.jloga.ext.ExtSearchRegistry;
 
 public final class SearchRegistry {
 

@@ -1,0 +1,10 @@
+{
+  "icon": "\uD83D\uDC4B 2",
+  "label": "Standard out/err test",
+  "description": "Print hello from stderr and out, does not read from in",
+  "command": [
+    "%SystemRoot%\\system32\\cmd.exe",
+    "/c",
+    "echo hello from stderr 1>&2 && echo hello from stdout"
+  ]
+}
