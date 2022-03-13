@@ -21,6 +21,8 @@ import org.riekr.jloga.misc.AutoDetect;
 
 public class ArrowConversion {
 
+	private static final int _CHUNK_SIZE = 1024 * 1024 * 4; // 4Mb
+
 	interface Transformer {
 		Transformer IDENTITY = (col, val) -> val;
 
@@ -49,6 +51,7 @@ public class ArrowConversion {
 	private final StringBuilder       _buffer       = new StringBuilder(256);
 	private final ArrayList<String[]> _recordBuffer = new ArrayList<>();
 	private final Transformer[]       _colTransformers;
+	private       int                 _recSize      = 10000;
 
 	public ArrowConversion(String[] header) {
 		_header = header;
@@ -94,7 +97,7 @@ public class ArrowConversion {
 		_buffer.setLength(0);
 		_buffer.append('{');
 		_recordBuffer.clear();
-		while (data.hasNext() && _recordBuffer.size() < 10000)
+		while (data.hasNext() && _recordBuffer.size() < _recSize)
 			_recordBuffer.add(data.next());
 		for (int i = 0; i < _header.length; i++) {
 			if (i != 0)
@@ -108,6 +111,14 @@ public class ArrowConversion {
 			}
 			_buffer.append(']');
 		}
-		return _buffer.append('}').toString();
+		String res = _buffer.append('}').toString();
+		checkSize(res.length());
+		return res;
+	}
+
+	private void checkSize(int len) {
+		int prec = _recSize;
+		_recSize *= _CHUNK_SIZE / (float)len;
+		System.err.println("records " + prec + " -> " + _recSize);
 	}
 }
