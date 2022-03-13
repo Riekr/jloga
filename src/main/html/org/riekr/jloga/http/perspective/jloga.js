@@ -13,7 +13,7 @@ async function set(title, data) {
 }
 
 async function update(data) {
-    table.update(data);
+    await table.update(data);
 }
 
 const socket = new WebSocket(window.location.origin.replace("http", "ws"));
