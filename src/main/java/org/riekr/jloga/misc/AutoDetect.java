@@ -5,6 +5,7 @@ import static java.util.regex.Pattern.compile;
 import javax.swing.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -46,6 +47,10 @@ public final class AutoDetect implements Predicate<String> {
 
 		// 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
 		_AUTO_DETECTS.add(new AutoDetect(compile("^[\\d\\.]+ - [\\w\\d\\.]+ \\[(\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d) (?:-)?\\d+\\] \""), "dd/MMM/uuuu:HH:mm:ss"));
+	}
+
+	public static void getDateTimeFormatters(Collection<? super DateTimeFormatter> res) {
+		_AUTO_DETECTS.stream().map((ad) -> ad.formatter).forEach(res::add);
 	}
 
 	@NotNull
