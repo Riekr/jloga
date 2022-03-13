@@ -5,10 +5,13 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -34,6 +37,11 @@ public class ArrowConversion {
 		_dateTimeFormatters.add(ISO_LOCAL_DATE_TIME.withZone(_localZoneId));
 		_dateTimeFormatters.add(RFC_1123_DATE_TIME.withZone(_localZoneId));
 		_dateTimeFormatters.add(ISO_ZONED_DATE_TIME.withZone(_localZoneId));
+		LocalDate now = LocalDate.now();
+		_dateTimeFormatters.add(new DateTimeFormatterBuilder()
+				.appendPattern("HH:mm:ss[.SSS]")
+				.parseDefaulting(ChronoField.EPOCH_DAY, now.toEpochDay())
+				.toFormatter().withZone(_localZoneId));
 		AutoDetect.getDateTimeFormatters(_dateTimeFormatters);
 	}
 
@@ -67,10 +75,15 @@ public class ArrowConversion {
 				ZonedDateTime localDateTime = formatter.parse(dateString, ZonedDateTime::from);
 				return ISO_LOCAL_DATE_TIME.withZone(_utcZoneId).format(localDateTime.toOffsetDateTime());
 			} catch (DateTimeParseException e) {
-				_dateTimeFormatters.add(_dateTimeFormatters.removeFirst());
+				onDateTimeParseException(e);
 			}
 		}
 		return null;
+	}
+
+	protected void onDateTimeParseException(DateTimeParseException e) {
+		// rotate formatters supposing all date/time columns in the stream have the same format
+		_dateTimeFormatters.add(_dateTimeFormatters.removeFirst());
 	}
 
 	private String escapeQuotes(String val) {
