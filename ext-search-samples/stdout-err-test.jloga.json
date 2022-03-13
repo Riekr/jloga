@@ -1,4 +1,5 @@
 {
+  "order": 2,
   "icon": "\uD83D\uDC4B 2",
   "label": "Standard out/err test",
   "description": "Print hello from stderr and out, does not read from in",
