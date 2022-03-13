@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -53,8 +54,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar          _scrollBar;
 
-	private JTextAreaGridView _gridView;
-	private String            _header;
+	private final JToggleButton     _gridToggle;
+	private       JTextAreaGridView _gridView;
+	private       String            _header;
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
@@ -173,9 +175,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		buttons.add(buttonsContainer);
 		buttons.add(Box.createVerticalGlue());
 		buttonsContainer.add(Box.createHorizontalGlue());
-		final JToggleButton asGrid = new JToggleButton("\u25A6");
-		buttonsContainer.add(asGrid);
-		asGrid.addActionListener((e) -> setGridView(asGrid.isSelected()));
+		_gridToggle = new JToggleButton("\u25A6");
+		buttonsContainer.add(_gridToggle);
+		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected()));
 		final JButton perspective = new JButton("\uD83D\uDCC8");
 		perspective.addActionListener(e -> openInPerspective());
 		buttonsContainer.add(perspective);
@@ -323,6 +325,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_textSourceUnsubscribable.unsubscribe();
 		_textSource = textSource;
 		if (textSource != null) {
+			if (_title != null && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find()) {
+				EventQueue.invokeLater(() -> {
+					_gridToggle.setSelected(true);
+					setGridView(true);
+				});
+			}
 			_textSourceUnsubscribable = textSource.requestLineCount(this::setFileLineCount);
 			requireText();
 		}

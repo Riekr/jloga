@@ -84,7 +84,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	private String getChildTitle(String tabTitle) {
 		if (tabTitle == null || tabTitle.isBlank())
 			return _title;
-		return _title + " \uD83E\uDC06 " + tabTitle;
+		return tabTitle + " \uD83E\uDC06 " + _title;
 	}
 
 	private String newTabTempTitle() {
