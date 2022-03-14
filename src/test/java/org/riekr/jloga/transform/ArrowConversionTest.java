@@ -13,7 +13,7 @@ public class ArrowConversionTest {
 		private final ArrayList<Throwable> _errors = new ArrayList<>();
 
 		public TestArrowConversion() {
-			super(new String[0]);
+			super(new String[]{""});
 		}
 
 		@Override
@@ -23,8 +23,8 @@ public class ArrowConversionTest {
 		}
 
 		@Override
-		protected String fixDate(String dateString) {
-			String res = super.fixDate(dateString);
+		protected String fixDate(int col, String dateString) {
+			String res = super.fixDate(col, dateString);
 			if (res == null) {
 				_errors.forEach((e) -> {
 					e.printStackTrace(System.err);
@@ -38,8 +38,9 @@ public class ArrowConversionTest {
 	@Test
 	public void fixDate() {
 		// 2022-03-06T00:13:29
-		String val = "2022-03-06T00:13:29.231";
-		String res = new TestArrowConversion().fixDate(val);
+		// String val = "2022-03-06T00:13:29.231";
+		String val = "3/9/2022 1:00:00 PM";
+		String res = new TestArrowConversion().fixDate(0, val);
 		System.err.println(val + '\n' + res);
 		Assert.assertNotNull(res);
 		Assert.assertFalse(res.endsWith("[UTC]"));
@@ -49,7 +50,7 @@ public class ArrowConversionTest {
 	public void fixTime() {
 		// 2022-03-06T00:13:29
 		String val = "00:13:29.232";
-		String res = new TestArrowConversion().fixDate(val);
+		String res = new TestArrowConversion().fixDate(0, val);
 		System.err.println(val + '\n' + res);
 		Assert.assertNotNull(res);
 		Assert.assertFalse(res.endsWith("[UTC]"));

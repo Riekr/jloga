@@ -23,12 +23,6 @@ public class ArrowConversion {
 
 	private static final int _CHUNK_SIZE = 1024 * 1024 * 4; // 4Mb
 
-	interface Transformer {
-		Transformer IDENTITY = (col, val) -> val;
-
-		String apply(int col, String val);
-	}
-
 	private final ZoneId _utcZoneId = ZoneId.of("UTC");
 
 	private final LinkedList<DateTimeFormatter> _dateTimeFormatters = new LinkedList<>();
@@ -39,7 +33,11 @@ public class ArrowConversion {
 		_dateTimeFormatters.add(ISO_LOCAL_DATE_TIME.withZone(_localZoneId));
 		_dateTimeFormatters.add(RFC_1123_DATE_TIME.withZone(_localZoneId));
 		_dateTimeFormatters.add(ISO_ZONED_DATE_TIME.withZone(_localZoneId));
-		LocalDate now = LocalDate.now();
+		// "3/9/2022 12:30:00 PM"
+		_dateTimeFormatters.add(new DateTimeFormatterBuilder()
+				.appendPattern("M/d/u h:m:s a")
+				.toFormatter().withZone(_localZoneId));
+		final LocalDate now = LocalDate.now();
 		_dateTimeFormatters.add(new DateTimeFormatterBuilder()
 				.appendPattern("HH:mm:ss[.SSS]")
 				.parseDefaulting(ChronoField.EPOCH_DAY, now.toEpochDay())
@@ -56,22 +54,30 @@ public class ArrowConversion {
 	public ArrowConversion(String[] header) {
 		_header = header;
 		_colTransformers = new Transformer[header.length];
-		Transformer detect = (col, val) -> {
-			String fixedVal = fixDate(val);
-			if (fixedVal == null) {
-				_colTransformers[col] = Transformer.IDENTITY;
-				return val;
-			}
-			return fixedVal;
-		};
-		Arrays.fill(_colTransformers, detect);
+		Arrays.fill(_colTransformers, (Transformer)this::fixAndDetectColumn);
+	}
+
+	private String fixAndDetectColumn(int col, String val) {
+		String unwrapped = Transformer.UNWRAP_QUOTES.apply(col, val);
+		Transformer def;
+		if (unwrapped.equals(val))
+			def = Transformer.IDENTITY;
+		else
+			def = Transformer.UNWRAP_QUOTES;
+		String fixedDate = fixDate(col, unwrapped);
+		if (fixedDate == null) {
+			_colTransformers[col] = def;
+			return unwrapped;
+		}
+		_colTransformers[col] = def == Transformer.IDENTITY ? this::fixDate : def.andThen(this::fixDate);
+		return fixedDate;
 	}
 
 	/**
 	 * Finos perspective works in UTC only
 	 * https://github.com/finos/perspective/issues/1700
 	 */
-	protected String fixDate(String dateString) {
+	protected String fixDate(int col, String dateString) {
 		for (int i = 0, dateTimeFormattersSize = _dateTimeFormatters.size(); i < dateTimeFormattersSize; i++) {
 			try {
 				final DateTimeFormatter formatter = _dateTimeFormatters.get(0);
