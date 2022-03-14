@@ -21,11 +21,11 @@ class ResourcesServer {
 		_server = new LocalServer(Integer.getInteger("jloga." + getClass().getSimpleName() + ".port", 0), closeOnDisconnect ? this::stop : null) {
 			@Override
 			public Response serveResponse(IHTTPSession session) {
-				String uri = session.getUri();
-				System.err.println("Serving " + uri);
+				String uri = session.getUri().replace(' ', '+');
 				InputStream is = getClass().getResourceAsStream(_package + uri);
 				if (is != null)
 					return newChunkedResponse(Response.Status.OK, NanoHTTPD.getMimeTypeForFile(uri), is);
+				System.err.println("404 " + uri);
 				return null;
 			}
 		};
