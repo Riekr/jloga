@@ -1,15 +1,9 @@
 plugins {
 	id 'java'
-	id 'application'
 }
 
 repositories {
 	mavenCentral()
-}
-
-def mainClassName = 'org.riekr.jloga.Main'
-application {
-	mainClass = mainClassName
 }
 
 java {
@@ -58,8 +52,22 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-				"Implementation-Version": "0.0.4",
-				"Main-Class": mainClassName
+				"Implementation-Version": '0.0.4',
+				"Main-Class": 'org.riekr.jloga.Main'
 		)
 	}
+}
+
+tasks.register('fatJar', Jar) {
+	manifest.from jar.manifest
+	archiveClassifier = 'all'
+	from sourceSets.main.output
+	dependsOn configurations.runtimeClasspath
+	from {
+		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+	}
+}
+
+artifacts {
+	archives fatJar
 }
