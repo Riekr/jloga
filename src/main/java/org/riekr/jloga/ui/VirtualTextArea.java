@@ -60,6 +60,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final JToggleButton     _gridToggle;
 	private       JTextAreaGridView _gridView;
 	private       String            _header;
+	private       boolean           _ownHeader;
 	private final JButton           _perspectiveBtn;
 
 	private TextSource     _textSource;
@@ -224,6 +225,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private void gridNotAvailable(String reason) {
 		_header = "";
+		_ownHeader = true;
 		_gridToggle.setSelected(false);
 		_gridToggle.setEnabled(false);
 		_perspectiveBtn.setEnabled(false);
@@ -259,6 +261,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 							break;
 						}
 					}
+					_ownHeader = true;
 				} catch (ExecutionException | InterruptedException e) {
 					e.printStackTrace(System.err);
 					_header = "";
@@ -271,7 +274,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	/** Will open finos perspective in a standalone browser window.*/
 	public void openInPerspective() {
 		_textSource.requestStream((stream) -> {
-			if (_parent != null)
+			String header = requireHeader();
+			if (header != null && !_ownHeader)
 				stream = Stream.concat(Stream.of(requireHeader()), stream);
 			// the server will automatically close when the browser closes (websocket disconnected)
 			// the port is automatically determined in the constructor
