@@ -5,18 +5,34 @@ import java.util.function.Function;
 
 public class FastSplitOperation implements Function<String, String[]> {
 
+	public static int count(String s) {
+		int max = 0;
+		if (s != null && !s.isEmpty()) {
+			for (int di = 0, dlen = _DELIMS.length(); di < dlen; di++) {
+				char delim = _DELIMS.charAt(di);
+				int count = 0;
+				for (int si = 0, slen = s.length(); si < slen; si++) {
+					if (s.charAt(si) == delim)
+						count++;
+				}
+				if (max < count)
+					max = count;
+			}
+		}
+		return max;
+	}
+
+
 	private static final String[] _EMPTY = new String[0];
 
-	private static final String _DELIMS = "\t,;:|";
-
-	private boolean _detect;
-	private char    _delim;
-	private String  _escapedDelim;
-	private String  _stringDelim;
-	private int     _cols;
-	private int     _line = 0;
-
-	private final ArrayList<String> _buffer;
+	private static final String            _DELIMS = "\t,;:|";
+	private final        ArrayList<String> _buffer;
+	private              boolean           _detect;
+	private              char              _delim;
+	private              String            _escapedDelim;
+	private              String            _stringDelim;
+	private              int               _cols;
+	private              int               _line   = 0;
 
 	/** For autodetection */
 	public FastSplitOperation() {
@@ -108,7 +124,7 @@ public class FastSplitOperation implements Function<String, String[]> {
 		} else
 			res = split(s);
 		if (res.length != _cols)
-			throw new IllegalStateException("Number of columns changed from " + _cols + " to " + res.length + " at line " + _line);
+			throw new IllegalArgumentException("Number of columns changed from " + _cols + " to " + res.length + " at line " + _line);
 		return res;
 	}
 }

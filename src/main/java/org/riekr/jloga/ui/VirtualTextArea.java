@@ -34,10 +34,13 @@ import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.transform.FastSplitOperation;
 import org.riekr.jloga.ui.utils.SelectionHighlight;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
+
+	private static final int _GRID_HEADER_CHECK_LINES = 10;
 
 	private int _lineHeight;
 
@@ -57,6 +60,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final JToggleButton     _gridToggle;
 	private       JTextAreaGridView _gridView;
 	private       String            _header;
+	private final JButton           _perspectiveBtn;
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
@@ -178,9 +182,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_gridToggle = new JToggleButton("\u25A6");
 		buttonsContainer.add(_gridToggle);
 		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected()));
-		final JButton perspective = new JButton("\uD83D\uDCC8");
-		perspective.addActionListener(e -> openInPerspective());
-		buttonsContainer.add(perspective);
+		_perspectiveBtn = new JButton("\uD83D\uDCC8");
+		_perspectiveBtn.addActionListener(e -> openInPerspective());
+		buttonsContainer.add(_perspectiveBtn);
 		buttonsContainer.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
 
 		// overlay layout
@@ -195,10 +199,17 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void setGridView(boolean active) {
-		System.out.println("setGridView:" + active);
 		if (active) {
 			if (_gridView == null) {
-				_gridView = new JTextAreaGridView(_text, getHeader());
+				String header = requireHeader();
+				if (header == null)
+					return;
+				try {
+					_gridView = new JTextAreaGridView(_text, header);
+				} catch (IllegalArgumentException e) {
+					gridNotAvailable(e.getLocalizedMessage());
+					return;
+				}
 				_gridView.setRowHeight(_lineHeight);
 				_gridView.getTableHeader().setPreferredSize(new Dimension(_scrollPane.getWidth(), _lineHeight));
 				_scrollPane.setViewportView(_gridView);
@@ -211,6 +222,24 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 	}
 
+	private void gridNotAvailable(String reason) {
+		_gridToggle.setSelected(false);
+		_gridToggle.setEnabled(false);
+		_perspectiveBtn.setEnabled(false);
+		if (reason != null)
+			JOptionPane.showMessageDialog(this, reason, "Grid view not available", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private String requireHeader() {
+		String header = getHeader();
+		if (header == null || header.isEmpty()) {
+			EventQueue.invokeLater(() -> gridNotAvailable("Grid column count is not stable across the first " + _GRID_HEADER_CHECK_LINES + " lines"));
+			return null;
+		}
+		return header;
+	}
+
+
 	/**
 	 * Search for header recurively to parents as the search may have stripped it out
 	 */
@@ -218,9 +247,17 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		if (_header == null) {
 			if (_parent != null)
 				_header = _parent.getHeader();
-			else {
+			if (_header == null || _header.isEmpty()) {
 				try {
 					_header = _textSource.getText(0);
+					int splitHeader = FastSplitOperation.count(_header);
+					for (int i = 1; i < Math.min(_textSource.getLineCount(), _GRID_HEADER_CHECK_LINES); i++) {
+						int verify = FastSplitOperation.count(_textSource.getText(i));
+						if (splitHeader != verify) {
+							_header = "";
+							break;
+						}
+					}
 				} catch (ExecutionException | InterruptedException e) {
 					e.printStackTrace(System.err);
 					_header = "";
@@ -234,7 +271,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	public void openInPerspective() {
 		_textSource.requestStream((stream) -> {
 			if (_parent != null)
-				stream = Stream.concat(Stream.of(getHeader()), stream);
+				stream = Stream.concat(Stream.of(requireHeader()), stream);
 			// the server will automatically close when the browser closes (websocket disconnected)
 			// the port is automatically determined in the constructor
 			FinosPerspectiveServer server = new FinosPerspectiveServer();
