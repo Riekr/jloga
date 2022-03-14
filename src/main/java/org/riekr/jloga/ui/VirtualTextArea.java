@@ -40,7 +40,7 @@ import org.riekr.jloga.ui.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
 
-	private static final int _GRID_HEADER_CHECK_LINES = 10;
+	private static final int _GRID_HEADER_CHECK_LINES = 25;
 
 	private int _lineHeight;
 
@@ -223,6 +223,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void gridNotAvailable(String reason) {
+		_header = "";
 		_gridToggle.setSelected(false);
 		_gridToggle.setEnabled(false);
 		_perspectiveBtn.setEnabled(false);
