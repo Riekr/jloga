@@ -12,6 +12,13 @@ public interface Transformer {
 
 	String apply(int col, String val);
 
+	default String[] apply(String... vals) {
+		String[] res = new String[vals.length];
+		for (int i = 0; i < vals.length; i++)
+			res[i] = apply(i, vals[i]);
+		return res;
+	}
+
 	default Transformer andThen(Transformer other) {
 		return (col, val) -> other.apply(col, this.apply(col, val));
 	}

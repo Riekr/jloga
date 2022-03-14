@@ -52,7 +52,7 @@ public class ArrowConversion {
 	private       int                 _recSize      = 10000;
 
 	public ArrowConversion(String[] header) {
-		_header = header;
+		_header = Transformer.UNWRAP_QUOTES.apply(header);
 		_colTransformers = new Transformer[header.length];
 		Arrays.fill(_colTransformers, (Transformer)this::fixAndDetectColumn);
 	}
