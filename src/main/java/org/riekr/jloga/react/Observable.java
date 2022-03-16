@@ -19,7 +19,7 @@ public interface Observable<T> {
 		return observer -> this.subscribe(new Observer<>() {
 			@Override
 			public void onNext(T item) {
-				observer.onNext(mapper.apply(item));
+				observer.onNext(item == null ? null : mapper.apply(item));
 			}
 
 			@Override
