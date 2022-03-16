@@ -59,10 +59,9 @@ public class Main extends JFrame implements FileDropListener {
 
 		toolBar.add(newBorderlessButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
 		toolBar.addSeparator();
-		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
-		toolBar.addSeparator();
 		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.add(Box.createHorizontalGlue());
+		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		toolBar.add(_charsetCombo);
 		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
