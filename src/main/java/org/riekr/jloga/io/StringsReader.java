@@ -1,7 +1,10 @@
 package org.riekr.jloga.io;
 
+import static java.util.Collections.singleton;
+
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Iterator;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,16 +12,14 @@ public class StringsReader extends Reader {
 
 	public static class ErrorReader extends StringsReader {
 		public ErrorReader(@NotNull Throwable e) {
-			super(new String[]{e.getLocalizedMessage()});
+			super(singleton(e.getLocalizedMessage()).iterator());
 		}
 	}
 
-	private String[] _strings;
-	private int      _i     = 0;
-	private int      _start = 0;
-	private int[]    _mark;
+	private Iterator<String> _strings;
+	private int              _start = 0;
 
-	public StringsReader(@NotNull String[] strings) {
+	public StringsReader(@NotNull Iterator<String> strings) {
 		_strings = strings;
 	}
 
@@ -31,9 +32,9 @@ public class StringsReader extends Reader {
 		}
 		if (_strings == null)
 			throw new IOException("Reader has been closed");
-		if (_i == _strings.length)
+		if (!_strings.hasNext())
 			return -1;
-		String string = _strings[_i];
+		String string = _strings.next();
 		if (string == null)
 			return 0;
 		int strLen = string.length();
@@ -42,27 +43,9 @@ public class StringsReader extends Reader {
 			len = strAvail;
 		string.getChars(_start, _start + len, cbuf, off);
 		_start += len;
-		if (_start == strLen) {
-			_i++;
+		if (_start == strLen)
 			_start = -1;
-		}
 		return len;
-	}
-
-	@Override
-	public void mark(int readAheadLimit) {
-		_mark = new int[]{_i, _start};
-	}
-
-	@Override
-	public void reset() {
-		if (_mark == null) {
-			_i = 0;
-			_start = 0;
-		} else {
-			_i = _mark[0];
-			_start = _mark[1];
-		}
 	}
 
 	@Override

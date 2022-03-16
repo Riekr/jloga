@@ -42,9 +42,9 @@ public interface TextSource extends Iterable<String> {
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		executeRequestText(() -> {
 			try {
-				StringsReader reader = new StringsReader(getText(fromLine, count));
+				StringsReader reader = new StringsReader(iterator(fromLine, fromLine + count));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
-			} catch (InterruptedException | CancellationException ignored) {
+			} catch (CancellationException ignored) {
 				System.out.println("Text request cancelled");
 			} catch (Throwable e) {
 				e.printStackTrace(System.err);
@@ -153,41 +153,35 @@ public interface TextSource extends Iterable<String> {
 	@Override
 	default Iterator<String> iterator() {
 		try {
-			return new Iterator<>() {
-				int line = 0;
+			return iterator(0, getLineCount());
+		} catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
 
-				private int lineCount() {
+	default Iterator<String> iterator(int fromInclusive,  int toExclusive) {
+		return new Iterator<>() {
+			int line = fromInclusive;
+
+			@Override
+			public boolean hasNext() {
+				return line < toExclusive;
+			}
+
+			@Override
+			public String next() {
+				if (line < toExclusive) {
 					try {
-						return getLineCount();
+						return getText(line++);
 					} catch (RuntimeException e) {
 						throw e;
 					} catch (Exception e) {
 						throw new IllegalStateException(e);
 					}
 				}
-
-				@Override
-				public boolean hasNext() {
-					return line < lineCount();
-				}
-
-				@Override
-				public String next() {
-					if (line < lineCount()) {
-						try {
-							return getText(line++);
-						} catch (RuntimeException e) {
-							throw e;
-						} catch (Exception e) {
-							throw new IllegalStateException(e);
-						}
-					}
-					throw new NoSuchElementException();
-				}
-			};
-		} catch (Exception e) {
-			throw new UnsupportedOperationException(e);
-		}
+				throw new NoSuchElementException();
+			}
+		};
 	}
 
 	default Stream<String> stream() {

@@ -131,13 +131,8 @@ public class TextFileSource implements TextSource {
 				public void run() {
 					try {
 						int toLinePlus1 = fromLine + count;
-						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null) {
-							_indexChangeListeners.remove(this);
-							String[] lines = new String[toLinePlus1 - fromLine + 1];
-							for (int line = fromLine; line <= toLinePlus1; line++)
-								lines[line - fromLine] = getText(line);
-							EventQueue.invokeLater(() -> consumer.accept(new StringsReader(lines)));
-						}
+						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null)
+							EventQueue.invokeLater(() -> consumer.accept(new StringsReader(iterator(fromLine, toLinePlus1))));
 					} catch (Throwable e) {
 						_indexChangeListeners.remove(this);
 						consumer.accept(new StringsReader.ErrorReader(e));
