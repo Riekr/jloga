@@ -1,9 +1,9 @@
 package org.riekr.jloga.react;
 
-import org.riekr.jloga.ui.utils.UIUtils;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public interface Observer<T> {
 

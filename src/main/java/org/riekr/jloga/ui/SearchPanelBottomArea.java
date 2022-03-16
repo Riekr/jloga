@@ -1,7 +1,5 @@
 package org.riekr.jloga.ui;
 
-import static org.riekr.jloga.io.Preferences.LAST_SAVE_PATH;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -10,12 +8,13 @@ import java.util.concurrent.Future;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JPanel {
+	private static final long serialVersionUID = 8509725982053259245L;
 
 	private final String _title;
 	private final int    _level;
@@ -59,14 +58,14 @@ public class SearchPanelBottomArea extends JPanel {
 		if (_resultTextArea == null)
 			return;
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(Preferences.loadFile(LAST_SAVE_PATH, () -> new File(".")));
+		fileChooser.setCurrentDirectory(Preferences.LAST_SAVE_PATH.get());
 		fileChooser.setDialogTitle("Specify a file to save");
 		int userSelection = fileChooser.showSaveDialog(SearchPanelBottomArea.this);
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
 			_resultTextArea.getTextSource().requestSave(fileToSave, _progressBar.addJob("Saving"));
-			Preferences.save(LAST_SAVE_PATH, fileToSave.getParentFile());
+			Preferences.LAST_SAVE_PATH.set(fileToSave.getParentFile());
 		}
 	}
 

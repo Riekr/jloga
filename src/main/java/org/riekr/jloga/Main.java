@@ -1,9 +1,6 @@
 package org.riekr.jloga;
 
-import static org.riekr.jloga.io.Preferences.FONT;
-import static org.riekr.jloga.io.Preferences.LAST_OPEN_PATH;
 import static org.riekr.jloga.ui.utils.UIUtils.newButton;
-import static org.riekr.jloga.ui.utils.UIUtils.newRadioButton;
 import static org.riekr.jloga.ui.utils.UIUtils.newTabHeader;
 
 import javax.swing.*;
@@ -11,7 +8,6 @@ import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,17 +19,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.drjekyll.fontchooser.FontDialog;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.MixFileSource;
-import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
-import org.riekr.jloga.search.simple.SimpleSearchPredicate;
+import org.riekr.jloga.prefs.PrefPanel;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
 import org.riekr.jloga.ui.ContextMenu;
 import org.riekr.jloga.ui.JobProgressBar;
@@ -43,6 +38,7 @@ import org.riekr.jloga.ui.TabNavigation;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class Main extends JFrame implements FileDropListener {
+	private static final long serialVersionUID = -5418006859279219934L;
 
 	private final CharsetCombo            _charsetCombo;
 	private final JTabbedPane             _tabs;
@@ -53,7 +49,6 @@ public class Main extends JFrame implements FileDropListener {
 	private MainDesktopHelp _help;
 
 	public Main() {
-		_font = Preferences.load(FONT, () -> new Font("monospaced", Font.PLAIN, 12));
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane();
 		_progressBar = new JobProgressBar();
@@ -62,16 +57,14 @@ public class Main extends JFrame implements FileDropListener {
 		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
 		_charsetCombo.setToolTipText("Select next file charset");
 
-		toolBar.add(newButton("\uD83D\uDCC1", this::openFileDialog, "Open file in new tab"));
+		toolBar.add(newButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
 		toolBar.addSeparator();
-		toolBar.add(newButton("\uD83D\uDDDA", this::selectFont, "Select text font"));
-		toolBar.add(newButton("\u21C5", this::selectPagingSize, "Select page scroll size"));
-		toolBar.add(newButton("\uD83D\uDD0B", this::openSystemConfigDialog, "System configuration"));
+		toolBar.add(newButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		toolBar.addSeparator();
-		toolBar.add(newButton("\u292D", this::openMixDialog, "Pick'n'mix opened log files"));
+		toolBar.add(newButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(_charsetCombo);
-		toolBar.add(newButton("\uD83D\uDEC8", () -> new AboutPane().createDialog("About").setVisible(true)));
+		toolBar.add(newButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
 		// layout
 		setLayout(new BorderLayout());
@@ -81,6 +74,18 @@ public class Main extends JFrame implements FileDropListener {
 		add(_help = new MainDesktopHelp(toolBar));
 
 		setFileDropListener(this::openFiles);
+
+		// preferences
+		Preferences.FONT.subscribe((selectedFont) -> {
+			if (!selectedFont.equals(_font)) {
+				System.out.println("Selected font is: " + selectedFont);
+				_font = selectedFont;
+				for (int i = 0; i < _tabs.getTabCount(); i++) {
+					SearchPanel analyzer = (SearchPanel)_tabs.getComponentAt(i);
+					analyzer.setFont(selectedFont);
+				}
+			}
+		});
 	}
 
 	private void openMixDialog() {
@@ -102,68 +107,14 @@ public class Main extends JFrame implements FileDropListener {
 		}
 	}
 
-	private void selectFont() {
-		FontDialog dialog = new FontDialog(this, "Select Font", true);
-		dialog.setSelectedFont(_font);
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		dialog.setVisible(true);
-		if (!dialog.isCancelSelected()) {
-			Font selectedFont = dialog.getSelectedFont();
-			System.out.println("Selected font is: " + selectedFont);
-			if (!selectedFont.equals(_font)) {
-				_font = selectedFont;
-				for (int i = 0; i < _tabs.getTabCount(); i++) {
-					SearchPanel analyzer = (SearchPanel)_tabs.getComponentAt(i);
-					analyzer.setFont(selectedFont);
-				}
-				Preferences.save(FONT, selectedFont);
-			}
-		}
-	}
-
-	private void selectPagingSize() {
-		String[] options = {"Full page", "\u00BD page", "\u2153 of page", "\u00BC of page", "\u2155 of page"};
-		Object x = JOptionPane.showInputDialog(this,
-				"<html>Select how many of the visible lines<br>" +
-						"should be scrolled when paging text:<br>&nbsp;</html>",
-				"Page scrolling size",
-				JOptionPane.PLAIN_MESSAGE,
-				null,
-				options,
-				options[Math.min(options.length, Preferences.getPageDivider() - 1)]
-		);
-		if (x != null) {
-			int idx = Arrays.binarySearch(options, x);
-			if (idx != -1)
-				Preferences.setPageDivider(idx + 1);
-		}
-	}
-
-	private void openSystemConfigDialog() {
-		JOptionPane optionPane = new JOptionPane(null, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
-		JDialog dialog = optionPane.createDialog(this, "System configuration");
-		ArrayList<Object> options = new ArrayList<>();
-		ButtonGroup threadingOptions = new ButtonGroup();
-		for (Map.Entry<String, String> e : SimpleSearchPredicate.getModels().entrySet()) {
-			options.add(newRadioButton(
-					threadingOptions,
-					e.getValue(),
-					e.getKey(),
-					() -> SimpleSearchPredicate.setModel(e.getKey()),
-					e.getKey().equals(SimpleSearchPredicate.getModel())
-			));
-		}
-		optionPane.setMessage(options.toArray());
-		EventQueue.invokeLater(dialog::pack);
-		dialog.setMinimumSize(new Dimension(480, 0));
-		dialog.setVisible(true);
-		dialog.dispose();
+	private void openPreferences() {
+		new PrefPanel(this).setVisible(true);
 	}
 
 	public void openFileDialog() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setMultiSelectionEnabled(true);
-		fileChooser.setCurrentDirectory(Preferences.loadFile(LAST_OPEN_PATH, () -> new File(".")));
+		fileChooser.setCurrentDirectory(Preferences.LAST_OPEN_PATH.get());
 		fileChooser.setDialogTitle("Specify a file to open");
 		int userSelection = fileChooser.showOpenDialog(this);
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -173,7 +124,7 @@ public class Main extends JFrame implements FileDropListener {
 				openFile(selectedFile);
 			}
 			if (lastFile != null)
-				Preferences.save(LAST_OPEN_PATH, lastFile.getParentFile());
+				Preferences.LAST_OPEN_PATH.set(lastFile.getParentFile());
 		}
 	}
 

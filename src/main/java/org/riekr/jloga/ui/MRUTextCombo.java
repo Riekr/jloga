@@ -1,14 +1,20 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.io.Preferences;
-import org.riekr.jloga.react.Subject;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.function.BiFunction;
 
+import org.riekr.jloga.prefs.PrefsUtils;
+import org.riekr.jloga.react.Subject;
+
 public class MRUTextCombo<T> extends JComboBox<T> {
+	private static final long serialVersionUID = -3289527560220826466L;
 
 	public static MRUTextCombo<String> newMRUTextCombo(String key, String deflt) {
 		return new MRUTextCombo<>(key, (newValue, oldValue) -> newValue == null ? deflt : newValue);
@@ -35,7 +41,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 			_value = value;
 			_valueIndex = getSelectedIndex();
 		});
-		_model = Preferences.loadDefaultComboBoxModel(_key);
+		_model = PrefsUtils.loadDefaultComboBoxModel(_key);
 		_mapper = mapper;
 		setModel(_model);
 		setEditable(true);
@@ -74,7 +80,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	}
 
 	public void save() {
-		Preferences.save(_key, _model);
+		PrefsUtils.save(_key, _model);
 	}
 
 	@SuppressWarnings("unchecked")

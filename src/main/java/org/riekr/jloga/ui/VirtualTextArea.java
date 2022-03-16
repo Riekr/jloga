@@ -29,9 +29,9 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
-import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.FastSplitOperation;
@@ -39,6 +39,7 @@ import org.riekr.jloga.ui.utils.SelectionHighlight;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
+	private static final long serialVersionUID = -2704231180724047955L;
 
 	private static final int _GRID_HEADER_CHECK_LINES = 25;
 
@@ -315,11 +316,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void pageUp() {
-		setFromLine(_fromLine - (_lineCount / Preferences.getPageDivider()));
+		setFromLine(_fromLine - (_lineCount / Preferences.PAGE_SCROLL_DIVIDER.get()));
 	}
 
 	public void pageDn() {
-		setFromLine(_fromLine + (_lineCount / Preferences.getPageDivider()));
+		setFromLine(_fromLine + (_lineCount / Preferences.PAGE_SCROLL_DIVIDER.get()));
 	}
 
 	public void toBeginning() {

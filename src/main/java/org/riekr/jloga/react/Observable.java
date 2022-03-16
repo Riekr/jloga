@@ -1,8 +1,9 @@
 package org.riekr.jloga.react;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.function.Consumer;
+import java.util.function.Function;
+
+import org.jetbrains.annotations.NotNull;
 
 public interface Observable<T> {
 
@@ -12,6 +13,20 @@ public interface Observable<T> {
 	@NotNull
 	default Unsubscribable subscribe(Consumer<? super T> onNext, Consumer<Throwable> onError) {
 		return subscribe(Observer.from(onNext, onError));
+	}
+
+	default <R> Observable<R> map(Function<T, R> mapper) {
+		return observer -> this.subscribe(new Observer<>() {
+			@Override
+			public void onNext(T item) {
+				observer.onNext(mapper.apply(item));
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				observer.onError(t);
+			}
+		});
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.riekr.jloga.io;
+package org.riekr.jloga.prefs;
 
 import javax.swing.*;
 import java.io.ByteArrayInputStream;
@@ -13,36 +13,15 @@ import java.util.prefs.BackingStoreException;
 
 import org.riekr.jloga.Main;
 
-public class Preferences {
-
-	public static final String LAST_OPEN_PATH = "LastOpen";
-	public static final String LAST_SAVE_PATH = "LastSave";
-	public static final String CHARSET        = "CharsetCombo";
-	public static final String FONT           = "Font";
-	public static final String SEARCH_TYPE    = "SearchType";
-	public static final String PAGE_DIVIDER   = "PageDivider";
+public class PrefsUtils {
 
 	private static final java.util.prefs.Preferences _PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
-
-	static {
-		_PREFS.addPreferenceChangeListener(evt -> {
-			if (PAGE_DIVIDER.equals(evt.getKey())) {
-				_PAGE_DIVIDER = null;
-			}
-		});
-	}
-
-	private static Integer _PAGE_DIVIDER;
 
 	public static void save(String key, DefaultComboBoxModel<?> o) {
 		Object[] data = new Object[o.getSize()];
 		for (int i = 0; i < Math.min(20, data.length); i++)
 			data[i] = o.getElementAt(i);
 		save(key, data);
-	}
-
-	public static void save(String key, Class<?> o) {
-		save(key, o.getCanonicalName());
 	}
 
 	public static void save(String key, File o) {
@@ -84,53 +63,21 @@ public class Preferences {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> Class<T> loadClass(String key, Supplier<Class<T>> deflt) {
-		try {
-			String name = load(key, null);
-			if (name != null) {
-				return (Class<T>)Class.forName(name);
-			}
-		} catch (ClassNotFoundException | ClassCastException ignored) {
-		}
-		return deflt == null ? null : deflt.get();
-	}
-
-	@SuppressWarnings("unchecked")
 	public static <T> T load(String key, Supplier<T> deflt) {
+		T res = null;
 		if (!Boolean.getBoolean("jloga.prefs.ignore")) {
 			byte[] buf = _PREFS.getByteArray(key, null);
 			if (buf != null) {
 				ByteArrayInputStream bais = new ByteArrayInputStream(buf);
 				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-					return (T)ois.readObject();
+					res = (T)ois.readObject();
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
 			}
 		}
+		if (res != null)
+			return res;
 		return deflt == null ? null : deflt.get();
-	}
-
-	public static <T extends Enum<T>> T load(String key, Supplier<T> deflt, Class<T> enumClass) {
-		String val = load(key, null);
-		if (val == null)
-			return deflt.get();
-		try {
-			return Enum.valueOf(enumClass, val);
-		} catch (IllegalArgumentException e) {
-			return deflt.get();
-		}
-	}
-
-	@SuppressWarnings("ConstantConditions")
-	public static int getPageDivider() {
-		if (_PAGE_DIVIDER == null)
-			_PAGE_DIVIDER = Math.max(1, load(PAGE_DIVIDER, () -> 3));
-		return _PAGE_DIVIDER;
-	}
-
-	public static void setPageDivider(int divider) {
-		_PAGE_DIVIDER = Math.max(1, divider);
-		save(PAGE_DIVIDER, _PAGE_DIVIDER);
 	}
 }

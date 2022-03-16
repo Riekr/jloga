@@ -1,30 +1,36 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.io.Preferences;
+import static java.util.Objects.requireNonNull;
 
 import javax.swing.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
-import static java.util.Objects.requireNonNull;
+import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.react.Unsubscribable;
 
 public class CharsetCombo extends JComboBox<Charset> {
+	private static final long serialVersionUID = -2526623806412379161L;
+
+	private Unsubscribable _unsubscribable = Preferences.CHARSET.subscribe(this::setCharset);
 
 	public Charset charset;
 
 	public CharsetCombo() {
-		try {
-			charset = Charset.forName(requireNonNull(Preferences.load(Preferences.CHARSET, StandardCharsets.UTF_8::name)));
-		} catch (Throwable e) {
-			charset = StandardCharsets.UTF_8;
-		}
+		charset = Preferences.CHARSET.get();
 		for (Charset cs : Charset.availableCharsets().values())
 			addItem(cs);
 		setSelectedItem(charset);
 		addItemListener(e -> {
-			charset = (Charset) requireNonNull(getSelectedItem());
-			Preferences.save(Preferences.CHARSET, charset.name());
+			setCharset((Charset)requireNonNull(getSelectedItem()));
+			if (_unsubscribable != null) {
+				_unsubscribable.unsubscribe();
+				_unsubscribable = null;
+			}
 		});
+	}
+
+	public void setCharset(Charset charset) {
+		this.charset = charset;
 	}
 
 }

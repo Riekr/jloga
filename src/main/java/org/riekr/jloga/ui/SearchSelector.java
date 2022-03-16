@@ -1,7 +1,5 @@
 package org.riekr.jloga.ui;
 
-import static org.riekr.jloga.io.Preferences.SEARCH_TYPE;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -10,16 +8,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.Preferences;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
-import org.riekr.jloga.search.RegExComponent;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.search.SearchRegistry;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class SearchSelector extends JPanel {
+	private static final long serialVersionUID = 1562652212113703845L;
 
 	private final int                       _level;
 	private final JButton                   _selectBtn;
@@ -42,7 +40,7 @@ public class SearchSelector extends JPanel {
 		add(_selectBtn, BorderLayout.LINE_START);
 
 		SearchRegistry.get(
-				Preferences.load(SEARCH_TYPE, () -> RegExComponent.ID),
+				Preferences.LAST_SEARCH_TYPE.get(level),
 				level,
 				this::setSearchUI
 		);
@@ -64,7 +62,7 @@ public class SearchSelector extends JPanel {
 				initialSelectionValue
 		);
 		if (input != null)
-			Preferences.save(SEARCH_TYPE, setSearchUI(input.newInstance(_level)));
+			Preferences.LAST_SEARCH_TYPE.set(setSearchUI(input.newInstance(_level)), _level);
 	}
 
 	private <T extends JComponent & SearchComponent> String setSearchUI(T comp) {

@@ -7,20 +7,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.io.Preferences;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchPredicate;
 
 public class SimpleSearchPredicate {
-
-	private static final String _PREF_MODEL = "Multithreading.model";
-
-	public interface Factory {
-		SearchPredicate from(@NotNull Predicate<String> predicate);
-
-		SearchPredicate from(@NotNull Supplier<Predicate<String>> predicateSupplier);
-
-		String description();
-	}
 
 	/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * Should we use multithreading searches?
@@ -29,7 +19,7 @@ public class SimpleSearchPredicate {
 	 * From my tests I see multithreading gains are up to 20% but even of this
 	 * improvement a regex search in a ~400 MB log files needs about 5 seconds.
 	 ** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	private enum Impl implements Factory {
+	public enum ThreadModel {
 
 		SYNC {
 			@Override
@@ -52,7 +42,7 @@ public class SimpleSearchPredicate {
 		STREAM {
 			@Override
 			public String description() {
-				return "Parallel streaming, faster than mono, more memory use; should be a compromise.";
+				return "Parallel streaming, faster than mono, more memory use.";
 			}
 
 			@Override
@@ -64,7 +54,7 @@ public class SimpleSearchPredicate {
 			public SearchPredicate from(@NotNull Supplier<Predicate<String>> predicateSupplier) {
 				return new StreamSearchPredicate(predicateSupplier);
 			}
-		},
+		};
 
 
 		// EXECUTORS {
@@ -83,30 +73,36 @@ public class SimpleSearchPredicate {
 		// 		return new MultiThreadSearchPredicate(predicateSupplier);
 		// 	}
 		// }
+
+		public abstract SearchPredicate from(@NotNull Predicate<String> predicate);
+
+		public abstract SearchPredicate from(@NotNull Supplier<Predicate<String>> predicateSupplier);
+
+		public abstract String description();
+
 	}
 
-	public static Factory FACTORY;
+	public static ThreadModel FACTORY;
 
 	static {
 		String forcedValue = System.getProperty("jloga.search.multithreading");
 		if (forcedValue == null || (forcedValue = forcedValue.trim()).isEmpty())
-			FACTORY = Preferences.load(_PREF_MODEL, () -> (Runtime.getRuntime().availableProcessors() > 1 ? Impl.STREAM : Impl.SYNC), Impl.class);
+			Preferences.MT_MODEL.subscribe(SimpleSearchPredicate::setModel);
 		else
-			FACTORY = Impl.valueOf(forcedValue.toUpperCase(Locale.ROOT));
+			setModel(ThreadModel.valueOf(forcedValue.toUpperCase(Locale.ROOT)));
+	}
+
+	private static void setModel(ThreadModel model) {
+		FACTORY = model;
 		System.out.println("SimpleSearchPredicate factory is " + FACTORY);
 	}
 
 	@NotNull
-	public static Map<String, String> getModels() {
-		LinkedHashMap<String, String> res = new LinkedHashMap<>();
-		for (Impl impl : Impl.values())
-			res.put(impl.toString(), impl.description());
+	public static Map<String, ThreadModel> getThreadModels() {
+		LinkedHashMap<String, ThreadModel> res = new LinkedHashMap<>();
+		for (ThreadModel threadModel : ThreadModel.values())
+			res.put(threadModel + " - " + threadModel.description(), threadModel);
 		return res;
-	}
-
-	public static void setModel(String name) {
-		FACTORY = Impl.valueOf(name);
-		Preferences.save(_PREF_MODEL, name);
 	}
 
 	public static String getModel() {

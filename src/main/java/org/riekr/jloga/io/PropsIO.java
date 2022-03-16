@@ -1,16 +1,22 @@
 package org.riekr.jloga.io;
 
-import org.riekr.jloga.misc.Project;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+
+import org.riekr.jloga.misc.Project;
+import org.riekr.jloga.prefs.PrefsUtils;
 
 public class PropsIO {
 
@@ -46,12 +52,12 @@ public class PropsIO {
 
 	public static void save(File dest, Object pojo) throws InvocationTargetException, IllegalAccessException, IOException {
 		if (pojo instanceof Project) {
-			save(dest, (Project) pojo);
+			save(dest, (Project)pojo);
 			return;
 		}
 		Properties props = new Properties();
 		for (Map.Entry<String, GetterAndSetter> entry : map(pojo).entrySet()) {
-			String val = (String) entry.getValue().getter.invoke(pojo);
+			String val = (String)entry.getValue().getter.invoke(pojo);
 			if (val != null)
 				props.setProperty(entry.getKey(), val);
 		}
@@ -62,7 +68,7 @@ public class PropsIO {
 
 	public static void load(File src, Object dest) throws IOException, InvocationTargetException, IllegalAccessException {
 		if (dest instanceof Project) {
-			load(src, (Project) dest);
+			load(src, (Project)dest);
 			return;
 		}
 		Properties props = new Properties();
@@ -97,7 +103,7 @@ public class PropsIO {
 		JFileChooser fileChooser = new JFileChooser();
 		if (ext != null && !ext.isBlank())
 			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
-		fileChooser.setCurrentDirectory(Preferences.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
+		fileChooser.setCurrentDirectory(PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
 		fileChooser.setDialogTitle("Specify a file to open");
 		int userSelection = fileChooser.showSaveDialog(owner);
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -109,7 +115,7 @@ public class PropsIO {
 				e.printStackTrace(System.err);
 				return;
 			}
-			Preferences.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
+			PrefsUtils.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
 			if (onSuccess != null)
 				for (Runnable task : onSuccess)
 					task.run();
@@ -120,7 +126,7 @@ public class PropsIO {
 		JFileChooser fileChooser = new JFileChooser();
 		if (ext != null && !ext.isBlank())
 			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
-		fileChooser.setCurrentDirectory(Preferences.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
+		fileChooser.setCurrentDirectory(PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
 		fileChooser.setDialogTitle("Specify a file to open");
 		int userSelection = fileChooser.showOpenDialog(owner);
 		if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -132,7 +138,7 @@ public class PropsIO {
 				e.printStackTrace(System.err);
 				return;
 			}
-			Preferences.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
+			PrefsUtils.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
 			if (onSuccess != null)
 				for (Runnable task : onSuccess)
 					task.run();
