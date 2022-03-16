@@ -13,7 +13,7 @@ public class TempTextSource implements FilteredTextSource {
 	private final IntBehaviourSubject       _lineCountSubject = new IntBehaviourSubject();
 
 	@Override
-	public String getText(int line) throws ExecutionException, InterruptedException {
+	public String getText(int line) {
 		if (line < _data.size())
 			return _data.getValue(line);
 		return "";

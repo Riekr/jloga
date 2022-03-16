@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -60,7 +59,7 @@ public interface TextSource extends Iterable<String> {
 		return lines;
 	}
 
-	String getText(int line) throws ExecutionException, InterruptedException;
+	String getText(int line);
 
 	/** May block if indexing is not finished */
 	int getLineCount() throws ExecutionException, InterruptedException;
@@ -153,35 +152,18 @@ public interface TextSource extends Iterable<String> {
 	@Override
 	default Iterator<String> iterator() {
 		try {
-			return iterator(0, getLineCount());
-		} catch (Exception e) {
-			throw new UnsupportedOperationException(e);
+			return new RangeIterator<>(0, getLineCount(), this::getText);
+		} catch (ExecutionException | InterruptedException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
-	default Iterator<String> iterator(int fromInclusive,  int toExclusive) {
-		return new Iterator<>() {
-			int line = fromInclusive;
-
-			@Override
-			public boolean hasNext() {
-				return line < toExclusive;
-			}
-
-			@Override
-			public String next() {
-				if (line < toExclusive) {
-					try {
-						return getText(line++);
-					} catch (RuntimeException e) {
-						throw e;
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
-					}
-				}
-				throw new NoSuchElementException();
-			}
-		};
+	default Iterator<String> iterator(int fromInclusive, int toExclusive) {
+		try {
+			return new RangeIterator<>(fromInclusive, Math.min(getLineCount(), toExclusive), this::getText);
+		} catch (ExecutionException | InterruptedException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	default Stream<String> stream() {

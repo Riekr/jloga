@@ -1,9 +1,6 @@
 package org.riekr.jloga.io;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.misc.MutableInt;
-import org.riekr.jloga.pmem.PagedIntBag;
+import static java.util.Objects.requireNonNullElse;
 
 import java.io.File;
 import java.time.Duration;
@@ -22,7 +19,10 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Objects.requireNonNullElse;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.misc.MutableInt;
+import org.riekr.jloga.pmem.PagedIntBag;
 
 public class MixFileSource implements TextSource {
 
@@ -191,7 +191,7 @@ public class MixFileSource implements TextSource {
 	}
 
 	@Override
-	public String getText(int line) throws ExecutionException, InterruptedException {
+	public String getText(int line) {
 		if (line >= _index.size())
 			return "";
 		int[] data = _index.get(line);

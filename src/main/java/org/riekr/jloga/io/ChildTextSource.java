@@ -74,7 +74,7 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public String getText(int line) throws ExecutionException, InterruptedException {
+	public String getText(int line) {
 		Integer tieLine = getSrcLine(line);
 		if (tieLine != null)
 			return _tie.getText(tieLine);

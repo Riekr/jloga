@@ -334,15 +334,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			int limit = _allLinesCount - 100;
 			TextSource.EXECUTOR.submit(() -> {
 				for (int line = _allLinesCount; line > limit; line--) {
-					try {
-						String text = _textSource.getText(line);
-						if (text != null && !text.isEmpty()) {
-							setHighlightedLine(line);
-							return;
-						}
-					} catch (ExecutionException | InterruptedException e) {
-						e.printStackTrace(System.err);
-						break;
+					String text = _textSource.getText(line);
+					if (text != null && !text.isEmpty()) {
+						setHighlightedLine(line);
+						return;
 					}
 				}
 				setHighlightedLine(_allLinesCount);

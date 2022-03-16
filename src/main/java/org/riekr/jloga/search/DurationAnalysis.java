@@ -1,8 +1,6 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.io.ChildTextSource;
-import org.riekr.jloga.io.FilteredTextSource;
-import org.riekr.jloga.io.TextSource;
+import static java.lang.Math.max;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -10,13 +8,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Math.max;
+import org.riekr.jloga.io.ChildTextSource;
+import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.TextSource;
 
 public class DurationAnalysis implements SearchPredicate {
 
@@ -115,7 +114,7 @@ public class DurationAnalysis implements SearchPredicate {
 			final StringBuilder buf = new StringBuilder();
 
 			@Override
-			public synchronized String getText(int line) throws ExecutionException, InterruptedException {
+			public synchronized String getText(int line)  {
 				String origText = super.getText(line);
 				matchers.match(origText,
 						(instant, func) -> {

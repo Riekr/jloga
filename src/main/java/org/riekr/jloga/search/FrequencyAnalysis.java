@@ -1,8 +1,6 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.io.ChildTextSource;
-import org.riekr.jloga.io.FilteredTextSource;
-import org.riekr.jloga.io.TextSource;
+import static java.lang.Math.max;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -11,19 +9,20 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Math.max;
+import org.riekr.jloga.io.ChildTextSource;
+import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.TextSource;
 
 public class FrequencyAnalysis implements SearchPredicate {
 
 	private static class Count {
-		int startLine;
+		int     startLine;
 		Instant startInstant;
-		int count = 1;
+		int     count = 1;
 
 		Count(int startLine, Instant startInstant) {
 			this.startLine = startLine;
@@ -67,17 +66,17 @@ public class FrequencyAnalysis implements SearchPredicate {
 		}
 	}
 
-	private final Pattern _patDateExtract;    // "^(\d+ \w+ \d+ \d+:\d+:\d+,\d+) \["
+	private final Pattern           _patDateExtract;    // "^(\d+ \w+ \d+ \d+:\d+:\d+,\d+) \["
 	private final DateTimeFormatter _patDate; // "dd MMM YYYY HH:mm:ss,SSS"
-	private final Pattern _patFunc;           // " \[([^@]+@[^#]+#[^]]+)\] "
-	private final Duration _window;
+	private final Pattern           _patFunc;           // " \[([^@]+@[^#]+#[^]]+)\] "
+	private final Duration          _window;
 
-	private Matchers _matchers;
+	private Matchers           _matchers;
 	private Map<String, Count> _counters;
-	private int _maxFuncLength;
-	private int _maxFreqLength;
+	private int                _maxFuncLength;
+	private int                _maxFreqLength;
 
-	private ChildTextSource _dest;
+	private       ChildTextSource       _dest;
 	private final Map<Integer, Integer> _results = new HashMap<>();
 
 	public FrequencyAnalysis(Pattern patDateExtract, DateTimeFormatter patDate, Pattern patFunc, Duration measureWindow) {
@@ -101,7 +100,7 @@ public class FrequencyAnalysis implements SearchPredicate {
 			final StringBuilder buf = new StringBuilder();
 
 			@Override
-			public synchronized String getText(int line) throws ExecutionException, InterruptedException {
+			public synchronized String getText(int line) {
 				String origText = super.getText(line);
 				matchers.match(origText,
 						(instant, func) -> {
@@ -149,7 +148,7 @@ public class FrequencyAnalysis implements SearchPredicate {
 						count.reset(line, instant);
 					} else {
 						count.count++;
-						_maxFreqLength = max(_maxFreqLength, ((int) Math.log10(count.count)) + 1);
+						_maxFreqLength = max(_maxFreqLength, ((int)Math.log10(count.count)) + 1);
 					}
 				}
 		);

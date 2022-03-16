@@ -1,6 +1,5 @@
 package org.riekr.jloga.search;
 
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -61,7 +60,7 @@ public class RegExSearch implements SearchPredicate {
 				private final Function<Matcher, String> _extractor = newExtractor();
 
 				@Override
-				public String getText(int line) throws ExecutionException, InterruptedException {
+				public String getText(int line) {
 					String text = super.getText(line);
 					if (_viewMatcher.find())
 						return _extractor.apply(_viewMatcher);

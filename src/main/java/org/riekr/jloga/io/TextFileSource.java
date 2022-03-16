@@ -18,6 +18,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
@@ -124,7 +126,7 @@ public class TextFileSource implements TextSource {
 	@Override
 	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		if (_indexing.isDone())
-			TextSource.super.requestText(fromLine, count, consumer);
+			consumer.accept(new StringsReader(iterator(fromLine, fromLine + count)));
 		else {
 			_indexChangeListeners.add(new Runnable() {
 				@Override
@@ -143,6 +145,11 @@ public class TextFileSource implements TextSource {
 				}
 			});
 		}
+	}
+
+	@Override
+	public Iterator<String> iterator(int fromInclusive, int toExclusive) {
+		return new RangeIterator<>(fromInclusive, Math.min(_lineCount, toExclusive), this::getText);
 	}
 
 	private String[] loadPage(int fromLine, int toLine, long pos) throws IOException {
@@ -180,7 +187,7 @@ public class TextFileSource implements TextSource {
 	// }
 
 	@Override
-	public synchronized String getText(int line) throws ExecutionException, InterruptedException {
+	public synchronized String getText(int line) {
 		if (_lines == null || line < _fromLine || line >= (_fromLine + _lines.length)) {
 			Map.Entry<Integer, IndexData> fromLineE = _index.floorEntry(line);
 			IndexData indexData = fromLineE.getValue();
