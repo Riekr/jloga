@@ -80,6 +80,11 @@ public class PrefPanel extends JDialog {
 		}
 		cp.add(Box.createVerticalStrut(_SPACING), constraints(cpY));
 		Box footer = Box.createHorizontalBox();
+		footer.add(UIUtils.newButton("Reset all", () -> {
+			int input = JOptionPane.showConfirmDialog(this, "Do you really want to reset all preferences?", "Reset", JOptionPane.YES_NO_OPTION);
+			if (input == JOptionPane.YES_OPTION)
+				allPrefs.forEach(Preference::reset);
+		}));
 		footer.add(Box.createHorizontalGlue());
 		footer.add(UIUtils.newButton("Close", this::dispose));
 		cp.add(footer, constraints(cpY));
