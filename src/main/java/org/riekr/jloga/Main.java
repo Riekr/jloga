@@ -1,6 +1,6 @@
 package org.riekr.jloga;
 
-import static org.riekr.jloga.ui.utils.UIUtils.newButton;
+import static org.riekr.jloga.ui.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.ui.utils.UIUtils.newTabHeader;
 
 import javax.swing.*;
@@ -57,14 +57,14 @@ public class Main extends JFrame implements FileDropListener {
 		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
 		_charsetCombo.setToolTipText("Select next file charset");
 
-		toolBar.add(newButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
+		toolBar.add(newBorderlessButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
 		toolBar.addSeparator();
-		toolBar.add(newButton("\u2699 Settings", this::openPreferences, "Change preferences"));
+		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		toolBar.addSeparator();
-		toolBar.add(newButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
+		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(_charsetCombo);
-		toolBar.add(newButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
+		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
 		// layout
 		setLayout(new BorderLayout());

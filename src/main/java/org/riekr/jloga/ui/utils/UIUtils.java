@@ -37,7 +37,7 @@ import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public final class UIUtils {
 
-	public static final Border BUTTON_BORDER = new EmptyBorder(6, 8, 6, 8);
+	public static final Border FLAT_BUTTON_BORDER = new EmptyBorder(6, 8, 6, 8);
 
 	private UIUtils() {
 	}
@@ -54,24 +54,29 @@ public final class UIUtils {
 		return d;
 	}
 
-	public static JButton newButton(String text, Runnable action, String tooltip) {
-		JButton res = newButton(text, action);
+	public static JButton newBorderlessButton(String text, Runnable action, String tooltip) {
+		JButton res = newBorderlessButton(text, action);
 		res.setToolTipText(tooltip);
 		return res;
 	}
 
-	public static JButton newButton(String text, Runnable action) {
-		JButton btn = new JButton(text);
+	public static JButton newBorderlessButton(String text, Runnable action) {
+		JButton btn = newButton(text, action);
+		btn.setBorder(FLAT_BUTTON_BORDER);
 		btn.setBorderPainted(false);
 		btn.setContentAreaFilled(false);
-		btn.setBorder(BUTTON_BORDER);
+		return btn;
+	}
+
+	public static JButton newButton(String text, Runnable action) {
+		JButton btn = new JButton(text);
 		btn.addActionListener((e) -> action.run());
 		return btn;
 	}
 
 	public static JToggleButton newToggleButton(String text, String tooltip, boolean initialValue, BoolConsumer consumer) {
 		JToggleButton btn = new JToggleButton(text);
-		btn.setBorder(BUTTON_BORDER);
+		btn.setBorder(FLAT_BUTTON_BORDER);
 		btn.setToolTipText(tooltip);
 		btn.setSelected(initialValue);
 		if (consumer != null)
@@ -105,7 +110,7 @@ public final class UIUtils {
 		box.addMouseListener(mouseListener);
 		box.add(label);
 		box.add(Box.createHorizontalStrut(5));
-		JButton xBtn = newButton("\u274C", onClose, "Close " + text);
+		JButton xBtn = newBorderlessButton("\u274C", onClose, "Close " + text);
 		xBtn.addMouseListener(mouseListener);
 		box.add(xBtn);
 		return box;

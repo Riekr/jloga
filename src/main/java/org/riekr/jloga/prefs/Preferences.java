@@ -20,7 +20,7 @@ public interface Preferences {
 
 	//region GUI editable preferences
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
-			.describe(Type.Font, "Text font:", "Font used in text viewers, using a monospace font is recommended.");
+			.describe(Type.Font, "Text font", "Font used in text viewers, using a monospace font is recommended.");
 
 	GUIPreference<Integer> PAGE_SCROLL_DIVIDER = of("PageDivider", 3, 1, Integer.MAX_VALUE)
 			.describe(Type.Combo, "Page scroll size:", "Select how many of the visible lines should be scrolled when paging text.")
@@ -40,8 +40,8 @@ public interface Preferences {
 	//endregion
 
 	//region Hidden (state) preferences
-	Preference<File>        LAST_OPEN_PATH   = of("LastOpen", () -> new File("."));
-	Preference<File>        LAST_SAVE_PATH   = of("LastSave", () -> new File("."));
+	Preference<File>        LAST_OPEN_PATH   = of("LastOpen", () -> ".").withConversion(File::new, File::getAbsolutePath);
+	Preference<File>        LAST_SAVE_PATH   = of("LastSave", () -> ".").withConversion(File::new, File::getAbsolutePath);
 	KeyedPreference<String> LAST_SEARCH_TYPE = of("SearchType", () -> RegExComponent.ID);
 	//endregion
 

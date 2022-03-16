@@ -42,14 +42,14 @@ public class SearchPanelBottomArea extends JPanel {
 		searchHeader.add(_searchUI, BorderLayout.CENTER);
 
 		JToolBar searchToolbar = new JToolBar();
-		searchToolbar.add(UIUtils.newButton("\u274C", () -> {
+		searchToolbar.add(UIUtils.newBorderlessButton("\u274C", () -> {
 			if (_searching != null && !_searching.isDone()) {
 				_searching.cancel(true);
 			} else if (!this.removeResultTextArea()) {
 				_parent.removeBottomArea(this);
 			}
 		}));
-		searchToolbar.add(UIUtils.newButton("\uD83D\uDDAB", this::saveResults));
+		searchToolbar.add(UIUtils.newBorderlessButton("\uD83D\uDDAB", this::saveResults));
 		searchHeader.add(searchToolbar, BorderLayout.LINE_END);
 		add(searchHeader, BorderLayout.NORTH);
 	}

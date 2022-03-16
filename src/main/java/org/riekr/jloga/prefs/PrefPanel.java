@@ -7,9 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.drjekyll.fontchooser.FontDialog;
 import org.riekr.jloga.ui.ComboEntryWrapper;
+import org.riekr.jloga.ui.utils.KeyUtils;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class PrefPanel extends JDialog {
 	private static final long serialVersionUID = 3940084083723252336L;
+
+	private static final int _SPACING = 4;
 
 	private GridBagConstraints constraints(AtomicInteger y) {
 		GridBagConstraints res = new GridBagConstraints();
@@ -20,24 +24,31 @@ public class PrefPanel extends JDialog {
 		return res;
 	}
 
-
 	@SuppressWarnings("unchecked")
 	public PrefPanel(Frame parent) {
 		super(parent, "Preferences:", true);
 		setResizable(false);
-		Container cp = getContentPane();
+		KeyUtils.closeOnEscape(this);
+
+		JPanel cp = new JPanel();
+		getContentPane().add(cp);
 		cp.setLayout(new GridBagLayout());
+		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
 		AtomicInteger cpY = new AtomicInteger();
 		List<GUIPreference<?>> allPrefs = Preferences.getGUIPreferences();
 		for (GUIPreference<?> p : allPrefs) {
 			Box panel = Box.createVerticalBox();
-			panel.setBorder(BorderFactory.createTitledBorder(p.title()));
+			panel.setBorder(BorderFactory.createCompoundBorder(
+					BorderFactory.createTitledBorder(p.title()),
+					BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
+			));
 
 			String descr = p.description();
 			if (descr != null && !descr.isEmpty()) {
 				JLabel label = new JLabel(descr);
 				label.setAlignmentX(0);
 				panel.add(label);
+				panel.add(Box.createVerticalStrut(_SPACING));
 			}
 
 			switch (p.type()) {
@@ -51,7 +62,7 @@ public class PrefPanel extends JDialog {
 							button.setText(describeFont(selectedFont));
 						}
 					});
-					button.setAlignmentX(0);
+					button.setAlignmentX(-1);
 					panel.add(button);
 					break;
 
@@ -75,6 +86,11 @@ public class PrefPanel extends JDialog {
 			}
 			cp.add(panel, constraints(cpY));
 		}
+		cp.add(Box.createVerticalStrut(_SPACING), constraints(cpY));
+		Box footer = Box.createHorizontalBox();
+		footer.add(Box.createHorizontalGlue());
+		footer.add(UIUtils.newButton("Close", this::dispose));
+		cp.add(footer, constraints(cpY));
 		pack();
 		setLocationRelativeTo(parent);
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));

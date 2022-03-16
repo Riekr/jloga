@@ -55,7 +55,7 @@ public final class AutoDetect implements Predicate<String> {
 
 	@NotNull
 	public static JButton newButtonFor(TextSource textSource, MRUComboWithLabels<Pattern> patternCombo, MRUComboWithLabels<DateTimeFormatter> formatterCombo) {
-		return UIUtils.newButton(GLYPH, () -> {
+		return UIUtils.newBorderlessButton(GLYPH, () -> {
 			AutoDetect res = from(textSource);
 			if (res != null) {
 				patternCombo.combo.setValue(res.pattern.pattern());

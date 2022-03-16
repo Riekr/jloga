@@ -36,7 +36,7 @@ public class SearchSelector extends JPanel {
 
 		setLayout(new BorderLayout());
 
-		_selectBtn = UIUtils.newButton("\u26A7", this::openSelection);
+		_selectBtn = UIUtils.newBorderlessButton("\u26A7", this::openSelection);
 		add(_selectBtn, BorderLayout.LINE_START);
 
 		SearchRegistry.get(
