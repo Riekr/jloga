@@ -14,7 +14,7 @@ public abstract class GUIPreference<T> implements Preference<T> {
 	private List<Consumer<Map<String, T>>> _values;
 
 	public enum Type {
-		Font, Combo, Toggle
+		Font, Combo, Toggle, Directory
 	}
 
 	public abstract Type type();

@@ -35,6 +35,7 @@ import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
 import org.riekr.jloga.ui.SearchPanel;
 import org.riekr.jloga.ui.TabNavigation;
+import org.riekr.jloga.ui.utils.FileUtils;
 import org.riekr.jloga.ui.utils.UIUtils;
 
 public class Main extends JFrame implements FileDropListener {
@@ -111,20 +112,14 @@ public class Main extends JFrame implements FileDropListener {
 	}
 
 	public void openFileDialog() {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setMultiSelectionEnabled(true);
-		fileChooser.setCurrentDirectory(Preferences.LAST_OPEN_PATH.get());
-		fileChooser.setDialogTitle("Specify a file to open");
-		int userSelection = fileChooser.showOpenDialog(this);
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File lastFile = null;
-			for (File selectedFile : fileChooser.getSelectedFiles()) {
-				lastFile = selectedFile;
-				openFile(selectedFile);
-			}
-			if (lastFile != null)
-				Preferences.LAST_OPEN_PATH.set(lastFile.getParentFile());
+		List<File> files = FileUtils.selectFilesDialog(this, Preferences.LAST_OPEN_PATH.get());
+		File lastFile = null;
+		for (File selectedFile : files) {
+			lastFile = selectedFile;
+			openFile(selectedFile);
 		}
+		if (lastFile != null)
+			Preferences.LAST_OPEN_PATH.set(lastFile.getParentFile());
 	}
 
 	public void openFiles(@NotNull List<File> files) {

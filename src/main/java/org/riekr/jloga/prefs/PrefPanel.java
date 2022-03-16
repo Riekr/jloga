@@ -1,11 +1,17 @@
 package org.riekr.jloga.prefs;
 
+import static org.riekr.jloga.ui.utils.FileUtils.selectDirectoryDialog;
+import static org.riekr.jloga.ui.utils.FontUtils.describeFont;
+import static org.riekr.jloga.ui.utils.FontUtils.selectFontDialog;
+
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.drjekyll.fontchooser.FontDialog;
+import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.ComboEntryWrapper;
 import org.riekr.jloga.ui.utils.KeyUtils;
 import org.riekr.jloga.ui.utils.UIUtils;
@@ -13,7 +19,10 @@ import org.riekr.jloga.ui.utils.UIUtils;
 public class PrefPanel extends JDialog {
 	private static final long serialVersionUID = 3940084083723252336L;
 
-	private static final int _SPACING = 4;
+	private static final int    _SPACING = 4;
+	private static final String _RESET   = "\u21BA";
+
+	private final ArrayList<Unsubscribable> _subscriptions = new ArrayList<>();
 
 	private GridBagConstraints constraints(AtomicInteger y) {
 		GridBagConstraints res = new GridBagConstraints();
@@ -42,7 +51,6 @@ public class PrefPanel extends JDialog {
 					BorderFactory.createTitledBorder(p.title()),
 					BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
 			));
-
 			String descr = p.description();
 			if (descr != null && !descr.isEmpty()) {
 				JLabel label = new JLabel(descr);
@@ -50,43 +58,18 @@ public class PrefPanel extends JDialog {
 				panel.add(label);
 				panel.add(Box.createVerticalStrut(_SPACING));
 			}
-
 			switch (p.type()) {
 				case Font:
-					GUIPreference<Font> fontPref = (GUIPreference<Font>)p;
-					JButton button = new JButton(describeFont(fontPref.get()));
-					button.addActionListener((e) -> {
-						Font selectedFont = selectFont(fontPref.get());
-						if (selectedFont != null) {
-							fontPref.set(selectedFont);
-							button.setText(describeFont(selectedFont));
-						}
-					});
-					button.setAlignmentX(-1);
-					panel.add(button);
+					panel.add(newFontComponent((GUIPreference<Font>)p));
 					break;
-
 				case Combo:
-					GUIPreference<Object> comboPref = (GUIPreference<Object>)p;
-					ComboEntryWrapper<?>[] values = comboPref.values().stream().map(ComboEntryWrapper::new).toArray(ComboEntryWrapper[]::new);
-					JComboBox<ComboEntryWrapper<?>> combo = new JComboBox<>(values);
-					combo.setSelectedIndex(ComboEntryWrapper.indexOf(comboPref.get(), values));
-					combo.addItemListener(e -> {
-						Object selectedItem = combo.getSelectedItem();
-						if (selectedItem instanceof ComboEntryWrapper)
-							comboPref.set(((ComboEntryWrapper<?>)selectedItem).value);
-					});
-					combo.setAlignmentX(0);
-					panel.add(combo);
+					panel.add(newComboComponent((GUIPreference<Object>)p));
 					break;
-
 				case Toggle:
-					GUIPreference<Boolean> togglePref = (GUIPreference<Boolean>)p;
-					JCheckBox toggle = new JCheckBox(p.title());
-					toggle.addChangeListener(e -> togglePref.set(toggle.isSelected()));
-					toggle.setSelected(togglePref.get());
-					toggle.setAlignmentX(0);
-					panel.add(toggle);
+					panel.add(newToggleComponent((GUIPreference<Boolean>)p));
+					break;
+				case Directory:
+					panel.add(newDirectoryComponent((GUIPreference<File>)p));
 					break;
 
 				default:
@@ -105,23 +88,68 @@ public class PrefPanel extends JDialog {
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));
 	}
 
-	private String describeFont(Font font) {
-		if (font == null)
-			return null;
-		String family = font.getFamily();
-		String name = font.getName().replace('.', ' ');
-		if (name.toUpperCase().startsWith(family.toUpperCase()))
-			name = name.substring(family.length()).trim();
-		return family + ' ' + name + ' ' + font.getSize();
+	private Component newFontComponent(GUIPreference<Font> fontPref) {
+		JPanel res = new JPanel();
+		res.setLayout(new BorderLayout());
+		final JButton selectButton = new JButton();
+		_subscriptions.add(fontPref.subscribe((font) -> selectButton.setText(describeFont(fontPref.get()))));
+		res.add(selectButton, BorderLayout.CENTER);
+		selectButton.addActionListener((e) -> {
+			Font selectedFont = selectFontDialog(this, fontPref.get());
+			if (selectedFont != null) {
+				fontPref.set(selectedFont);
+				selectButton.setText(describeFont(selectedFont));
+			}
+		});
+		final JButton resetButton = new JButton(_RESET);
+		resetButton.addActionListener((e) -> fontPref.reset());
+		res.add(resetButton, BorderLayout.LINE_END);
+		res.setAlignmentX(-1);
+		return res;
 	}
 
-	private Font selectFont(Font initialFont) {
-		FontDialog dialog = new FontDialog(this, "Select Font", true);
-		dialog.setSelectedFont(initialFont);
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		dialog.setVisible(true);
-		if (!dialog.isCancelSelected())
-			return dialog.getSelectedFont();
-		return null;
+	private Component newComboComponent(GUIPreference<Object> comboPref) {
+		ComboEntryWrapper<?>[] values = comboPref.values().stream().map(ComboEntryWrapper::new).toArray(ComboEntryWrapper[]::new);
+		JComboBox<ComboEntryWrapper<?>> combo = new JComboBox<>(values);
+		_subscriptions.add(comboPref.subscribe((selectedItem) -> combo.setSelectedIndex(ComboEntryWrapper.indexOf(selectedItem, values))));
+		combo.addItemListener(e -> {
+			Object selectedItem = combo.getSelectedItem();
+			if (selectedItem instanceof ComboEntryWrapper)
+				comboPref.set(((ComboEntryWrapper<?>)selectedItem).value);
+		});
+		combo.setAlignmentX(0);
+		return combo;
+	}
+
+	private Component newToggleComponent(GUIPreference<Boolean> togglePref) {
+		JCheckBox toggle = new JCheckBox(togglePref.title());
+		toggle.addChangeListener(e -> togglePref.set(toggle.isSelected()));
+		toggle.setSelected(togglePref.get());
+		toggle.setAlignmentX(0);
+		return toggle;
+	}
+
+	private Component newDirectoryComponent(GUIPreference<File> dirPref) {
+		JPanel res = new JPanel();
+		res.setLayout(new BorderLayout());
+		final JButton selectButton = new JButton();
+		_subscriptions.add(dirPref.subscribe((dir) -> selectButton.setText(dir == null ? "" : dir.getAbsolutePath())));
+		selectButton.addActionListener((e) -> {
+			File newDir = selectDirectoryDialog(this, dirPref.get());
+			if (newDir != null)
+				dirPref.set(newDir);
+		});
+		res.add(selectButton, BorderLayout.CENTER);
+		final JButton resetButton = new JButton(_RESET);
+		resetButton.addActionListener((e) -> dirPref.reset());
+		res.add(resetButton, BorderLayout.LINE_END);
+		res.setAlignmentX(0);
+		return res;
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		_subscriptions.forEach(Unsubscribable::unsubscribe);
 	}
 }

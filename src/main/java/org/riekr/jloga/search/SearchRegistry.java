@@ -52,6 +52,10 @@ public final class SearchRegistry {
 		}
 	}
 
+	public static void remove(Entry<?> entry) {
+		_ENTRIES.remove(entry.id);
+	}
+
 	public static void register(Entry<?> entry) {
 		_ENTRIES.put(entry.id, entry);
 	}
@@ -62,7 +66,7 @@ public final class SearchRegistry {
 		register(new Entry<>(DurationAnalysisComponent.ID, DurationAnalysisComponent::new, "Duration Analysis"));
 		register(new Entry<>(FrequencyAnalysisComponent.ID, FrequencyAnalysisComponent::new, "Frequency Analysis"));
 		register(new Entry<>(UniqueSearchComponent.ID, UniqueSearchComponent::new, "Unique pattern search"));
-		ExtSearchRegistry.forEach(SearchRegistry::register);
+		ExtSearchRegistry.init();
 	}
 
 	public static Entry<?>[] getChoices() {

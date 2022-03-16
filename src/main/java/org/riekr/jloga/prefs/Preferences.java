@@ -40,6 +40,10 @@ public interface Preferences {
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid",
 			"When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
+
+	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
+			.describe(Type.Directory, "Extension scripts folder",
+					"A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
 	//endregion
 
 	//region Hidden (state) preferences
