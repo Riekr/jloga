@@ -30,28 +30,29 @@ public class PrefPanel extends JDialog {
 		AtomicInteger cpY = new AtomicInteger();
 		List<GUIPreference<?>> allPrefs = Preferences.getGUIPreferences();
 		for (GUIPreference<?> p : allPrefs) {
-			JPanel panel = new JPanel();
+			Box panel = Box.createVerticalBox();
 			panel.setBorder(BorderFactory.createTitledBorder(p.title()));
-			panel.setLayout(new GridLayout());
-
-			AtomicInteger panelY = new AtomicInteger();
 
 			String descr = p.description();
-			if (descr != null && !descr.isEmpty())
-				panel.add(new JLabel(descr), constraints(panelY));
+			if (descr != null && !descr.isEmpty()) {
+				JLabel label = new JLabel(descr);
+				label.setAlignmentX(0);
+				panel.add(label);
+			}
 
 			switch (p.type()) {
 				case Font:
 					GUIPreference<Font> fontPref = (GUIPreference<Font>)p;
-					JButton button = new JButton(fontPref.get().getFontName());
+					JButton button = new JButton(describeFont(fontPref.get()));
 					button.addActionListener((e) -> {
 						Font selectedFont = selectFont(fontPref.get());
 						if (selectedFont != null) {
 							fontPref.set(selectedFont);
-							button.setText(selectedFont.getFontName());
+							button.setText(describeFont(selectedFont));
 						}
 					});
-					panel.add(button, constraints(panelY));
+					button.setAlignmentX(0);
+					panel.add(button);
 					break;
 
 				case Combo:
@@ -64,7 +65,8 @@ public class PrefPanel extends JDialog {
 						if (selectedItem instanceof ComboEntryWrapper)
 							comboPref.set(((ComboEntryWrapper<?>)selectedItem).value);
 					});
-					panel.add(combo, constraints(panelY));
+					combo.setAlignmentX(0);
+					panel.add(combo);
 					break;
 
 				default:
@@ -76,6 +78,16 @@ public class PrefPanel extends JDialog {
 		pack();
 		setLocationRelativeTo(parent);
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));
+	}
+
+	private String describeFont(Font font) {
+		if (font == null)
+			return null;
+		String family = font.getFamily();
+		String name = font.getName().replace('.', ' ');
+		if (name.toUpperCase().startsWith(family.toUpperCase()))
+			name = name.substring(family.length()).trim();
+		return family + ' ' + name + ' ' + font.getSize();
 	}
 
 	private Font selectFont(Font initialFont) {
