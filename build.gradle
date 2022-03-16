@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'edu.sc.seis.launch4j' version '2.5.1'
 }
 
 repositories {
@@ -56,6 +57,14 @@ jar {
 				"Main-Class": 'org.riekr.jloga.Main'
 		)
 	}
+}
+
+launch4j {
+	// https://github.com/TheBoegl/gradle-launch4j
+	mainClassName = 'org.riekr.jloga.Main'
+
+	// convert icon.png -resize 256x256 -channel rgb -negate icon.ico
+	icon = "${projectDir}/src/main/resources/org/riekr/jloga/icon.ico"
 }
 
 tasks.register('fatJar', Jar) {
