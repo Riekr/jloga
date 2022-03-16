@@ -18,7 +18,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -126,15 +125,18 @@ public class TextFileSource implements TextSource {
 	@Override
 	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		if (_indexing.isDone())
-			consumer.accept(new StringsReader(iterator(fromLine, fromLine + count)));
+			TextSource.super.requestText(fromLine, count, consumer);
 		else {
 			_indexChangeListeners.add(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						int toLinePlus1 = fromLine + count;
-						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null)
-							EventQueue.invokeLater(() -> consumer.accept(new StringsReader(iterator(fromLine, toLinePlus1))));
+						if (_index.floorKey(fromLine) != null && _index.ceilingKey(toLinePlus1) != null) {
+							_indexChangeListeners.remove(this);
+							StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount, fromLine + count)));
+							EventQueue.invokeLater(() -> consumer.accept(reader));
+						}
 					} catch (Throwable e) {
 						_indexChangeListeners.remove(this);
 						consumer.accept(new StringsReader.ErrorReader(e));
@@ -214,6 +216,15 @@ public class TextFileSource implements TextSource {
 		}
 		int i = line - _fromLine;
 		return i >= 0 && i < _lines.length ? _lines[i] : "";
+	}
+
+	@Override
+	public String[] getText(int fromLine, int count) {
+		int toLinePlus1 = Math.min(fromLine + count, _lineCount);
+		String[] lines = new String[toLinePlus1 - fromLine + 1];
+		for (int i = fromLine; i <= toLinePlus1; i++)
+			lines[i - fromLine] = getText(i);
+		return lines;
 	}
 
 	@Override

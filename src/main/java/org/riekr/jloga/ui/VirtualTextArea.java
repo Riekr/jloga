@@ -20,7 +20,6 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Pattern;
@@ -252,21 +251,18 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			if (_parent != null)
 				_header = _parent.getHeader();
 			if (_header == null || _header.isEmpty()) {
-				try {
-					_header = _textSource.getText(0);
-					int splitHeader = FastSplitOperation.count(_header);
-					for (int i = 1; i < Math.min(_textSource.getLineCount(), _GRID_HEADER_CHECK_LINES); i++) {
-						int verify = FastSplitOperation.count(_textSource.getText(i));
-						if (splitHeader != verify) {
-							_header = "";
-							break;
-						}
+				_header = _textSource.getText(0);
+				int splitHeader = FastSplitOperation.count(_header);
+				// avoid calling getLineCount() here or may block til the end of indexing
+				int count = Math.min(_allLinesCount, _GRID_HEADER_CHECK_LINES);
+				for (int i = 1; i < count; i++) {
+					int verify = FastSplitOperation.count(_textSource.getText(i));
+					if (splitHeader != verify) {
+						_header = "";
+						break;
 					}
-					_ownHeader = true;
-				} catch (ExecutionException | InterruptedException e) {
-					e.printStackTrace(System.err);
-					_header = "";
 				}
+				_ownHeader = true;
 			}
 		}
 		return _header;

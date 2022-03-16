@@ -41,7 +41,7 @@ public interface TextSource extends Iterable<String> {
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		executeRequestText(() -> {
 			try {
-				StringsReader reader = new StringsReader(iterator(fromLine, fromLine + count));
+				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount(), fromLine + count)));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			} catch (CancellationException ignored) {
 				System.out.println("Text request cancelled");
@@ -52,7 +52,7 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
-		int toLinePlus1 = fromLine + Math.min(count, getLineCount());
+		int toLinePlus1 = Math.min(fromLine + count, getLineCount());
 		String[] lines = new String[toLinePlus1 - fromLine + 1];
 		for (int i = fromLine; i <= toLinePlus1; i++)
 			lines[i - fromLine] = getText(i);

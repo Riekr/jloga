@@ -1,7 +1,5 @@
 package org.riekr.jloga.io;
 
-import static java.util.Collections.singleton;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
@@ -12,12 +10,16 @@ public class StringsReader extends Reader {
 
 	public static class ErrorReader extends StringsReader {
 		public ErrorReader(@NotNull Throwable e) {
-			super(singleton(e.getLocalizedMessage()).iterator());
+			super(new RangeIterator<>(e.getLocalizedMessage()));
 		}
 	}
 
 	private Iterator<String> _strings;
 	private int              _start = 0;
+
+	public StringsReader(@NotNull String[] strings) {
+		this(new RangeIterator<>(0, strings.length, strings));
+	}
 
 	public StringsReader(@NotNull Iterator<String> strings) {
 		_strings = strings;
