@@ -368,7 +368,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_textSourceUnsubscribable.unsubscribe();
 		_textSource = textSource;
 		if (textSource != null) {
-			if (_title != null && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find()) {
+			if (_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find()) {
 				EventQueue.invokeLater(() -> {
 					_gridToggle.setSelected(true);
 					setGridView(true);

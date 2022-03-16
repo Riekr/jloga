@@ -80,6 +80,15 @@ public class PrefPanel extends JDialog {
 					panel.add(combo);
 					break;
 
+				case Toggle:
+					GUIPreference<Boolean> togglePref = (GUIPreference<Boolean>)p;
+					JCheckBox toggle = new JCheckBox(p.title());
+					toggle.addChangeListener(e -> togglePref.set(toggle.isSelected()));
+					toggle.setSelected(togglePref.get());
+					toggle.setAlignmentX(0);
+					panel.add(toggle);
+					break;
+
 				default:
 					System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
 					continue;

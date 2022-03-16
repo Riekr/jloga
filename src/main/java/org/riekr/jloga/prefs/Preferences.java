@@ -37,6 +37,9 @@ public interface Preferences {
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
 			.describe(Type.Combo, "Thread model", "Select which threading model should be used for simple searches (eg: plain text and regex).")
 			.add(SimpleSearchPredicate::getThreadModels);
+
+	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid",
+			"When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
 	//endregion
 
 	//region Hidden (state) preferences
