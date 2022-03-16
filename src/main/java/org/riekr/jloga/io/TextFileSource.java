@@ -34,13 +34,11 @@ import java.util.function.IntConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.misc.MutableLong;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 
 public class TextFileSource implements TextSource {
-
-	// private static final int PAGE_SIZE = 1024 * 1024 * 2; // 2MB
-	private static final int PAGE_SIZE = 1024 * 1024; // 1MB
 
 	static final class IndexData {
 		final long startPos;
@@ -51,7 +49,7 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-
+	private final int     _pageSize = Preferences.PAGE_SIZE.get();
 	private final Path    _file;
 	private final Charset _charset;
 
@@ -77,8 +75,8 @@ public class TextFileSource implements TextSource {
 			_lineCountSubject.next(0);
 			_index = new TreeMap<>();
 			_index.put(0, new IndexData(0));
-			ByteBuffer byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
-			CharBuffer charBuffer = CharBuffer.allocate(PAGE_SIZE);
+			ByteBuffer byteBuffer = ByteBuffer.allocate(_pageSize);
+			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
 			CharsetDecoder decoder = _charset.newDecoder()
 					.onMalformedInput(CodingErrorAction.REPLACE)
 					.onUnmappableCharacter(CodingErrorAction.REPLACE);
@@ -157,7 +155,7 @@ public class TextFileSource implements TextSource {
 		String[] lines = new String[toLine - fromLine];
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			fileChannel.position(pos);
-			try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), PAGE_SIZE)) {
+			try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), _pageSize)) {
 				for (int i = 0; i < lines.length; i++)
 					lines[i] = br.readLine();
 				return lines;

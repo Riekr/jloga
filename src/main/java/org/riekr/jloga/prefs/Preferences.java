@@ -44,6 +44,14 @@ public interface Preferences {
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
 			.describe(Type.Directory, "Extension scripts folder",
 					"A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
+
+	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024)
+			.describe(Type.Combo, "Size of disk pages", "<html>Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase memory usage and vice-versa.<br>1MB is generally recommended.</html>")
+			.add("256kB", 256 * 1024)
+			.add("512kB", 512 * 1024)
+			.add("1MB", 1024 * 1024)
+			.add("2MB", 1024 * 1024 * 2)
+			.add("4MB", 1024 * 1024 * 4);
 	//endregion
 
 	//region Hidden (state) preferences

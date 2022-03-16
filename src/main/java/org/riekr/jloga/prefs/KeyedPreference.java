@@ -19,8 +19,8 @@ public class KeyedPreference<T extends Serializable> implements Preference<T> {
 	private T       _value;
 
 	protected KeyedPreference(String key, Supplier<T> deflt) {
-		this._key = key;
-		this._deflt = deflt;
+		_key = key;
+		_deflt = deflt;
 	}
 
 	@Override
