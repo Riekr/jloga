@@ -38,12 +38,12 @@ java -cp build/libs/jloga-all.jar org.riekr.jloga.httpd.FinosPerspectiveServer i
 ```
 Once you close the browser, the app will automatically close.
 
-#Future and licensing
+##Future and licensing
 This software is free as in speech, do whatever you want with it.
 
 As a spare time project this source base is updated only when needed, don't expect fast response times to bug/issues or requests. I'll do my best anyway.
 
-Used libraries includes:
+###Used libraries includes:
 - FlatLaf - Flat Look and Feel ([home](https://www.formdev.com/flatlaf/) - [license](https://github.com/JFormDesigner/FlatLaf/blob/main/LICENSE))
 - fontchooser ([home](https://gitlab.com/dheid/fontchooser) - [license](https://gitlab.com/dheid/fontchooser/-/blob/master/LICENSE))
 - NanoHTTPD – a tiny web server in Java ([home](https://github.com/NanoHttpd/nanohttpd) - [license](https://github.com/NanoHttpd/nanohttpd/blob/master/LICENSE.md))
