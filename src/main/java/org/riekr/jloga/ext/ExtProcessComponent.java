@@ -1,5 +1,7 @@
 package org.riekr.jloga.ext;
 
+import static org.riekr.jloga.ui.utils.KeyUtils.closeOnEscape;
+
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessComponent extends JPanel implements SearchComponent {
+	private static final long serialVersionUID = 8599529986240844558L;
 
 	private final String _id;
 	private final String _icon;
@@ -102,6 +105,7 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 			popup.setPreferredSize(new Dimension(640, 480));
 			popup.pack();
 			popup.setVisible(true);
+			closeOnEscape(popup);
 		}
 		if (line.isEmpty())
 			_stdErr.append("\n");
