@@ -32,14 +32,14 @@ public interface TextSource extends Iterable<String> {
 	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(2);
 	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
 
-	private static void executeRequestText(Runnable task) {
+	default void enqueueTextRequest(Runnable task) {
 		Future<?> oldFuture = TEXT_FUTURE.getAndSet(EXECUTOR.submit(task));
 		if (oldFuture != null)
-			oldFuture.cancel(true);
+			oldFuture.cancel(false);
 	}
 
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
-		executeRequestText(() -> {
+		enqueueTextRequest(() -> {
 			try {
 				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount() - fromLine, count)));
 				EventQueue.invokeLater(() -> consumer.accept(reader));

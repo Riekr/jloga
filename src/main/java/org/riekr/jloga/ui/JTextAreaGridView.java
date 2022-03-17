@@ -8,13 +8,16 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.transform.FastSplitOperation;
 
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS_MATRIX;
+
 public class JTextAreaGridView extends JTable {
+	private static final long serialVersionUID = -4187398533175075732L;
 
 	private final          FastSplitOperation _splitter = new FastSplitOperation();
 	private final          String[]           _header;
 	private final @NotNull JTextArea          _text;
 
-	private String[][] _data = new String[0][0];
+	private String[][] _data = EMPTY_STRINGS_MATRIX;
 
 	public JTextAreaGridView(@NotNull JTextArea text, String header) {
 		_text = text;

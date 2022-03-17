@@ -1,6 +1,7 @@
 package org.riekr.jloga.io;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -20,7 +21,6 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -53,8 +53,8 @@ public class TextFileSource implements TextSource {
 	private final Path    _file;
 	private final Charset _charset;
 
-	private final Future<?>                        _indexing;
-	private       NavigableMap<Integer, IndexData> _index;
+	private final Future<?>                   _indexing;
+	private       TreeMap<Integer, IndexData> _index;
 
 	private       int                 _lineCount;
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
@@ -122,9 +122,12 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
-		if (_indexing.isDone())
-			TextSource.super.requestText(fromLine, count, consumer);
-		else {
+		if (_indexing.isDone()) {
+			enqueueTextRequest(() -> {
+				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+				EventQueue.invokeLater(() -> consumer.accept(reader));
+			});
+		} else {
 			_indexChangeListeners.add(new Runnable() {
 				@Override
 				public void run() {
@@ -185,6 +188,9 @@ public class TextFileSource implements TextSource {
 	// 	}
 	// }
 
+	/**
+	 * Read a single line changing loaded page if needed
+	 */
 	@Override
 	public synchronized String getText(int line) {
 		if (_lines == null || line < _fromLine || line >= (_fromLine + _lines.length)) {
@@ -217,11 +223,64 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public String[] getText(int fromLine, int count) {
-		int toLinePlus1 = Math.min(fromLine + count, _lineCount);
-		String[] lines = new String[toLinePlus1 - fromLine + 1];
-		for (int i = fromLine; i <= toLinePlus1; i++)
-			lines[i - fromLine] = getText(i);
-		return lines;
+		// This method exists to make sure all data is read from disk without interruptions.
+		// Reading line-by-line may cause loaded page to be changed multiple times.
+		switch (count) {
+			case 0:
+				return EMPTY_STRINGS;
+			case 1:
+				return new String[]{getText(fromLine)};
+		}
+		String[] res;
+		synchronized (this) {
+			count = Math.min(count, _lineCount - fromLine);
+			int endLine = fromLine + count;
+			res = new String[count + 1];
+			if (_lines == null || fromLine < _fromLine || res.length > _lines.length || fromLine >= (_fromLine + _lines.length)) {
+				Map.Entry<Integer, IndexData> entry = _index.floorEntry(fromLine);
+				do {
+					IndexData indexData = entry.getValue();
+					int pageFromLine = entry.getKey();
+					if (indexData.data == null || (_lines = indexData.data.get()) == null) {
+						//				System.out.println("MISS");
+						entry = _index.higherEntry(entry.getKey());
+						int toLine;
+						if (entry == null)
+							toLine = _lineCount;
+						else {
+							toLine = entry.getKey();
+							if (toLine >= endLine)
+								entry = null;
+						}
+						try {
+							_lines = loadPage(pageFromLine, toLine, indexData.startPos);
+							_fromLine = pageFromLine;
+							indexData.data = new WeakReference<>(_lines);
+						} catch (ClosedByInterruptException ignored) {
+							return EMPTY_STRINGS;
+						} catch (IOException e) {
+							e.printStackTrace(System.err);
+							throw new UncheckedIOException(e);
+						}
+					} else {
+						//				System.out.println("HIT");
+						_fromLine = pageFromLine;
+						if (_fromLine + _lines.length >= endLine)
+							entry = null;
+					}
+					int from = fromLine - _fromLine;
+					int len = Math.min(res.length, _lines.length - from);
+					System.arraycopy(_lines, from, res, 0, len);
+					fromLine += len;
+				} while (entry != null);
+			} else {
+				int from = fromLine - _fromLine;
+				System.arraycopy(_lines, from, res, 0, Math.min(res.length, _lines.length - from));
+			}
+		}
+		if (res[count] == null)
+			res[count] = "";
+		return res;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.riekr.jloga;
 
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.ui.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.ui.utils.UIUtils.newTabHeader;
 
@@ -200,7 +201,7 @@ public class Main extends JFrame implements FileDropListener {
 				}
 				if (arg.equals("-perspective")) {
 					i.remove();
-					FinosPerspectiveServer.main(args.toArray(new String[0]));
+					FinosPerspectiveServer.main(args.toArray(EMPTY_STRINGS));
 					return;
 				}
 			}

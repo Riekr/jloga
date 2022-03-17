@@ -3,6 +3,8 @@ package org.riekr.jloga.transform;
 import java.util.ArrayList;
 import java.util.function.Function;
 
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
+
 public class FastSplitOperation implements Function<String, String[]> {
 
 	public static int count(String s) {
@@ -22,8 +24,6 @@ public class FastSplitOperation implements Function<String, String[]> {
 		return max;
 	}
 
-
-	private static final String[] _EMPTY = new String[0];
 
 	private static final String            _DELIMS = "\t,;:|";
 	private final        ArrayList<String> _buffer;
@@ -89,11 +89,11 @@ public class FastSplitOperation implements Function<String, String[]> {
 			if (start <= s.length())
 				add(s.substring(start));
 		}
-		return _buffer.toArray(_EMPTY);
+		return _buffer.toArray(EMPTY_STRINGS);
 	}
 
 	private String[] detect(String s) {
-		String[] selectedRec = _EMPTY;
+		String[] selectedRec = EMPTY_STRINGS;
 		char selectedDelim = 0;
 		for (int i = 0, len = _DELIMS.length(); i < len; i++) {
 			char delim = _DELIMS.charAt(i);
