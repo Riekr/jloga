@@ -42,7 +42,14 @@ public interface Preference<T> extends Observable<T> {
 
 	default <R> Preference<R> withConversion(Function<T, R> encoder, Function<R, T> decoder) {
 		Preference<T> self = this;
-		Observable<R> o = self.map(encoder);
+		Observable<R> o = self.map((t) -> {
+			try {
+				return t == null ? null : encoder.apply(t);
+			} catch (Throwable e) {
+				t = self.reset();
+				return t == null ? null : encoder.apply(t);
+			}
+		});
 		return new Preference<>() {
 			@Override
 			public @NotNull Unsubscribable subscribe(Observer<? super R> observer) {
