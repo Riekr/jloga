@@ -110,30 +110,7 @@ public interface Preference<T> extends Observable<T> {
 	}
 
 	default GUIPreference<T> describe(GUIPreference.Type type, String title) {
-		return describe(type, title, null);
-	}
-
-	default GUIPreference<T> describe(GUIPreference.Type type, String title, String description) {
-		Preference<T> self = this;
-		return new GUIPreference<>() {
-			@Override
-			public @NotNull Unsubscribable subscribe(Observer<? super T> observer) {
-				return self.subscribe(observer);
-			}
-
-			@Override public Type type() {return type;}
-
-			@Override public String title() {return title;}
-
-			@Override public String description() {return description;}
-
-			@Override public T get() {return self.get();}
-
-			@Override public boolean set(T t) {return self.set(t);}
-
-			@Override
-			public T reset() {return self.reset();}
-		};
+		return new GUIPreference<>(this, type, title);
 	}
 
 }

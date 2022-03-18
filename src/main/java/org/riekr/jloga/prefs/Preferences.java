@@ -20,10 +20,12 @@ public interface Preferences {
 
 	//region GUI editable preferences
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
-			.describe(Type.Font, "Text font", "Font used in text viewers, using a monospace font is recommended.");
+			.describe(Type.Font, "Text font")
+			.addDescription("Font used in text viewers, using a monospace font is recommended.");
 
 	GUIPreference<Integer> PAGE_SCROLL_DIVIDER = of("PageDivider", 3, 1, Integer.MAX_VALUE)
-			.describe(Type.Combo, "Page scroll size:", "Select how many of the visible lines should be scrolled when paging text.")
+			.describe(Type.Combo, "Page scroll size:")
+			.addDescription("Select how many of the visible lines should be scrolled when paging text.")
 			.add("Full page", 1)
 			.add("\u00BD page", 2)
 			.add("\u2153 of page", 3)
@@ -31,22 +33,26 @@ public interface Preferences {
 			.add("\u2155 of page", 5);
 
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
-			.describe(Type.Combo, "Charset", "Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
+			.describe(Type.Combo, "Charset")
+			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
 			.add(Charset::availableCharsets);
 
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
-			.describe(Type.Combo, "Thread model", "Select which threading model should be used for simple searches (eg: plain text and regex).")
+			.describe(Type.Combo, "Thread model")
+			.addDescription("Select which threading model should be used for simple searches (eg: plain text and regex).")
 			.add(SimpleSearchPredicate::getThreadModels);
 
-	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid",
-			"When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
+	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
+			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
 
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
-			.describe(Type.Directory, "Extension scripts folder",
-					"A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
+			.describe(Type.Directory, "Extension scripts folder")
+			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
 
 	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024)
-			.describe(Type.Combo, "Size of disk pages", "<html>Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase memory usage and vice-versa.<br>1MB is generally recommended.</html>")
+			.describe(Type.Combo, "Size of disk pages")
+			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase memory usage and vice-versa.")
+			.addDescription("1MB is generally recommended.")
 			.add("256kB", 256 * 1024)
 			.add("512kB", 512 * 1024)
 			.add("1MB", 1024 * 1024)

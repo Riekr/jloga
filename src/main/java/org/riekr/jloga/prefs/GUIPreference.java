@@ -1,5 +1,8 @@
 package org.riekr.jloga.prefs;
 
+import static java.util.stream.Stream.concat;
+import static org.riekr.jloga.ui.utils.TextUtils.escapeHTML;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -8,20 +11,51 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public abstract class GUIPreference<T> implements Preference<T> {
+import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.react.Observer;
+import org.riekr.jloga.react.Unsubscribable;
 
-	private List<Consumer<Map<String, T>>> _values;
+public class GUIPreference<T> implements Preference<T> {
 
 	public enum Type {
 		Font, Combo, Toggle, Directory
 	}
 
-	public abstract Type type();
+	private final Preference<T> _pref;
+	private final Type          _type;
+	private final String        _title;
+	private       String[]      _descriptions;
 
-	public abstract String title();
+	public GUIPreference(Preference<T> pref, Type type, String title) {
+		_pref = pref;
+		_type = type;
+		_title = title;
+	}
 
-	public abstract String description();
+	private List<Consumer<Map<String, T>>> _values;
+
+	public Type type() {return _type;}
+
+	public String title() {return _title;}
+
+	public String description() {
+		if (_descriptions == null)
+			return null;
+		return "<html>" + String.join("<br>", _descriptions) + "</html>";
+	}
+
+	public GUIPreference<T> addDescription(String description) {
+		if (description != null && !description.isEmpty()) {
+			description = escapeHTML(description);
+			if (_descriptions == null)
+				_descriptions = new String[]{description};
+			else
+				_descriptions = concat(Stream.of(_descriptions), Stream.of(description)).toArray(String[]::new);
+		}
+		return this;
+	}
 
 	public Set<Map.Entry<String, T>> values() {
 		if (_values == null || _values.isEmpty())
@@ -49,4 +83,22 @@ public abstract class GUIPreference<T> implements Preference<T> {
 		return this;
 	}
 
+	@Override
+	public T get() {return _pref.get();}
+
+	@Override
+	public boolean set(T t) {return _pref.set(t);}
+
+	@Override
+	public T reset() {return _pref.reset();}
+
+	@Override
+	public GUIPreference<T> describe(Type type, String title) {
+		return new GUIPreference<>(_pref, type, title);
+	}
+
+	@Override
+	public @NotNull Unsubscribable subscribe(Observer<? super T> observer) {
+		return _pref.subscribe(observer);
+	}
 }
