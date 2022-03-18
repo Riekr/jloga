@@ -1,11 +1,10 @@
 package org.riekr.jloga.misc;
 
-import org.riekr.jloga.prefs.Preferences;
-
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Locale;
+
+import org.riekr.jloga.prefs.Preferences;
 
 public class Formatters {
 

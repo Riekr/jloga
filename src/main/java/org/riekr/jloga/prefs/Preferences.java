@@ -20,6 +20,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 public interface Preferences {
 
 	String GENERAL = "General";
+	String FORMATS = "Formats";
 	String IO      = "I/O";
 	String SCRIPTS = "Scripting";
 
@@ -43,17 +44,18 @@ public interface Preferences {
 			.group(GENERAL)
 			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
 
+	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
+			.describe(Type.Combo, "Locale")
+			.group(FORMATS)
+			.addDescription("Default locale to use for date conversions.")
+			.addDescription("Applied only for localized date formats in search parameters.")
+			.add(Locale::getDisplayName, Locale::getAvailableLocales);
+
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
 			.describe(Type.Combo, "Charset")
 			.group(IO)
 			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
 			.add(Charset::availableCharsets);
-
-	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
-			.describe(Type.Combo, "Locale")
-			.group(IO)
-			.addDescription("Default locale to use for date conversions.")
-			.add(Locale::getDisplayName, Locale::getAvailableLocales);
 
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
 			.describe(Type.Combo, "Thread model")

@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.ComboEntryWrapper;
@@ -29,17 +28,6 @@ public class PrefPanel extends JDialog {
 
 	private final ArrayList<Unsubscribable> _subscriptions = new ArrayList<>();
 
-	private GridBagConstraints constraints(AtomicInteger y) {
-		GridBagConstraints res = new GridBagConstraints();
-		res.fill = GridBagConstraints.HORIZONTAL;
-		res.weightx = 1;
-		res.weighty = 1;
-		res.gridx = 0;
-		res.gridy = y.getAndIncrement();
-		res.anchor = GridBagConstraints.NORTH;
-		return res;
-	}
-
 	@SuppressWarnings("unchecked")
 	public PrefPanel(Frame parent) {
 		super(parent, "Preferences:", true);
@@ -48,22 +36,21 @@ public class PrefPanel extends JDialog {
 
 		JPanel cp = new JPanel();
 		getContentPane().add(cp);
-		cp.setLayout(new GridBagLayout());
+		cp.setLayout(new BorderLayout());
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-		AtomicInteger cpY = new AtomicInteger();
 		JTabbedPane tabs = new JTabbedPane();
-		cp.add(tabs, constraints(cpY));
+		cp.add(tabs, BorderLayout.NORTH);
 		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
 				.collect(groupingBy(GUIPreference::group, LinkedHashMap::new, toList()));
 		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
 			String group = e.getKey();
 			List<GUIPreference<?>> allPrefs = e.getValue();
-			JPanel wrapper = new JPanel();
-			wrapper.setLayout(new BorderLayout());
-			Box tabContents = Box.createVerticalBox();
-			wrapper.add(tabContents, BorderLayout.NORTH);
+			final Box tabContents = Box.createVerticalBox();
 			tabContents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-			tabs.addTab(group, wrapper);
+			final JPanel tabContentsWrapper = new JPanel();
+			tabContentsWrapper.setLayout(new BorderLayout());
+			tabContentsWrapper.add(tabContents, BorderLayout.NORTH);
+			tabs.addTab(group, tabContentsWrapper);
 			for (GUIPreference<?> p : allPrefs) {
 				Box panel = Box.createVerticalBox();
 				panel.setBorder(BorderFactory.createCompoundBorder(
@@ -98,7 +85,7 @@ public class PrefPanel extends JDialog {
 				tabContents.add(panel);
 			}
 		}
-		cp.add(Box.createVerticalStrut(_SPACING), constraints(cpY));
+		cp.add(Box.createVerticalStrut(_SPACING), BorderLayout.CENTER);
 		Box footer = Box.createHorizontalBox();
 		footer.add(UIUtils.newButton("Reset all", () -> {
 			int input = JOptionPane.showConfirmDialog(this, "Do you really want to reset all preferences?", "Reset", JOptionPane.YES_NO_OPTION);
@@ -107,7 +94,7 @@ public class PrefPanel extends JDialog {
 		}));
 		footer.add(Box.createHorizontalGlue());
 		footer.add(UIUtils.newButton("Close", this::dispose));
-		cp.add(footer, constraints(cpY));
+		cp.add(footer, BorderLayout.SOUTH);
 		pack();
 		setLocationRelativeTo(parent);
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));
