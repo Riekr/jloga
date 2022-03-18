@@ -2,6 +2,7 @@ package org.riekr.jloga.prefs;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -37,6 +38,14 @@ public interface Preference<T> extends Observable<T> {
 				() -> deflt == null ? Charset.defaultCharset().name() : deflt.name()).withConversion(
 				Charset::forName,
 				Charset::name
+		);
+	}
+
+	static Preference<Locale> of(String key, Locale deflt) {
+		return Preference.of(key,
+				() -> deflt == null ? Locale.ENGLISH.toLanguageTag() : deflt.toLanguageTag()).withConversion(
+				Locale::forLanguageTag,
+				Locale::toLanguageTag
 		);
 	}
 

@@ -5,12 +5,13 @@ import static org.riekr.jloga.ui.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -74,7 +75,7 @@ public class GUIPreference<T> implements Preference<T> {
 	public Set<Map.Entry<String, T>> values() {
 		if (_values == null || _values.isEmpty())
 			return Collections.emptySet();
-		Map<String, T> values = new LinkedHashMap<>();
+		Map<String, T> values = new TreeMap<>();
 		_values.forEach((filler) -> filler.accept(values));
 		return values.entrySet();
 	}
@@ -83,6 +84,16 @@ public class GUIPreference<T> implements Preference<T> {
 		if (_values == null)
 			_values = new ArrayList<>();
 		_values.add((res) -> res.putAll(values.get()));
+		return this;
+	}
+
+	public GUIPreference<T> add(Function<T, String> descriptor, Supplier<T[]> values) {
+		if (_values == null)
+			_values = new ArrayList<>();
+		_values.add((res) -> {
+			for (T t : values.get())
+				res.put(descriptor.apply(t), t);
+		});
 		return this;
 	}
 

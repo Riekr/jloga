@@ -1,5 +1,7 @@
 package org.riekr.jloga.misc;
 
+import org.riekr.jloga.prefs.Preferences;
+
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -11,7 +13,7 @@ public class Formatters {
 		return new DateTimeFormatterBuilder()
 				.appendPattern(pattern)
 				.toFormatter()
-				.withLocale(Locale.ENGLISH)
+				.withLocale(Preferences.LOCALE.get())
 				.withZone(ZoneId.systemDefault());
 	}
 

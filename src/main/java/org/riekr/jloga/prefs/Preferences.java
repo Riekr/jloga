@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.riekr.jloga.prefs.GUIPreference.Type;
 import org.riekr.jloga.search.RegExComponent;
@@ -47,6 +48,12 @@ public interface Preferences {
 			.group(IO)
 			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
 			.add(Charset::availableCharsets);
+
+	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
+			.describe(Type.Combo, "Locale")
+			.group(IO)
+			.addDescription("Default locale to use for date conversions.")
+			.add(Locale::getDisplayName, Locale::getAvailableLocales);
 
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
 			.describe(Type.Combo, "Thread model")

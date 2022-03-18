@@ -1,11 +1,5 @@
 package org.riekr.jloga.ui;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.MixFileSource;
-import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.misc.InstantRange;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -19,11 +13,17 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.MixFileSource;
+import org.riekr.jloga.io.TextSource;
+import org.riekr.jloga.misc.InstantRange;
+import org.riekr.jloga.prefs.Preferences;
 
 public class PickNMixOptionPane {
 
@@ -33,11 +33,11 @@ public class PickNMixOptionPane {
 
 	private static final DateTimeFormatter _DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 			.withZone(_ZONE_ID)
-			.withLocale(Locale.ENGLISH);
+			.withLocale(Preferences.LOCALE.get());
 
 	private static final DateTimeFormatter _TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss:SSS")
 			.withZone(_ZONE_ID)
-			.withLocale(Locale.ENGLISH);
+			.withLocale(Preferences.LOCALE.get());
 
 	@Nullable
 	public static MixFileSource.Config show(@NotNull Map<File, TextSource> inputFiles, @Nullable Component parentComponent) {

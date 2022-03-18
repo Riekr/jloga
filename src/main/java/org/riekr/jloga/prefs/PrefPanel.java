@@ -58,11 +58,12 @@ public class PrefPanel extends JDialog {
 		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
 			String group = e.getKey();
 			List<GUIPreference<?>> allPrefs = e.getValue();
-			JPanel tabContents = new JPanel();
+			JPanel wrapper = new JPanel();
+			wrapper.setLayout(new BorderLayout());
+			Box tabContents = Box.createVerticalBox();
+			wrapper.add(tabContents, BorderLayout.NORTH);
 			tabContents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-			tabContents.setLayout(new GridBagLayout());
-			AtomicInteger tabY = new AtomicInteger();
-			tabs.addTab(group, tabContents);
+			tabs.addTab(group, wrapper);
 			for (GUIPreference<?> p : allPrefs) {
 				Box panel = Box.createVerticalBox();
 				panel.setBorder(BorderFactory.createCompoundBorder(
@@ -94,7 +95,7 @@ public class PrefPanel extends JDialog {
 						System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
 						continue;
 				}
-				tabContents.add(panel, constraints(tabY));
+				tabContents.add(panel);
 			}
 		}
 		cp.add(Box.createVerticalStrut(_SPACING), constraints(cpY));
