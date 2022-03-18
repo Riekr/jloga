@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -27,6 +28,7 @@ public class GUIPreference<T> implements Preference<T> {
 	private final Type          _type;
 	private final String        _title;
 	private       String[]      _descriptions;
+	private       String        _group;
 
 	public GUIPreference(Preference<T> pref, Type type, String title) {
 		_pref = pref;
@@ -44,6 +46,18 @@ public class GUIPreference<T> implements Preference<T> {
 		if (_descriptions == null)
 			return null;
 		return "<html>" + String.join("<br>", _descriptions) + "</html>";
+	}
+
+	public String group() {
+		return _group;
+	}
+
+	public GUIPreference<T> group(String group) {
+		if (_group != null)
+			throw new IllegalStateException("Group already specified");
+		Objects.requireNonNull(group, "Group must be specified");
+		_group = group;
+		return this;
 	}
 
 	public GUIPreference<T> addDescription(String description) {

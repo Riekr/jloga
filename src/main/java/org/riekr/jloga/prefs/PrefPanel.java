@@ -1,5 +1,7 @@
 package org.riekr.jloga.prefs;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.ui.utils.FileUtils.selectDirectoryDialog;
 import static org.riekr.jloga.ui.utils.FontUtils.describeFont;
 import static org.riekr.jloga.ui.utils.FontUtils.selectFontDialog;
@@ -8,7 +10,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.riekr.jloga.react.Unsubscribable;
@@ -28,8 +33,10 @@ public class PrefPanel extends JDialog {
 		GridBagConstraints res = new GridBagConstraints();
 		res.fill = GridBagConstraints.HORIZONTAL;
 		res.weightx = 1;
+		res.weighty = 1;
 		res.gridx = 0;
 		res.gridy = y.getAndIncrement();
+		res.anchor = GridBagConstraints.NORTH;
 		return res;
 	}
 
@@ -44,46 +51,58 @@ public class PrefPanel extends JDialog {
 		cp.setLayout(new GridBagLayout());
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
 		AtomicInteger cpY = new AtomicInteger();
-		List<GUIPreference<?>> allPrefs = Preferences.getGUIPreferences();
-		for (GUIPreference<?> p : allPrefs) {
-			Box panel = Box.createVerticalBox();
-			panel.setBorder(BorderFactory.createCompoundBorder(
-					BorderFactory.createTitledBorder(p.title()),
-					BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
-			));
-			String descr = p.description();
-			if (descr != null && !descr.isEmpty()) {
-				JLabel label = new JLabel(descr);
-				label.setAlignmentX(0);
-				panel.add(label);
-				panel.add(Box.createVerticalStrut(_SPACING));
-			}
-			switch (p.type()) {
-				case Font:
-					panel.add(newFontComponent((GUIPreference<Font>)p));
-					break;
-				case Combo:
-					panel.add(newComboComponent((GUIPreference<Object>)p));
-					break;
-				case Toggle:
-					panel.add(newToggleComponent((GUIPreference<Boolean>)p));
-					break;
-				case Directory:
-					panel.add(newDirectoryComponent((GUIPreference<File>)p));
-					break;
+		JTabbedPane tabs = new JTabbedPane();
+		cp.add(tabs, constraints(cpY));
+		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
+				.collect(groupingBy(GUIPreference::group, LinkedHashMap::new, toList()));
+		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
+			String group = e.getKey();
+			List<GUIPreference<?>> allPrefs = e.getValue();
+			JPanel tabContents = new JPanel();
+			tabContents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
+			tabContents.setLayout(new GridBagLayout());
+			AtomicInteger tabY = new AtomicInteger();
+			tabs.addTab(group, tabContents);
+			for (GUIPreference<?> p : allPrefs) {
+				Box panel = Box.createVerticalBox();
+				panel.setBorder(BorderFactory.createCompoundBorder(
+						BorderFactory.createTitledBorder(p.title()),
+						BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
+				));
+				String descr = p.description();
+				if (descr != null && !descr.isEmpty()) {
+					JLabel label = new JLabel(descr);
+					label.setAlignmentX(0);
+					panel.add(label);
+					panel.add(Box.createVerticalStrut(_SPACING));
+				}
+				switch (p.type()) {
+					case Font:
+						panel.add(newFontComponent((GUIPreference<Font>)p));
+						break;
+					case Combo:
+						panel.add(newComboComponent((GUIPreference<Object>)p));
+						break;
+					case Toggle:
+						panel.add(newToggleComponent((GUIPreference<Boolean>)p));
+						break;
+					case Directory:
+						panel.add(newDirectoryComponent((GUIPreference<File>)p));
+						break;
 
-				default:
-					System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
-					continue;
+					default:
+						System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
+						continue;
+				}
+				tabContents.add(panel, constraints(tabY));
 			}
-			cp.add(panel, constraints(cpY));
 		}
 		cp.add(Box.createVerticalStrut(_SPACING), constraints(cpY));
 		Box footer = Box.createHorizontalBox();
 		footer.add(UIUtils.newButton("Reset all", () -> {
 			int input = JOptionPane.showConfirmDialog(this, "Do you really want to reset all preferences?", "Reset", JOptionPane.YES_NO_OPTION);
 			if (input == JOptionPane.YES_OPTION)
-				allPrefs.forEach(Preference::reset);
+				prefsByGroup.values().stream().flatMap(Collection::stream).forEach(Preference::reset);
 		}));
 		footer.add(Box.createHorizontalGlue());
 		footer.add(UIUtils.newButton("Close", this::dispose));

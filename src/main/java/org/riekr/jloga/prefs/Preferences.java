@@ -18,13 +18,19 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 
 public interface Preferences {
 
+	String GENERAL = "General";
+	String IO      = "I/O";
+	String SCRIPTS = "Scripting";
+
 	//region GUI editable preferences
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
 			.describe(Type.Font, "Text font")
+			.group(GENERAL)
 			.addDescription("Font used in text viewers, using a monospace font is recommended.");
 
 	GUIPreference<Integer> PAGE_SCROLL_DIVIDER = of("PageDivider", 3, 1, Integer.MAX_VALUE)
 			.describe(Type.Combo, "Page scroll size:")
+			.group(GENERAL)
 			.addDescription("Select how many of the visible lines should be scrolled when paging text.")
 			.add("Full page", 1)
 			.add("\u00BD page", 2)
@@ -32,25 +38,25 @@ public interface Preferences {
 			.add("\u00BC of page", 4)
 			.add("\u2155 of page", 5);
 
+	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
+			.group(GENERAL)
+			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
+
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
 			.describe(Type.Combo, "Charset")
+			.group(IO)
 			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
 			.add(Charset::availableCharsets);
 
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
 			.describe(Type.Combo, "Thread model")
+			.group(IO)
 			.addDescription("Select which threading model should be used for simple searches (eg: plain text and regex).")
 			.add(SimpleSearchPredicate::getThreadModels);
 
-	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
-			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
-
-	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
-			.describe(Type.Directory, "Extension scripts folder")
-			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
-
 	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024)
 			.describe(Type.Combo, "Size of disk pages")
+			.group(IO)
 			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase memory usage and vice-versa.")
 			.addDescription("1MB is generally recommended.")
 			.add("256kB", 256 * 1024)
@@ -58,6 +64,11 @@ public interface Preferences {
 			.add("1MB", 1024 * 1024)
 			.add("2MB", 1024 * 1024 * 2)
 			.add("4MB", 1024 * 1024 * 4);
+
+	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
+			.describe(Type.Directory, "Extension scripts folder")
+			.group(SCRIPTS)
+			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
 	//endregion
 
 	//region Hidden (state) preferences
