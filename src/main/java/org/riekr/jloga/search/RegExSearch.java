@@ -1,5 +1,8 @@
 package org.riekr.jloga.search;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
+
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -8,6 +11,8 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.io.ChildTextSource;
 import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.RemappingChildTextSource;
+import org.riekr.jloga.io.RemappingChildTextSourceWithHeader;
 import org.riekr.jloga.io.TextSource;
 
 public class RegExSearch implements SearchPredicate {
@@ -54,19 +59,14 @@ public class RegExSearch implements SearchPredicate {
 			throw new IllegalStateException("RegExSearch already started");
 		if (_groupCount == 0)
 			_childTextSource = new ChildTextSource(master);
-		else
-			_childTextSource = new ChildTextSource(master) {
-				private final Matcher _viewMatcher = _pattern.matcher("");
-				private final Function<Matcher, String> _extractor = newExtractor();
-
-				@Override
-				public String getText(int line) {
-					String text = super.getText(line);
-					if (_viewMatcher.find())
-						return _extractor.apply(_viewMatcher);
-					return text;
-				}
-			};
+		else {
+			if (_groupCount == 1)
+				_childTextSource = new RemappingChildTextSource(master, _pattern, newExtractor());
+			else {
+				String header = range(1, _groupCount + 1).mapToObj((g) -> "Group " + g).collect(joining(","));
+				_childTextSource = new RemappingChildTextSourceWithHeader(master, _pattern, newExtractor(), header);
+			}
+		}
 		return _childTextSource;
 	}
 
