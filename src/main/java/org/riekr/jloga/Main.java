@@ -28,6 +28,7 @@ import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
@@ -47,8 +48,8 @@ public class Main extends JFrame implements FileDropListener {
 	private final JobProgressBar          _progressBar;
 	private final Map<Object, TextSource> _openFiles = new LinkedHashMap<>();
 
-	private Font            _font;
-	private MainDesktopHelp _help;
+	private       Font            _font;
+	private final MainDesktopHelp _help;
 
 	public Main() {
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
@@ -72,7 +73,7 @@ public class Main extends JFrame implements FileDropListener {
 		add(toolBar, BorderLayout.NORTH);
 		add(_progressBar, BorderLayout.SOUTH);
 
-		add(_help = new MainDesktopHelp(toolBar));
+		add(_help = new MainDesktopHelp(toolBar, this::openFile));
 
 		setFileDropListener(this::openFiles);
 
@@ -128,8 +129,16 @@ public class Main extends JFrame implements FileDropListener {
 	}
 
 	public void openFile(File file) {
-		if (file.canRead())
-			open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset));
+		if (file.canRead()) {
+			LimitedList<File> files = Preferences.RECENT_FILES.get();
+			files.remove(file);
+			try {
+				open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset));
+			} finally {
+				files.add(0, file);
+				Preferences.RECENT_FILES.set(files);
+			}
+		}
 	}
 
 	public void open(Object key, String title, String description, Supplier<TextSource> src) {
@@ -141,11 +150,9 @@ public class Main extends JFrame implements FileDropListener {
 		_openFiles.put(key, textSource);
 		try {
 			System.out.println("Opening: " + description);
-			if (_help != null) {
-				remove(_help);
-				_help = null;
+			_help.setVisible(false);
+			if (_tabs.getParent() == null)
 				add(_tabs);
-			}
 			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
 			searchPanel.setFileDropListener(this::openFiles);
 			_tabs.addTab(searchPanel.toString(), searchPanel);
@@ -160,6 +167,8 @@ public class Main extends JFrame implements FileDropListener {
 				searchPanel.onClose();
 				_tabs.remove(searchPanel);
 				_openFiles.remove(key);
+				if (_tabs.getTabCount() == 0)
+					_help.setVisible(true);
 			}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
 			ContextMenu.addActionCopy(tabHeader, key);
 			_tabs.setTabComponentAt(idx, tabHeader);

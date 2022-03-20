@@ -4,7 +4,12 @@ import static org.riekr.jloga.ui.utils.UIUtils.getComponentHorizontalCenter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.function.Consumer;
+
+import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.ui.utils.UIUtils;
 
 public class MainDesktopHelp extends JComponent {
 	private static final long serialVersionUID = -1736336915951307265L;
@@ -14,7 +19,7 @@ public class MainDesktopHelp extends JComponent {
 	private final JComponent[] _leftComponents;
 	private final JComponent[] _rightComponents;
 
-	public MainDesktopHelp(JToolBar toolBar) {
+	public MainDesktopHelp(JToolBar toolBar, Consumer<File> opener) {
 		ArrayList<JComponent> lc = new ArrayList<>();
 		ArrayList<JComponent> rc = new ArrayList<>();
 		ArrayList<JComponent> arr = lc;
@@ -29,6 +34,22 @@ public class MainDesktopHelp extends JComponent {
 		}
 		_leftComponents = lc.toArray(new JComponent[0]);
 		_rightComponents = rc.toArray(new JComponent[0]);
+
+		// recent files
+		setLayout(new GridBagLayout());
+		Box recentBox = Box.createVerticalBox();
+		JLabel title = new JLabel("Recent files:");
+		title.setBorder(UIUtils.FLAT_BUTTON_BORDER);
+		recentBox.add(title);
+		Preferences.RECENT_FILES.subscribe((files) -> {
+			while (recentBox.getComponentCount() != 1)
+				recentBox.remove(1);
+			for (File recent : files)
+				recentBox.add(UIUtils.newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent)));
+		});
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.weightx = gbc.weighty = 0.5;
+		add(recentBox, gbc);
 	}
 
 	@Override
