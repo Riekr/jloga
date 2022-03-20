@@ -180,4 +180,6 @@ public interface TextSource extends Iterable<String> {
 
 	default boolean isIndexing() {return false;}
 
+	default boolean mayHaveTabularData() {return false;}
+
 }

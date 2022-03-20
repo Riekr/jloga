@@ -1,13 +1,13 @@
 package org.riekr.jloga.io;
 
-import org.riekr.jloga.react.Unsubscribable;
-
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.riekr.jloga.react.Unsubscribable;
 
 public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource {
 
@@ -38,4 +38,8 @@ public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource
 		return line == 0 ? null : super.getSrcLine(line);
 	}
 
+	@Override
+	public boolean mayHaveTabularData() {
+		return true;
+	}
 }

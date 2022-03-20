@@ -235,7 +235,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private String requireHeader() {
 		String header = getHeader();
-		if (header == null || header.isEmpty()) {
+		if (header.isEmpty()) {
 			EventQueue.invokeLater(() -> gridNotAvailable("Grid column count is not stable across the first " + _GRID_HEADER_CHECK_LINES + " lines"));
 			return null;
 		}
@@ -246,6 +246,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	/**
 	 * Search for header recurively to parents as the search may have stripped it out
 	 */
+	@NotNull
 	public String getHeader() {
 		if (_header == null) {
 			if (_parent != null)
@@ -359,7 +360,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_textSourceUnsubscribable.unsubscribe();
 		_textSource = textSource;
 		if (textSource != null) {
-			if (_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find()) {
+			if ((_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find())
+					|| (textSource.mayHaveTabularData() && !getHeader().isEmpty())) {
 				EventQueue.invokeLater(() -> {
 					_gridToggle.setSelected(true);
 					setGridView(true);
