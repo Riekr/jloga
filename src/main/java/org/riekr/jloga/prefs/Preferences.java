@@ -20,6 +20,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 public interface Preferences {
 
 	String GENERAL = "General";
+	String GRID    = "Grid";
 	String FORMATS = "Formats";
 	String IO      = "I/O";
 	String SCRIPTS = "Scripting";
@@ -41,8 +42,18 @@ public interface Preferences {
 			.add("\u2155 of page", 5);
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
-			.group(GENERAL)
+			.group(GRID)
 			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
+
+	GUIPreference<Boolean> AUTO_TAB_GRID = of("Grid.auto.tab", () -> true).describe(Type.Toggle, "RegEx automatic grid")
+			.group(GRID)
+			.addDescription("When checked results of RegEx searches with groups will be automatically opened in grid view");
+
+	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
+			.describe(Type.Combo, "Charset")
+			.group(FORMATS)
+			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
+			.add(Charset::availableCharsets);
 
 	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
 			.describe(Type.Combo, "Locale")
@@ -50,12 +61,6 @@ public interface Preferences {
 			.addDescription("Default locale to use for date conversions.")
 			.addDescription("Applied only for localized date formats in search parameters.")
 			.add(Locale::getDisplayName, Locale::getAvailableLocales);
-
-	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
-			.describe(Type.Combo, "Charset")
-			.group(IO)
-			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
-			.add(Charset::availableCharsets);
 
 	GUIPreference<ThreadModel> MT_MODEL = of("Multithreading.model", () -> getRuntime().availableProcessors() > 1 ? ThreadModel.STREAM : ThreadModel.SYNC, ThreadModel.class)
 			.describe(Type.Combo, "Thread model")
