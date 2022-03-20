@@ -65,6 +65,13 @@ public final class UIUtils {
 		btn.setBorder(FLAT_BUTTON_BORDER);
 		btn.setBorderPainted(false);
 		btn.setContentAreaFilled(false);
+		btn.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {btn.setContentAreaFilled(true);}
+
+			@Override
+			public void mouseExited(MouseEvent e) {btn.setContentAreaFilled(false);}
+		});
 		return btn;
 	}
 
