@@ -92,6 +92,7 @@ public class PrefPanel extends JDialog {
 			if (input == JOptionPane.YES_OPTION)
 				prefsByGroup.values().stream().flatMap(Collection::stream).forEach(Preference::reset);
 		}));
+		footer.add(UIUtils.newButton("Clear recent files", Preferences.RECENT_FILES::reset));
 		footer.add(Box.createHorizontalGlue());
 		footer.add(UIUtils.newButton("Close", this::dispose));
 		cp.add(footer, BorderLayout.SOUTH);

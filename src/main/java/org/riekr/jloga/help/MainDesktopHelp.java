@@ -46,6 +46,8 @@ public class MainDesktopHelp extends JComponent {
 				recentBox.remove(1);
 			for (File recent : files)
 				recentBox.add(UIUtils.newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent)));
+			title.setVisible(!files.isEmpty());
+			recentBox.repaint();
 		});
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.weightx = gbc.weighty = 0.5;
