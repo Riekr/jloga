@@ -50,20 +50,20 @@ public interface Preferences {
 			.group(GRID)
 			.addDescription("When checked results of RegEx searches with groups will be automatically opened in grid view");
 
+	GUIPreference<Boolean> BROWSER_SYSTEM = of("browser.sys", () -> false).describe(Type.Toggle, "Use system browser")
+			.group(BROWSER)
+			.addDescription("Try to user system browser, may not work on all operating systems and not all browsers may be supported.");
+
 	GUIPreference<File> BROWSER_CUSTOM = of("browser.custom", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
 			.describe(Type.Executable, "Browser executable")
-			.group(BROWSER)
+			.group(BROWSER).require(BROWSER_SYSTEM, false)
 			.addDescription("Select browser executable to launch for opening finos perspective analysis.")
 			.addDescription("URL is the only passed parameter, use a wrapper script eventually to specify additional ones.")
 			.addDescription("If you leave this field blank, a best guess will be used, chromium based browser are suggested.");
 
 	GUIPreference<Boolean> BROWSER_WARN = of("browser.warn", () -> true).describe(Type.Toggle, "Warn unsupported browser")
-			.group(BROWSER)
+			.group(BROWSER).require(BROWSER_SYSTEM, false)
 			.addDescription("Show a warning when no suggested browser is found.");
-
-	GUIPreference<Boolean> BROWSER_SYSTEM = of("browser.sys", () -> false).describe(Type.Toggle, "Use system browser")
-			.group(BROWSER)
-			.addDescription("Try to user system browser, may not work on all operating systems and not all browsers may be supported.");
 
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
 			.describe(Type.Combo, "Charset")

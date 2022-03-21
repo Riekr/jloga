@@ -6,6 +6,10 @@ public class BoolBehaviourSubject extends BehaviourSubject<Boolean> {
 		super(Boolean.FALSE);
 	}
 
+	public BoolBehaviourSubject(boolean deflt) {
+		super(deflt);
+	}
+
 	@Override
 	public void next(Boolean item) {
 		assert item != null;

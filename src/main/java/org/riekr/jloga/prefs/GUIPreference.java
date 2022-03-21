@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 
@@ -24,6 +25,8 @@ public class GUIPreference<T> implements Preference<T> {
 	public enum Type {
 		Font, Combo, Toggle, Executable, Directory
 	}
+
+	public final BoolBehaviourSubject enabled = new BoolBehaviourSubject(true);
 
 	private final Preference<T> _pref;
 	private final Type          _type;
@@ -130,5 +133,10 @@ public class GUIPreference<T> implements Preference<T> {
 	@Override
 	public @NotNull Unsubscribable subscribe(Observer<? super T> observer) {
 		return _pref.subscribe(observer);
+	}
+
+	public <V> GUIPreference<T> require(GUIPreference<V> otherPref, V val) {
+		otherPref.subscribe((otherVal) -> enabled.next(Objects.equals(val, otherVal)));
+		return this;
 	}
 }

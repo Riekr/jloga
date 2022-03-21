@@ -6,6 +6,7 @@ import static org.riekr.jloga.utils.FileUtils.selectDirectoryDialog;
 import static org.riekr.jloga.utils.FileUtils.selectExecutableDialog;
 import static org.riekr.jloga.utils.FontUtils.describeFont;
 import static org.riekr.jloga.utils.FontUtils.selectFontDialog;
+import static org.riekr.jloga.utils.UIUtils.allComponents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,6 +94,7 @@ public class PrefPanel extends JDialog {
 						continue;
 				}
 				tabContents.add(panel);
+				_subscriptions.add(p.enabled.subscribe((enabled) -> allComponents(panel).forEach((c) -> c.setEnabled(enabled))));
 			}
 		}
 		_tabs.setSelectedIndex(_LAST_SELECTED_TAB);

@@ -27,6 +27,7 @@ import java.util.TooManyListenersException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -238,5 +239,19 @@ public final class UIUtils {
 		radioButton.addActionListener((e) -> onSelection.run());
 		group.add(radioButton);
 		return radioButton;
+	}
+
+	public static Stream<Component> allComponents(Container root) {
+		return Stream.concat(Stream.of(root), findComponents(root));
+	}
+
+	public static Stream<Component> findComponents(Container container) {
+		Component[] components = container.getComponents();
+		return Stream.concat(
+				Arrays.stream(components),
+				Arrays.stream(components)
+						.filter(Container.class::isInstance)
+						.flatMap(c -> findComponents((Container)c))
+		);
 	}
 }
