@@ -7,6 +7,11 @@ Files and results can be view in grid mode and inspected with [finos perspective
 
 The project started in my spare time to simplify crash analisys.
 
+## Downloads and installation
+There is no installer but a `.exe` all-in-one executable build with Launch4J is provided for windows in order to simplify file associations. The app uses the standard java preferences to store its user selections.\
+For other platforms you can download the `.jar` file and execute it with `java -jar jloga-all.jar`, all dependencies are included.\
+Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for downloads.
+
 ## Features
 - Hierarchical panel structure to ease files and results navigation
 - [No size limit](#file-limits) on open files, each file is indexed and paged from disk. The only limit is the memory of your computer
