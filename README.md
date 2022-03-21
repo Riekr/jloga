@@ -29,6 +29,8 @@ Each command must be able to parse data from stdin and produce output to stdout,
 
 Processes will be started in the folder where the json files are stored, if a `env.jloga.properties` file is present in the same directory it will be parsed as input variables for the external script definition, if a variable is not found in system environment, provided variables or custom ones, an error message will appear and the script will not be executed.
 
+Inside the `.json.jloga` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
+
 ### Current provided variables:
 | Name      | Description                                                          |
 |-----------|----------------------------------------------------------------------|

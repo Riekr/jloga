@@ -49,7 +49,7 @@ public class ExtSearchRegistry {
 								String id = f.toAbsolutePath().toString();
 								res.add(new AbstractMap.SimpleEntry<>(
 										config.order,
-										new Entry<>(id, (level) -> new ExtProcessComponent(id, config.icon, config.label, config.workingDirectory, config.command), config.description))
+										new Entry<>(id, (level) -> new ExtProcessComponent(id, config.icon, config.label, config.workingDirectory, config.getCommand()), config.description))
 								);
 							}
 						}

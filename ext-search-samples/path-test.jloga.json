@@ -1,0 +1,12 @@
+{
+  "order": 3,
+  "icon": "\uD83D\uDC4B 3",
+  "label": "Path test",
+  "description": "Print path concatenation sample",
+  "command": [
+    "%SystemRoot%\\system32\\cmd.exe",
+    "/c",
+    "echo",
+    ["1", "2", "3"]
+  ]
+}
