@@ -42,7 +42,7 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 				try {
 					_lastCommand = new String[command.length];
 					Map<String, String> env = getAllVars(workingDirectory);
-					Pattern pattern = Pattern.compile("%([\\w_]+)%");
+					Pattern pattern = Pattern.compile("%([\\w._]+)%");
 					for (int i = 0; i < command.length; i++)
 						_lastCommand[i] = TextUtils.replaceRegex(command[i], pattern, env);
 					_searchPredicateConsumer.accept(new ExtProcessPipeSearch(workingDirectory, _lastCommand) {

@@ -37,7 +37,7 @@ class ExtEnv {
 
 	private static void readFile(File envFile, Map<String, String> dest, Function<String, String> mapper) {
 		if (envFile.isFile() && envFile.canRead()) {
-			Pattern selfPropPattern = Pattern.compile("%\\{([\\w_-]+)}");
+			Pattern selfPropPattern = Pattern.compile("%\\{([\\w._-]+)}");
 			try (Reader reader = new BufferedReader(new FileReader(envFile))) {
 				Properties props = new Properties();
 				props.load(reader);
