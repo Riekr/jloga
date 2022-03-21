@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.riekr.jloga.Main;
@@ -19,6 +18,7 @@ import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.TextUtils;
 
 public class ExtProcessComponent extends JPanel implements SearchComponent {
 	private static final long serialVersionUID = 8599529986240844558L;
@@ -42,9 +42,9 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 				try {
 					_lastCommand = new String[command.length];
 					Map<String, String> env = getAllVars(workingDirectory);
-					Matcher mat = Pattern.compile("%([\\w_]+)%").matcher("");
+					Pattern pattern = Pattern.compile("%([\\w_]+)%");
 					for (int i = 0; i < command.length; i++)
-						_lastCommand[i] = replace(command[i], mat, env);
+						_lastCommand[i] = TextUtils.replaceRegex(command[i], pattern, env);
 					_searchPredicateConsumer.accept(new ExtProcessPipeSearch(workingDirectory, _lastCommand) {
 						@Override
 						public FilteredTextSource start(TextSource master) {
@@ -71,23 +71,6 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 				}
 			}
 		});
-	}
-
-	private String replace(String orig, Matcher matcher, Map<String, String> env) {
-		matcher.reset(orig);
-		if (matcher.find()) {
-			StringBuilder buf = new StringBuilder(orig.length());
-			do {
-				String key = matcher.group(1);
-				String val = env.get(key);
-				if (val == null)
-					throw new IllegalArgumentException("Unbound variable name: " + key);
-				matcher.appendReplacement(buf, val);
-			} while (matcher.find());
-			matcher.appendTail(buf);
-			return buf.toString();
-		}
-		return orig;
 	}
 
 	private String toTime(LocalDateTime time) {
