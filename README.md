@@ -48,4 +48,5 @@ As a spare time project this source base is updated only when needed, don't expe
 - fontchooser ([home](https://gitlab.com/dheid/fontchooser) - [license](https://gitlab.com/dheid/fontchooser/-/blob/master/LICENSE))
 - NanoHTTPD – a tiny web server in Java ([home](https://github.com/NanoHttpd/nanohttpd) - [license](https://github.com/NanoHttpd/nanohttpd/blob/master/LICENSE.md))
 - Gson ([home](https://github.com/google/gson) - [license](https://github.com/google/gson/blob/master/LICENSE))
+- Launch4J - Cross-platform Java executable wrapper ([license](https://sourceforge.net/p/launch4j/git/ci/master/tree/LICENSE.txt) - [home](http://launch4j.sourceforge.net/) - [gradle plugin](https://github.com/TheBoegl/gradle-launch4j))
 - [IntelliJ Idea Community Edition](https://www.jetbrains.com/idea/)
