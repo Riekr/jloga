@@ -225,11 +225,20 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void gridNotAvailable(String reason) {
-		_header = "";
-		_ownHeader = true;
+		_header = null;
 		_gridToggle.setSelected(false);
-		_gridToggle.setEnabled(false);
-		_perspectiveBtn.setEnabled(false);
+		if (!_ownHeader) {
+			// this is done only once!
+			// if header detection fails, on the second round I try to consider the own header
+			_ownHeader = true;
+			boolean enabled = !getHeader().isEmpty();
+			_gridToggle.setEnabled(enabled);
+			_perspectiveBtn.setEnabled(enabled);
+			if (enabled) {
+				setGridView(true, true);
+				return;
+			}
+		}
 		if (reason != null)
 			JOptionPane.showMessageDialog(this, reason, "Grid view not available", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -250,7 +259,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	@NotNull
 	public String getHeader() {
 		if (_header == null) {
-			if (_parent != null)
+			if (_parent != null && !_ownHeader)
 				_header = _parent.getHeader();
 			if (_header == null || _header.isEmpty()) {
 				_header = _textSource.getText(0);
