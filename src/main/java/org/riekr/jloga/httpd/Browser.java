@@ -1,5 +1,9 @@
 package org.riekr.jloga.httpd;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+import static org.riekr.jloga.Main.getMain;
+
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +12,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.utils.OSUtils;
 
 class Browser {
 	private Browser() {}
@@ -68,21 +75,35 @@ class Browser {
 	public static void open(String url) {
 		if (url == null || (url = url.trim()).isEmpty())
 			throw new IllegalArgumentException("No url provided");
-		String osName = System.getProperty("os.name", "unknown").trim().toLowerCase();
-		// https://www.mindprod.com/jgloss/properties.html#OSNAME
-		String[] command;
-		if (osName.startsWith("windows"))
-			command = findWindowsExecutable(url);
-		else {
-			// if not windows just assume os it is unix like
-			command = findUnixExecutable(url);
+		String[] command = null;
+		File custom = Preferences.BROWSER_CUSTOM.get();
+		if (custom != null) {
+			if (custom.canExecute())
+				command = new String[]{custom.getAbsolutePath(), url};
+			else {
+				showMessageDialog(getMain(), '\'' + custom.getAbsolutePath() + "'\nis not executable, check you preferences.", "Invalid executable", JOptionPane.ERROR_MESSAGE);
+				Preferences.BROWSER_CUSTOM.reset();
+			}
 		}
-		if (command != null) {
-			exec(command);
-			return;
+		if (!Preferences.BROWSER_SYSTEM.get()) {
+			if (command == null) {
+				if (OSUtils.isWindows())
+					command = findWindowsExecutable(url);
+				else {
+					// if not windows just assume os it is unix like
+					command = findUnixExecutable(url);
+				}
+			}
+			if (command != null) {
+				exec(command);
+				return;
+			}
+			// if no supported chromium based browser has been found try the standard/uglier/maybe unsupported one
+			if (Preferences.BROWSER_WARN.get()) {
+				showMessageDialog(getMain(), "No supported browser found, you may select one in preferences.", "Invalid browser", JOptionPane.WARNING_MESSAGE);
+				Preferences.BROWSER_WARN.set(false);
+			}
 		}
-		// if no supported chromium browser has been found try the standard/uglier/maybe unsupported one
-		// TODO: ask for browser?
 		Desktop desktop = Desktop.getDesktop();
 		try {
 			URI uri = new URI(url);

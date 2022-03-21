@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JPanel {
 	private static final long serialVersionUID = 8509725982053259245L;

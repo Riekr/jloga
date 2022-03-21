@@ -1,4 +1,4 @@
-package org.riekr.jloga.ui.utils;
+package org.riekr.jloga.utils;
 
 import org.drjekyll.fontchooser.FontDialog;
 

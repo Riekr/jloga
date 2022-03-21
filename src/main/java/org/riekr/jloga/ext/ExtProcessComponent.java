@@ -1,6 +1,6 @@
 package org.riekr.jloga.ext;
 
-import static org.riekr.jloga.ui.utils.KeyUtils.closeOnEscape;
+import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
 
 import javax.swing.*;
 import java.awt.*;

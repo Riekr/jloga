@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
-import org.riekr.jloga.ui.utils.ContextMenu;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanel extends JComponent implements FileDropListener {
 	private static final long serialVersionUID = -6368198678080747740L;

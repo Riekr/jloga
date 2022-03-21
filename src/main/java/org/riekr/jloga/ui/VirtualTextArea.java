@@ -34,9 +34,9 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.FastSplitOperation;
-import org.riekr.jloga.ui.utils.ContextMenu;
-import org.riekr.jloga.ui.utils.SelectionHighlight;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.SelectionHighlight;
+import org.riekr.jloga.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
 	private static final long serialVersionUID = -2704231180724047955L;

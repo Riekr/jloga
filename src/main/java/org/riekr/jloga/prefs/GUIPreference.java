@@ -1,7 +1,7 @@
 package org.riekr.jloga.prefs;
 
 import static java.util.stream.Stream.concat;
-import static org.riekr.jloga.ui.utils.TextUtils.escapeHTML;
+import static org.riekr.jloga.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import org.riekr.jloga.react.Unsubscribable;
 public class GUIPreference<T> implements Preference<T> {
 
 	public enum Type {
-		Font, Combo, Toggle, Directory
+		Font, Combo, Toggle, Executable, Directory
 	}
 
 	private final Preference<T> _pref;
@@ -62,8 +62,13 @@ public class GUIPreference<T> implements Preference<T> {
 	}
 
 	public GUIPreference<T> addDescription(String description) {
+		if (description != null && !description.isEmpty())
+			addDescriptionHTML(escapeHTML(description));
+		return this;
+	}
+
+	public GUIPreference<T> addDescriptionHTML(String description) {
 		if (description != null && !description.isEmpty()) {
-			description = escapeHTML(description);
 			if (_descriptions == null)
 				_descriptions = new String[]{description};
 			else

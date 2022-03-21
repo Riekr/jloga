@@ -2,9 +2,10 @@ package org.riekr.jloga.prefs;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static org.riekr.jloga.ui.utils.FileUtils.selectDirectoryDialog;
-import static org.riekr.jloga.ui.utils.FontUtils.describeFont;
-import static org.riekr.jloga.ui.utils.FontUtils.selectFontDialog;
+import static org.riekr.jloga.utils.FileUtils.selectDirectoryDialog;
+import static org.riekr.jloga.utils.FileUtils.selectExecutableDialog;
+import static org.riekr.jloga.utils.FontUtils.describeFont;
+import static org.riekr.jloga.utils.FontUtils.selectFontDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,9 +18,9 @@ import java.util.Map;
 
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.ComboEntryWrapper;
-import org.riekr.jloga.ui.utils.ContextMenu;
-import org.riekr.jloga.ui.utils.KeyUtils;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.KeyUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class PrefPanel extends JDialog {
 	private static final long serialVersionUID = 3940084083723252336L;
@@ -78,6 +79,10 @@ public class PrefPanel extends JDialog {
 						break;
 					case Directory:
 						panel.add(newDirectoryComponent((GUIPreference<File>)p));
+						break;
+
+					case Executable:
+						panel.add(newExecComponent((GUIPreference<File>)p));
 						break;
 
 					default:
@@ -157,6 +162,24 @@ public class PrefPanel extends JDialog {
 		res.add(selectButton, BorderLayout.CENTER);
 		final JButton resetButton = new JButton(_RESET);
 		resetButton.addActionListener((e) -> dirPref.reset());
+		res.add(resetButton, BorderLayout.LINE_END);
+		res.setAlignmentX(0);
+		return res;
+	}
+
+	private Component newExecComponent(GUIPreference<File> filePref) {
+		JPanel res = new JPanel();
+		res.setLayout(new BorderLayout());
+		final JButton selectButton = new JButton();
+		_subscriptions.add(filePref.subscribe((f) -> selectButton.setText(f == null ? "" : f.getAbsolutePath())));
+		selectButton.addActionListener((e) -> {
+			File newFile = selectExecutableDialog(this, filePref.get());
+			if (newFile != null)
+				filePref.set(newFile);
+		});
+		res.add(selectButton, BorderLayout.CENTER);
+		final JButton resetButton = new JButton(_RESET);
+		resetButton.addActionListener((e) -> filePref.reset());
 		res.add(resetButton, BorderLayout.LINE_END);
 		res.setAlignmentX(0);
 		return res;

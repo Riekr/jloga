@@ -1,4 +1,4 @@
-package org.riekr.jloga.ui.utils;
+package org.riekr.jloga.utils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

@@ -9,7 +9,7 @@ import org.riekr.jloga.misc.SearchComboEntry;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.MRUTextCombo;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class RegExComponent extends Box implements SearchComponent {
 

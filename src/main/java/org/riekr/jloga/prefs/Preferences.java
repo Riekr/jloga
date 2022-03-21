@@ -21,6 +21,7 @@ public interface Preferences {
 
 	String GENERAL = "General";
 	String GRID    = "Grid";
+	String BROWSER = "Browser";
 	String FORMATS = "Formats";
 	String IO      = "I/O";
 	String SCRIPTS = "Scripting";
@@ -49,6 +50,21 @@ public interface Preferences {
 			.group(GRID)
 			.addDescription("When checked results of RegEx searches with groups will be automatically opened in grid view");
 
+	GUIPreference<File> BROWSER_CUSTOM = of("browser.custom", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
+			.describe(Type.Executable, "Browser executable")
+			.group(BROWSER)
+			.addDescription("Select browser executable to launch for opening finos perspective analysis.")
+			.addDescription("URL is the only passed parameter, use a wrapper script eventually to specify additional ones.")
+			.addDescription("If you leave this field blank, a best guess will be used, chromium based browser are suggested.");
+
+	GUIPreference<Boolean> BROWSER_WARN = of("browser.warn", () -> true).describe(Type.Toggle, "Warn unsupported browser")
+			.group(BROWSER)
+			.addDescription("Show a warning when no suggested browser is found.");
+
+	GUIPreference<Boolean> BROWSER_SYSTEM = of("browser.sys", () -> false).describe(Type.Toggle, "Use system browser")
+			.group(BROWSER)
+			.addDescription("Try to user system browser, may not work on all operating systems and not all browsers may be supported.");
+
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
 			.describe(Type.Combo, "Charset")
 			.group(FORMATS)
@@ -71,7 +87,8 @@ public interface Preferences {
 	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024)
 			.describe(Type.Combo, "Size of disk pages")
 			.group(IO)
-			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase memory usage and vice-versa.")
+			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase ")
+			.addDescription("memory usage and vice-versa, larger sizes will increase disk i/o but slightly reduce memory.")
 			.addDescription("1MB is generally recommended.")
 			.add("256kB", 256 * 1024)
 			.add("512kB", 512 * 1024)

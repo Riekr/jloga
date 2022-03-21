@@ -1,9 +1,10 @@
-package org.riekr.jloga.ui.utils;
+package org.riekr.jloga.utils;
 
 import static java.util.Collections.emptyList;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
@@ -20,6 +21,21 @@ public class FileUtils {
 
 			@Override
 			public String getDescription() {return hidden ? "All directories" : "Directories";}
+		};
+	}
+
+	public static FileFilter executableFilter() {
+		String description = "Executables";
+		if (OSUtils.isWindows())
+			return new FileNameExtensionFilter(description, "exe", "com", "cmd", "bat");
+		return new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.canExecute();
+			}
+
+			@Override
+			public String getDescription() {return description;}
 		};
 	}
 
@@ -47,6 +63,30 @@ public class FileUtils {
 		if (userSelection == JFileChooser.APPROVE_OPTION)
 			return Arrays.asList(chooser.getSelectedFiles());
 		return emptyList();
+	}
+
+	public static File selectExecutableDialog(Component parent, File initialFile) {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setAcceptAllFileFilterUsed(true);
+		FileFilter filter = executableFilter();
+		chooser.addChoosableFileFilter(filter);
+		chooser.setFileFilter(filter);
+		File initialDir;
+		if (initialFile == null)
+			initialDir = null;
+		else if (initialFile.isDirectory())
+			initialDir = initialFile;
+		else {
+			initialDir = initialFile.getParentFile();
+			chooser.setSelectedFile(initialFile);
+		}
+		chooser.setCurrentDirectory(initialDir == null || !initialDir.isDirectory() ? new File(".") : initialDir);
+		chooser.setDialogTitle("Select executable");
+		int userSelection = chooser.showOpenDialog(parent);
+		if (userSelection == JFileChooser.APPROVE_OPTION)
+			return chooser.getSelectedFile();
+		return null;
 	}
 
 	private FileUtils() {}

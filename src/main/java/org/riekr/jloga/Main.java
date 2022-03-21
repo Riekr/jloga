@@ -1,8 +1,8 @@
 package org.riekr.jloga;
 
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
-import static org.riekr.jloga.ui.utils.UIUtils.newBorderlessButton;
-import static org.riekr.jloga.ui.utils.UIUtils.newTabHeader;
+import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
+import static org.riekr.jloga.utils.UIUtils.newTabHeader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
@@ -32,16 +33,21 @@ import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
-import org.riekr.jloga.ui.utils.ContextMenu;
+import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
 import org.riekr.jloga.ui.SearchPanel;
 import org.riekr.jloga.ui.TabNavigation;
-import org.riekr.jloga.ui.utils.FileUtils;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.FileUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class Main extends JFrame implements FileDropListener {
 	private static final long serialVersionUID = -5418006859279219934L;
+
+	private static Main _INSTANCE;
+
+	@Nullable
+	public static Main getMain() {return _INSTANCE;}
 
 	private final CharsetCombo            _charsetCombo;
 	private final JTabbedPane             _tabs;
@@ -51,7 +57,7 @@ public class Main extends JFrame implements FileDropListener {
 	private       Font            _font;
 	private final MainDesktopHelp _help;
 
-	public Main() {
+	private Main() {
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane();
 		_progressBar = new JobProgressBar();
@@ -219,19 +225,21 @@ public class Main extends JFrame implements FileDropListener {
 			boolean dark = loadLAF();
 
 			// init ui
-			Main main = new Main();
-			main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			main.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
-			main.setExtendedState(main.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-			main.setTitle("JLogA");
-			UIUtils.setIcon(main, "icon.png", dark);
-			main.setVisible(true);
+			if (_INSTANCE == null) {
+				_INSTANCE = new Main();
+				_INSTANCE.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+				_INSTANCE.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
+				_INSTANCE.setExtendedState(_INSTANCE.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+				_INSTANCE.setTitle("JLogA");
+				UIUtils.setIcon(_INSTANCE, "icon.png", dark);
+			}
+			_INSTANCE.setVisible(true);
 
 			// load files
 			args.stream().sequential()
 					.map(File::new)
 					.filter(File::canRead)
-					.forEach(main::openFile);
+					.forEach(_INSTANCE::openFile);
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}

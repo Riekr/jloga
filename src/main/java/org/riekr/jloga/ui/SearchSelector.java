@@ -14,7 +14,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.search.SearchRegistry;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class SearchSelector extends JPanel {
 	private static final long serialVersionUID = 1562652212113703845L;

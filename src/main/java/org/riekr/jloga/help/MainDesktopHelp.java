@@ -1,6 +1,6 @@
 package org.riekr.jloga.help;
 
-import static org.riekr.jloga.ui.utils.UIUtils.getComponentHorizontalCenter;
+import static org.riekr.jloga.utils.UIUtils.getComponentHorizontalCenter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import org.riekr.jloga.prefs.Preferences;
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public class MainDesktopHelp extends JComponent {
 	private static final long serialVersionUID = -1736336915951307265L;

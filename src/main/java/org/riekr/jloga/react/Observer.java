@@ -3,7 +3,7 @@ package org.riekr.jloga.react;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.riekr.jloga.ui.utils.UIUtils;
+import org.riekr.jloga.utils.UIUtils;
 
 public interface Observer<T> {
 
