@@ -5,16 +5,11 @@ import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -143,19 +138,8 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 
 	private Map<String, String> getAllVars(File workingDir) {
 		Map<String, String> res = new HashMap<>(System.getenv());
-		if (workingDir != null && workingDir.isDirectory()) {
-			File envFile = new File(workingDir, "env.jloga.properties");
-			if (envFile.isFile() && envFile.canRead()) {
-				try (Reader reader = new BufferedReader(new FileReader(envFile))) {
-					Properties props = new Properties();
-					props.load(reader);
-					props.forEach((k, v) -> res.put(String.valueOf(k), String.valueOf(v)));
-				} catch (IOException e) {
-					showMessageDialog(Main.getMain(), e.getLocalizedMessage(), "Unable to read " + envFile, JOptionPane.WARNING_MESSAGE);
-					e.printStackTrace(System.err);
-				}
-			}
-		}
+		if (workingDir != null && workingDir.isDirectory())
+			ExtEnv.read(workingDir, res);
 		if (_searchVars != null)
 			res.putAll(_searchVars);
 		return res;
