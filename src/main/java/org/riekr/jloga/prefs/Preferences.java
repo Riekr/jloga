@@ -99,7 +99,8 @@ public interface Preferences {
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
 			.describe(Type.Directory, "Extension scripts folder")
 			.group(SCRIPTS)
-			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.");
+			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.")
+			.addDescriptionHTML("<b>WARNING:</b> executing unsafe scripts may be a security risk!");
 	//endregion
 
 	//region Hidden (state) preferences

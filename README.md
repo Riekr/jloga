@@ -22,6 +22,10 @@ The only limit is the amout of memory available to jloga: when a file is opened 
 Past pages of the files are kept in memory until garbage collection starts in order to reduce disk i/o activity, due to the nature of the application, the best performance is achieved when reading files from a ssd.
 
 ## External commands
+
+**WARNING:** executing unsafe scripts may be a security risk!\
+Be sure that every external analyzer you define comes from a trusted source, jloga can't apply any security related restriction on external processes.
+
 You can create a set of files with extension `.jloga.json` inside a dedicated folder and then have those commands be executed inside jloga as custom analyzers.
 This folder can be specified inside the settings or via the system property `jloga.ext.dir`.
 
