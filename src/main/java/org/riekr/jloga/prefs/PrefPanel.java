@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.ComboEntryWrapper;
+import org.riekr.jloga.ui.utils.ContextMenu;
 import org.riekr.jloga.ui.utils.KeyUtils;
 import org.riekr.jloga.ui.utils.UIUtils;
 
@@ -53,6 +54,7 @@ public class PrefPanel extends JDialog {
 			tabs.addTab(group, tabContentsWrapper);
 			for (GUIPreference<?> p : allPrefs) {
 				Box panel = Box.createVerticalBox();
+				ContextMenu.addAction(panel, "Reset", p::reset);
 				panel.setBorder(BorderFactory.createCompoundBorder(
 						BorderFactory.createTitledBorder(p.title()),
 						BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)

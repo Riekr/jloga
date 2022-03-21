@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.transform.FastSplitOperation;
+import org.riekr.jloga.ui.utils.ContextMenu;
 
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS_MATRIX;
 

@@ -32,7 +32,7 @@ import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
-import org.riekr.jloga.ui.ContextMenu;
+import org.riekr.jloga.ui.utils.ContextMenu;
 import org.riekr.jloga.ui.JobProgressBar;
 import org.riekr.jloga.ui.PickNMixOptionPane;
 import org.riekr.jloga.ui.SearchPanel;

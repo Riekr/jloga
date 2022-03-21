@@ -34,6 +34,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.FastSplitOperation;
+import org.riekr.jloga.ui.utils.ContextMenu;
 import org.riekr.jloga.ui.utils.SelectionHighlight;
 import org.riekr.jloga.ui.utils.UIUtils;
 

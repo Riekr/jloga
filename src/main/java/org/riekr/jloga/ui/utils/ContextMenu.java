@@ -1,4 +1,4 @@
-package org.riekr.jloga.ui;
+package org.riekr.jloga.ui.utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,8 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.ui.utils.TextAreaUtils;
+import org.riekr.jloga.ui.JPopupMenuWithMouseLoc;
+import org.riekr.jloga.ui.VirtualTextArea;
 
 public class ContextMenu {
 
@@ -89,6 +90,12 @@ public class ContextMenu {
 				clipboard.setContents(stringSelection, null);
 			}
 		});
+		return component;
+	}
+
+	public static <T extends JComponent> T addAction(T component, String label, Runnable action) {
+		JPopupMenuWithMouseLoc popupMenu = JPopupMenuWithMouseLoc.ensurePopupMenu(component);
+		popupMenu.add(label).addActionListener((a) -> action.run());
 		return component;
 	}
 
