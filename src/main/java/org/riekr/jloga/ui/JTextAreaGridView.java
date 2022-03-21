@@ -3,6 +3,7 @@ package org.riekr.jloga.ui;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -16,13 +17,15 @@ public class JTextAreaGridView extends JTable {
 
 	private final          FastSplitOperation _splitter = new FastSplitOperation();
 	private final          String[]           _header;
-	private final @NotNull JTextArea          _text;
+	private final @NotNull VirtualTextArea    _text;
+	private final          boolean            _headerIsEmbedded;
 
 	private String[][] _data = EMPTY_STRINGS_MATRIX;
 
-	public JTextAreaGridView(@NotNull JTextArea text, String header) {
+	public JTextAreaGridView(@NotNull VirtualTextArea text, String header, boolean headerIsEmbedded) {
 		_text = text;
 		_header = _splitter.apply(header);
+		_headerIsEmbedded = headerIsEmbedded;
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		setCellSelectionEnabled(true);
 		setModel(new AbstractTableModel() {
@@ -64,10 +67,10 @@ public class JTextAreaGridView extends JTable {
 	}
 
 	public void refresh() {
-		_data = Pattern.compile("[\r\n]+").splitAsStream(_text.getText())
-				.skip(1)
-				.map(_splitter)
-				.toArray(String[][]::new);
+		Stream<String> stream = Pattern.compile("[\r\n]+").splitAsStream(_text.getDisplayedText());
+		if (_text.getFromLine() == 0 && _headerIsEmbedded)
+			stream = stream.skip(1);
+		_data = stream.map(_splitter).toArray(String[][]::new);
 		this.tableChanged(null);
 	}
 }

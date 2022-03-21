@@ -183,7 +183,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		buttonsContainer.add(Box.createHorizontalGlue());
 		_gridToggle = new JToggleButton("\u25A6");
 		buttonsContainer.add(_gridToggle);
-		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected()));
+		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected(), false));
 		_perspectiveBtn = new JButton("\uD83D\uDCC8");
 		_perspectiveBtn.addActionListener(e -> openInPerspective());
 		buttonsContainer.add(_perspectiveBtn);
@@ -200,16 +200,16 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
 	}
 
-	public void setGridView(boolean active) {
+	private void setGridView(boolean active, boolean fromDetection) {
 		if (active) {
 			if (_gridView == null) {
-				String header = requireHeader();
+				String header = requireHeader(fromDetection);
 				if (header == null)
 					return;
 				try {
-					_gridView = new JTextAreaGridView(_text, header);
+					_gridView = new JTextAreaGridView(this, header, _ownHeader);
 				} catch (IllegalArgumentException e) {
-					gridNotAvailable(e.getLocalizedMessage());
+					gridNotAvailable(fromDetection ? null : e.getLocalizedMessage());
 					return;
 				}
 				_gridView.setRowHeight(_lineHeight);
@@ -234,10 +234,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			JOptionPane.showMessageDialog(this, reason, "Grid view not available", JOptionPane.INFORMATION_MESSAGE);
 	}
 
-	private String requireHeader() {
+	private String requireHeader(boolean fromDetection) {
 		String header = getHeader();
 		if (header.isEmpty()) {
-			EventQueue.invokeLater(() -> gridNotAvailable("Grid column count is not stable across the first " + _GRID_HEADER_CHECK_LINES + " lines"));
+			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Grid column count is not stable across the first " + _GRID_HEADER_CHECK_LINES + " lines"));
 			return null;
 		}
 		return header;
@@ -273,9 +273,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	/** Will open finos perspective in a standalone browser window.*/
 	public void openInPerspective() {
 		_textSource.requestStream((stream) -> {
-			String header = requireHeader();
+			String header = requireHeader(false);
 			if (header != null && !_ownHeader)
-				stream = Stream.concat(Stream.of(requireHeader()), stream);
+				stream = Stream.concat(Stream.of(requireHeader(false)), stream);
 			// the server will automatically close when the browser closes (websocket disconnected)
 			// the port is automatically determined in the constructor
 			FinosPerspectiveServer server = new FinosPerspectiveServer();
@@ -365,7 +365,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					|| (textSource.mayHaveTabularData() && Preferences.AUTO_TAB_GRID.get() && !getHeader().isEmpty())) {
 				EventQueue.invokeLater(() -> {
 					_gridToggle.setSelected(true);
-					setGridView(true);
+					setGridView(true, true);
 				});
 			}
 			_textSourceUnsubscribable = textSource.requestLineCount(this::setFileLineCount);
@@ -507,5 +507,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	public void setFileDropListener(@NotNull Consumer<List<File>> consumer) {
 		UIUtils.setFileDropListener(_text, consumer);
 		UIUtils.setFileDropListener(_lineNumbers, consumer);
+	}
+
+	public String getDisplayedText() {
+		return _text.getText();
 	}
 }
