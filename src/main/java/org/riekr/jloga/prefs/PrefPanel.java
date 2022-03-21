@@ -28,6 +28,9 @@ public class PrefPanel extends JDialog {
 	private static final int    _SPACING = 4;
 	private static final String _RESET   = "\u21BA";
 
+	private static int _LAST_SELECTED_TAB = 0;
+
+	private final JTabbedPane               _tabs;
 	private final ArrayList<Unsubscribable> _subscriptions = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
@@ -40,8 +43,8 @@ public class PrefPanel extends JDialog {
 		getContentPane().add(cp);
 		cp.setLayout(new BorderLayout());
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-		JTabbedPane tabs = new JTabbedPane();
-		cp.add(tabs, BorderLayout.NORTH);
+		_tabs = new JTabbedPane();
+		cp.add(_tabs, BorderLayout.NORTH);
 		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
 				.collect(groupingBy(GUIPreference::group, LinkedHashMap::new, toList()));
 		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
@@ -52,7 +55,7 @@ public class PrefPanel extends JDialog {
 			final JPanel tabContentsWrapper = new JPanel();
 			tabContentsWrapper.setLayout(new BorderLayout());
 			tabContentsWrapper.add(tabContents, BorderLayout.NORTH);
-			tabs.addTab(group, tabContentsWrapper);
+			_tabs.addTab(group, tabContentsWrapper);
 			for (GUIPreference<?> p : allPrefs) {
 				Box panel = Box.createVerticalBox();
 				ContextMenu.addAction(panel, "Reset", p::reset);
@@ -92,6 +95,7 @@ public class PrefPanel extends JDialog {
 				tabContents.add(panel);
 			}
 		}
+		_tabs.setSelectedIndex(_LAST_SELECTED_TAB);
 		cp.add(Box.createVerticalStrut(_SPACING), BorderLayout.CENTER);
 		Box footer = Box.createHorizontalBox();
 		footer.add(UIUtils.newButton("Reset all", () -> {
@@ -187,6 +191,7 @@ public class PrefPanel extends JDialog {
 
 	@Override
 	public void dispose() {
+		_LAST_SELECTED_TAB = _tabs.getSelectedIndex();
 		super.dispose();
 		_subscriptions.forEach(Unsubscribable::unsubscribe);
 	}
