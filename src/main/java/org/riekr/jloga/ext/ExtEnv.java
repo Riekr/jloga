@@ -37,10 +37,11 @@ class ExtEnv {
 
 	private static void readFile(File envFile, Map<String, String> dest, Function<String, String> mapper) {
 		if (envFile.isFile() && envFile.canRead()) {
+			Pattern selfPropPattern = Pattern.compile("%\\{([\\w_-]+)}");
 			try (Reader reader = new BufferedReader(new FileReader(envFile))) {
 				Properties props = new Properties();
 				props.load(reader);
-				props.forEach((k, v) -> dest.put(String.valueOf(k), mapper.apply(String.valueOf(v))));
+				props.forEach((k, v) -> dest.put(String.valueOf(k), mapper.apply(TextUtils.replaceRegex(String.valueOf(v), selfPropPattern, dest))));
 			} catch (IOException e) {
 				showMessageDialog(Main.getMain(), e.getLocalizedMessage(), "Unable to read " + envFile, JOptionPane.WARNING_MESSAGE);
 				e.printStackTrace(System.err);
