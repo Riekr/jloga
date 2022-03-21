@@ -1,9 +1,11 @@
 package org.riekr.jloga.ext;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class ExtProcessConfig {
 
+	public       File     workingDirectory;
 	public final String   icon;
 	public final String   label;
 	public final String   description;

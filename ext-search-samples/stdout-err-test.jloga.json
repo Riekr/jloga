@@ -6,6 +6,6 @@
   "command": [
     "%SystemRoot%\\system32\\cmd.exe",
     "/c",
-    "echo hello from stderr 1>&2 && echo hello from stdout"
+    "echo %hellox% from stderr 1>&2 && echo %hello% from stdout"
   ]
 }

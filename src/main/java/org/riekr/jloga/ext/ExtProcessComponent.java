@@ -1,16 +1,25 @@
 package org.riekr.jloga.ext;
 
+import static javax.swing.JOptionPane.showMessageDialog;
 import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.riekr.jloga.Main;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchComponent;
@@ -23,42 +32,48 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 	private final String _icon;
 
 	private Consumer<SearchPredicate> _searchPredicateConsumer;
-	private Map<String, String>       _vars;
+	private Map<String, String>       _searchVars;
 	private JTextArea                 _stdErr;
 	private String[]                  _lastCommand;
 	private LocalDateTime             _lastStart;
 
-	public ExtProcessComponent(String id, String icon, String label, String[] command) {
+	public ExtProcessComponent(String id, String icon, String label, File workingDirectory, String[] command) {
 		_id = id;
 		_icon = icon;
 		JButton launchButton = new JButton(label);
 		add(launchButton);
 		launchButton.addActionListener((e) -> {
 			if (_searchPredicateConsumer != null) {
-				_lastCommand = new String[command.length];
-				Map<String, String> env = System.getenv();
-				Matcher mat = Pattern.compile("%([\\w_]+)%").matcher("");
-				for (int i = 0; i < command.length; i++)
-					_lastCommand[i] = replace(command[i], mat, env);
-				_searchPredicateConsumer.accept(new ExtProcessPipeSearch(_lastCommand) {
-					@Override
-					public FilteredTextSource start(TextSource master) {
-						_lastStart = LocalDateTime.now();
-						return super.start(master);
-					}
+				try {
+					_lastCommand = new String[command.length];
+					Map<String, String> env = getAllVars(workingDirectory);
+					Matcher mat = Pattern.compile("%([\\w_]+)%").matcher("");
+					for (int i = 0; i < command.length; i++)
+						_lastCommand[i] = replace(command[i], mat, env);
+					_searchPredicateConsumer.accept(new ExtProcessPipeSearch(workingDirectory, _lastCommand) {
+						@Override
+						public FilteredTextSource start(TextSource master) {
+							_lastStart = LocalDateTime.now();
+							return super.start(master);
+						}
 
-					@Override
-					protected void onStdErr(String line) {
-						super.onStdErr(line);
-						EventQueue.invokeLater(() -> ExtProcessComponent.this.onStdErr(line));
-					}
+						@Override
+						protected void onStdErr(String line) {
+							super.onStdErr(line);
+							EventQueue.invokeLater(() -> ExtProcessComponent.this.onStdErr(line));
+						}
 
-					@Override
-					public void end() {
-						super.end();
-						EventQueue.invokeLater(() -> _stdErr = null);
-					}
-				});
+						@Override
+						public void end() {
+							super.end();
+							EventQueue.invokeLater(() -> _stdErr = null);
+						}
+					});
+				} catch (Exception ex) {
+					if (!(ex instanceof IllegalArgumentException))
+						ex.printStackTrace(System.err);
+					showMessageDialog(Main.getMain(), ex.getLocalizedMessage(), "Can't execute", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		});
 	}
@@ -69,16 +84,9 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 			StringBuilder buf = new StringBuilder(orig.length());
 			do {
 				String key = matcher.group(1);
-				String val;
-				if (_vars == null)
-					val = env.get(key);
-				else {
-					val = _vars.get(key);
-					if (val == null)
-						val = env.get(key);
-				}
+				String val = env.get(key);
 				if (val == null)
-					throw new IllegalArgumentException("Invalid env name: " + key);
+					throw new IllegalArgumentException("Unbound variable name: " + key);
 				matcher.appendReplacement(buf, val);
 			} while (matcher.find());
 			matcher.appendTail(buf);
@@ -130,6 +138,27 @@ public class ExtProcessComponent extends JPanel implements SearchComponent {
 
 	@Override
 	public void setVariables(Map<String, String> vars) {
-		_vars = vars;
+		_searchVars = vars;
 	}
+
+	private Map<String, String> getAllVars(File workingDir) {
+		Map<String, String> res = new HashMap<>(System.getenv());
+		if (workingDir != null && workingDir.isDirectory()) {
+			File envFile = new File(workingDir, "env.jloga.properties");
+			if (envFile.isFile() && envFile.canRead()) {
+				try (Reader reader = new BufferedReader(new FileReader(envFile))) {
+					Properties props = new Properties();
+					props.load(reader);
+					props.forEach((k, v) -> res.put(String.valueOf(k), String.valueOf(v)));
+				} catch (IOException e) {
+					showMessageDialog(Main.getMain(), e.getLocalizedMessage(), "Unable to read " + envFile, JOptionPane.WARNING_MESSAGE);
+					e.printStackTrace(System.err);
+				}
+			}
+		}
+		if (_searchVars != null)
+			res.putAll(_searchVars);
+		return res;
+	}
+
 }

@@ -22,9 +22,22 @@ The only limit is the amout of memory available to jloga: when a file is opened 
 Past pages of the files are kept in memory until garbage collection starts in order to reduce disk i/o activity, due to the nature of the application, the best performance is achieved when reading files from a ssd.
 
 ## External commands
-You can create a set of files with extension `.jloga.json` inside a dedicated folder and then have those commands be executed inside jloga as custom analyzers.\
-Each command must be able to parse data from stdin and produce output to stdout, each line emitted from the command is associated to the last line parsed from the source.\
-See the folder `ext-search-samples` for some instruction.
+You can create a set of files with extension `.jloga.json` inside a dedicated folder and then have those commands be executed inside jloga as custom analyzers.
+This folder can be specified inside the settings or via the system property `jloga.ext.dir`.
+
+Each command must be able to parse data from stdin and produce output to stdout, each line emitted from the command is associated to the last line parsed from the source.
+
+Processes will be started in the folder where the json files are stored, if a `env.jloga.properties` file is present in the same directory it will be parsed as input variables for the external script definition, if a variable is not found in system environment, provided variables or custom ones, an error message will appear and the script will not be executed.
+
+### Current provided variables:
+| Name      | Description                                                          |
+|-----------|----------------------------------------------------------------------|
+| Title     | The title of the search panel                                        |
+| RootTitle | The title of the root search panel, ususally contains the file name. |
+
+The variables are read in sequence from: system environment, custom provided variables and search provided variables. Each source takes precedence over the previous ones.
+
+See the folder `ext-search-samples` for some examples.
 
 ## Finos perspective
 I've fallen in love with [Data Preview](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-preview) for Visual Studio Code then discovered [finos perspective](https://perspective.finos.org/). \

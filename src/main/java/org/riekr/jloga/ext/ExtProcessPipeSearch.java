@@ -1,6 +1,7 @@
 package org.riekr.jloga.ext;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
@@ -13,11 +14,13 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessPipeSearch implements SearchPredicate {
 
+	private final File     _workingDir;
 	private final String[] _command;
 
-	public ExtProcessPipeSearch(String... command) {
+	public ExtProcessPipeSearch(File workingDir, String... command) {
 		if (command == null || command.length == 0)
 			throw new IllegalArgumentException("No command specified");
+		_workingDir = workingDir;
 		_command = command;
 	}
 
@@ -36,7 +39,9 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 		Process process;
 		try {
 			System.out.println("RUNNING EXT: " + String.join(" ", _command));
-			process = new ProcessBuilder(_command).start();
+			process = new ProcessBuilder(_command)
+					.directory(_workingDir)
+					.start();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
