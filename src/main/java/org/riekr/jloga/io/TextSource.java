@@ -8,7 +8,6 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -93,7 +92,7 @@ public interface TextSource extends Iterable<String> {
 			Future<?> future = resRef.get();
 			return future == null || !future.isCancelled();
 		};
-		Future<?> res = Executors.newSingleThreadExecutor().submit(() -> {
+		Future<?> res = EXECUTOR.submit(() -> {
 			try {
 				FilteredTextSource searchResult = predicate.start(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
