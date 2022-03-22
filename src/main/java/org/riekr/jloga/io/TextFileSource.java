@@ -76,7 +76,7 @@ public class TextFileSource implements TextSource {
 	public TextFileSource(Path file, Charset charset) {
 		_file = file;
 		_charset = charset;
-		_indexing = EXECUTOR.submit(() -> {
+		_indexing = IO_EXECUTOR.submit(() -> {
 			System.out.println("Indexing " + _file);
 			final long start = System.currentTimeMillis();
 			_lineCount = 0;
@@ -92,7 +92,7 @@ public class TextFileSource implements TextSource {
 			try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 				final long totalSize = fileChannel.size();
 				final MutableLong pos = new MutableLong();
-				ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+				ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
 					_indexingListener.onProgressChanged(pos.value, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
 					_lineCountSubject.next(_lineCount);
@@ -130,7 +130,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public void enqueueTextRequest(Runnable task) {
-		Future<?> oldFuture = _textRequest.getAndSet(EXECUTOR.submit(task));
+		Future<?> oldFuture = _textRequest.getAndSet(AUX_EXECUTOR.submit(task));
 		if (oldFuture != null)
 			oldFuture.cancel(false);
 	}
@@ -185,7 +185,7 @@ public class TextFileSource implements TextSource {
 	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		long start = System.currentTimeMillis();
 		final MutableInt lineNumber = new MutableInt();
-		ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+		ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
 			progressListener.onProgressChanged(lineNumber.value, _lineCount);
 			out.dispatchLineCount();
 		}, 0, 200, TimeUnit.MILLISECONDS);

@@ -8,10 +8,11 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -28,16 +29,12 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public interface TextSource extends Iterable<String> {
 
-	// threads = (indexing + searching) * monitoring + loading into view + waitfor linecount
-	ScheduledExecutorService EXECUTOR = new ScheduledThreadPoolExecutor(6) {
-		{
-			setKeepAliveTime(30, TimeUnit.SECONDS);
-			allowCoreThreadTimeOut(true);
-		}
-	};
+	ExecutorService          IO_EXECUTOR      = Executors.newSingleThreadExecutor();
+	ScheduledExecutorService MONITOR_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+	ExecutorService          AUX_EXECUTOR     = Executors.newCachedThreadPool();
 
 	default void enqueueTextRequest(Runnable task) {
-		EXECUTOR.submit(task);
+		AUX_EXECUTOR.submit(task);
 	}
 
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
@@ -72,7 +69,7 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default Future<Integer> requestCompleteLineCount(IntConsumer consumer) {
-		return EXECUTOR.submit(() -> {
+		return AUX_EXECUTOR.submit(() -> {
 			int lineCount = getLineCount();
 			EventQueue.invokeLater(() -> consumer.accept(lineCount));
 			return lineCount;
@@ -91,7 +88,7 @@ public interface TextSource extends Iterable<String> {
 			Future<?> future = resRef.get();
 			return future == null || !future.isCancelled();
 		};
-		Future<?> res = EXECUTOR.submit(() -> {
+		Future<?> res = AUX_EXECUTOR.submit(() -> {
 			try {
 				FilteredTextSource searchResult = predicate.start(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
@@ -115,7 +112,7 @@ public interface TextSource extends Iterable<String> {
 		long start = System.currentTimeMillis();
 		final int lineCount = getLineCount();
 		final MutableInt line = new MutableInt();
-		ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> fullProgressListener.onProgressChanged(line.value, lineCount), 0, 200, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> fullProgressListener.onProgressChanged(line.value, lineCount), 0, 200, TimeUnit.MILLISECONDS);
 		try {
 			for (line.value = 0; line.value <= getLineCount() && running.getAsBoolean(); line.value++)
 				predicate.verify(line.value, getText(line.value));
@@ -132,11 +129,11 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default void requestSave(File file, ProgressListener progressListener) {
-		EXECUTOR.execute(() -> {
+		IO_EXECUTOR.execute(() -> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
-				ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(
+				ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(
 						() -> progressListener.onProgressChanged(ln.value, lineCount),
 						0, 200, TimeUnit.MILLISECONDS
 				);
@@ -180,7 +177,7 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default void requestStream(Consumer<Stream<String>> streamConsumer) {
-		EXECUTOR.execute(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
+		IO_EXECUTOR.execute(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
 	}
 
 	default void onClose() {}

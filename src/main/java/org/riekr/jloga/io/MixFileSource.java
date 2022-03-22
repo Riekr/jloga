@@ -99,10 +99,10 @@ public class MixFileSource implements TextSource {
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
 		_padding = (int)(Math.log10(_sources.length)) + 1;
-		_indexing = EXECUTOR.submit(() -> {
+		_indexing = IO_EXECUTOR.submit(() -> {
 			final MutableInt totLineCount = new MutableInt();
 			final MutableInt parsedLines = new MutableInt();
-			ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+			ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
 				if (_indexingListener != null)
 					_indexingListener.onProgressChanged(parsedLines.value, totLineCount.value);
 			}, 0, 200, TimeUnit.MILLISECONDS);
