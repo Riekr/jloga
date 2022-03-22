@@ -1,8 +1,6 @@
 package org.riekr.jloga.transform;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -29,28 +27,34 @@ public class HeaderDetector {
 
 	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
 		source.requestCompleteLineCount((lineCount) -> {
+			if (_parent != null)
+				_parent.waitCompletion();
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
 			for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++)
 				detect(lineNumber, source.getText(lineNumber));
 			// finished the file
-			_checkSet = null;
+			complete();
 			if (onComplete != null)
-				onComplete.run();
+				EventQueue.invokeLater(onComplete);
 		});
 	}
 
-	public void detect(Reader reader) {
-		try (BufferedReader br = reader instanceof BufferedReader ? (BufferedReader)reader : new BufferedReader(reader)) {
-			String line;
-			int lineNumber = 0;
-			while ((line = br.readLine()) != null)
-				detect(lineNumber++, line);
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+	private synchronized void waitCompletion() {
+		if (!isComplete()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 
-	public void detect(int lineNumber, String line) {
+	private synchronized void complete() {
+		_checkSet = null;
+		notifyAll();
+	}
+
+	private void detect(int lineNumber, String line) {
 		if (line == null || line.isEmpty() || _checkSet == null)
 			return;
 		if (_checkSet.add(lineNumber)) {
@@ -65,11 +69,11 @@ public class HeaderDetector {
 					_header = line;
 				}
 			} else if (_colCount != count) {
-				_checkSet = null;
 				_header = "";
+				complete();
 			}
 			if (_checkSet != null && _checkSet.size() >= _checkTarget)
-				_checkSet = null;
+				complete();
 		}
 	}
 
