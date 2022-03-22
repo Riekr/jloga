@@ -86,7 +86,7 @@ public class Main extends JFrame implements FileDropListener {
 		// preferences
 		Preferences.FONT.subscribe((selectedFont) -> {
 			if (!selectedFont.equals(_font)) {
-				System.out.println("Selected font is: " + selectedFont);
+				// System.out.println("Selected font is: " + selectedFont);
 				_font = selectedFont;
 				for (int i = 0; i < _tabs.getTabCount(); i++) {
 					SearchPanel analyzer = (SearchPanel)_tabs.getComponentAt(i);

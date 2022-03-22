@@ -43,7 +43,7 @@ public class ExtSearchRegistry {
 						if (Files.isRegularFile(f) && f.toString().toLowerCase().endsWith(".jloga.json")) {
 							try (BufferedReader reader = Files.newBufferedReader(f)) {
 								ExtProcessConfig config = gson.fromJson(reader, ExtProcessConfig.class);
-								System.out.println("LOADING EXT: " + config);
+								// System.out.println("LOADING EXT: " + config);
 								if (config.workingDirectory == null)
 									config.workingDirectory = extPath;
 								String id = f.toAbsolutePath().toString();
