@@ -88,13 +88,12 @@ public class MixFileSource implements TextSource {
 		}
 	}
 
-	private final     TextSource[]     _sources;
-	private final     Future<?>        _indexing;
-	private final     PagedIntBag      _index = new PagedIntBag(2);
-	private final     int              _padding;
-	private @Nullable ProgressListener _indexingListener;
+	private final TextSource[] _sources;
+	private final Future<?>    _indexing;
+	private final PagedIntBag  _index = new PagedIntBag(2);
+	private final int          _padding;
 
-	public MixFileSource(@NotNull Config config) {
+	public MixFileSource(@NotNull Config config, @NotNull ProgressListener indexingListener) {
 		if (config.sources.size() < 2)
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
@@ -102,10 +101,7 @@ public class MixFileSource implements TextSource {
 		_indexing = IO_EXECUTOR.submit(() -> {
 			final MutableInt totLineCount = new MutableInt();
 			final MutableInt parsedLines = new MutableInt();
-			ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
-				if (_indexingListener != null)
-					_indexingListener.onProgressChanged(parsedLines.value, totLineCount.value);
-			}, 0, 200, TimeUnit.MILLISECONDS);
+			ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> indexingListener.onProgressChanged(parsedLines.value, totLineCount.value), 0, 200, TimeUnit.MILLISECONDS);
 			try {
 				int idx = 0;
 				ScanData[] data = new ScanData[_sources.length];
@@ -117,8 +113,7 @@ public class MixFileSource implements TextSource {
 					data[idx] = new ScanData(idx, textSource, entry.getValue(), lineCount);
 					idx++;
 				}
-				if (_indexingListener != null)
-					_indexingListener.onProgressChanged(0, totLineCount.value);
+				indexingListener.onProgressChanged(0, totLineCount.value);
 				final BooleanSupplier hasData = () -> {
 					for (ScanData sd : data) {
 						if (sd.hasData())
@@ -182,10 +177,7 @@ public class MixFileSource implements TextSource {
 				e.printStackTrace(System.err);
 			} finally {
 				updateTask.cancel(false);
-				if (_indexingListener != null) {
-					_indexingListener.onProgressChanged(totLineCount.value, totLineCount.value);
-					_indexingListener = null;
-				}
+				indexingListener.onProgressChanged(totLineCount.value, totLineCount.value);
 			}
 		});
 	}
@@ -202,11 +194,6 @@ public class MixFileSource implements TextSource {
 				srcId +
 				" | " +
 				text;
-	}
-
-	@Override
-	public void setIndexingListener(@NotNull ProgressListener indexingListener) {
-		_indexingListener = indexingListener;
 	}
 
 	@Override

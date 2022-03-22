@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.utils.ContextMenu;
@@ -116,8 +115,6 @@ public class SearchPanel extends JComponent implements FileDropListener {
 
 	public void setTextSource(TextSource src) {
 		_textArea.setTextSource(src);
-		if (src.isIndexing())
-			src.setIndexingListener(_progressBar.addJob(src instanceof MixFileSource ? "Mixing" : "Indexing"));
 	}
 
 	public TextSource getTextSource() {

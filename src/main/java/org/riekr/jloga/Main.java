@@ -111,7 +111,7 @@ public class Main extends JFrame implements FileDropListener {
 			String tabDescr = config.sources.values().stream()
 					.map((sc) -> idx.getAndIncrement() + " = " + sc.file.getAbsolutePath())
 					.collect(Collectors.joining("<br>"));
-			open(config, tabTitle, "<html>" + tabDescr + "</html>", () -> new MixFileSource(config));
+			open(config, tabTitle, "<html>" + tabDescr + "</html>", () -> new MixFileSource(config, _progressBar.addJob("Mixing")));
 		}
 	}
 
@@ -139,7 +139,7 @@ public class Main extends JFrame implements FileDropListener {
 			LimitedList<File> files = Preferences.RECENT_FILES.get();
 			files.remove(file);
 			try {
-				open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset));
+				open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset, _progressBar.addJob("Indexing")));
 			} finally {
 				files.add(0, file);
 				Preferences.RECENT_FILES.set(files);

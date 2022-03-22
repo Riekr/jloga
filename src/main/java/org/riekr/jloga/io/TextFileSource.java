@@ -35,7 +35,6 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.prefs.Preferences;
@@ -65,15 +64,14 @@ public class TextFileSource implements TextSource {
 	private       int                 _lineCount;
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
-	private @NotNull ProgressListener _indexingListener     = ProgressListener.NOP;
-	private final    Set<Runnable>    _indexChangeListeners = new CopyOnWriteArraySet<>();
+	private final Set<Runnable> _indexChangeListeners = new CopyOnWriteArraySet<>();
 
 	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
 
 	private final AtomicReference<Future<?>> _textRequest = new AtomicReference<>();
 
-	public TextFileSource(Path file, Charset charset) {
+	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener) {
 		_file = file;
 		_charset = charset;
 		_indexing = IO_EXECUTOR.submit(() -> {
@@ -93,7 +91,7 @@ public class TextFileSource implements TextSource {
 				final long totalSize = fileChannel.size();
 				final MutableLong pos = new MutableLong();
 				ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
-					_indexingListener.onProgressChanged(pos.value, totalSize);
+					indexingListener.onProgressChanged(pos.value, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
 					_lineCountSubject.next(_lineCount);
 				}, 0, 200, TimeUnit.MILLISECONDS);
@@ -115,7 +113,7 @@ public class TextFileSource implements TextSource {
 				} finally {
 					updateTask.cancel(false);
 					_lineCountSubject.last(_lineCount);
-					_indexingListener.onProgressChanged(totalSize, totalSize);
+					indexingListener.onProgressChanged(totalSize, totalSize);
 					_indexChangeListeners.forEach(Runnable::run);
 					_indexChangeListeners.clear();
 				}
@@ -322,12 +320,6 @@ public class TextFileSource implements TextSource {
 	public int getLineCount() throws ExecutionException, InterruptedException {
 		_indexing.get();
 		return _lineCount;
-	}
-
-	public void setIndexingListener(@Nullable ProgressListener indexingListener) {
-		_indexingListener = indexingListener == null ? ProgressListener.NOP : indexingListener;
-		if (_indexing.isDone())
-			_indexingListener.onProgressChanged(100, 100);
 	}
 
 	@Override
