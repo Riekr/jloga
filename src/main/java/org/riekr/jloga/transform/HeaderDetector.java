@@ -30,24 +30,10 @@ public class HeaderDetector {
 	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
 		source.requestCompleteLineCount((lineCount) -> {
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
-			// go async recursively to fullfill the number of lines to be checked
-			requestDetect(source, 0, lineCount, onComplete);
-		});
-	}
-
-	private void requestDetect(TextSource source, int from, int max, Runnable onComplete) {
-		int count = _checkTarget - _checkSet.size();
-		source.requestText(from, count, (reader) -> {
-			detect(reader);
-			if (!isComplete()) {
-				int nextFrom = from + count;
-				if (nextFrom < max) {
-					requestDetect(source, nextFrom, max, onComplete);
-					return;
-				}
-				// finished the file
-				_checkSet = null;
-			}
+			for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++)
+				detect(lineNumber, source.getText(lineNumber));
+			// finished the file
+			_checkSet = null;
 			if (onComplete != null)
 				onComplete.run();
 		});
@@ -71,9 +57,7 @@ public class HeaderDetector {
 			int count = FastSplitOperation.count(line);
 			if (_colCount == -1) {
 				_colCount = count;
-				if (_parent != null && !_parent.isComplete())
-					throw new IllegalStateException("Parent did not finish checking");
-				if (_parent != null && _parent._colCount == _colCount) {
+				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount) {
 					_header = _parent.getHeader();
 					_own = false;
 				} else {
@@ -89,9 +73,10 @@ public class HeaderDetector {
 		}
 	}
 
-	private void requireComplete() {
+	private boolean requireComplete() {
 		if (!isComplete())
 			throw new IllegalStateException("Didn't finish checking");
+		return true;
 	}
 
 	@NotNull
