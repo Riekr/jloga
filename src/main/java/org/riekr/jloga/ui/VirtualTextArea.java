@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
+import org.riekr.jloga.io.TextRequest;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.Preferences;
@@ -62,6 +63,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
+	private TextRequest    _lastTextRequest;
 
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
@@ -324,7 +326,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	public void setTextSource(TextSource textSource) {
 		if (_textSourceUnsubscribable != null)
 			_textSourceUnsubscribable.unsubscribe();
-		_textSource = textSource;
+		if (_textSource != textSource) {
+			_textSource = textSource;
+			_lastTextRequest = null;
+		}
 		if (textSource != null) {
 			_header = new HeaderDetector(_parent == null ? null : _parent._header);
 			_header.detect(textSource, this::detectHeaderDone);
@@ -379,6 +384,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		if (_textSource == null)
 			_text.setText("");
 		else {
+			if (_lastTextRequest.from == _fromLine && _lastTextRequest.count == _lineCount)
+				return;
+			_lastTextRequest.from = _fromLine;
+			_lastTextRequest.count = _lineCount;
 			_textSource.requestText(_fromLine, _lineCount, (reader) -> {
 				try {
 					// _text.setText(text); simply does not work every time
