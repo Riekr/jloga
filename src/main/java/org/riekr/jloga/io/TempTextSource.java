@@ -3,12 +3,14 @@ package org.riekr.jloga.io;
 import java.awt.*;
 import java.io.Reader;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.riekr.jloga.pmem.PagedIntToObjList;
 import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 
 public class TempTextSource implements FilteredTextSource {
@@ -65,8 +67,13 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(consumer::accept);
+	public Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
+		return _lineCountSubject.once(Observer.async(consumer::accept));
+	}
+
+	@Override
+	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
+		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
 	}
 
 	@Override

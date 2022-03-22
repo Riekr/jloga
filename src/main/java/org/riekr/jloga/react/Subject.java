@@ -1,11 +1,12 @@
 package org.riekr.jloga.react;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.*;
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 
@@ -29,8 +30,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 		return () -> _observers.remove(observer);
 	}
 
-	protected void onSubscribe(Observer<? super T> observer) {
-	}
+	protected void onSubscribe(Observer<? super T> observer) {}
 
 	private long _next = 0L;
 

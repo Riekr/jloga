@@ -27,16 +27,22 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.IntBehaviourSubject;
+import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.search.SearchPredicate;
 
 public class TextFileSource implements TextSource {
 
@@ -64,6 +70,8 @@ public class TextFileSource implements TextSource {
 
 	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
+
+	private final AtomicReference<Future<?>> _textRequest = new AtomicReference<>();
 
 	public TextFileSource(Path file, Charset charset) {
 		_file = file;
@@ -121,6 +129,13 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
+	public void enqueueTextRequest(Runnable task) {
+		Future<?> oldFuture = _textRequest.getAndSet(EXECUTOR.submit(task));
+		if (oldFuture != null)
+			oldFuture.cancel(false);
+	}
+
+	@Override
 	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		if (_indexing.isDone()) {
 			enqueueTextRequest(() -> {
@@ -166,27 +181,37 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	// TODO: should fill search results while indexing but is causing search line corruptions, should investigate why
-	// @Override
-	// public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException {
-	// 	// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
-	// 	progressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
-	// 	long start = System.currentTimeMillis();
-	// 	try (BufferedReader reader = Files.newBufferedReader(_file, _charset)) {
-	// 		int lineNumber = 0;
-	// 		String line;
-	// 		while (running.getAsBoolean() && (line = reader.readLine()) != null) {
-	// 			predicate.verify(lineNumber, line);
-	// 			progressListener.onProgressChanged(lineNumber++, _lineCount);
-	// 		}
-	// 	} catch (IOException e) {
-	// 		throw new ExecutionException(e);
-	// 	} finally {
-	// 		predicate.end();
-	// 		progressListener.onProgressChanged(_lineCount, _lineCount);
-	// 		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
-	// 	}
-	// }
+	@Override
+	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+		long start = System.currentTimeMillis();
+		final MutableInt lineNumber = new MutableInt();
+		ScheduledFuture<?> updateTask = EXECUTOR.scheduleWithFixedDelay(() -> {
+			progressListener.onProgressChanged(lineNumber.value, _lineCount);
+			out.dispatchLineCount();
+		}, 0, 200, TimeUnit.MILLISECONDS);
+		Semaphore semaphore = new Semaphore(0);
+		_indexChangeListeners.add(() -> semaphore.release(1));
+		BooleanSupplier stopCondition = () -> {
+			if (!_indexing.isDone()) {
+				semaphore.acquireUninterruptibly();
+				return false;
+			}
+			return true;
+		};
+		int fromLine = 0;
+		do {
+			if (_lineCount > 0) {
+				// System.out.println(_lineCount);
+				for (lineNumber.value = fromLine; lineNumber.value < _lineCount; lineNumber.value++)
+					predicate.verify(lineNumber.value, getText(lineNumber.value));
+				fromLine = lineNumber.value;
+			}
+		} while (!stopCondition.getAsBoolean());
+		predicate.end();
+		updateTask.cancel(false);
+		progressListener.onProgressChanged(_lineCount, _lineCount);
+		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
+	}
 
 	/**
 	 * Read a single line changing loaded page if needed
@@ -284,8 +309,13 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(consumer::accept);
+	public Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
+		return _lineCountSubject.once(Observer.async(consumer::accept));
+	}
+
+	@Override
+	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
+		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
 	}
 
 	@Override

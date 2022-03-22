@@ -28,19 +28,16 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public interface TextSource extends Iterable<String> {
 
-	// threads = indexing + monitoring + loading into view + waitfor linecount
-	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(4) {
+	// threads = (indexing + searching) * monitoring + loading into view + waitfor linecount
+	ScheduledExecutorService EXECUTOR = new ScheduledThreadPoolExecutor(6) {
 		{
 			setKeepAliveTime(30, TimeUnit.SECONDS);
 			allowCoreThreadTimeOut(true);
 		}
 	};
-	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
 
 	default void enqueueTextRequest(Runnable task) {
-		Future<?> oldFuture = TEXT_FUTURE.getAndSet(EXECUTOR.submit(task));
-		if (oldFuture != null)
-			oldFuture.cancel(false);
+		EXECUTOR.submit(task);
 	}
 
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
@@ -69,21 +66,23 @@ public interface TextSource extends Iterable<String> {
 	/** May block if indexing is not finished */
 	int getLineCount() throws ExecutionException, InterruptedException;
 
-	default Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
+	default Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
 		// implementations that support intermediate line count should override this method
 		return requestCompleteLineCount(consumer);
 	}
 
-	default Unsubscribable requestCompleteLineCount(IntConsumer consumer) {
-		Future<?> future = EXECUTOR.submit(() -> {
-			try {
-				int lineCount = getLineCount();
-				EventQueue.invokeLater(() -> consumer.accept(lineCount));
-			} catch (Throwable e) {
-				e.printStackTrace(System.err);
-			}
+	default Future<Integer> requestCompleteLineCount(IntConsumer consumer) {
+		return EXECUTOR.submit(() -> {
+			int lineCount = getLineCount();
+			EventQueue.invokeLater(() -> consumer.accept(lineCount));
+			return lineCount;
 		});
-		return () -> future.cancel(true);
+	}
+
+	/** Once if stable or multiple if supported and loading */
+	default Unsubscribable subscribeLineCount(IntConsumer consumer) {
+		Future<Integer> future = requestIntermediateLineCount(consumer);
+		return () -> future.cancel(false);
 	}
 
 	default Future<?> requestSearch(SearchPredicate predicate, ProgressListener progressListener, Consumer<TextSource> consumer, Consumer<Throwable> onError) {
@@ -186,7 +185,10 @@ public interface TextSource extends Iterable<String> {
 
 	default void onClose() {}
 
-	default void setIndexingListener(@NotNull ProgressListener indexingListener) {}
+	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
+		// implementations that support indexing should override this method
+		indexingListener.onProgressChanged(0, 0);
+	}
 
 	default boolean isIndexing() {return false;}
 

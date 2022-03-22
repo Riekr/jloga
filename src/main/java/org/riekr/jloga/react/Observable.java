@@ -1,5 +1,6 @@
 package org.riekr.jloga.react;
 
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -13,6 +14,10 @@ public interface Observable<T> {
 	@NotNull
 	default Unsubscribable subscribe(Consumer<? super T> onNext, Consumer<Throwable> onError) {
 		return subscribe(Observer.from(onNext, onError));
+	}
+
+	default Future<T> once(Observer<? super T> observer) {
+		return new ObserveOnce<>(observer, this);
 	}
 
 	default <R> Observable<R> map(Function<T, R> mapper) {

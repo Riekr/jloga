@@ -1,13 +1,18 @@
 package org.riekr.jloga.io;
 
+import java.awt.*;
+import java.io.Reader;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
-
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.function.IntConsumer;
 
 public class ChildTextSource implements FilteredTextSource {
 
@@ -69,7 +74,12 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
+	public Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
+		return _lineCountSubject.once(Observer.async(consumer::accept));
+	}
+
+	@Override
+	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
 		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
 	}
 
@@ -95,7 +105,29 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public boolean isIndexing() {
-		return _tie.isIndexing();
+	public String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
+		int toLinePlus1 = Math.min(fromLine + count, _lineCount);
+		String[] lines = new String[toLinePlus1 - fromLine + 1];
+		for (int i = fromLine; i <= toLinePlus1; i++)
+			lines[i - fromLine] = getText(i);
+		return lines;
+	}
+
+	@Override
+	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
+		if (_tie.isIndexing()) {
+			enqueueTextRequest(() -> {
+				try {
+					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+					EventQueue.invokeLater(() -> consumer.accept(reader));
+				} catch (CancellationException ignored) {
+					System.out.println("Text request cancelled");
+				} catch (Throwable e) {
+					e.printStackTrace(System.err);
+				}
+			});
+			return;
+		}
+		FilteredTextSource.super.requestText(fromLine, count, consumer);
 	}
 }

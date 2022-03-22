@@ -15,18 +15,19 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 
 public class JobProgressBar extends JProgressBar {
+	private static final long serialVersionUID = -6197337243003830409L;
 
 	private static final class Job {
 		public final String descr;
-		public long pos, max;
+		public       long   pos, max;
 
-		public Job(String descr) {
-			this.descr = descr;
-		}
+		public Job(String descr) {this.descr = descr;}
+
+		@Override public String toString() {return descr;}
 	}
 
-	private final Set<Job> _jobs = Collections.synchronizedSet(new LinkedHashSet<>());
-	private final IntBehaviourSubject _pos = new IntBehaviourSubject();
+	private final Set<Job>                 _jobs  = Collections.synchronizedSet(new LinkedHashSet<>());
+	private final IntBehaviourSubject      _pos   = new IntBehaviourSubject();
 	private final BehaviourSubject<String> _descr = new BehaviourSubject<>("");
 
 	private int _width;
@@ -51,6 +52,7 @@ public class JobProgressBar extends JProgressBar {
 		_jobs.add(job);
 		refreshDescr();
 		return (pos, size) -> {
+			// System.out.println(job.descr + " " + pos + " " + size);
 			if (pos >= size) {
 				if (_jobs.remove(job))
 					refreshDescr();
@@ -74,7 +76,7 @@ public class JobProgressBar extends JProgressBar {
 						.collect(joining(" / ", "", suffix));
 			}
 		}
-		EventQueue.invokeLater(() -> setVisible(sz > 0));
+		EventQueue.invokeLater(() -> setVisible(!_jobs.isEmpty()));
 		_descr.next(text);
 	}
 
@@ -88,7 +90,7 @@ public class JobProgressBar extends JProgressBar {
 				max += job.max;
 			}
 		}
-		int intPos = (int) (pos * (double) _width / max);
+		int intPos = (int)(pos * (double)_width / max);
 		if (intPos >= _width) {
 			if (_pos.get() != intPos)
 				_pos.next(intPos);

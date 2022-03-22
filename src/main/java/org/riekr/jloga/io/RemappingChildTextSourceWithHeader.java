@@ -1,13 +1,14 @@
 package org.riekr.jloga.io;
 
+import org.riekr.jloga.react.Unsubscribable;
+
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.riekr.jloga.react.Unsubscribable;
 
 public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource {
 
@@ -24,8 +25,13 @@ public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource
 	}
 
 	@Override
-	public Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
+	public Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
 		return super.requestIntermediateLineCount((lc) -> consumer.accept(lc + 1));
+	}
+
+	@Override
+	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
+		return super.subscribeLineCount((lc) -> consumer.accept(lc + 1));
 	}
 
 	@Override
