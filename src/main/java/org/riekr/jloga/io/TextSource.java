@@ -187,6 +187,8 @@ public interface TextSource extends Iterable<String> {
 
 	default void setIndexingListener(@NotNull ProgressListener indexingListener) {
 		// implementations that support indexing should override this method
+		if (isIndexing())
+			System.err.println(this.getClass().getName() + " does not accept indexing listeners");
 		indexingListener.onProgressChanged(0, 0);
 	}
 
