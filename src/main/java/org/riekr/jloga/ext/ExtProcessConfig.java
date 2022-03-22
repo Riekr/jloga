@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ExtProcessConfig {
 
-	public File     workingDirectory;
+	public String   workingDirectory;
 	public String   icon;
 	public String   label;
 	public String   description;

@@ -45,11 +45,11 @@ public class ExtSearchRegistry {
 								ExtProcessConfig config = gson.fromJson(reader, ExtProcessConfig.class);
 								// System.out.println("LOADING EXT: " + config);
 								if (config.workingDirectory == null)
-									config.workingDirectory = extPath;
+									config.workingDirectory = extPath.getAbsolutePath();
 								String id = f.toAbsolutePath().toString();
 								res.add(new AbstractMap.SimpleEntry<>(
 										config.order,
-										new Entry<>(id, (level) -> new ExtProcessComponent(id, config.icon, config.label, config.workingDirectory, config.getCommand()), config.description))
+										new Entry<>(id, (level) -> new ExtProcessComponent(id, config.icon, config.label, new File(config.workingDirectory), config.getCommand()), config.description))
 								);
 							}
 						}
