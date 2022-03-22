@@ -33,15 +33,13 @@ import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
-import org.riekr.jloga.transform.FastSplitOperation;
+import org.riekr.jloga.transform.HeaderDetector;
 import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.SelectionHighlight;
 import org.riekr.jloga.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
 	private static final long serialVersionUID = -2704231180724047955L;
-
-	private static final int _GRID_HEADER_CHECK_LINES = 25;
 
 	private int _lineHeight;
 
@@ -60,9 +58,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private final JToggleButton     _gridToggle;
 	private       JTextAreaGridView _gridView;
-	private       String            _header;
-	private       boolean           _ownHeader;
-	private final JButton           _perspectiveBtn;
+	private       HeaderDetector    _header;
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
@@ -184,9 +180,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_gridToggle = new JToggleButton("\u25A6");
 		buttonsContainer.add(_gridToggle);
 		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected(), false));
-		_perspectiveBtn = new JButton("\uD83D\uDCC8");
-		_perspectiveBtn.addActionListener(e -> openInPerspective());
-		buttonsContainer.add(_perspectiveBtn);
+		JButton perspectiveBtn = new JButton("\uD83D\uDCC8");
+		perspectiveBtn.addActionListener(e -> openInPerspective());
+		buttonsContainer.add(perspectiveBtn);
 		buttonsContainer.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
 
 		// overlay layout
@@ -207,7 +203,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				if (header == null)
 					return;
 				try {
-					_gridView = new JTextAreaGridView(this, header, _ownHeader);
+					_gridView = new JTextAreaGridView(this, header, _header.isOwnHeader());
 				} catch (IllegalArgumentException e) {
 					gridNotAvailable(fromDetection ? null : e.getLocalizedMessage());
 					return;
@@ -225,65 +221,25 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void gridNotAvailable(String reason) {
-		_header = null;
 		_gridToggle.setSelected(false);
-		if (!_ownHeader) {
-			// this is done only once!
-			// if header detection fails, on the second round I try to consider the own header
-			_ownHeader = true;
-			boolean enabled = !getHeader().isEmpty();
-			_gridToggle.setEnabled(enabled);
-			_perspectiveBtn.setEnabled(enabled);
-			if (enabled) {
-				setGridView(true, true);
-				return;
-			}
-		}
 		if (reason != null)
 			JOptionPane.showMessageDialog(this, reason, "Grid view not available", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private String requireHeader(boolean fromDetection) {
-		String header = getHeader();
+		String header = _header.getHeader();
 		if (header.isEmpty()) {
-			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Grid column count is not stable across the first " + _GRID_HEADER_CHECK_LINES + " lines"));
+			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Grid column count is not stable across the first " + _header.getCheckTarget() + " lines"));
 			return null;
 		}
 		return header;
-	}
-
-
-	/**
-	 * Search for header recurively to parents as the search may have stripped it out
-	 */
-	@NotNull
-	public String getHeader() {
-		if (_header == null) {
-			if (_parent != null && !_ownHeader)
-				_header = _parent.getHeader();
-			if (_header == null || _header.isEmpty()) {
-				_header = _textSource.getText(0);
-				int splitHeader = FastSplitOperation.count(_header);
-				// avoid calling getLineCount() here or may block til the end of indexing
-				int count = Math.min(_allLinesCount, _GRID_HEADER_CHECK_LINES);
-				for (int i = 1; i < count; i++) {
-					int verify = FastSplitOperation.count(_textSource.getText(i));
-					if (splitHeader != verify) {
-						_header = "";
-						break;
-					}
-				}
-				_ownHeader = true;
-			}
-		}
-		return _header;
 	}
 
 	/** Will open finos perspective in a standalone browser window.*/
 	public void openInPerspective() {
 		_textSource.requestStream((stream) -> {
 			String header = requireHeader(false);
-			if (header != null && !_ownHeader)
+			if (header != null && !_header.isOwnHeader())
 				stream = Stream.concat(Stream.of(requireHeader(false)), stream);
 			// the server will automatically close when the browser closes (websocket disconnected)
 			// the port is automatically determined in the constructor
@@ -370,15 +326,20 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_textSourceUnsubscribable.unsubscribe();
 		_textSource = textSource;
 		if (textSource != null) {
-			if ((_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find())
-					|| (textSource.mayHaveTabularData() && Preferences.AUTO_TAB_GRID.get() && !getHeader().isEmpty())) {
-				EventQueue.invokeLater(() -> {
-					_gridToggle.setSelected(true);
-					setGridView(true, true);
-				});
-			}
-			_textSourceUnsubscribable = textSource.requestLineCount(this::setFileLineCount);
+			_header = new HeaderDetector(_parent == null ? null : _parent._header);
+			_header.detect(textSource, this::detectHeaderDone);
+			_textSourceUnsubscribable = textSource.requestIntermediateLineCount(this::setFileLineCount);
 			requireText();
+		}
+	}
+
+	private void detectHeaderDone() {
+		if ((_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find())
+				|| (_textSource.mayHaveTabularData() && Preferences.AUTO_TAB_GRID.get() && !_header.getHeader().isEmpty())) {
+			EventQueue.invokeLater(() -> {
+				_gridToggle.setSelected(true);
+				setGridView(true, true);
+			});
 		}
 	}
 

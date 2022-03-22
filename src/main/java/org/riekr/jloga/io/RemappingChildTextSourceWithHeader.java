@@ -24,8 +24,8 @@ public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource
 	}
 
 	@Override
-	public Unsubscribable requestLineCount(IntConsumer consumer) {
-		return super.requestLineCount((lc) -> consumer.accept(lc + 1));
+	public Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
+		return super.requestIntermediateLineCount((lc) -> consumer.accept(lc + 1));
 	}
 
 	@Override

@@ -29,7 +29,13 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public interface TextSource extends Iterable<String> {
 
-	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(2);
+	// threads = indexing + monitoring + loading into view + waitfor linecount
+	ScheduledExecutorService   EXECUTOR    = new ScheduledThreadPoolExecutor(4) {
+		{
+			setKeepAliveTime(30, TimeUnit.SECONDS);
+			allowCoreThreadTimeOut(true);
+		}
+	};
 	AtomicReference<Future<?>> TEXT_FUTURE = new AtomicReference<>();
 
 	default void enqueueTextRequest(Runnable task) {
@@ -64,7 +70,12 @@ public interface TextSource extends Iterable<String> {
 	/** May block if indexing is not finished */
 	int getLineCount() throws ExecutionException, InterruptedException;
 
-	default Unsubscribable requestLineCount(IntConsumer consumer) {
+	default Unsubscribable requestIntermediateLineCount(IntConsumer consumer) {
+		// implementations that support intermediate line count should override this method
+		return requestCompleteLineCount(consumer);
+	}
+
+	default Unsubscribable requestCompleteLineCount(IntConsumer consumer) {
 		Future<?> future = EXECUTOR.submit(() -> {
 			try {
 				int lineCount = getLineCount();
