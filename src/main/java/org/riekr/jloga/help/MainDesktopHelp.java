@@ -1,5 +1,7 @@
 package org.riekr.jloga.help;
 
+import static org.riekr.jloga.utils.TextUtils.describeKeyBinding;
+import static org.riekr.jloga.utils.UIUtils.center;
 import static org.riekr.jloga.utils.UIUtils.getComponentHorizontalCenter;
 
 import javax.swing.*;
@@ -36,7 +38,7 @@ public class MainDesktopHelp extends JComponent {
 		_rightComponents = rc.toArray(new JComponent[0]);
 
 		// recent files
-		setLayout(new GridBagLayout());
+		setLayout(new BorderLayout());
 		Box recentBox = Box.createVerticalBox();
 		JLabel title = new JLabel("Recent files:");
 		title.setBorder(UIUtils.FLAT_BUTTON_BORDER);
@@ -49,9 +51,19 @@ public class MainDesktopHelp extends JComponent {
 			title.setVisible(!files.isEmpty());
 			recentBox.repaint();
 		});
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.weightx = gbc.weighty = 0.5;
-		add(recentBox, gbc);
+
+		add(center(recentBox), BorderLayout.CENTER);
+		JLabel keyBindings = new JLabel("<html>" + String.join("<br>",
+				"Main window:",
+				describeKeyBinding("O", "Open file"),
+				describeKeyBinding(",", "Open settings"),
+				"<br>Search panel:",
+				describeKeyBinding("F", "Find plain text"),
+				describeKeyBinding("R", "Find regex text"),
+				describeKeyBinding(".", "Open search type selector")
+		) + "</html>");
+		keyBindings.setBorder(UIUtils.createEmptyBorder(16));
+		add(keyBindings, BorderLayout.SOUTH);
 	}
 
 	@Override

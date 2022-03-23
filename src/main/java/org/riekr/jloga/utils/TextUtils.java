@@ -39,5 +39,9 @@ public class TextUtils {
 		return orig;
 	}
 
+	public static String describeKeyBinding(String key, String description) {
+		return "<b>CTRL+" + key + "</b>&nbsp;=&nbsp;" + description.replace(" ", "&nbsp;");
+	}
+
 	private TextUtils() {}
 }

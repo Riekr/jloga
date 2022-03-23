@@ -1,7 +1,10 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.utils.KeyUtils.addCtrlKeyAction;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -14,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.search.PlainTextComponent;
+import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.UIUtils;
 
@@ -80,6 +85,30 @@ public class SearchPanel extends JComponent implements FileDropListener {
 					addNewTab();
 			}
 		});
+		setupKeyBindings();
+	}
+
+	/**
+	 * In order to let keybindings work in {@link VirtualTextArea} you should allow keystrokes in {@link ROKeyListener#discard(KeyEvent)}
+	 * after having checked that the key combinations does not have side effect on the editor.
+	 */
+	private void setupKeyBindings() {
+		addCtrlKeyAction(this, 'F', () -> selectSearchInFocusedTab(PlainTextComponent.ID));
+		addCtrlKeyAction(this, 'R', () -> selectSearchInFocusedTab(RegExComponent.ID));
+		addCtrlKeyAction(this, '.', () -> selectSearchInFocusedTab(null));
+	}
+
+	private void selectSearchInFocusedTab(String id) {
+		SearchPanelBottomArea tab = getSelectedSearchPanelBottomArea();
+		if (tab != null) {
+			SearchSelector searchSelector = tab.getSearchUI();
+			if (searchSelector != null) {
+				if (id == null)
+					searchSelector.openSelection();
+				else
+					searchSelector.setSearchUI(id);
+			}
+		}
 	}
 
 	private String getChildTitle(String tabTitle) {
@@ -126,6 +155,11 @@ public class SearchPanel extends JComponent implements FileDropListener {
 				.mapToObj(_bottomTabs::getComponentAt)
 				.filter((c) -> c instanceof SearchPanelBottomArea)
 				.map((c) -> (SearchPanelBottomArea)c);
+	}
+
+	@Nullable
+	private SearchPanelBottomArea getSelectedSearchPanelBottomArea() {
+		return (SearchPanelBottomArea)_bottomTabs.getSelectedComponent();
 	}
 
 	@Override

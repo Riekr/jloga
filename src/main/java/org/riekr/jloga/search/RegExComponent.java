@@ -12,6 +12,7 @@ import org.riekr.jloga.ui.MRUTextCombo;
 import org.riekr.jloga.utils.UIUtils;
 
 public class RegExComponent extends Box implements SearchComponent {
+	private static final long serialVersionUID = -2681776106341733771L;
 
 	public static final String ID = "RegExComponent";
 
@@ -66,5 +67,10 @@ public class RegExComponent extends Box implements SearchComponent {
 	@Override
 	public String getSearchIconLabel() {
 		return ".*";
+	}
+
+	@Override
+	public boolean requestFocusInWindow() {
+		return _combo.requestFocusInWindow();
 	}
 }

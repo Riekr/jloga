@@ -254,4 +254,20 @@ public final class UIUtils {
 						.flatMap(c -> findComponents((Container)c))
 		);
 	}
+
+	public static Component center(Component component) {
+		Box horiz = Box.createHorizontalBox();
+		Box vert = Box.createVerticalBox();
+		horiz.add(Box.createHorizontalGlue());
+		horiz.add(vert);
+		horiz.add(Box.createHorizontalGlue());
+		vert.add(Box.createVerticalGlue());
+		vert.add(component);
+		vert.add(Box.createVerticalGlue());
+		return horiz;
+	}
+
+	public static Border createEmptyBorder(int size) {
+		return BorderFactory.createEmptyBorder(size, size, size, size);
+	}
 }

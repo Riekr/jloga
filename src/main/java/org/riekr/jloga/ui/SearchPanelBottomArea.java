@@ -139,4 +139,11 @@ public class SearchPanelBottomArea extends JPanel {
 			_searching.cancel(true);
 	}
 
+	public String getTitle() {
+		return _title;
+	}
+
+	public SearchSelector getSearchUI() {
+		return _searchUI;
+	}
 }

@@ -19,8 +19,8 @@ public class ROKeyListener implements KeyListener {
 		e.consume();
 	}
 
-	private void discard(KeyEvent e) {
-//		System.out.println(e);
+	protected void discard(KeyEvent e) {
+		//		System.out.println(e);
 		switch (e.getKeyCode()) {
 			case 33: // pgup
 				if (e.isControlDown())
@@ -50,10 +50,13 @@ public class ROKeyListener implements KeyListener {
 			case 40: // giu
 				// arrows
 				return;
+			case 44: // ,
+			case 46: // .
 			case 65: // A
-				if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK)
-					return;
 			case 67: // C
+			case 70: // F
+			case 79: // O
+			case 82: // R
 			case 155: // ins
 				if (e.isControlDown())
 					return;
@@ -66,21 +69,15 @@ public class ROKeyListener implements KeyListener {
 		e.consume();
 	}
 
-	protected void onDocumentStart() {
-	}
+	protected void onDocumentStart() {}
 
-	protected void onDocumentEnd() {
-	}
+	protected void onDocumentEnd() {}
 
-	protected void onPageUp() {
-	}
+	protected void onPageUp() {}
 
-	protected void onPageDn() {
-	}
+	protected void onPageDn() {}
 
-	protected void onPreviousTab() {
-	}
+	protected void onPreviousTab() {}
 
-	protected void onNextTab() {
-	}
+	protected void onNextTab() {}
 }

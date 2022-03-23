@@ -39,14 +39,10 @@ public class SearchSelector extends JPanel {
 		_selectBtn = UIUtils.newBorderlessButton("\u26A7", this::openSelection);
 		add(_selectBtn, BorderLayout.LINE_START);
 
-		SearchRegistry.get(
-				Preferences.LAST_SEARCH_TYPE.get(level),
-				level,
-				this::setSearchUI
-		);
+		setSearchUI(Preferences.LAST_SEARCH_TYPE.get(level));
 	}
 
-	private void openSelection() {
+	public void openSelection() {
 		SearchRegistry.Entry<?>[] choices = SearchRegistry.getChoices();
 		SearchRegistry.Entry<?> initialSelectionValue = Arrays.stream(choices)
 				.filter((e) -> e.id.equals(_searchComponent.getID()))
@@ -65,7 +61,12 @@ public class SearchSelector extends JPanel {
 			Preferences.LAST_SEARCH_TYPE.set(setSearchUI(input.newInstance(_level)), _level);
 	}
 
+	public void setSearchUI(String id) {
+		SearchRegistry.get(id, _level, this::setSearchUI);
+	}
+
 	private <T extends JComponent & SearchComponent> String setSearchUI(T comp) {
+		boolean focus = _searchComponent != null;
 		if (_searchComponent != null)
 			_searchComponent.onSearch(null);
 		if (_searchUI != null)
@@ -78,6 +79,8 @@ public class SearchSelector extends JPanel {
 		comp.setVariables(_vars);
 		add(comp, BorderLayout.CENTER);
 		_selectBtn.setText(_searchComponent.getSearchIconLabel());
+		if (focus)
+			comp.requestFocusInWindow();
 		return comp.getID();
 	}
 

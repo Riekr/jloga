@@ -11,6 +11,8 @@ import org.riekr.jloga.ui.MRUTextCombo;
 import org.riekr.jloga.utils.UIUtils;
 
 public class PlainTextComponent extends Box implements SearchComponent {
+	private static final long serialVersionUID = -2002183911884676582L;
+
 	public static final String ID = "PlainTextComponent";
 
 	private final MRUTextCombo<SearchComboEntry> _combo;
@@ -64,5 +66,10 @@ public class PlainTextComponent extends Box implements SearchComponent {
 	@Override
 	public String getSearchIconLabel() {
 		return "Tt";
+	}
+
+	@Override
+	public boolean requestFocusInWindow() {
+		return _combo.requestFocusInWindow();
 	}
 }
