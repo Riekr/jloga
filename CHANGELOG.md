@@ -1,4 +1,6 @@
 ## In progress:
+- General:
+  - Key bindings
 
 ## v0.0.8
 - General:
