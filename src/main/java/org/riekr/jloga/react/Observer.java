@@ -1,6 +1,8 @@
 package org.riekr.jloga.react;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.riekr.jloga.utils.UIUtils;
@@ -58,6 +60,37 @@ public interface Observer<T> {
 			@Override
 			public void onError(Throwable t) {
 				onError.accept(t);
+			}
+		};
+	}
+
+	static <T> Observer<T> skip(int count, Observer<T> observer) {
+		if (count <= 0)
+			return observer;
+		AtomicReference<Observer<T>> latch = new AtomicReference<>();
+		latch.set(new Observer<>() {
+			final AtomicInteger countDown = new AtomicInteger(count);
+
+			@Override
+			public void onNext(T item) {
+				if (countDown.decrementAndGet() == 0)
+					latch.set(observer);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				observer.onError(t);
+			}
+		});
+		return new Observer<>() {
+			@Override
+			public void onNext(T item) {
+				latch.get().onNext(item);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				latch.get().onError(t);
 			}
 		};
 	}
