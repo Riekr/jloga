@@ -8,8 +8,12 @@ Files and results can be view in grid mode and inspected with [finos perspective
 The project started in my spare time to simplify crash analisys.
 
 ## Downloads and installation
-There is no installer but a `.exe` all-in-one executable build with Launch4J is provided for windows in order to simplify file associations. The app uses the standard java preferences to store its user selections.\
-For other platforms you can download the `.jar` file and execute it with `java -jar jloga-all.jar`, all dependencies are included.\
+For each jloga variant Java 11 or later is required, you can download it from [Oracle's java.com](https://java.com/it/download/) or use OpenJDK available from [Adoptium](https://adoptium.net/releases.html?variant=openjdk11&jvmVariant=hotspot) or [Adopt OpenJDK](https://adoptopenjdk.net/releases.html).
+
+The `.exe` file is an all-in-one executable file built with Launch4J for windows in order to simplify file associations. You don't need to extract it, just double click to run. The app uses the standard java preferences to store the user selections.
+
+For other platforms you can download the `.jar` file and execute it with `java -jar jloga-all.jar`, all dependencies are included.
+
 Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for downloads.
 
 ## Features
