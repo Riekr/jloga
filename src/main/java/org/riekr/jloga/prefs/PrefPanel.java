@@ -232,8 +232,9 @@ public class PrefPanel extends JDialog {
 				_tabs.setEnabled(true);
 			}
 		});
-		JButton resetButton = new JButton(_RESET);
-		resetButton.addActionListener((e) -> btn.reset());
+		JButton resetButton = register(new JButton(_RESET));
+		resetButton.addActionListener((e) -> keyPref.reset());
+		_subscriptions.add(keyPref.subscribe((ks) -> btn.refresh()));
 		JPanel res = new JPanel(new BorderLayout());
 		res.add(btn, BorderLayout.CENTER);
 		res.add(resetButton, BorderLayout.LINE_END);

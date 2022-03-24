@@ -33,12 +33,16 @@ public class KeyStrokeToggleButton extends JToggleButton {
 			KeyStroke keyStroke = getKeyStrokeForEvent(e);
 			if (!keyStroke.equals(_last)) {
 				switch (e.getKeyCode()) {
+
+					case KeyEvent.VK_SPACE:
+						return;
+
 					case KeyEvent.VK_ENTER:
 						if (isValid(_last))
 							_keyPref.set(_last);
 						//noinspection fallthrough
 					case KeyEvent.VK_ESCAPE:
-						printKeyStroke(_keyPref.get());
+						_label.setForeground(_color);
 						setSelected(false);
 						deselected();
 						enableOthers();
@@ -77,10 +81,12 @@ public class KeyStrokeToggleButton extends JToggleButton {
 		printKeyStroke(_keyPref.get());
 	}
 
-	public void reset() {
-		setSelected(false);
-		printKeyStroke(_keyPref.reset());
-		enableOthers();
+	public void refresh() {
+		printKeyStroke(_keyPref.get());
+		if (isSelected()) {
+			setSelected(false);
+			enableOthers();
+		}
 	}
 
 	private void printKeyStroke(KeyStroke keyStroke) {
@@ -108,6 +114,7 @@ public class KeyStrokeToggleButton extends JToggleButton {
 	}
 
 	protected void deselected() {
+		printKeyStroke(_keyPref.get());
 		removeKeyListener(_keyListener);
 		setFocusable(false);
 		getRootPane().requestFocus();
