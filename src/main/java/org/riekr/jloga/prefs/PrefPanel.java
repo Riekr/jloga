@@ -26,6 +26,21 @@ import org.riekr.jloga.utils.UIUtils;
 public class PrefPanel extends JDialog {
 	private static final long serialVersionUID = 3940084083723252336L;
 
+	private static class Tab extends JPanel {
+		private static final long serialVersionUID = 7427857846628153672L;
+
+		final List<GUIPreference<?>> prefs;
+		final Box                    contents;
+
+		public Tab(List<GUIPreference<?>> prefs) {
+			super(new BorderLayout());
+			this.prefs = prefs;
+			this.contents = Box.createVerticalBox();
+			this.contents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
+			add(contents, BorderLayout.NORTH);
+		}
+	}
+
 	private static final int    _SPACING = 4;
 	private static final String _RESET   = "\u21BA";
 
@@ -50,14 +65,9 @@ public class PrefPanel extends JDialog {
 				.collect(groupingBy(GUIPreference::group, LinkedHashMap::new, toList()));
 		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
 			String group = e.getKey();
-			List<GUIPreference<?>> allPrefs = e.getValue();
-			final Box tabContents = Box.createVerticalBox();
-			tabContents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-			final JPanel tabContentsWrapper = new JPanel();
-			tabContentsWrapper.setLayout(new BorderLayout());
-			tabContentsWrapper.add(tabContents, BorderLayout.NORTH);
-			_tabs.addTab(group, tabContentsWrapper);
-			for (GUIPreference<?> p : allPrefs) {
+			final Tab tab = new Tab(e.getValue());
+			_tabs.addTab(group, tab);
+			for (GUIPreference<?> p : tab.prefs) {
 				Box panel = Box.createVerticalBox();
 				ContextMenu.addAction(panel, "Reset", p::reset);
 				panel.setBorder(BorderFactory.createCompoundBorder(
@@ -93,13 +103,18 @@ public class PrefPanel extends JDialog {
 						System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
 						continue;
 				}
-				tabContents.add(panel);
+				tab.contents.add(panel);
 				_subscriptions.add(p.enabled.subscribe((enabled) -> allComponents(panel).forEach((c) -> c.setEnabled(enabled))));
 			}
 		}
 		_tabs.setSelectedIndex(_LAST_SELECTED_TAB);
 		cp.add(Box.createVerticalStrut(_SPACING), BorderLayout.CENTER);
 		Box footer = Box.createHorizontalBox();
+		footer.add(UIUtils.newButton("Reset page", () -> {
+			Component comp = _tabs.getSelectedComponent();
+			if (comp instanceof Tab)
+				((Tab)comp).prefs.forEach(Preference::reset);
+		}));
 		footer.add(UIUtils.newButton("Reset all", () -> {
 			int input = JOptionPane.showConfirmDialog(this, "Do you really want to reset all preferences?", "Reset", JOptionPane.YES_NO_OPTION);
 			if (input == JOptionPane.YES_OPTION)
