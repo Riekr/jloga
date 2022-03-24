@@ -10,7 +10,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+import org.riekr.jloga.prefs.KeyBindings;
 import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.react.Observer;
+import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.utils.UIUtils;
 
 public class MainDesktopHelp extends JComponent {
@@ -18,8 +21,11 @@ public class MainDesktopHelp extends JComponent {
 
 	private static final char[] _ARROW = new char[]{'\u25B2'};
 
+	private static Unsubscribable[] _UNSUBSCRIBABLES;
+
 	private final JComponent[] _leftComponents;
 	private final JComponent[] _rightComponents;
+	private final JLabel       _keyBindings;
 
 	public MainDesktopHelp(JToolBar toolBar, Consumer<File> opener) {
 		ArrayList<JComponent> lc = new ArrayList<>();
@@ -53,17 +59,31 @@ public class MainDesktopHelp extends JComponent {
 		});
 
 		add(center(recentBox), BorderLayout.CENTER);
-		JLabel keyBindings = new JLabel("<html>" + String.join("<br>",
+		_keyBindings = new JLabel();
+		_keyBindings.setBorder(UIUtils.createEmptyBorder(16));
+		add(_keyBindings, BorderLayout.SOUTH);
+
+		if (_UNSUBSCRIBABLES != null) {
+			System.err.println("DOUBLE INSTANTIATION OF MainDesktopHelp");
+			for (final Unsubscribable unsubscribable : _UNSUBSCRIBABLES)
+				unsubscribable.unsubscribe();
+		}
+		_UNSUBSCRIBABLES = KeyBindings.getGUIKeyBindings().stream()
+				.map((pref) -> pref.subscribe(Observer.skip(1, (ks) -> updateKeyBindings())))
+				.toArray(Unsubscribable[]::new);
+		updateKeyBindings();
+	}
+
+	private void updateKeyBindings() {
+		_keyBindings.setText("<html>" + String.join("<br>",
 				"Main window:",
-				describeKeyBinding("O", "Open file"),
-				describeKeyBinding(",", "Open settings"),
+				describeKeyBinding(KeyBindings.KB_OPENFILE),
+				describeKeyBinding(KeyBindings.KB_SETTINGS),
 				"<br>Search panel:",
-				describeKeyBinding("F", "Find plain text"),
-				describeKeyBinding("R", "Find regex text"),
-				describeKeyBinding(".", "Open search type selector")
+				describeKeyBinding(KeyBindings.KB_FINDTEXT),
+				describeKeyBinding(KeyBindings.KB_FINDREGEX),
+				describeKeyBinding(KeyBindings.KB_FINDSELECT)
 		) + "</html>");
-		keyBindings.setBorder(UIUtils.createEmptyBorder(16));
-		add(keyBindings, BorderLayout.SOUTH);
 	}
 
 	@Override

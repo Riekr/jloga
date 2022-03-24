@@ -1,7 +1,10 @@
 package org.riekr.jloga.ui;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import org.riekr.jloga.prefs.KeyBindings;
 
 public class ROKeyListener implements KeyListener {
 	@Override
@@ -39,11 +42,13 @@ public class ROKeyListener implements KeyListener {
 					onDocumentEnd();
 					break;
 				}
+				//noinspection fallthrough
 			case 36: // home
 				if (e.isControlDown()) {
 					onDocumentStart();
 					break;
 				}
+				//noinspection fallthrough
 			case 37:
 			case 38: // su
 			case 39:
@@ -66,7 +71,9 @@ public class ROKeyListener implements KeyListener {
 					return;
 				break;
 		}
-		e.consume();
+		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
+		if (KeyBindings.getGUIKeyBindings().stream().noneMatch((pref) -> keyStroke.equals(pref.get())))
+			e.consume();
 	}
 
 	protected void onDocumentStart() {}

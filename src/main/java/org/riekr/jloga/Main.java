@@ -1,7 +1,7 @@
 package org.riekr.jloga;
 
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
-import static org.riekr.jloga.utils.KeyUtils.addCtrlKeyAction;
+import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newTabHeader;
 
@@ -30,6 +30,7 @@ import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.KeyBindings;
 import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
@@ -68,12 +69,12 @@ public class Main extends JFrame implements FileDropListener {
 		_charsetCombo.setToolTipText("Select next file charset");
 
 		toolBar.add(newBorderlessButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
-		addCtrlKeyAction(this, 'O', this::openFileDialog);
+		addKeyStrokeAction(this, KeyBindings.KB_OPENFILE, this::openFileDialog);
 		toolBar.addSeparator();
 		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
-		addCtrlKeyAction(this, ',', this::openPreferences);
+		addKeyStrokeAction(this, KeyBindings.KB_SETTINGS, this::openPreferences);
 		toolBar.add(_charsetCombo);
 		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 

@@ -1,6 +1,6 @@
 package org.riekr.jloga.ui;
 
-import static org.riekr.jloga.utils.KeyUtils.addCtrlKeyAction;
+import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.KeyBindings;
 import org.riekr.jloga.search.PlainTextComponent;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.utils.ContextMenu;
@@ -93,9 +94,9 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	 * after having checked that the key combinations does not have side effect on the editor.
 	 */
 	private void setupKeyBindings() {
-		addCtrlKeyAction(this, 'F', () -> selectSearchInFocusedTab(PlainTextComponent.ID));
-		addCtrlKeyAction(this, 'R', () -> selectSearchInFocusedTab(RegExComponent.ID));
-		addCtrlKeyAction(this, '.', () -> selectSearchInFocusedTab(null));
+		addKeyStrokeAction(this, KeyBindings.KB_FINDTEXT, () -> selectSearchInFocusedTab(PlainTextComponent.ID));
+		addKeyStrokeAction(this, KeyBindings.KB_FINDREGEX, () -> selectSearchInFocusedTab(RegExComponent.ID));
+		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null));
 	}
 
 	private void selectSearchInFocusedTab(String id) {

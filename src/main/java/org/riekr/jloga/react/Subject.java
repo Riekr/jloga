@@ -4,7 +4,6 @@ import java.awt.*;
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
 
 import org.jetbrains.annotations.NotNull;
 

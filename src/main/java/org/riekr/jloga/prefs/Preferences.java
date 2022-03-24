@@ -17,7 +17,7 @@ import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 
-public interface Preferences {
+public interface Preferences extends KeyBindings {
 
 	String GENERAL = "General";
 	String GRID    = "Grid";

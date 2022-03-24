@@ -1,8 +1,16 @@
 package org.riekr.jloga.utils;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
+import javax.swing.*;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.prefs.GUIPreference;
 
 public class TextUtils {
 
@@ -39,8 +47,21 @@ public class TextUtils {
 		return orig;
 	}
 
-	public static String describeKeyBinding(String key, String description) {
-		return "<b>CTRL+" + key + "</b>&nbsp;=&nbsp;" + description.replace(" ", "&nbsp;");
+	public static String describeKeyBinding(@NotNull GUIPreference<KeyStroke> key) {
+		return describeKeyBinding(key.get(), key.title());
+	}
+
+	public static String describeKeyBinding(@NotNull KeyStroke key, @Nullable String description) {
+		String res = stream(key.toString().toUpperCase().split(" +"))
+				.filter((s -> !s.equals("PRESSED")))
+				.map(s -> s.equals("CONTROL") ? "CTRL" : s)
+				// .peek(System.out::println)
+				.distinct().collect(joining("+"));
+		// System.out.println(res);
+		res = "<b>" + res.toUpperCase() + "</b>";
+		if (description != null && !(description = description.trim()).isEmpty())
+			res += "&nbsp;=&nbsp;" + description.replace(" ", "&nbsp;");
+		return res;
 	}
 
 	private TextUtils() {}

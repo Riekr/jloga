@@ -2,11 +2,14 @@ package org.riekr.jloga.prefs;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static org.riekr.jloga.prefs.GUIPreference.Type.KeyBinding;
 import static org.riekr.jloga.utils.FileUtils.selectDirectoryDialog;
 import static org.riekr.jloga.utils.FileUtils.selectExecutableDialog;
 import static org.riekr.jloga.utils.FontUtils.describeFont;
 import static org.riekr.jloga.utils.FontUtils.selectFontDialog;
+import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
 import static org.riekr.jloga.utils.UIUtils.allComponents;
+import static org.riekr.jloga.utils.UIUtils.newButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,9 +22,8 @@ import java.util.Map;
 
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.ui.ComboEntryWrapper;
+import org.riekr.jloga.ui.KeyStrokeToggleButton;
 import org.riekr.jloga.utils.ContextMenu;
-import org.riekr.jloga.utils.KeyUtils;
-import org.riekr.jloga.utils.UIUtils;
 
 public class PrefPanel extends JDialog {
 	private static final long serialVersionUID = 3940084083723252336L;
@@ -30,12 +32,11 @@ public class PrefPanel extends JDialog {
 		private static final long serialVersionUID = 7427857846628153672L;
 
 		final List<GUIPreference<?>> prefs;
-		final Box                    contents;
+		final Box                    contents = Box.createVerticalBox();
 
 		public Tab(List<GUIPreference<?>> prefs) {
 			super(new BorderLayout());
 			this.prefs = prefs;
-			this.contents = Box.createVerticalBox();
 			this.contents.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
 			add(contents, BorderLayout.NORTH);
 		}
@@ -48,16 +49,16 @@ public class PrefPanel extends JDialog {
 
 	private final JTabbedPane               _tabs;
 	private final ArrayList<Unsubscribable> _subscriptions = new ArrayList<>();
+	private final ArrayList<AbstractButton> _allButtons    = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
 	public PrefPanel(Frame parent) {
 		super(parent, "Preferences:", true);
 		setResizable(false);
-		KeyUtils.closeOnEscape(this);
+		closeOnEscape(this);
 
-		JPanel cp = new JPanel();
+		JPanel cp = new JPanel(new BorderLayout());
 		getContentPane().add(cp);
-		cp.setLayout(new BorderLayout());
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
 		_tabs = new JTabbedPane();
 		cp.add(_tabs, BorderLayout.NORTH);
@@ -70,12 +71,14 @@ public class PrefPanel extends JDialog {
 			for (GUIPreference<?> p : tab.prefs) {
 				Box panel = Box.createVerticalBox();
 				ContextMenu.addAction(panel, "Reset", p::reset);
-				panel.setBorder(BorderFactory.createCompoundBorder(
-						BorderFactory.createTitledBorder(p.title()),
-						BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
-				));
 				String descr = p.description();
 				if (descr != null && !descr.isEmpty()) {
+					if (p.type() != KeyBinding) {
+						panel.setBorder(BorderFactory.createCompoundBorder(
+								BorderFactory.createTitledBorder(p.title()),
+								BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
+						));
+					}
 					JLabel label = new JLabel(descr);
 					label.setAlignmentX(0);
 					panel.add(label);
@@ -94,9 +97,11 @@ public class PrefPanel extends JDialog {
 					case Directory:
 						panel.add(newDirectoryComponent((GUIPreference<File>)p));
 						break;
-
 					case Executable:
 						panel.add(newExecComponent((GUIPreference<File>)p));
+						break;
+					case KeyBinding:
+						panel.add(newKeyBindingComponent((GUIPreference<KeyStroke>)p));
 						break;
 
 					default:
@@ -110,28 +115,36 @@ public class PrefPanel extends JDialog {
 		_tabs.setSelectedIndex(_LAST_SELECTED_TAB);
 		cp.add(Box.createVerticalStrut(_SPACING), BorderLayout.CENTER);
 		Box footer = Box.createHorizontalBox();
-		footer.add(UIUtils.newButton("Reset page", () -> {
+		footer.add(newRegisteredButton("Reset page", () -> {
 			Component comp = _tabs.getSelectedComponent();
 			if (comp instanceof Tab)
 				((Tab)comp).prefs.forEach(Preference::reset);
 		}));
-		footer.add(UIUtils.newButton("Reset all", () -> {
+		footer.add(newRegisteredButton("Reset all", () -> {
 			int input = JOptionPane.showConfirmDialog(this, "Do you really want to reset all preferences?", "Reset", JOptionPane.YES_NO_OPTION);
 			if (input == JOptionPane.YES_OPTION)
 				prefsByGroup.values().stream().flatMap(Collection::stream).forEach(Preference::reset);
 		}));
-		footer.add(UIUtils.newButton("Clear recent files", Preferences.RECENT_FILES::reset));
+		footer.add(newRegisteredButton("Clear recent files", Preferences.RECENT_FILES::reset));
 		footer.add(Box.createHorizontalGlue());
-		footer.add(UIUtils.newButton("Close", this::dispose));
+		footer.add(newButton("Close", this::dispose));
 		cp.add(footer, BorderLayout.SOUTH);
 		pack();
 		setLocationRelativeTo(parent);
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));
 	}
 
+	private JButton newRegisteredButton(String text, Runnable action) {
+		return register(newButton(text, action));
+	}
+
+	private <T extends AbstractButton> T register(T button) {
+		_allButtons.add(button);
+		return button;
+	}
+
 	private Component newFontComponent(GUIPreference<Font> fontPref) {
-		JPanel res = new JPanel();
-		res.setLayout(new BorderLayout());
+		JPanel res = new JPanel(new BorderLayout());
 		final JButton selectButton = new JButton();
 		_subscriptions.add(fontPref.subscribe((font) -> selectButton.setText(describeFont(fontPref.get()))));
 		res.add(selectButton, BorderLayout.CENTER);
@@ -171,8 +184,7 @@ public class PrefPanel extends JDialog {
 	}
 
 	private Component newDirectoryComponent(GUIPreference<File> dirPref) {
-		JPanel res = new JPanel();
-		res.setLayout(new BorderLayout());
+		JPanel res = new JPanel(new BorderLayout());
 		final JButton selectButton = new JButton();
 		_subscriptions.add(dirPref.subscribe((dir) -> selectButton.setText(dir == null ? "" : dir.getAbsolutePath())));
 		selectButton.addActionListener((e) -> {
@@ -189,8 +201,7 @@ public class PrefPanel extends JDialog {
 	}
 
 	private Component newExecComponent(GUIPreference<File> filePref) {
-		JPanel res = new JPanel();
-		res.setLayout(new BorderLayout());
+		JPanel res = new JPanel(new BorderLayout());
 		final JButton selectButton = new JButton();
 		_subscriptions.add(filePref.subscribe((f) -> selectButton.setText(f == null ? "" : f.getAbsolutePath())));
 		selectButton.addActionListener((e) -> {
@@ -203,6 +214,29 @@ public class PrefPanel extends JDialog {
 		resetButton.addActionListener((e) -> filePref.reset());
 		res.add(resetButton, BorderLayout.LINE_END);
 		res.setAlignmentX(0);
+		return res;
+	}
+
+	@SuppressWarnings("serial")
+	private Component newKeyBindingComponent(GUIPreference<KeyStroke> keyPref) {
+		KeyStrokeToggleButton btn = register(new KeyStrokeToggleButton(_allButtons, keyPref) {
+			@Override
+			protected void disableOthers() {
+				super.disableOthers();
+				_tabs.setEnabled(false);
+			}
+
+			@Override
+			protected void enableOthers() {
+				super.enableOthers();
+				_tabs.setEnabled(true);
+			}
+		});
+		JButton resetButton = new JButton(_RESET);
+		resetButton.addActionListener((e) -> btn.reset());
+		JPanel res = new JPanel(new BorderLayout());
+		res.add(btn, BorderLayout.CENTER);
+		res.add(resetButton, BorderLayout.LINE_END);
 		return res;
 	}
 

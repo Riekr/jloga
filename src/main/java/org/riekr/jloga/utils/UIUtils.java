@@ -267,6 +267,13 @@ public final class UIUtils {
 		return horiz;
 	}
 
+	public static Component atStart(Component component) {
+		Box horiz = Box.createHorizontalBox();
+		horiz.add(component);
+		horiz.add(Box.createHorizontalGlue());
+		return horiz;
+	}
+
 	public static Border createEmptyBorder(int size) {
 		return BorderFactory.createEmptyBorder(size, size, size, size);
 	}
