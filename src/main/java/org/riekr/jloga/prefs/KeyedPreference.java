@@ -1,7 +1,9 @@
 package org.riekr.jloga.prefs;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +13,8 @@ import org.riekr.jloga.react.Unsubscribable;
 
 public class KeyedPreference<T extends Serializable> implements Preference<T> {
 
+	private static final Set<String> _ALLKEYS = new HashSet<>();
+
 	private final String      _key;
 	private final Supplier<T> _deflt;
 	private final Subject<T>  _subject = new Subject<>();
@@ -19,6 +23,8 @@ public class KeyedPreference<T extends Serializable> implements Preference<T> {
 	private T       _value;
 
 	protected KeyedPreference(String key, Supplier<T> deflt) {
+		if (!_ALLKEYS.add(key))
+			throw new IllegalArgumentException("Duplicate preference key: " + key);
 		_key = key;
 		_deflt = deflt;
 	}
