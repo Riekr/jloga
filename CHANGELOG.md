@@ -1,4 +1,6 @@
 ## In progress:
+- Bug fixes:
+  - Analysis after 2nd level does not hang
 - General:
   - Key bindings
 

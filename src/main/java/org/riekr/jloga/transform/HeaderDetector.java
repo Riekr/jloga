@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +52,12 @@ public class HeaderDetector {
 
 	private synchronized void complete() {
 		_checkSet = null;
+		if (_header == null) {
+			_header = "";
+			if (_own == null)
+				_own = false;
+		} else if (_own == null)
+			_own = true;
 		notifyAll();
 	}
 
