@@ -11,6 +11,7 @@ import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.InvalidMarkException;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
@@ -18,6 +19,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.Main;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.prefs.Preferences;
@@ -42,6 +45,8 @@ import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
+
+import javax.swing.*;
 
 public class TextFileSource implements TextSource {
 
@@ -56,7 +61,7 @@ public class TextFileSource implements TextSource {
 
 	private final int     _pageSize = Preferences.PAGE_SIZE.get();
 	private final Path    _file;
-	private final Charset _charset;
+	private       Charset _charset;
 
 	private final Future<?>                   _indexing;
 	private       TreeMap<Integer, IndexData> _index;
@@ -71,7 +76,7 @@ public class TextFileSource implements TextSource {
 
 	private final AtomicReference<Future<?>> _textRequest = new AtomicReference<>();
 
-	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener) {
+	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
 		_charset = charset;
 		_indexing = IO_EXECUTOR.submit(() -> {
@@ -120,8 +125,18 @@ public class TextFileSource implements TextSource {
 				System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
 			} catch (ClosedByInterruptException ignored) {
 				System.out.println("Indexing cancelled");
-			} catch (IOException e) {
+			} catch (IOException | InvalidMarkException e) {
+				EventQueue.invokeLater(() -> {
+					String msg = e.getLocalizedMessage();
+					if (msg == null)
+						msg = "";
+					else if (!(msg = msg.trim()).isEmpty())
+						msg += '\n';
+					JOptionPane.showMessageDialog(Main.getMain(), msg + "\nWrong charset?", "Indexing error", JOptionPane.ERROR_MESSAGE);
+					closer.run();
+				});
 				e.printStackTrace(System.err);
+				throw new IndexingException("Error indexing " + file, e);
 			}
 		});
 	}
@@ -167,16 +182,48 @@ public class TextFileSource implements TextSource {
 		return new RangeIterator<>(fromInclusive, Math.min(_lineCount, toExclusive), this::getText);
 	}
 
-	private String[] loadPage(int fromLine, int toLine, long pos) throws IOException {
-		String[] lines = new String[toLine - fromLine];
+	private void loadPage(long pos, String[] lines) throws IOException {
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			fileChannel.position(pos);
 			try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), _pageSize)) {
 				for (int i = 0; i < lines.length; i++)
 					lines[i] = br.readLine();
-				return lines;
 			}
 		}
+	}
+
+	private String[] loadPage(int fromLine, int toLine, long pos) throws IOException {
+		String[] lines = new String[toLine - fromLine];
+		try {
+			loadPage(pos, lines);
+			return lines;
+		} catch (MalformedInputException e) {
+			if (Preferences.CHARSET_DETECT.get()) {
+				// cycle all but one (the first)
+				Charset orig = _charset;
+				for (Charset charset : Charsets.nextOf(orig)) {
+					try {
+						_charset = charset;
+						loadPage(pos, lines);
+						System.out.println("Changed charset from " + orig + " to " + _charset);
+						Preferences.CHARSET.set(_charset);
+						EventQueue.invokeLater(this::showCharsetWarning);
+						return lines;
+					} catch (MalformedInputException ignored) {}
+				}
+				_charset = orig;
+			}
+			throw e;
+		}
+	}
+
+	private void showCharsetWarning() {
+		JOptionPane.showMessageDialog(Main.getMain(), "Charset has been automatically changed to " + _charset + ",\n"
+						+ "if text is corrupted please select another charset and reopen the file.\n"
+						+ "You can disable charset auto detection in preferences.",
+				"Charset changed",
+				JOptionPane.WARNING_MESSAGE
+		);
 	}
 
 	@Override

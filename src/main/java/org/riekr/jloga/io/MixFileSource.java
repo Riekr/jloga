@@ -2,6 +2,8 @@ package org.riekr.jloga.io;
 
 import static java.util.Objects.requireNonNullElse;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.Main;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.pmem.PagedIntBag;
 
@@ -93,7 +96,7 @@ public class MixFileSource implements TextSource {
 	private final PagedIntBag  _index = new PagedIntBag(2);
 	private final int          _padding;
 
-	public MixFileSource(@NotNull Config config, @NotNull ProgressListener indexingListener) {
+	public MixFileSource(@NotNull Config config, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		if (config.sources.size() < 2)
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
@@ -174,7 +177,15 @@ public class MixFileSource implements TextSource {
 				_index.seal();
 				System.out.println("Mixed " + _index.size() + " lines of " + totLineCount + " using " + _index.pages() + " pages");
 			} catch (Throwable e) {
+				EventQueue.invokeLater(() -> {
+					String msg = e.getLocalizedMessage();
+					if (msg == null || msg.isBlank())
+						msg = "Error mixing files";
+					JOptionPane.showMessageDialog(Main.getMain(), msg, "Mixing error", JOptionPane.ERROR_MESSAGE);
+					closer.run();
+				});
 				e.printStackTrace(System.err);
+				throw new IndexingException("Error mixing files", e);
 			} finally {
 				updateTask.cancel(false);
 				indexingListener.onProgressChanged(totLineCount.value, totLineCount.value);

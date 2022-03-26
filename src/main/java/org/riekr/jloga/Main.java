@@ -17,8 +17,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,6 @@ public class Main extends JFrame implements FileDropListener {
 	@Nullable
 	public static Main getMain() {return _INSTANCE;}
 
-	private final CharsetCombo            _charsetCombo;
 	private final JTabbedPane             _tabs;
 	private final JobProgressBar          _progressBar;
 	private final Map<Object, TextSource> _openFiles = new LinkedHashMap<>();
@@ -64,9 +64,11 @@ public class Main extends JFrame implements FileDropListener {
 		_tabs = new JTabbedPane();
 		_progressBar = new JobProgressBar();
 		JToolBar toolBar = new JToolBar();
-		_charsetCombo = new CharsetCombo();
-		_charsetCombo.setMaximumSize(_charsetCombo.getPreferredSize());
-		_charsetCombo.setToolTipText("Select next file charset");
+
+		CharsetCombo charsetCombo = new CharsetCombo();
+		charsetCombo.setMaximumSize(charsetCombo.getPreferredSize());
+		charsetCombo.setToolTipText("Select next file charset");
+		Preferences.CHARSET.subscribe(charsetCombo::setSelectedItem);
 
 		toolBar.add(newBorderlessButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
 		addKeyStrokeAction(this, KeyBindings.KB_OPENFILE, this::openFileDialog);
@@ -75,7 +77,7 @@ public class Main extends JFrame implements FileDropListener {
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		addKeyStrokeAction(this, KeyBindings.KB_SETTINGS, this::openPreferences);
-		toolBar.add(_charsetCombo);
+		toolBar.add(charsetCombo);
 		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
 		// layout
@@ -115,7 +117,9 @@ public class Main extends JFrame implements FileDropListener {
 			String tabDescr = config.sources.values().stream()
 					.map((sc) -> idx.getAndIncrement() + " = " + sc.file.getAbsolutePath())
 					.collect(Collectors.joining("<br>"));
-			open(config, tabTitle, "<html>" + tabDescr + "</html>", () -> new MixFileSource(config, _progressBar.addJob("Mixing")));
+			open(config, tabTitle, "<html>" + tabDescr + "</html>",
+					(closer) -> new MixFileSource(config, _progressBar.addJob("Mixing"), closer)
+			);
 		}
 	}
 
@@ -143,7 +147,9 @@ public class Main extends JFrame implements FileDropListener {
 			LimitedList<File> files = Preferences.RECENT_FILES.get();
 			files.remove(file);
 			try {
-				open(file, file.getName(), file.getAbsolutePath(), () -> new TextFileSource(file.toPath(), _charsetCombo.charset, _progressBar.addJob("Indexing")));
+				open(file, file.getName(), file.getAbsolutePath(),
+						(closer) -> new TextFileSource(file.toPath(), Preferences.CHARSET.get(), _progressBar.addJob("Indexing"), closer)
+				);
 			} finally {
 				files.add(0, file);
 				Preferences.RECENT_FILES.set(files);
@@ -151,35 +157,46 @@ public class Main extends JFrame implements FileDropListener {
 		}
 	}
 
-	public void open(Object key, String title, String description, Supplier<TextSource> src) {
+	public void open(Object key, String title, String description, Function<Runnable, TextSource> src) {
 		if (_openFiles.containsKey(key)) {
 			System.out.println("Already open: " + key);
 			return;
 		}
-		TextSource textSource = src.get();
+		AtomicReference<SearchPanel> searchPanelReference = new AtomicReference<>();
+
+		// used for closing the tab, passet to the text source to handle indexing errors
+		Runnable closer = () -> {
+			SearchPanel searchPanel = searchPanelReference.get();
+			if (searchPanel != null) {
+				searchPanel.onClose();
+				_tabs.remove(searchPanel);
+			}
+			_openFiles.remove(key);
+			if (_tabs.getTabCount() == 0)
+				_help.setVisible(true);
+		};
+
+		TextSource textSource = src.apply(closer);
 		_openFiles.put(key, textSource);
 		try {
 			System.out.println("Opening: " + description);
 			_help.setVisible(false);
 			if (_tabs.getParent() == null)
 				add(_tabs);
+
 			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
 			searchPanel.setFileDropListener(this::openFiles);
-			_tabs.addTab(searchPanel.toString(), searchPanel);
 			searchPanel.setFont(_font);
+			_tabs.addTab(searchPanel.toString(), searchPanel);
+			searchPanelReference.set(searchPanel);
 			searchPanel.addHierarchyListener(e -> {
 				if (e.getID() == HierarchyEvent.PARENT_CHANGED && searchPanel.getParent() == null)
 					_openFiles.remove(key);
 			});
+
 			int idx = _tabs.getTabCount() - 1;
 			_tabs.setSelectedIndex(idx);
-			JComponent tabHeader = newTabHeader(searchPanel.toString(), () -> {
-				searchPanel.onClose();
-				_tabs.remove(searchPanel);
-				_openFiles.remove(key);
-				if (_tabs.getTabCount() == 0)
-					_help.setVisible(true);
-			}, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
+			JComponent tabHeader = newTabHeader(searchPanel.toString(), closer, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
 			ContextMenu.addActionCopy(tabHeader, key);
 			_tabs.setTabComponentAt(idx, tabHeader);
 		} catch (Exception e) {

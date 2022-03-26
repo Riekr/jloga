@@ -2,6 +2,7 @@ package org.riekr.jloga.prefs;
 
 import static java.lang.Runtime.getRuntime;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.joining;
 import static org.riekr.jloga.prefs.Preference.of;
 
 import java.awt.*;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.riekr.jloga.io.Charsets;
 import org.riekr.jloga.prefs.GUIPreference.Type;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
@@ -61,7 +63,8 @@ public interface Preferences extends KeyBindings {
 			.addDescription("URL is the only passed parameter, use a wrapper script eventually to specify additional ones.")
 			.addDescription("If you leave this field blank, a best guess will be used, chromium based browser are suggested.");
 
-	GUIPreference<Boolean> BROWSER_WARN = of("browser.warn", () -> true).describe(Type.Toggle, "Warn unsupported browser")
+	GUIPreference<Boolean> BROWSER_WARN = of("browser.warn", () -> true)
+			.describe(Type.Toggle, "Warn unsupported browser")
 			.group(BROWSER).require(BROWSER_SYSTEM, false)
 			.addDescription("Show a warning when no suggested browser is found.");
 
@@ -70,6 +73,12 @@ public interface Preferences extends KeyBindings {
 			.group(FORMATS)
 			.addDescription("Select the charset used for opening the next files. Using UTF-8 or ISO-8859-1 is recommended.")
 			.add(Charset::availableCharsets);
+
+	GUIPreference<Boolean> CHARSET_DETECT = of("charset.detect", () -> true)
+			.describe(Type.Toggle, "Charset auto detection")
+			.group(FORMATS)
+			.addDescription("Try to automatically detect the charset of the opened file, the result will be set in this page.")
+			.addDescription("Tried charsets are: " + Charsets.stream().map(Charset::name).collect(joining(", ")));
 
 	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
 			.describe(Type.Combo, "Locale")
