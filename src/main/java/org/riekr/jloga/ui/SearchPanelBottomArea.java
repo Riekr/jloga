@@ -84,8 +84,8 @@ public class SearchPanelBottomArea extends JPanel {
 					(err) -> EventQueue.invokeLater(() -> {
 						if (err instanceof SearchException) {
 							JOptionPane.showMessageDialog(this,
-									err.getCause() == null ? err.getLocalizedMessage() : err.getCause().getLocalizedMessage(),
-									err.getLocalizedMessage(),
+									err.getCause() == null ? err.getMessage() : err.getCause().getLocalizedMessage(),
+									err.getMessage(),
 									JOptionPane.ERROR_MESSAGE
 							);
 						} else

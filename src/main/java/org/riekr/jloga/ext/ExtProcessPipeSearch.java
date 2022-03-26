@@ -31,46 +31,60 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 	private          BufferedWriter _toProc;
 	private          ReadThread     _stdOutReader;
 	private          ReadThread     _stdErrReader;
+	private volatile Throwable      _err;
+	private          Process        _process;
 
 	@Override
 	public FilteredTextSource start(TextSource master) {
 		if (_textSource != null || _toProc != null || _stdOutReader != null || _stdErrReader != null)
 			throw new IllegalStateException("ExtProcessPipeSearch already started");
-		Process process;
 		try {
 			System.out.println("RUNNING EXT: " + String.join(" ", _command));
-			process = new ProcessBuilder(_command)
+			_process = new ProcessBuilder(_command)
 					.directory(_workingDir)
 					.start();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		_toProc = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+		_toProc = new BufferedWriter(new OutputStreamWriter(_process.getOutputStream()));
 		_textSource = new TempTextSource();
-		_stdOutReader = new ReadThread(process.getInputStream(), this::onStdOut, "stdout").startNow();
-		_stdErrReader = new ReadThread(process.getErrorStream(), this::onStdErr, "stderr").startNow();
+		_stdOutReader = new ReadThread(_process.getInputStream(), this::onStdOut, this::onError, "stdout").startNow();
+		_stdErrReader = new ReadThread(_process.getErrorStream(), this::onStdErr, this::onError, "stderr").startNow();
 		return _textSource;
 	}
 
-	// no need to increase visibility
+	private void onError(Throwable e) {
+		_err = e;
+	}
+
 	private void onStdOut(String line) {
 		_textSource.addLine(_line, line);
 	}
 
+	// protected for catching lines in a dump window
 	protected void onStdErr(String line) {
 		System.err.println(line);
 	}
 
 	@Override
 	public void verify(int line, String text) {
-		_line = line;
-		try {
-			_toProc.write(text);
-			_toProc.write(_LINE_SEP);
-			_toProc.flush();
-		} catch (IOException e) {
-			onStdErr("Child process exited (" + e.getLocalizedMessage() + ')');
-			throw new SearchException();
+		if (_err == null) {
+			_line = line;
+			try {
+				_toProc.write(text);
+				_toProc.write(_LINE_SEP);
+				_toProc.flush();
+			} catch (IOException e) {
+				_err = e;
+			}
+		}
+		if (_err != null) {
+			_stdOutReader.interrupt();
+			_stdErrReader.interrupt();
+			_process.destroy();
+			_err.printStackTrace(System.err);
+			onStdErr("Child process exited (" + _err.getLocalizedMessage() + ')');
+			throw new SearchException("Input not fully processed", _err);
 		}
 	}
 

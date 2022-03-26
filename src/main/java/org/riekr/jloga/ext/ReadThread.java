@@ -9,24 +9,27 @@ import org.jetbrains.annotations.NotNull;
 
 public class ReadThread extends Thread {
 
-	private final BufferedReader   _reader;
-	private final Consumer<String> _consumer;
+	private final    BufferedReader      _reader;
+	private final    Consumer<String>    _consumer;
+	private final    Consumer<Throwable> _errConsumer;
+	private volatile boolean             _running;
 
-	public ReadThread(@NotNull InputStream inputStream, @NotNull Consumer<String> consumer, String tag) {
+	public ReadThread(@NotNull InputStream inputStream, @NotNull Consumer<String> consumer, @NotNull Consumer<Throwable> errConsumer, String tag) {
 		super(tag + "-reader");
 		setDaemon(true);
 		_reader = new BufferedReader(new InputStreamReader(inputStream));
 		_consumer = consumer;
+		_errConsumer = errConsumer;
 	}
 
 	@Override
 	public void run() {
 		try {
 			String line;
-			while ((line = _reader.readLine()) != null)
+			while (_running && (line = _reader.readLine()) != null)
 				_consumer.accept(line);
 		} catch (Throwable e) {
-			e.printStackTrace(System.err);
+			_errConsumer.accept(e);
 		} finally {
 			try {
 				_reader.close();
@@ -34,6 +37,12 @@ public class ReadThread extends Thread {
 				e.printStackTrace(System.err);
 			}
 		}
+	}
+
+	@Override
+	public void interrupt() {
+		_running = false;
+		super.interrupt();
 	}
 
 	public ReadThread startNow() {
