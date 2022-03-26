@@ -33,10 +33,15 @@ public interface TextSource extends Iterable<String> {
 	ScheduledExecutorService MONITOR_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 	ExecutorService          AUX_EXECUTOR     = Executors.newCachedThreadPool();
 
+	/**
+	 * Runs in a background executor, may be overridden if the source has a performance
+	 * constraint running multiple threads concurrently
+	 */
 	default void enqueueTextRequest(Runnable task) {
 		AUX_EXECUTOR.submit(task);
 	}
 
+	/** Runs in AWT thread when ready */
 	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		enqueueTextRequest(() -> {
 			try {
@@ -50,6 +55,7 @@ public interface TextSource extends Iterable<String> {
 		});
 	}
 
+	/** May block if other tasks are running, may be overridden to not block */
 	default String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
 		int toLinePlus1 = Math.min(fromLine + count, getLineCount());
 		String[] lines = new String[toLinePlus1 - fromLine + 1];
@@ -63,11 +69,13 @@ public interface TextSource extends Iterable<String> {
 	/** May block if indexing is not finished */
 	int getLineCount() throws ExecutionException, InterruptedException;
 
+	/** Runs in AWT thread when ready */
 	default Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
 		// implementations that support intermediate line count should override this method
 		return requestCompleteLineCount(consumer);
 	}
 
+	/** Runs in AWT thread when ready */
 	default Future<Integer> requestCompleteLineCount(IntConsumer consumer) {
 		return AUX_EXECUTOR.submit(() -> {
 			int lineCount = getLineCount();
