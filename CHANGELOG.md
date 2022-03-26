@@ -1,10 +1,13 @@
 ## In progress:
-- Bug fixes:
+
+## v0.0.9
+Bug fixes:
   - Analysis after 2nd level does not hang
   - Stopping searches may leave progressbar dirty
   - Ext analysis may not correctly stop in case of errors
 - General:
   - Key bindings
+  - Limited charset autodetection
 
 ## v0.0.8
 - General:
