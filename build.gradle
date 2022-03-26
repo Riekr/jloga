@@ -1,6 +1,7 @@
 plugins {
 	id 'java'
 	id 'edu.sc.seis.launch4j' version '2.5.1'
+	id 'de.undercouch.download' version '5.0.2'
 }
 
 repositories {
@@ -62,18 +63,46 @@ jar {
 launch4j {
 	// https://github.com/TheBoegl/gradle-launch4j
 	mainClassName = 'org.riekr.jloga.Main'
-
 	// convert icon.png -resize 256x256 -channel rgb -negate icon.ico
 	icon = "${projectDir}/src/main/resources/org/riekr/jloga/icon.ico"
 }
 
 tasks.register('fatJar', Jar) {
+	group "build"
 	manifest.from jar.manifest
 	archiveClassifier = 'all'
 	from sourceSets.main.output
 	dependsOn configurations.runtimeClasspath
 	from {
 		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+	}
+}
+
+task updateFinos {
+	// https://github.com/michel-kraemer/gradle-download-task
+	doLast {
+		def repo = "https://cdn.jsdelivr.net/npm/@finos"
+		def local = "src/main/html/org/riekr/jloga/http/perspective"
+		download.run { src "${repo}/perspective"; dest "${local}/perspective.js" }
+		download.run { src "${repo}/perspective-viewer"; dest "${local}/perspective-viewer.js" }
+		download.run { src "${repo}/perspective-viewer-datagrid"; dest "${local}/perspective-viewer-datagrid.js" }
+		download.run { src "${repo}/perspective-viewer-d3fc"; dest "${local}/perspective-viewer-d3fc.js" }
+		// you can set "wgetExec" in "gradle.properties" file in the same folder of this one (useful for cygwin)
+		def wget = project.hasProperty('wgetExec') ? wgetExec : 'wget'
+		exec {
+			workingDir "${local}"
+			executable wget
+			args(['-q',
+			      '--page-requisites',
+			      '--convert-links',
+			      '-e', 'robots=off',
+			      '--span-hosts',
+			      '--restrict-file-names=windows',
+			      '--directory-prefix=res',
+			      '--adjust-extension',
+			      "${repo}/perspective-viewer/dist/css/themes.css"
+			])
+		}
 	}
 }
 
