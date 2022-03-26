@@ -187,27 +187,31 @@ public class TextFileSource implements TextSource {
 			progressListener.onProgressChanged(lineNumber.value, _lineCount);
 			out.dispatchLineCount();
 		}, 0, 200, TimeUnit.MILLISECONDS);
-		Semaphore semaphore = new Semaphore(0);
-		_indexChangeListeners.add(() -> semaphore.release(1));
-		BooleanSupplier stopCondition = () -> {
-			if (!_indexing.isDone()) {
-				semaphore.acquireUninterruptibly();
+		try {
+			Semaphore semaphore = new Semaphore(0);
+			_indexChangeListeners.add(() -> semaphore.release(1));
+			BooleanSupplier continueCond = () -> {
+				if (!_indexing.isDone()) {
+					// wait for at least 1 page to be loaded
+					semaphore.acquireUninterruptibly();
+					return running.getAsBoolean();
+				}
 				return false;
-			}
-			return true;
-		};
-		int fromLine = 0;
-		do {
-			if (_lineCount > 0) {
-				// System.out.println(_lineCount);
-				for (lineNumber.value = fromLine; lineNumber.value < _lineCount; lineNumber.value++)
-					predicate.verify(lineNumber.value, getText(lineNumber.value));
-				fromLine = lineNumber.value;
-			}
-		} while (!stopCondition.getAsBoolean());
-		predicate.end();
-		updateTask.cancel(false);
-		progressListener.onProgressChanged(_lineCount, _lineCount);
+			};
+			int fromLine = 0;
+			do {
+				if (_lineCount > 0) {
+					// System.out.println(_lineCount);
+					for (lineNumber.value = fromLine; lineNumber.value < _lineCount && running.getAsBoolean(); lineNumber.value++)
+						predicate.verify(lineNumber.value, getText(lineNumber.value));
+					fromLine = lineNumber.value;
+				}
+			} while (continueCond.getAsBoolean());
+		} finally {
+			predicate.end();
+			updateTask.cancel(false);
+			progressListener.onProgressChanged(_lineCount, _lineCount);
+		}
 		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
 	}
 

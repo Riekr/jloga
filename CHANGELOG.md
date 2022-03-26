@@ -1,6 +1,7 @@
 ## In progress:
 - Bug fixes:
   - Analysis after 2nd level does not hang
+  - Stopping searches may leave progressbar dirty
 - General:
   - Key bindings
 
