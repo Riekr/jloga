@@ -27,7 +27,14 @@ public class HeaderDetector {
 	}
 
 	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
-		source.requestCompleteLineCount((lineCount) -> {
+		TextSource.AUX_EXECUTOR.submit(() -> {
+			int lineCount;
+			try {
+				lineCount = source.getLineCount();
+			} catch (ExecutionException | InterruptedException e) {
+				e.printStackTrace(System.err);
+				return;
+			}
 			if (_parent != null)
 				_parent.waitCompletion();
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
