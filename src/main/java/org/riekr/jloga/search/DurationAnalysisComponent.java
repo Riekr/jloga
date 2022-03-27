@@ -1,33 +1,29 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.io.TextSource;
-import org.riekr.jloga.misc.AutoDetect;
-import org.riekr.jloga.misc.Project;
+import static org.riekr.jloga.misc.StdFields.End;
+import static org.riekr.jloga.misc.StdFields.Func;
+import static org.riekr.jloga.misc.StdFields.MinDuration;
+import static org.riekr.jloga.misc.StdFields.Restart;
+import static org.riekr.jloga.misc.StdFields.Start;
 
 import java.time.Duration;
-import java.time.format.DateTimeFormatter;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import static org.riekr.jloga.misc.StdFields.*;
+import org.riekr.jloga.misc.Project;
 
-public class DurationAnalysisComponent extends SearchProjectComponentWithExpandablePanel implements AutoDetect.Wizard {
+public class DurationAnalysisComponent extends SearchProjectComponentWithExpandablePanel.WithStdWizard {
 	public static final String ID = "DurationAnalysisComponent";
 
-	public final Project.Field<Pattern>           patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
-	public final Project.Field<DateTimeFormatter> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
-	public final Project.Field<Pattern>           patFunc        = newPatternField(Func, "Function pattern:", 1);
-	public final Project.Field<Pattern>           patStart       = newPatternField(Start, "Start pattern:");
-	public final Project.Field<Pattern>           patEnd         = newPatternField(End, "End pattern:");
-	public final Project.Field<Pattern>           patRestart     = newPatternField(Restart, "Restart pattern:");
-	public final Project.Field<Duration>          minDuration    = newDurationField(MinDuration, "Minimum duration:");
+	private static final long serialVersionUID = -5133137752144513068L;
 
-	private Supplier<TextSource> _textSource;
+	public final Project.Field<Pattern>  patFunc     = newPatternField(Func, "Function pattern:", 1);
+	public final Project.Field<Pattern>  patStart    = newPatternField(Start, "Start pattern:");
+	public final Project.Field<Pattern>  patEnd      = newPatternField(End, "End pattern:");
+	public final Project.Field<Pattern>  patRestart  = newPatternField(Restart, "Restart pattern:");
+	public final Project.Field<Duration> minDuration = newDurationField(MinDuration, "Minimum duration:");
 
 	public DurationAnalysisComponent(int level) {
-		super("DurationAnalysisComponent." + level,
-				"jloga",
-				"Duration analysis project");
+		super(ID, level, "Duration analysis project");
 		buildUI();
 	}
 
@@ -52,34 +48,14 @@ public class DurationAnalysisComponent extends SearchProjectComponentWithExpanda
 
 	@Override
 	protected SearchPredicate getSearchPredicate() {
-		if (isReady()) {
-			return new DurationAnalysis(
-					patDateExtract.get(),
-					patDate.get(),
-					patFunc.get(),
-					patStart.get(),
-					patEnd.get(),
-					patRestart.get(),
-					minDuration.get()
-			);
-		}
-		return null;
-	}
-
-	@Override
-	public void setTextSourceSupplier(Supplier<TextSource> textSource) {
-		_textSource = textSource;
-	}
-
-	@Override
-	public void onWizard() {
-		AutoDetect autoDetect = AutoDetect.from(_textSource.get());
-		if (autoDetect != null) {
-			patDateExtract.ui.combo.setValue(autoDetect.pattern.pattern());
-			patDate.ui.combo.setValue(autoDetect.formatterString);
-		} else {
-			patDateExtract.ui.combo.setValue(null);
-			patDate.ui.combo.setValue(null);
-		}
+		return new DurationAnalysis(
+				patDateExtract.get(),
+				patDate.get(),
+				patFunc.get(),
+				patStart.get(),
+				patEnd.get(),
+				patRestart.get(),
+				minDuration.get()
+		);
 	}
 }

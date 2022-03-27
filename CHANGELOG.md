@@ -1,5 +1,8 @@
 ## In progress:
 
+## v0.0.10
+- Uniq search timestamp extraction
+
 ## v0.0.9
 - Bug fixes:
   - Analysis after 2nd level does not hang

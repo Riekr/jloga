@@ -10,5 +10,6 @@ public interface StdFields {
 	String Restart = "Restart";
 	String MinDuration = "MinDuration";
 	String Period = "Period";
+	String SearchPat = "SearchPattern";
 
 }

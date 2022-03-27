@@ -1,21 +1,59 @@
 package org.riekr.jloga.search;
 
+import java.awt.*;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
 import org.riekr.jloga.io.PropsIO;
+import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.misc.Project;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
-import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import static org.riekr.jloga.misc.StdFields.Date;
+import static org.riekr.jloga.misc.StdFields.DateExtractor;
 
 public abstract class SearchProjectComponentWithExpandablePanel extends SearchComponentWithExpandablePanel implements Project {
+	private static final long serialVersionUID = -1685626672776376188L;
+
+	protected abstract static class WithStdWizard extends SearchProjectComponentWithExpandablePanel implements AutoDetect.Wizard {
+		private static final long serialVersionUID = -7459674268125654646L;
+
+		public final Field<Pattern>           patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
+		public final Field<DateTimeFormatter> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
+
+		public WithStdWizard(String id, int level, String fileDescr) {
+			super(id, level, fileDescr);
+		}
+
+		@Override
+		public void onWizard() {
+			AutoDetect autoDetect = AutoDetect.from(_textSource.get());
+			if (autoDetect != null) {
+				patDateExtract.ui.combo.setValue(autoDetect.pattern.pattern());
+				patDate.ui.combo.setValue(autoDetect.formatterString);
+			} else {
+				patDateExtract.ui.combo.setValue(null);
+				patDate.ui.combo.setValue(null);
+			}
+		}
+	}
 
 	private final Map<String, MRUComboWithLabels<String>> _combos = new HashMap<>();
 
 	private final String _fileExt;
 	private final String _fileDescr;
 
+	protected Supplier<TextSource> _textSource;
+
+	public SearchProjectComponentWithExpandablePanel(String id, int level, String fileDescr) {
+		this(id + '.' + level, "jloga", fileDescr);
+	}
+
+	@Deprecated
 	public SearchProjectComponentWithExpandablePanel(String prefsPrefix, String fileExt, String fileDescr) {
 		super(prefsPrefix);
 		_fileExt = fileExt;
@@ -65,4 +103,13 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 			setText("Hey! Hover here!");
 	}
 
+	@Override
+	protected void search() {
+		if (isReady())
+			super.search();
+	}
+
+	public final void setTextSourceSupplier(Supplier<TextSource> textSource) {
+		_textSource = textSource;
+	}
 }

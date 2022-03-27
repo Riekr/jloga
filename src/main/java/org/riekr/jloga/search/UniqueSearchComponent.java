@@ -1,38 +1,19 @@
 package org.riekr.jloga.search;
 
-import javax.swing.*;
-import java.util.function.Consumer;
+import static org.riekr.jloga.misc.StdFields.SearchPat;
+
 import java.util.regex.Pattern;
 
-import org.riekr.jloga.react.Unsubscribable;
-import org.riekr.jloga.ui.MRUTextCombo;
-import org.riekr.jloga.utils.UIUtils;
+public class UniqueSearchComponent extends SearchProjectComponentWithExpandablePanel.WithStdWizard {
+	private static final long serialVersionUID = -9087197176161972847L;
 
-public class UniqueSearchComponent extends Box implements SearchComponent {
 	public static final String ID = "UniqueSearchComponent";
 
-	private final MRUTextCombo<String> _combo;
-	private       Unsubscribable       _comboListener;
+	public final Field<Pattern> pattern = newPatternField(SearchPat, "Pattern:", 1);
 
 	public UniqueSearchComponent(int level) {
-		super(BoxLayout.LINE_AXIS);
-		_combo = MRUTextCombo.newMRUTextCombo("unique." + level, "(\\w+(?:\\.\\w+)*\\.\\w*(?:Exception|Error))");
-		add(_combo);
-	}
-
-	@Override
-	public void onSearch(Consumer<SearchPredicate> consumer) {
-		if (_comboListener != null) {
-			_comboListener.unsubscribe();
-			_comboListener = null;
-		}
-		if (consumer != null) {
-			_comboListener = _combo.subject.subscribe((pattern) -> {
-				Pattern pat = UIUtils.toPattern(this, pattern, 0, 0);
-				if (pat != null)
-					consumer.accept(new UniqueSearch(pat));
-			});
-		}
+		super(ID, level, "Unique search project");
+		buildUI();
 	}
 
 	@Override
@@ -43,5 +24,15 @@ public class UniqueSearchComponent extends Box implements SearchComponent {
 	@Override
 	public String getSearchIconLabel() {
 		return "U";
+	}
+
+	@Override
+	public boolean isReady() {
+		return pattern.hasValue();
+	}
+
+	@Override
+	protected SearchPredicate getSearchPredicate() {
+		return new UniqueSearch(pattern.get(), patDateExtract.get(), patDate.get());
 	}
 }

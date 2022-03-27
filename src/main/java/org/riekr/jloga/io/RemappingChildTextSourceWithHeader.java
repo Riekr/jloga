@@ -1,22 +1,22 @@
 package org.riekr.jloga.io;
 
-import org.riekr.jloga.react.Unsubscribable;
+import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Supplier;
+
+import org.riekr.jloga.react.Unsubscribable;
 
 public class RemappingChildTextSourceWithHeader extends RemappingChildTextSource {
 
 	private final String _header;
 
-	public RemappingChildTextSourceWithHeader(TextSource tie, Pattern pattern, Function<Matcher, String> extractor, String header) {
-		super(tie, pattern, extractor);
-		_header = Objects.requireNonNull(header);
+	public RemappingChildTextSourceWithHeader(TextSource tie, Supplier<Function<String, String>> extractor, String header) {
+		super(tie, extractor);
+		_header = requireNonNull(header);
 	}
 
 	@Override

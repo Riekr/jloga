@@ -16,6 +16,7 @@ import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public abstract class SearchComponentWithExpandablePanel extends JLabel implements SearchComponent {
+	private static final long serialVersionUID = 7751803744482675483L;
 
 	private final String               _prefsPrefix;
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();
