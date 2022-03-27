@@ -1,7 +1,9 @@
 ## In progress:
 
-## v0.0.10
-- Uniq search timestamp extraction
+- Analysis:
+  - Uniq search timestamp extraction
+- Bug fixes:
+  - RegEx searches with extraction does not corrupt grid data anymore
 
 ## v0.0.9
 - Bug fixes:
