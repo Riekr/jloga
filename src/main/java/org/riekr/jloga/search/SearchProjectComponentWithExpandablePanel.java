@@ -1,7 +1,9 @@
 package org.riekr.jloga.search;
 
+import static org.riekr.jloga.misc.StdFields.Date;
+import static org.riekr.jloga.misc.StdFields.DateExtractor;
+
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -10,11 +12,9 @@ import java.util.regex.Pattern;
 import org.riekr.jloga.io.PropsIO;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
+import org.riekr.jloga.misc.DateTimeFormatterRef;
 import org.riekr.jloga.misc.Project;
 import org.riekr.jloga.ui.MRUComboWithLabels;
-
-import static org.riekr.jloga.misc.StdFields.Date;
-import static org.riekr.jloga.misc.StdFields.DateExtractor;
 
 public abstract class SearchProjectComponentWithExpandablePanel extends SearchComponentWithExpandablePanel implements Project {
 	private static final long serialVersionUID = -1685626672776376188L;
@@ -22,8 +22,8 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 	protected abstract static class WithStdWizard extends SearchProjectComponentWithExpandablePanel implements AutoDetect.Wizard {
 		private static final long serialVersionUID = -7459674268125654646L;
 
-		public final Field<Pattern>           patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
-		public final Field<DateTimeFormatter> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
+		public final Field<Pattern>              patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
+		public final Field<DateTimeFormatterRef> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
 
 		public WithStdWizard(String id, int level, String fileDescr) {
 			super(id, level, fileDescr);
@@ -33,11 +33,11 @@ public abstract class SearchProjectComponentWithExpandablePanel extends SearchCo
 		public void onWizard() {
 			AutoDetect autoDetect = AutoDetect.from(_textSource.get());
 			if (autoDetect != null) {
-				patDateExtract.ui.combo.setValue(autoDetect.pattern.pattern());
-				patDate.ui.combo.setValue(autoDetect.formatterString);
+				patDateExtract.set(autoDetect.pattern);
+				patDate.set(autoDetect.formatterRef);
 			} else {
-				patDateExtract.ui.combo.setValue(null);
-				patDate.ui.combo.setValue(null);
+				patDateExtract.set(null);
+				patDate.set(null);
 			}
 		}
 	}

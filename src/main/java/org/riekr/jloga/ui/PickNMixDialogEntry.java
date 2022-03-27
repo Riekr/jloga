@@ -17,6 +17,7 @@ import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.utils.UIUtils;
 
 public class PickNMixDialogEntry extends JComponent {
+	private static final long serialVersionUID = -5071232382364124273L;
 
 	private final BiConsumer<Boolean, PickNMixDialogEntry> _consumer;
 
@@ -32,7 +33,7 @@ public class PickNMixDialogEntry extends JComponent {
 		MRUComboWithLabels<Pattern> dateExtractComp = newCombo("dateExtract", "Date extract pattern:", this::setDateExtract, (ui, text) -> UIUtils.toPattern(ui, text, 1));
 		dateExtractComp.setVisible(false);
 
-		MRUComboWithLabels<DateTimeFormatter> dateFormatterComp = newCombo("dateFormat", "Date format pattern:", this::setDateFormat, UIUtils::toDateTimeFormatter);
+		MRUComboWithLabels<DateTimeFormatter> dateFormatterComp = newCombo("dateFormat", "Date format pattern:", this::setDateFormat, (ui, pat) -> UIUtils.toDateTimeFormatter(ui, pat).formatter);
 		dateFormatterComp.setVisible(false);
 
 		JComponent offsetComp = newCombo("offset", "Date offset:", this::setOffset, UIUtils::toDuration);

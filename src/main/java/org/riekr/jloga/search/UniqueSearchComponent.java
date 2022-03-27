@@ -33,6 +33,10 @@ public class UniqueSearchComponent extends SearchProjectComponentWithExpandableP
 
 	@Override
 	protected SearchPredicate getSearchPredicate() {
-		return new UniqueSearch(pattern.get(), patDateExtract.get(), patDate.get());
+		return new UniqueSearch(
+				pattern.get(),
+				patDateExtract.get(),
+				patDate.get().formatter
+		);
 	}
 }

@@ -50,7 +50,7 @@ public final class AutoDetect implements Predicate<String> {
 	}
 
 	public static void getDateTimeFormatters(Collection<? super DateTimeFormatter> res) {
-		_AUTO_DETECTS.stream().map((ad) -> ad.formatter).forEach(res::add);
+		_AUTO_DETECTS.stream().map((ad) -> ad.formatterRef.formatter).forEach(res::add);
 	}
 
 	@NotNull
@@ -59,7 +59,7 @@ public final class AutoDetect implements Predicate<String> {
 			AutoDetect res = from(textSource);
 			if (res != null) {
 				patternCombo.combo.setValue(res.pattern.pattern());
-				formatterCombo.combo.setValue(res.formatterString);
+				formatterCombo.combo.setValue(res.formatterRef.pattern);
 			} else {
 				patternCombo.combo.setValue(null);
 				formatterCombo.combo.setValue(null);
@@ -91,14 +91,12 @@ public final class AutoDetect implements Predicate<String> {
 	}
 
 
-	public final @NotNull Pattern           pattern;
-	public final @NotNull DateTimeFormatter formatter;
-	public final @NotNull String            formatterString;
+	public final @NotNull Pattern              pattern;
+	public final @NotNull DateTimeFormatterRef formatterRef;
 
 	private AutoDetect(@NotNull Pattern pattern, @NotNull String dateFormat) {
 		this.pattern = pattern;
-		this.formatter = Formatters.newDefaultDateTimeFormatter(dateFormat);
-		this.formatterString = dateFormat;
+		this.formatterRef = DateTimeFormatterRef.ofPattern(dateFormat);
 	}
 
 
@@ -109,7 +107,7 @@ public final class AutoDetect implements Predicate<String> {
 			if (matcher.find()) {
 				String date = matcher.group(matcher.groupCount());
 				try {
-					formatter.parse(date);
+					formatterRef.formatter.parse(date);
 					return true;
 				} catch (DateTimeParseException ignored) {}
 			}
@@ -125,12 +123,12 @@ public final class AutoDetect implements Predicate<String> {
 		final AutoDetect that = (AutoDetect)o;
 		if (!pattern.equals(that.pattern))
 			return false;
-		return formatter.equals(that.formatter);
+		return formatterRef.equals(that.formatterRef);
 	}
 
 	@Override public int hashCode() {
 		int result = pattern.hashCode();
-		result = 31 * result + formatter.hashCode();
+		result = 31 * result + formatterRef.hashCode();
 		return result;
 	}
 }

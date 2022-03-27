@@ -4,6 +4,7 @@
   - Uniq search timestamp extraction
 - Bug fixes:
   - RegEx searches with extraction does not corrupt grid data anymore
+  - Date patterns detection wizards correctly gets saved in project combos
 
 ## v0.0.9
 - Bug fixes:

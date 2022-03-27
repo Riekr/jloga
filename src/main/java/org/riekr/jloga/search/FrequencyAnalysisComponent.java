@@ -41,7 +41,7 @@ public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpand
 	protected SearchPredicate getSearchPredicate() {
 		return new FrequencyAnalysis(
 				patDateExtract.get(),
-				patDate.get(),
+				patDate.get().formatter,
 				patFunc.get(),
 				periodDuration.get()
 		);

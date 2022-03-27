@@ -50,7 +50,7 @@ public class DurationAnalysisComponent extends SearchProjectComponentWithExpanda
 	protected SearchPredicate getSearchPredicate() {
 		return new DurationAnalysis(
 				patDateExtract.get(),
-				patDate.get(),
+				patDate.get().formatter,
 				patFunc.get(),
 				patStart.get(),
 				patEnd.get(),

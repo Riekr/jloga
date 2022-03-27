@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.Main;
-import org.riekr.jloga.misc.Formatters;
+import org.riekr.jloga.misc.DateTimeFormatterRef;
 import org.riekr.jloga.react.BoolConsumer;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
@@ -170,10 +169,10 @@ public final class UIUtils {
 		return null;
 	}
 
-	public static DateTimeFormatter toDateTimeFormatter(Component component, String patDate) {
+	public static DateTimeFormatterRef toDateTimeFormatter(Component component, String patDate) {
 		if (patDate != null && !patDate.isBlank()) {
 			try {
-				DateTimeFormatter res = Formatters.newDefaultDateTimeFormatter(patDate);
+				DateTimeFormatterRef res = DateTimeFormatterRef.ofPattern(patDate);
 				dispatchErrorCleared(component);
 				return res;
 			} catch (IllegalArgumentException iae) {
