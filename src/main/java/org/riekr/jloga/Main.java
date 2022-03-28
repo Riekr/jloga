@@ -2,6 +2,7 @@ package org.riekr.jloga;
 
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
+import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newTabHeader;
 
@@ -80,12 +81,14 @@ public class Main extends JFrame implements FileDropListener {
 		toolBar.add(charsetCombo);
 		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
+		// help
+		_help = new MainDesktopHelp(toolBar, this::openFile);
+
 		// layout
 		setLayout(new BorderLayout());
 		add(toolBar, BorderLayout.NORTH);
 		add(_progressBar, BorderLayout.SOUTH);
-
-		add(_help = new MainDesktopHelp(toolBar, this::openFile));
+		add(_help, BorderLayout.CENTER);
 
 		setFileDropListener(this::openFiles);
 
@@ -157,6 +160,21 @@ public class Main extends JFrame implements FileDropListener {
 		}
 	}
 
+	private void onAddFirstTab() {
+		remove(_help);
+		_help.setHideArrows(true);
+		_tabs.addTab(TAB_ADD, _help);
+	}
+
+	private void onRemoveLastTab() {
+		int helpIdx = _tabs.indexOfComponent(_help);
+		if (helpIdx != -1)
+			_tabs.removeTabAt(helpIdx);
+		remove(_tabs);
+		_help.setHideArrows(false);
+		add(_help, BorderLayout.CENTER);
+	}
+
 	public void open(Object key, String title, String description, Function<Runnable, TextSource> src) {
 		if (_openFiles.containsKey(key)) {
 			System.out.println("Already open: " + key);
@@ -172,30 +190,38 @@ public class Main extends JFrame implements FileDropListener {
 				_tabs.remove(searchPanel);
 			}
 			_openFiles.remove(key);
-			if (_tabs.getTabCount() == 0)
-				_help.setVisible(true);
+			if (_tabs.getTabCount() == 1)
+				onRemoveLastTab();
+			else {
+				int idx = _tabs.indexOfTab(TAB_ADD);
+				if (idx > 0)
+					_tabs.setSelectedIndex(idx - 1);
+			}
 		};
 
 		TextSource textSource = src.apply(closer);
 		_openFiles.put(key, textSource);
 		try {
 			System.out.println("Opening: " + description);
-			_help.setVisible(false);
-			if (_tabs.getParent() == null)
-				add(_tabs);
+			if (_tabs.getParent() == null) {
+				onAddFirstTab();
+				add(_tabs, BorderLayout.CENTER);
+			}
 
 			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
 			searchPanel.setFileDropListener(this::openFiles);
 			searchPanel.setFont(_font);
-			_tabs.addTab(searchPanel.toString(), searchPanel);
+
+			int idx = _tabs.indexOfTab(TAB_ADD);
+			_tabs.insertTab(searchPanel.toString(), null, searchPanel, null, idx);
+			_tabs.setSelectedIndex(idx);
+
 			searchPanelReference.set(searchPanel);
 			searchPanel.addHierarchyListener(e -> {
 				if (e.getID() == HierarchyEvent.PARENT_CHANGED && searchPanel.getParent() == null)
 					_openFiles.remove(key);
 			});
 
-			int idx = _tabs.getTabCount() - 1;
-			_tabs.setSelectedIndex(idx);
 			JComponent tabHeader = newTabHeader(searchPanel.toString(), closer, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
 			ContextMenu.addActionCopy(tabHeader, key);
 			_tabs.setTabComponentAt(idx, tabHeader);

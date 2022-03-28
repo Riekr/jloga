@@ -1,5 +1,7 @@
 ## In progress:
 
+- General
+  - New tab button in main panel allows reopening recent files
 - Analysis:
   - Uniq search timestamp extraction
 - Bug fixes:

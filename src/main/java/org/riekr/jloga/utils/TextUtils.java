@@ -14,6 +14,8 @@ import org.riekr.jloga.prefs.GUIPreference;
 
 public class TextUtils {
 
+	public static final String TAB_ADD = " + ";
+
 	// https://stackoverflow.com/a/25228492/1326326
 	public static String escapeHTML(String s) {
 		StringBuilder out = new StringBuilder(Math.max(16, s.length()));

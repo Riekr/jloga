@@ -276,4 +276,16 @@ public final class UIUtils {
 	public static Border createEmptyBorder(int size) {
 		return BorderFactory.createEmptyBorder(size, size, size, size);
 	}
+
+	public static MouseListener onClickListener(Runnable runnable) {
+		return new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == 1) {
+					runnable.run();
+					e.consume();
+				}
+			}
+		};
+	}
 }

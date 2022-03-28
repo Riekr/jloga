@@ -1,12 +1,12 @@
 package org.riekr.jloga.ui;
 
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
+import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
+import static org.riekr.jloga.utils.UIUtils.onClickListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
@@ -26,7 +26,6 @@ import org.riekr.jloga.utils.UIUtils;
 public class SearchPanel extends JComponent implements FileDropListener {
 	private static final long serialVersionUID = -6368198678080747740L;
 
-	private static final String _TAB_ADD    = " + ";
 	private static final String _TAB_PREFIX = "Search ";
 
 	private final VirtualTextArea _textArea;
@@ -75,17 +74,11 @@ public class SearchPanel extends JComponent implements FileDropListener {
 
 		// add new tab code: I can't use a change listener to avoid loops
 		// the "+" tab should never be selected and must stick as last tab
-		_bottomTabs.addTab(_TAB_ADD, null);
+		_bottomTabs.addTab(TAB_ADD, null);
 		_bottomTabsNavigation = TabNavigation.createFor(_bottomTabs);
 		_splitPane.add(_bottomTabs);
 		// ugly but working (otherwise you have to hit "+" text)
-		_bottomTabs.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (e.getButton() == 1)
-					addNewTab();
-			}
-		});
+		_bottomTabs.addMouseListener(onClickListener(this::addNewTab));
 		setupKeyBindings();
 	}
 
@@ -126,7 +119,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		String tabTitle = newTabTempTitle();
 		SearchPanelBottomArea body = new SearchPanelBottomArea(getChildTitle(tabTitle), SearchPanel.this, _progressBar, _level);
 		body.setFont(getFont());
-		int idx = _bottomTabs.indexOfTab(_TAB_ADD);
+		int idx = _bottomTabs.indexOfTab(TAB_ADD);
 		_bottomTabs.insertTab(null, null, body, null, idx);
 		_bottomTabs.setTabComponentAt(idx, newTabHeader(this.newTabTempTitle(), body));
 		_bottomTabs.setSelectedIndex(idx);

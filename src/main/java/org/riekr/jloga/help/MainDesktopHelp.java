@@ -27,6 +27,8 @@ public class MainDesktopHelp extends JComponent {
 	private final JComponent[] _rightComponents;
 	private final JLabel       _keyBindings;
 
+	private boolean _hideArrows;
+
 	public MainDesktopHelp(JToolBar toolBar, Consumer<File> opener) {
 		ArrayList<JComponent> lc = new ArrayList<>();
 		ArrayList<JComponent> rc = new ArrayList<>();
@@ -86,8 +88,14 @@ public class MainDesktopHelp extends JComponent {
 		) + "</html>");
 	}
 
+	public void setHideArrows(boolean hideArrows) {
+		_hideArrows = hideArrows;
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
+		if (_hideArrows)
+			return;
 		if (g instanceof Graphics2D)
 			((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(Color.GRAY);
