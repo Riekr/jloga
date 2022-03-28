@@ -1,0 +1,10 @@
+{
+  "order": 1,
+  "icon": "\uD83D\uDC4B 1",
+  "label": "Grep ERROR",
+  "description": "Grep errors",
+  "command": [
+    "D:\\Gian\\Cygwin64\\bin\\grep.exe",
+    "ERROR"
+  ]
+}

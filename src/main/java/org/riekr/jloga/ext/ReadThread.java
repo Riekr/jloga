@@ -12,7 +12,7 @@ public class ReadThread extends Thread {
 	private final    BufferedReader      _reader;
 	private final    Consumer<String>    _consumer;
 	private final    Consumer<Throwable> _errConsumer;
-	private volatile boolean             _running;
+	private volatile boolean             _running = true;
 
 	public ReadThread(@NotNull InputStream inputStream, @NotNull Consumer<String> consumer, @NotNull Consumer<Throwable> errConsumer, String tag) {
 		super(tag + "-reader");
