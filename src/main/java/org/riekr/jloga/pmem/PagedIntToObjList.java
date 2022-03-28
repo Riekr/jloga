@@ -11,8 +11,9 @@ public class PagedIntToObjList<T extends Serializable> extends PagedList<IntToOb
 		super.add(new IntToObject<>(tag, value));
 	}
 
-	public final int getTag(int idx) {
-		return get(idx).tag;
+	public final Integer getTag(int idx) {
+		IntToObject<T> rec = get(idx);
+		return rec == null ? null : rec.tag;
 	}
 
 	public final T getValue(int idx) {

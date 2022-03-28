@@ -140,6 +140,10 @@ public class PagedList<T extends Serializable> implements Closeable {
 		int idx = index - _reading.start;
 		if (idx < 0 || idx >= _reading.data.size()) {
 			Map.Entry<Integer, Page<T>> e = _pages.floorEntry(index);
+			if (e == null) {
+				// no pages
+				return null;
+			}
 			int newStart = e.getKey();
 			idx = index - newStart;
 			if (idx < _reading.data.size()) {

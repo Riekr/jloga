@@ -7,6 +7,7 @@
 - Bug fixes:
   - RegEx searches with extraction does not corrupt grid data anymore
   - Date patterns detection wizards correctly gets saved in project combos
+  - Fix for empty paged lists
 
 ## v0.0.9
 - Bug fixes:
