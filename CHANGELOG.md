@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.0.10
 - General
   - New tab button in main panel allows reopening recent files
 - Analysis:
