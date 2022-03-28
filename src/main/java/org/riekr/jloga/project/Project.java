@@ -1,4 +1,4 @@
-package org.riekr.jloga.misc;
+package org.riekr.jloga.project;
 
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.joining;
@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.riekr.jloga.misc.DateTimeFormatterRef;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.UIUtils;
 
@@ -73,6 +74,10 @@ public interface Project {
 		public String toString() {
 			return _src;
 		}
+	}
+
+	default Field<String> newStringField(String key, String label) {
+		return new Field<>(key, label, (text, ui) -> text, Function.identity());
 	}
 
 	default Field<Pattern> newPatternField(String key, String label) {

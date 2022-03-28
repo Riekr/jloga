@@ -4,6 +4,8 @@
   - New tab button in main panel allows reopening recent files
 - Analysis:
   - Uniq search timestamp extraction
+- External scripts:
+  - Support for editing parameters from ui
 - Bug fixes:
   - RegEx searches with extraction does not corrupt grid data anymore
   - Date patterns detection wizards correctly gets saved in project combos

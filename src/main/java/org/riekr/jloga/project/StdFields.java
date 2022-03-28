@@ -1,4 +1,4 @@
-package org.riekr.jloga.misc;
+package org.riekr.jloga.project;
 
 public interface StdFields {
 

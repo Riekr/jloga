@@ -1,13 +1,15 @@
 package org.riekr.jloga.search;
 
-import static org.riekr.jloga.misc.StdFields.Func;
-import static org.riekr.jloga.misc.StdFields.Period;
+import org.riekr.jloga.project.ProjectComponentWithStdWizard;
+
+import static org.riekr.jloga.project.StdFields.Func;
+import static org.riekr.jloga.project.StdFields.Period;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
 
-public class FrequencyAnalysisComponent extends SearchProjectComponentWithExpandablePanel.WithStdWizard {
+public class FrequencyAnalysisComponent extends ProjectComponentWithStdWizard {
 	private static final long serialVersionUID = -3621473265054156767L;
 
 	public static final String ID = "FrequencyAnalysisComponent";

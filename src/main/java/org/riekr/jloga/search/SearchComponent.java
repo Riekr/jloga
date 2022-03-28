@@ -1,5 +1,8 @@
 package org.riekr.jloga.search;
 
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,5 +18,7 @@ public interface SearchComponent {
 	}
 
 	default void setVariables(Map<String, String> vars) {}
+
+	@NotNull JComponent getUIComponent();
 
 }

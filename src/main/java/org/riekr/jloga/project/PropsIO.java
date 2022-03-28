@@ -1,4 +1,4 @@
-package org.riekr.jloga.io;
+package org.riekr.jloga.project;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -15,10 +15,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import org.riekr.jloga.misc.Project;
 import org.riekr.jloga.prefs.PrefsUtils;
 
-public class PropsIO {
+class PropsIO {
 
 	private static final String PATH_PREFS_PREFIX = "PropsIO.";
 

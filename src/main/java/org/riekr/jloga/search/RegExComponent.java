@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.misc.Predicates;
 import org.riekr.jloga.misc.SearchComboEntry;
 import org.riekr.jloga.react.Unsubscribable;
@@ -67,6 +68,11 @@ public class RegExComponent extends Box implements SearchComponent {
 	@Override
 	public String getSearchIconLabel() {
 		return ".*";
+	}
+
+	@Override
+	public @NotNull JComponent getUIComponent() {
+		return this;
 	}
 
 	@Override

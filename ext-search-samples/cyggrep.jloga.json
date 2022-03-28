@@ -1,0 +1,17 @@
+{
+  "order": 0,
+  "icon": "\uD83D\uDC4B 0",
+  "label": "Grep",
+  "description": "Cygwin grep",
+  "command": [
+    "D:\\Gian\\Cygwin64\\bin\\grep.exe",
+    "%Text%"
+  ],
+  "params": {
+    "Text": {
+      "type": "STRING",
+      "description": "Text to search",
+      "mandatory": true
+    }
+  }
+}

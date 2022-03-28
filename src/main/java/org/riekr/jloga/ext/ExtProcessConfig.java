@@ -6,16 +6,36 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+
+import org.riekr.jloga.project.Project;
+import org.riekr.jloga.search.SearchComponent;
 
 public class ExtProcessConfig {
 
-	public String   workingDirectory;
-	public String   icon;
-	public String   label;
-	public String   description;
-	public Object[] command;
-	public int      order;
+	public enum ParamType {
+		STRING, PATTERN, DURATION
+		// TODO: BOOLEAN
+	}
+
+	public static class Param {
+		public String    description;
+		public ParamType type;
+		public boolean   mandatory;
+		public int       min;
+		public String    deflt;
+
+		public transient Project.Field<?> _field;
+	}
+
+	public String             workingDirectory;
+	public String             icon;
+	public String             label;
+	public String             description;
+	public Object[]           command;
+	public int                order;
+	public Map<String, Param> params;
 
 	public String[] getCommand() {
 		ArrayList<String> res = new ArrayList<>();
@@ -44,5 +64,11 @@ public class ExtProcessConfig {
 				", command=" + Arrays.toString(command) +
 				", order=" + order +
 				'}';
+	}
+
+	public SearchComponent toComponent(String id, int level) {
+		if (params == null || params.isEmpty())
+			return new ExtProcessComponent(id, icon, label, new File(workingDirectory), getCommand());
+		return new ExtProcessComponentProject(id, icon, level, new File(workingDirectory), getCommand(), params);
 	}
 }

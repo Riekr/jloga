@@ -43,12 +43,12 @@ public class SearchSelector extends JPanel {
 	}
 
 	public void openSelection() {
-		SearchRegistry.Entry<?>[] choices = SearchRegistry.getChoices();
-		SearchRegistry.Entry<?> initialSelectionValue = Arrays.stream(choices)
+		SearchRegistry.Entry[] choices = SearchRegistry.getChoices();
+		SearchRegistry.Entry initialSelectionValue = Arrays.stream(choices)
 				.filter((e) -> e.id.equals(_searchComponent.getID()))
 				.findFirst()
 				.orElseGet(() -> choices[0]);
-		SearchRegistry.Entry<?> input = (SearchRegistry.Entry<?>)JOptionPane.showInputDialog(
+		SearchRegistry.Entry input = (SearchRegistry.Entry)JOptionPane.showInputDialog(
 				this.getRootPane(),
 				"Select a search type between those available:",
 				"Choose search type",
@@ -65,23 +65,23 @@ public class SearchSelector extends JPanel {
 		SearchRegistry.get(id, _level, this::setSearchUI);
 	}
 
-	private <T extends JComponent & SearchComponent> String setSearchUI(T comp) {
+	private String setSearchUI(SearchComponent comp) {
 		boolean focus = _searchComponent != null;
 		if (_searchComponent != null)
 			_searchComponent.onSearch(null);
 		if (_searchUI != null)
 			remove(_searchUI);
 		_searchComponent = comp;
-		_searchUI = comp;
+		_searchUI = comp.getUIComponent();
 		if (comp instanceof AutoDetect.Wizard && _textSource != null)
 			((AutoDetect.Wizard)comp).setTextSourceSupplier(_textSource);
-		comp.onSearch(_onSearchConsumer);
-		comp.setVariables(_vars);
-		add(comp, BorderLayout.CENTER);
+		_searchComponent.onSearch(_onSearchConsumer);
+		_searchComponent.setVariables(_vars);
+		add(_searchUI, BorderLayout.CENTER);
 		_selectBtn.setText(_searchComponent.getSearchIconLabel());
 		if (focus)
-			comp.requestFocusInWindow();
-		return comp.getID();
+			_searchUI.requestFocusInWindow();
+		return _searchComponent.getID();
 	}
 
 	@Override

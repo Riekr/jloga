@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 
 public class ExtSearchRegistry {
 
-	private static List<Entry<?>> _ENTRIES = emptyList();
+	private static List<Entry> _ENTRIES = emptyList();
 
 	public static void init() {
 		// load external searches modules
@@ -37,7 +37,7 @@ public class ExtSearchRegistry {
 			_ENTRIES.forEach(SearchRegistry::remove);
 			if (extPath != null) {
 				Gson gson = new Gson();
-				ArrayList<Map.Entry<Integer, Entry<?>>> res = new ArrayList<>();
+				ArrayList<Map.Entry<Integer, Entry>> res = new ArrayList<>();
 				for (Path f : Files.list(extPath.toPath()).collect(toList())) {
 					try {
 						if (Files.isRegularFile(f) && f.toString().toLowerCase().endsWith(".jloga.json")) {
@@ -49,7 +49,7 @@ public class ExtSearchRegistry {
 								String id = f.toAbsolutePath().toString();
 								res.add(new AbstractMap.SimpleEntry<>(
 										config.order,
-										new Entry<>(id, (level) -> new ExtProcessComponent(id, config.icon, config.label, new File(config.workingDirectory), config.getCommand()), config.description))
+										new Entry(id, (level) -> config.toComponent(id, level), config.description))
 								);
 							}
 						}

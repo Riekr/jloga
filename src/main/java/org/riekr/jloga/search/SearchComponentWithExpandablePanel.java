@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
@@ -80,7 +81,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 	protected abstract void setupConfigPaneButtons(Container configPaneButtons);
 
-	protected MRUComboWithLabels<String> newEditableField(String key, String label, Consumer<String> onResult) {
+	protected MRUComboWithLabels<String> newEditableComponent(String key, String label, Consumer<String> onResult) {
 		MRUComboWithLabels<String> editableField = MRUComboWithLabels.forString(_prefsPrefix + '.' + key, label, onResult);
 		editableField.combo.addMouseListener(_mouseListener);
 		editableField.combo.addPopupMenuListener(new PopupMenuListener() {
@@ -152,6 +153,11 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 			_configVisible.next(false);
 			_onSearchConsumer.accept(predicate);
 		}
+	}
+
+	@Override
+	public @NotNull JComponent getUIComponent() {
+		return this;
 	}
 
 }

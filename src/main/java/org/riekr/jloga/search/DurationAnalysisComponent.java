@@ -1,17 +1,18 @@
 package org.riekr.jloga.search;
 
-import static org.riekr.jloga.misc.StdFields.End;
-import static org.riekr.jloga.misc.StdFields.Func;
-import static org.riekr.jloga.misc.StdFields.MinDuration;
-import static org.riekr.jloga.misc.StdFields.Restart;
-import static org.riekr.jloga.misc.StdFields.Start;
+import static org.riekr.jloga.project.StdFields.End;
+import static org.riekr.jloga.project.StdFields.Func;
+import static org.riekr.jloga.project.StdFields.MinDuration;
+import static org.riekr.jloga.project.StdFields.Restart;
+import static org.riekr.jloga.project.StdFields.Start;
 
 import java.time.Duration;
 import java.util.regex.Pattern;
 
-import org.riekr.jloga.misc.Project;
+import org.riekr.jloga.project.Project;
+import org.riekr.jloga.project.ProjectComponentWithStdWizard;
 
-public class DurationAnalysisComponent extends SearchProjectComponentWithExpandablePanel.WithStdWizard {
+public class DurationAnalysisComponent extends ProjectComponentWithStdWizard {
 	public static final String ID = "DurationAnalysisComponent";
 
 	private static final long serialVersionUID = -5133137752144513068L;
