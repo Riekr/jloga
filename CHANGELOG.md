@@ -1,5 +1,8 @@
 ## In progress:
 
+- Bug fixes:
+  - Fixed disappeared ext process start button
+
 ## v0.0.10
 - General
   - New tab button in main panel allows reopening recent files

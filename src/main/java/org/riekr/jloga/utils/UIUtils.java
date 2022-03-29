@@ -61,7 +61,10 @@ public final class UIUtils {
 	}
 
 	public static JButton newBorderlessButton(String text, Runnable action) {
-		JButton btn = newButton(text, action);
+		return makeBorderless(newButton(text, action));
+	}
+
+	public static JButton makeBorderless(JButton btn) {
 		btn.setBorder(FLAT_BUTTON_BORDER);
 		btn.setBorderPainted(false);
 		btn.setContentAreaFilled(false);

@@ -8,8 +8,9 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.search.SearchComponent;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.UIUtils;
 
-public class ExtProcessComponent extends JComponent implements SearchComponent {
+public class ExtProcessComponent extends JButton implements SearchComponent {
 	private static final long serialVersionUID = 8599529986240844558L;
 
 	private final String _id;
@@ -22,9 +23,9 @@ public class ExtProcessComponent extends JComponent implements SearchComponent {
 		_id = id;
 		_icon = icon;
 		_manager = new ExtProcessManager(command, workingDirectory);
-		JButton launchButton = new JButton(label);
-		add(launchButton);
-		launchButton.addActionListener((e) -> {
+		UIUtils.makeBorderless(this);
+		setText(label);
+		addActionListener((e) -> {
 			if (_searchPredicateConsumer != null) {
 				SearchPredicate searchPredicate = _manager.newSearchPredicate();
 				if (searchPredicate != null)
