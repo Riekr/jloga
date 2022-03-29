@@ -14,6 +14,7 @@ import java.time.temporal.TemporalQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -24,6 +25,7 @@ import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.InstantRange;
 import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.react.BoolConsumer;
 
 public class PickNMixOptionPane {
 
@@ -62,8 +64,10 @@ public class PickNMixOptionPane {
 		AtomicReference<LocalTime> fromTime = new AtomicReference<>();
 		AtomicReference<LocalDate> toDate = new AtomicReference<>();
 		AtomicReference<LocalTime> toTime = new AtomicReference<>();
+		AtomicBoolean prefixWithId = new AtomicBoolean();
 		options.add(getDateTimePicker("From:", LocalTime.MIN, fromDate::set, fromTime::set));
 		options.add(getDateTimePicker("To:", LocalTime.MAX, toDate::set, toTime::set));
+		options.add(getCheckbox("Prefix output with ID", true, prefixWithId::set));
 		optionPane.setMessage(options.toArray());
 		EventQueue.invokeLater(dialog::pack);
 		dialog.setMinimumSize(new Dimension(480, 0));
@@ -75,10 +79,14 @@ public class PickNMixOptionPane {
 			if (selectedFiles.size() >= 2) {
 				Map<TextSource, MixFileSource.SourceConfig> res = new HashMap<>();
 				selectedFiles.forEach((k, v) -> res.put(inputFiles.get(k), v.getConfig(k)));
-				return new MixFileSource.Config(res, InstantRange.from(
-						fromDate.get(), fromTime.get(),
-						toDate.get(), toTime.get()
-				));
+				return new MixFileSource.Config(
+						res,
+						InstantRange.from(
+								fromDate.get(), fromTime.get(),
+								toDate.get(), toTime.get()
+						),
+						prefixWithId.get()
+				);
 			}
 			JOptionPane.showMessageDialog(parentComponent, "Please select more than 1 log file", _TITLE, JOptionPane.INFORMATION_MESSAGE);
 		}
@@ -132,6 +140,14 @@ public class PickNMixOptionPane {
 		box.add(textFieldBox);
 		box.add(error);
 		return box;
+	}
+
+	private static JCheckBox getCheckbox(String label, boolean deflt, BoolConsumer consumer) {
+		JCheckBox checkBox = new JCheckBox(label);
+		checkBox.setSelected(deflt);
+		checkBox.addActionListener((e) -> consumer.accept(checkBox.isSelected()));
+		consumer.accept(deflt);
+		return checkBox;
 	}
 
 	private static JComponent getDateTimePicker(String label, TemporalAdjuster timeAdjuster, Consumer<LocalDate> dateConsumer, Consumer<LocalTime> timeConsumer) {

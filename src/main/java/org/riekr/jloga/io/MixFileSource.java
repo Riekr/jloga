@@ -55,19 +55,21 @@ public class MixFileSource implements TextSource {
 	public static final class Config {
 		public final @NotNull  Map<TextSource, SourceConfig> sources;
 		public final @Nullable Predicate<Instant>            predicate;
+		public final           boolean                       prefixWithID;
 
-		public Config(
-				@NotNull Map<TextSource, SourceConfig> sources, @Nullable Predicate<Instant> predicate) {
+		public Config(@NotNull Map<TextSource, SourceConfig> sources, @Nullable Predicate<Instant> predicate, boolean prefixWithID) {
 			this.sources = sources;
 			this.predicate = predicate;
+			this.prefixWithID = prefixWithID;
 		}
 	}
 
 	static final class ScanData implements Comparable<ScanData> {
 		final int          idx;
 		final TextSource   src;
-		final SourceConfig _sourceConfig;
+		final SourceConfig sourceConfig;
 		final int          len;
+
 		int     pos;
 		Instant instant;
 		int     pass = 0;
@@ -75,7 +77,7 @@ public class MixFileSource implements TextSource {
 		ScanData(int idx, TextSource src, SourceConfig sourceConfig, int len) {
 			this.idx = idx;
 			this.src = src;
-			this._sourceConfig = sourceConfig;
+			this.sourceConfig = sourceConfig;
 			this.len = len;
 		}
 
@@ -99,7 +101,7 @@ public class MixFileSource implements TextSource {
 		if (config.sources.size() < 2)
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
-		_padding = (int)(Math.log10(_sources.length)) + 1;
+		_padding = config.prefixWithID ? (int)(Math.log10(_sources.length)) + 1 : -1;
 		_indexing = IO_EXECUTOR.submit(() -> {
 			final MutableInt totLineCount = new MutableInt();
 			final MutableInt parsedLines = new MutableInt();
@@ -131,7 +133,7 @@ public class MixFileSource implements TextSource {
 						// collect all lines until we have an instant
 						while (sd.instant == null && sd.hasData()) {
 							String line = sd.src.getText(sd.pos);
-							sd.instant = sd._sourceConfig.getInstant(line);
+							sd.instant = sd.sourceConfig.getInstant(line);
 							if (sd.instant == null) {
 								sd.pos++;
 								parsedLines.value++;
@@ -157,7 +159,7 @@ public class MixFileSource implements TextSource {
 						if (sd.hasData()) {
 							do {
 								String line = sd.src.getText(sd.pos);
-								sd.instant = sd._sourceConfig.getInstant(line);
+								sd.instant = sd.sourceConfig.getInstant(line);
 								if (sd.instant == null) {
 									if (predicate.test(null))
 										_index.add(sd.idx, sd.pos);
@@ -200,6 +202,8 @@ public class MixFileSource implements TextSource {
 		int srcId = data[0];
 		int srcLine = data[1];
 		String text = _sources[srcId].getText(srcLine);
+		if (_padding == -1)
+			return text;
 		return " ".repeat(Math.max(0, _padding - ((int)Math.log10(srcId) + 1))) +
 				srcId +
 				" | " +

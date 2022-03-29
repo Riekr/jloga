@@ -1,5 +1,7 @@
 ## In progress:
 
+- Pick'n'mix:
+  - Results prefix with file ID can be disabled 
 - Bug fixes:
   - Fixed disappeared ext process start button
   - Fixed progress bars sometime non appearing (ex in pick'n'mix)
