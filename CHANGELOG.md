@@ -2,6 +2,7 @@
 
 - Bug fixes:
   - Fixed disappeared ext process start button
+  - Fixed progress bars sometime non appearing (ex in pick'n'mix)
 
 ## v0.0.10
 - General

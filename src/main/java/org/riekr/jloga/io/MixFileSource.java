@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -104,7 +103,7 @@ public class MixFileSource implements TextSource {
 		_indexing = IO_EXECUTOR.submit(() -> {
 			final MutableInt totLineCount = new MutableInt();
 			final MutableInt parsedLines = new MutableInt();
-			ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> indexingListener.onProgressChanged(parsedLines.value, totLineCount.value), 0, 200, TimeUnit.MILLISECONDS);
+			ScheduledFuture<?> updateTask = monitorProgress(parsedLines, totLineCount, indexingListener);
 			try {
 				int idx = 0;
 				ScanData[] data = new ScanData[_sources.length];

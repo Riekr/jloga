@@ -3,6 +3,7 @@ package org.riekr.jloga.io;
 import static java.nio.file.StandardOpenOption.READ;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -45,8 +45,6 @@ import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
-
-import javax.swing.*;
 
 public class TextFileSource implements TextSource {
 
@@ -95,11 +93,10 @@ public class TextFileSource implements TextSource {
 			try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 				final long totalSize = fileChannel.size();
 				final MutableLong pos = new MutableLong();
-				ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
-					indexingListener.onProgressChanged(pos.value, totalSize);
+				ScheduledFuture<?> updateTask = monitorProgress(pos, totalSize, indexingListener.andThen(() -> {
 					_indexChangeListeners.forEach(Runnable::run);
 					_lineCountSubject.next(_lineCount);
-				}, 0, 200, TimeUnit.MILLISECONDS);
+				}));
 				try {
 					while (fileChannel.read(byteBuffer) > 0) {
 						decoder.decode(byteBuffer.flip(), charBuffer, false);
@@ -230,10 +227,7 @@ public class TextFileSource implements TextSource {
 	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		long start = System.currentTimeMillis();
 		final MutableInt lineNumber = new MutableInt();
-		ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> {
-			progressListener.onProgressChanged(lineNumber.value, _lineCount);
-			out.dispatchLineCount();
-		}, 0, 200, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> updateTask = monitorProgress(lineNumber, _lineCount, progressListener.andThen(out::dispatchLineCount));
 		try {
 			Semaphore semaphore = new Semaphore(0);
 			_indexChangeListeners.add(() -> semaphore.release(1));

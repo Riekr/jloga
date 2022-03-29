@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -32,6 +33,16 @@ public interface TextSource extends Iterable<String> {
 	ExecutorService          IO_EXECUTOR      = Executors.newSingleThreadExecutor();
 	ScheduledExecutorService MONITOR_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 	ExecutorService          AUX_EXECUTOR     = Executors.newCachedThreadPool();
+
+	default ScheduledFuture<?> monitorProgress(LongSupplier current, long total, ProgressListener progressListener) {
+		return monitorProgress(current, () -> total, progressListener);
+	}
+
+	default ScheduledFuture<?> monitorProgress(LongSupplier current, LongSupplier total, ProgressListener progressListener) {
+		return MONITOR_EXECUTOR.scheduleWithFixedDelay(
+				() -> progressListener.onIntermediate(current.getAsLong(), total.getAsLong()),
+				200, 200, TimeUnit.MILLISECONDS);
+	}
 
 	/**
 	 * Runs in a background executor, may be overridden if the source has a performance
@@ -116,11 +127,11 @@ public interface TextSource extends Iterable<String> {
 
 	default void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
 		// dispatchLineCount called here to take advantage of 200ms scheduling of global progressbar update
-		ProgressListener fullProgressListener = progressListener.andThen((pos, of) -> out.dispatchLineCount());
+		ProgressListener fullProgressListener = progressListener.andThen(out::dispatchLineCount);
 		long start = System.currentTimeMillis();
 		final int lineCount = getLineCount();
 		final MutableInt line = new MutableInt();
-		ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(() -> fullProgressListener.onProgressChanged(line.value, lineCount), 0, 200, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> updateTask = monitorProgress(line, lineCount, fullProgressListener);
 		try {
 			for (line.value = 0; line.value <= getLineCount() && running.getAsBoolean(); line.value++)
 				predicate.verify(line.value, getText(line.value));
@@ -141,10 +152,7 @@ public interface TextSource extends Iterable<String> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
-				ScheduledFuture<?> updateTask = MONITOR_EXECUTOR.scheduleWithFixedDelay(
-						() -> progressListener.onProgressChanged(ln.value, lineCount),
-						0, 200, TimeUnit.MILLISECONDS
-				);
+				ScheduledFuture<?> updateTask = monitorProgress(ln, lineCount, progressListener);
 				try (BufferedWriter w = new BufferedWriter(new FileWriter(file, false))) {
 					for (ln.value = 0; ln.value < lineCount; ln.value++) {
 						w.write(getText(ln.value));

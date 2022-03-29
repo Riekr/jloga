@@ -4,8 +4,12 @@ import java.util.Objects;
 
 public interface ProgressListener {
 
-	ProgressListener NOP = (pos, size) -> {
-	};
+	ProgressListener NOP = (pos, size) -> {};
+
+	default void onIntermediate(long pos, long size) {
+		if (pos != size)
+			onProgressChanged(pos, size);
+	}
 
 	void onProgressChanged(long pos, long size);
 
@@ -14,6 +18,14 @@ public interface ProgressListener {
 		return (l, r) -> {
 			onProgressChanged(l, r);
 			after.onProgressChanged(l, r);
+		};
+	}
+
+	default ProgressListener andThen(Runnable after) {
+		Objects.requireNonNull(after);
+		return (l, r) -> {
+			onProgressChanged(l, r);
+			after.run();
 		};
 	}
 
