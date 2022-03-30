@@ -64,18 +64,21 @@ public final class UIUtils {
 		return makeBorderless(newButton(text, action));
 	}
 
-	public static JButton makeBorderless(JButton btn) {
-		btn.setBorder(FLAT_BUTTON_BORDER);
-		btn.setBorderPainted(false);
-		btn.setContentAreaFilled(false);
-		btn.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {btn.setContentAreaFilled(true);}
+	public static <T extends JComponent> T makeBorderless(T comp) {
+		comp.setBorder(FLAT_BUTTON_BORDER);
+		if (comp instanceof JButton) {
+			JButton btn = (JButton)comp;
+			btn.setBorderPainted(false);
+			btn.setContentAreaFilled(false);
+			btn.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseEntered(MouseEvent e) {btn.setContentAreaFilled(true);}
 
-			@Override
-			public void mouseExited(MouseEvent e) {btn.setContentAreaFilled(false);}
-		});
-		return btn;
+				@Override
+				public void mouseExited(MouseEvent e) {btn.setContentAreaFilled(false);}
+			});
+		}
+		return comp;
 	}
 
 	public static JButton newButton(String text, Runnable action) {
@@ -273,6 +276,13 @@ public final class UIUtils {
 		Box horiz = Box.createHorizontalBox();
 		horiz.add(component);
 		horiz.add(Box.createHorizontalGlue());
+		return horiz;
+	}
+
+	public static Component atEnd(Component component) {
+		Box horiz = Box.createHorizontalBox();
+		horiz.add(Box.createHorizontalGlue());
+		horiz.add(component);
 		return horiz;
 	}
 

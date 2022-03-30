@@ -1,7 +1,9 @@
 ## In progress:
 
 - Pick'n'mix:
-  - Results prefix with file ID can be disabled 
+  - Results prefix with file ID can be disabled
+- General:
+  - Moved "Cleared recent files" from settings to home panel
 - Bug fixes:
   - Fixed disappeared ext process start button
   - Fixed progress bars sometime non appearing (ex in pick'n'mix)

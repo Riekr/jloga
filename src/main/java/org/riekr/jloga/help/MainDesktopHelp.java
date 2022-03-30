@@ -3,6 +3,9 @@ package org.riekr.jloga.help;
 import static org.riekr.jloga.utils.TextUtils.describeKeyBinding;
 import static org.riekr.jloga.utils.UIUtils.center;
 import static org.riekr.jloga.utils.UIUtils.getComponentHorizontalCenter;
+import static org.riekr.jloga.utils.UIUtils.makeBorderless;
+import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
+import static org.riekr.jloga.utils.UIUtils.newButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,16 +51,15 @@ public class MainDesktopHelp extends JComponent {
 		// recent files
 		setLayout(new BorderLayout());
 		Box recentBox = Box.createVerticalBox();
-		JLabel title = new JLabel("Recent files:");
-		title.setBorder(UIUtils.FLAT_BUTTON_BORDER);
-		recentBox.add(title);
+		recentBox.add(makeBorderless(new JLabel("Recent files:")));
+		recentBox.add(newButton("Clear recent files", Preferences.RECENT_FILES::reset));
 		Preferences.RECENT_FILES.subscribe((files) -> {
-			while (recentBox.getComponentCount() != 1)
+			while (recentBox.getComponentCount() != 2)
 				recentBox.remove(1);
 			for (File recent : files)
-				recentBox.add(UIUtils.newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent)));
-			title.setVisible(!files.isEmpty());
-			recentBox.repaint();
+				recentBox.add(newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent)), 1);
+			recentBox.setVisible(!files.isEmpty());
+			recentBox.revalidate();
 		});
 
 		add(center(recentBox), BorderLayout.CENTER);
