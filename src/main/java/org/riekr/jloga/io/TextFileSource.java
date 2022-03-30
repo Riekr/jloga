@@ -98,6 +98,7 @@ public class TextFileSource implements TextSource {
 					_lineCountSubject.next(_lineCount);
 				}));
 				try {
+					char lastChar = 0;
 					while (fileChannel.read(byteBuffer) > 0) {
 						decoder.decode(byteBuffer.flip(), charBuffer, false);
 						charBuffer.flip();
@@ -107,10 +108,20 @@ public class TextFileSource implements TextSource {
 								charBuffer.mark();
 							}
 						}
+						// fetch last read char
+						int lastCharPos = charBuffer.position() - 1;
+						if (lastCharPos < charBuffer.limit())
+							lastChar = charBuffer.get(lastCharPos);
+						// finalize indexed page
 						pos.value = fileChannel.position();
 						_index.put(_lineCount, new IndexData(pos.value - encoder.encode(charBuffer.reset()).limit()));
 						charBuffer.flip();
 						byteBuffer.flip();
+					}
+					// if the last char is not a new-line adjust the line count
+					if (lastChar != '\n') {
+						IndexData t = _index.remove(_lineCount++);
+						_index.put(_lineCount, t);
 					}
 				} finally {
 					updateTask.cancel(false);

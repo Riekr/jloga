@@ -5,6 +5,7 @@
 - General:
   - Moved "Cleared recent files" from settings to home panel
 - Bug fixes:
+  - Fixed missing last line in files not ending with a new-line
   - Fixed disappeared ext process start button
   - Fixed progress bars sometime non appearing (ex in pick'n'mix)
 
