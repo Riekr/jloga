@@ -2,6 +2,7 @@ package org.riekr.jloga.help;
 
 import static org.riekr.jloga.utils.TextUtils.describeKeyBinding;
 import static org.riekr.jloga.utils.UIUtils.center;
+import static org.riekr.jloga.utils.UIUtils.drawOnHover;
 import static org.riekr.jloga.utils.UIUtils.getComponentHorizontalCenter;
 import static org.riekr.jloga.utils.UIUtils.makeBorderless;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
@@ -56,8 +57,17 @@ public class MainDesktopHelp extends JComponent {
 		Preferences.RECENT_FILES.subscribe((files) -> {
 			while (recentBox.getComponentCount() != 2)
 				recentBox.remove(1);
-			for (File recent : files)
-				recentBox.add(newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent)), 1);
+			for (File recent : files) {
+				Box row = Box.createHorizontalBox();
+				row.setAlignmentX(0);
+				JButton openBtn = newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent));
+				row.add(openBtn);
+				row.add(drawOnHover(newBorderlessButton("\u274C", () -> {
+					files.remove(recent);
+					Preferences.RECENT_FILES.set(files);
+				}), openBtn));
+				recentBox.add(row, 1);
+			}
 			recentBox.setVisible(!files.isEmpty());
 			recentBox.revalidate();
 		});

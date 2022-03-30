@@ -23,6 +23,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TooManyListenersException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -37,10 +38,13 @@ import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public final class UIUtils {
 
-	public static final Border FLAT_BUTTON_BORDER = new EmptyBorder(6, 8, 6, 8);
+	public static final int VSPACE = 6;
 
-	private UIUtils() {
-	}
+	public static final Border FLAT_BUTTON_BORDER = new EmptyBorder(VSPACE, 8, VSPACE, 8);
+
+	public static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+
+	private UIUtils() {}
 
 	public static void invokeAfter(Runnable runnable, int delay) {
 		Timer timer = new Timer(delay, (ev) -> runnable.run());
@@ -52,6 +56,31 @@ public final class UIUtils {
 		d.height /= 2;
 		d.width /= 2;
 		return d;
+	}
+
+	public static <T extends Component> T drawOnHover(T comp, Component... additionalHovers) {
+		AtomicBoolean paint = new AtomicBoolean();
+		Color orig = comp.getForeground();
+		comp.setForeground(TRANSPARENT);
+		MouseListener mouseListener = new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				if (paint.compareAndSet(false, true))
+					comp.setForeground(orig);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				if (paint.compareAndSet(true, false))
+					comp.setForeground(TRANSPARENT);
+			}
+		};
+		comp.addMouseListener(mouseListener);
+		if (additionalHovers != null) {
+			for (final Component additionalHover : additionalHovers)
+				additionalHover.addMouseListener(mouseListener);
+		}
+		return comp;
 	}
 
 	public static JButton newBorderlessButton(String text, Runnable action, String tooltip) {
