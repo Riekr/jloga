@@ -57,7 +57,8 @@ public class MainDesktopHelp extends JComponent {
 		Preferences.RECENT_FILES.subscribe((files) -> {
 			while (recentBox.getComponentCount() != 2)
 				recentBox.remove(1);
-			for (File recent : files) {
+			for (int i = 0, filesSize = files.size(); i < filesSize; i++) {
+				final File recent = files.get(i);
 				Box row = Box.createHorizontalBox();
 				row.setAlignmentX(0);
 				JButton openBtn = newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent));
@@ -66,7 +67,7 @@ public class MainDesktopHelp extends JComponent {
 					files.remove(recent);
 					Preferences.RECENT_FILES.set(files);
 				}), openBtn));
-				recentBox.add(row, 1);
+				recentBox.add(row, i + 1);
 			}
 			recentBox.setVisible(!files.isEmpty());
 			recentBox.revalidate();
