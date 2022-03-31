@@ -4,6 +4,7 @@
   - Results prefix with file ID can be disabled
 - General:
   - Moved "Cleared recent files" from settings to home panel
+  - Right click on search selection button to open context menu instead of popup
 - Bug fixes:
   - Fixed missing last line in files not ending with a new-line
   - Fixed disappeared ext process start button

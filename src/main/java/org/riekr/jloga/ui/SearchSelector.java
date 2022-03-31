@@ -19,6 +19,8 @@ import org.riekr.jloga.utils.UIUtils;
 public class SearchSelector extends JPanel {
 	private static final long serialVersionUID = 1562652212113703845L;
 
+	private static final String _TITLE = "Choose search type";
+
 	private final int                       _level;
 	private final JButton                   _selectBtn;
 	private final Consumer<SearchPredicate> _onSearchConsumer;
@@ -39,6 +41,14 @@ public class SearchSelector extends JPanel {
 		_selectBtn = UIUtils.newBorderlessButton("\u26A7", this::openSelection);
 		add(_selectBtn, BorderLayout.LINE_START);
 
+		JPopupMenu popupMenu = new JPopupMenu(_TITLE);
+		for (final SearchRegistry.Entry choice : SearchRegistry.getChoices()) {
+			JMenuItem item = new JMenuItem(choice.description);
+			item.addActionListener(e -> setSearchUI(choice.newInstance(_level)));
+			popupMenu.add(item);
+		}
+		_selectBtn.setComponentPopupMenu(popupMenu);
+
 		setSearchUI(Preferences.LAST_SEARCH_TYPE.get(level));
 	}
 
@@ -51,21 +61,21 @@ public class SearchSelector extends JPanel {
 		SearchRegistry.Entry input = (SearchRegistry.Entry)JOptionPane.showInputDialog(
 				this.getRootPane(),
 				"Select a search type between those available:",
-				"Choose search type",
+				_TITLE,
 				JOptionPane.QUESTION_MESSAGE,
 				null,
 				choices,
 				initialSelectionValue
 		);
 		if (input != null)
-			Preferences.LAST_SEARCH_TYPE.set(setSearchUI(input.newInstance(_level)), _level);
+			setSearchUI(input.newInstance(_level));
 	}
 
 	public void setSearchUI(String id) {
-		SearchRegistry.get(id, _level, this::setSearchUI);
+		setSearchUI(SearchRegistry.get(id, _level));
 	}
 
-	private String setSearchUI(SearchComponent comp) {
+	public void setSearchUI(SearchComponent comp) {
 		boolean focus = _searchComponent != null;
 		if (_searchComponent != null)
 			_searchComponent.onSearch(null);
@@ -81,7 +91,7 @@ public class SearchSelector extends JPanel {
 		_selectBtn.setText(_searchComponent.getSearchIconLabel());
 		if (focus)
 			_searchUI.requestFocusInWindow();
-		return _searchComponent.getID();
+		Preferences.LAST_SEARCH_TYPE.set(_searchComponent.getID(), _level);
 	}
 
 	@Override

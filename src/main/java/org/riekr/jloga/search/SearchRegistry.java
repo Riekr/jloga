@@ -2,7 +2,6 @@ package org.riekr.jloga.search;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 import org.jetbrains.annotations.NotNull;
@@ -72,13 +71,13 @@ public final class SearchRegistry {
 		return _ENTRIES.values().toArray(Entry[]::new);
 	}
 
-	public static void get(String id, int level, Consumer<SearchComponent> consumer) {
+	public static SearchComponent get(String id, int level) {
 		Entry res = _ENTRIES.get(id);
 		if (res == null) {
 			res = _ENTRIES.values().iterator().next();
 			System.err.println("ID " + id + " not registered");
 		}
-		consumer.accept(res.newInstance(level));
+		return res.newInstance(level);
 	}
 
 	private SearchRegistry() {}
