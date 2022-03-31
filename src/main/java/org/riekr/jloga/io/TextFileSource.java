@@ -120,8 +120,8 @@ public class TextFileSource implements TextSource {
 					}
 					// if the last char is not a new-line adjust the line count
 					if (lastChar != '\n') {
-						IndexData t = _index.remove(_lineCount++);
-						_index.put(_lineCount, t);
+						IndexData t = _index.remove(_lineCount);
+						_index.put(_lineCount + 1, t);
 					}
 				} finally {
 					updateTask.cancel(false);
