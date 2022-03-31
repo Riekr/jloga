@@ -41,7 +41,7 @@ class StreamSearchPredicate implements SearchPredicate {
 	}
 
 	@Override
-	public final void end() {
+	public final void end(boolean interrupted) {
 		if (_childTextSource == null)
 			throw new IllegalStateException("Not started");
 		if (_pos != 0)

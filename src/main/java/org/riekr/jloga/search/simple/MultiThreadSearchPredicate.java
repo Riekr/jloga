@@ -61,11 +61,14 @@ class MultiThreadSearchPredicate implements SearchPredicate {
 	}
 
 	@Override
-	public final void end() {
+	public final void end(boolean interrupted) {
 		if (_childTextSource == null)
 			throw new IllegalStateException("Not started");
 		try {
-			_searchExecutor.shutdown();
+			if (interrupted)
+				_searchExecutor.shutdownNow();
+			else
+				_searchExecutor.shutdown();
 			if (!_searchExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS))
 				throw new CompletionException("Search timed out", null);
 			List<Runnable> remainingSpools = _spoolExecutor.shutdownNow();

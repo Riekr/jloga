@@ -146,7 +146,7 @@ public class DurationAnalysis implements SearchPredicate {
 		return _dest;
 	}
 
-	public void end() {
+	public void end(boolean interrupted) {
 		_matchers = null;
 		_funcStarts = null;
 	}

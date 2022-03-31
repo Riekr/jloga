@@ -54,8 +54,8 @@ public class ExtProcessManager {
 				}
 
 				@Override
-				public void end() {
-					super.end();
+				public void end(boolean interrupted) {
+					super.end(interrupted);
 					EventQueue.invokeLater(() -> _stdErr = null);
 				}
 			};

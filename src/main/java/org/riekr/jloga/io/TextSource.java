@@ -136,7 +136,7 @@ public interface TextSource extends Iterable<String> {
 			for (line.value = 0; line.value <= getLineCount() && running.getAsBoolean(); line.value++)
 				predicate.verify(line.value, getText(line.value));
 		} finally {
-			predicate.end();
+			predicate.end(!running.getAsBoolean());
 			updateTask.cancel(false);
 			fullProgressListener.onProgressChanged(lineCount, lineCount);
 			System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");

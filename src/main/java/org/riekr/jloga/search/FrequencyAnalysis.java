@@ -123,7 +123,7 @@ public class FrequencyAnalysis implements SearchPredicate {
 		return _dest;
 	}
 
-	public void end() {
+	public void end(boolean interrupted) {
 		_counters.forEach((func, count) -> {
 			_dest.addLine(count.startLine);
 			_results.put(count.startLine, count.count);

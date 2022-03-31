@@ -260,7 +260,7 @@ public class TextFileSource implements TextSource {
 				}
 			} while (continueCond.getAsBoolean());
 		} finally {
-			predicate.end();
+			predicate.end(!running.getAsBoolean());
 			updateTask.cancel(false);
 			progressListener.onProgressChanged(_lineCount, _lineCount);
 		}

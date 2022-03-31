@@ -89,7 +89,9 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 	}
 
 	@Override
-	public void end() {
+	public void end(boolean interrupted) {
+		if (interrupted)
+			_process.destroy();
 		if (_textSource == null || _toProc == null)
 			throw new IllegalStateException("ExtProcessPipeSearch not started");
 		try {

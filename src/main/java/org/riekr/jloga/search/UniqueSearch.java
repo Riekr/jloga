@@ -68,8 +68,8 @@ public class UniqueSearch extends RegExSearch {
 	}
 
 	@Override
-	public void end() {
-		super.end();
+	public void end(boolean interrupted) {
+		super.end(interrupted);
 		_matches.clear();
 	}
 }

@@ -9,6 +9,6 @@ public interface SearchPredicate {
 
 	void verify(int line, String text);
 
-	default void end() {}
+	default void end(boolean interrupted) {}
 
 }

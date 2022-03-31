@@ -99,7 +99,7 @@ public class RegExSearch implements SearchPredicate {
 	}
 
 	@Override
-	public void end() {
+	public void end(boolean interrupted) {
 		if (_childTextSource == null)
 			throw new IllegalStateException("RegExSearch already finished");
 		_childTextSource = null;

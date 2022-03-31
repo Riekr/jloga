@@ -28,7 +28,7 @@ class SyncSimpleSearchPredicate implements SearchPredicate {
 	}
 
 	@Override
-	public final void end() {
+	public final void end(boolean interrupted) {
 		_childTextSource = null;
 	}
 }
