@@ -107,9 +107,9 @@ public class ChildTextSource implements FilteredTextSource {
 	@Override
 	public String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
 		int toLinePlus1 = Math.min(fromLine + count, _lineCount);
-		String[] lines = new String[toLinePlus1 - fromLine + 1];
-		for (int i = fromLine; i <= toLinePlus1; i++)
-			lines[i - fromLine] = getText(i);
+		String[] lines = new String[Math.max(toLinePlus1 - fromLine + 1, 0)];
+		for (int i = 0; i < lines.length; i++)
+			lines[i] = getText(i + fromLine);
 		return lines;
 	}
 
