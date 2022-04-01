@@ -43,7 +43,7 @@ public class SearchSelector extends JPanel {
 
 		JPopupMenu popupMenu = new JPopupMenu(_TITLE);
 		for (final SearchRegistry.Entry choice : SearchRegistry.getChoices()) {
-			JMenuItem item = new JMenuItem(choice.description);
+			JMenuItem item = new JMenuItem(choice.toString());
 			item.addActionListener(e -> setSearchUI(choice.newInstance(_level)));
 			popupMenu.add(item);
 		}

@@ -63,6 +63,13 @@ public class PrefPanel extends JDialog {
 		_tabs = new JTabbedPane();
 		cp.add(_tabs, BorderLayout.NORTH);
 		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
+				.filter((p) -> {
+					if (p.group() == null) {
+						System.err.println("Preference '" + p.title() + "' does not belong to a group");
+						return false;
+					}
+					return true;
+				})
 				.collect(groupingBy(GUIPreference::group, LinkedHashMap::new, toList()));
 		for (Map.Entry<String, List<GUIPreference<?>>> e : prefsByGroup.entrySet()) {
 			String group = e.getKey();

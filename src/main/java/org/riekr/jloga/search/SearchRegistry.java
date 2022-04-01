@@ -27,7 +27,7 @@ public final class SearchRegistry {
 		}
 
 		@Override
-		public final String toString() {
+		public String toString() {
 			return description;
 		}
 

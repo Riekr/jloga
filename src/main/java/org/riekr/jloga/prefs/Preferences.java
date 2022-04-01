@@ -110,6 +110,11 @@ public interface Preferences extends KeyBindings {
 			.group(SCRIPTS)
 			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.")
 			.addDescriptionHTML("<b>WARNING:</b> executing unsafe scripts may be a security risk!");
+
+	GUIPreference<Boolean> EXT_PREFIX_SKIP = of("ext.skipPrefix", () -> false)
+			.describe(Type.Toggle, "Skip \"EXT:\" prefix")
+			.group(SCRIPTS)
+			.addDescription("Skip prefixing external scripts with \"EXT:\" inside search selection dialogs");
 	//endregion
 
 	//region Hidden (state) preferences

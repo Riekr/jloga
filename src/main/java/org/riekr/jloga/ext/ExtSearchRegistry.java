@@ -49,7 +49,14 @@ public class ExtSearchRegistry {
 								String id = f.toAbsolutePath().toString();
 								res.add(new AbstractMap.SimpleEntry<>(
 										config.order,
-										new Entry(id, (level) -> config.toComponent(id, level), config.description))
+										new Entry(id, (level) -> config.toComponent(id, level), config.description) {
+											@Override
+											public String toString() {
+												if (Preferences.EXT_PREFIX_SKIP.get())
+													return super.toString();
+												return "EXT: " + super.toString();
+											}
+										})
 								);
 							}
 						}
