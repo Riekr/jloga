@@ -53,6 +53,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 					_model.insertElementAt(convert(elem), 0);
 					save();
 					setSelectedIndex(0);
+					//noinspection fallthrough
 				case "comboBoxChanged":
 					subject.next(convert(elem));
 					break;

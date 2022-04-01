@@ -1,5 +1,8 @@
 ## In progress:
 
+- Bug fixes:
+  - Negate button in text and regex works
+
 ## v0.0.11
 - Pick'n'mix:
   - Results prefix with file ID can be disabled

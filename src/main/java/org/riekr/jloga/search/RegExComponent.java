@@ -1,5 +1,8 @@
 package org.riekr.jloga.search;
 
+import static org.riekr.jloga.react.Observer.uniq;
+import static org.riekr.jloga.utils.UIUtils.newToggleButton;
+
 import javax.swing.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -25,18 +28,18 @@ public class RegExComponent extends Box implements SearchComponent {
 		_combo = new MRUTextCombo<>("regex." + level, SearchComboEntry::new);
 		add(_combo);
 		SearchComboEntry initialValue = _combo.getValue();
-		JToggleButton negateBtn = UIUtils.newToggleButton("!", "Negate", initialValue.negate, (b) -> {
+		JToggleButton negateBtn = newToggleButton("!", "Negate", initialValue.negate, (b) -> {
 			_combo.getValue().negate = b;
 			_combo.save();
 		});
-		JToggleButton caseBtn = UIUtils.newToggleButton("\uD83D\uDDDA", "Case insensitive", initialValue.caseInsensitive, (b) -> {
+		JToggleButton caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", initialValue.caseInsensitive, (b) -> {
 			_combo.getValue().caseInsensitive = b;
 			_combo.save();
 		});
-		_combo.subject.subscribe((value) -> {
+		_combo.subject.subscribe(uniq((value) -> {
 			negateBtn.setSelected(value.negate);
 			caseBtn.setSelected(value.caseInsensitive);
-		});
+		}));
 		add(negateBtn);
 		add(caseBtn);
 	}

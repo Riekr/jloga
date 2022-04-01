@@ -1,15 +1,15 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.react.Observer;
+import static org.riekr.jloga.react.Observer.uniq;
+import static org.riekr.jloga.ui.MRUTextCombo.newMRUTextCombo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.riekr.jloga.ui.MRUTextCombo.newMRUTextCombo;
-
 public class MRUComboWithLabels<T> extends JPanel {
+	private static final long serialVersionUID = -4669818889063163941L;
 
 	public static MRUComboWithLabels<String> forString(String key, String label, Consumer<String> onResult) {
 		return new MRUComboWithLabels<>(key, label, onResult, Function.identity());
@@ -31,7 +31,7 @@ public class MRUComboWithLabels<T> extends JPanel {
 		error.setVisible(false);
 		this.add(error, BorderLayout.SOUTH);
 
-		combo.subject.subscribe(Observer.uniq((text) -> {
+		combo.subject.subscribe(uniq((text) -> {
 			T res = mapper.apply(text);
 			if (res == null)
 				combo.setSelectedIndex(-1);
