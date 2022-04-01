@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.0.11
 - Pick'n'mix:
   - Results prefix with file ID can be disabled
 - General:
