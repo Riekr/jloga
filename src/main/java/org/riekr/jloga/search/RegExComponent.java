@@ -1,6 +1,7 @@
 package org.riekr.jloga.search;
 
 import static org.riekr.jloga.react.Observer.uniq;
+import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
@@ -40,6 +41,7 @@ public class RegExComponent extends Box implements SearchComponent {
 			negateBtn.setSelected(value.negate);
 			caseBtn.setSelected(value.caseInsensitive);
 		}));
+		add(newBorderlessButton("\uD83D\uDD0D", _combo::resend));
 		add(negateBtn);
 		add(caseBtn);
 	}

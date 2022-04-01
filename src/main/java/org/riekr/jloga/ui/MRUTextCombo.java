@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -55,10 +57,17 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 					setSelectedIndex(0);
 					//noinspection fallthrough
 				case "comboBoxChanged":
-					subject.next(convert(elem));
+					requestFocusInWindow();
 					break;
 				default:
 					System.err.println(e);
+			}
+		});
+		getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					resend();
 			}
 		});
 		addComponentListener(new ComponentAdapter() {
@@ -78,6 +87,10 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 					showPopup();
 			}
 		});
+	}
+
+	public void resend() {
+		subject.next(convert(getSelectedItem()));
 	}
 
 	public void save() {

@@ -1,7 +1,9 @@
 ## In progress:
 
+- General:
+  - Search button in text and regex searches (you can still press "enter")
 - Bug fixes:
-  - Negate button in text and regex works
+  - Toggle buttons in text and regex
 
 ## v0.0.11
 - Pick'n'mix:
