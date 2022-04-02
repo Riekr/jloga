@@ -44,6 +44,15 @@ public class PrefsUtils {
 		}
 	}
 
+	public static void save(String key, boolean bool) {
+		_PREFS.putBoolean(key, bool);
+		try {
+			_PREFS.sync();
+		} catch (BackingStoreException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> DefaultComboBoxModel<T> loadDefaultComboBoxModel(String key) {
 		Object[] data = load(key, null);
@@ -79,5 +88,15 @@ public class PrefsUtils {
 		if (res != null)
 			return res;
 		return deflt == null ? null : deflt.get();
+	}
+
+	public static boolean load(String key) {
+		return load(key, false);
+	}
+
+	public static boolean load(String key, boolean deflt) {
+		if (!Boolean.getBoolean("jloga.prefs.ignore"))
+			return _PREFS.getBoolean(key, deflt);
+		return deflt;
 	}
 }

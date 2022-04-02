@@ -15,7 +15,7 @@ import org.riekr.jloga.search.SearchComponent;
 public class ExtProcessConfig {
 
 	public enum ParamType {
-		STRING, PATTERN, DURATION, COMBO
+		STRING, PATTERN, DURATION, COMBO, CHECKBOX
 	}
 
 	public static class Param {

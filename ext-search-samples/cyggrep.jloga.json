@@ -6,6 +6,7 @@
   "command": [
     "D:\\Gian\\Cygwin64\\bin\\grep.exe",
     "%Case%",
+    "%Invert%",
     "%Text%"
   ],
   "params": {
@@ -21,6 +22,14 @@
       "values": {
         "sensitive": "",
         "insensitive": "-i"
+      }
+    },
+    "Invert": {
+      "type": "CHECKBOX",
+      "description": "Invert",
+      "values": {
+        "true": "-v",
+        "false": ""
       }
     }
   }

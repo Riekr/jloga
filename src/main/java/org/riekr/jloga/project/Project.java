@@ -2,13 +2,11 @@ package org.riekr.jloga.project;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 import static org.riekr.jloga.utils.UIUtils.toDateTimeFormatter;
 import static org.riekr.jloga.utils.UIUtils.toPattern;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -43,12 +41,12 @@ public interface Project {
 		return new ProjectEditableField<>(key, label, (pattern, ui) -> toDateTimeFormatter(ui, pattern), DateTimeFormatterRef::pattern);
 	}
 
-	default ProjectEditableField<String> newSelectField(String key, String label, List<String> values) {
-		return newSelectField(key, label, values.stream().collect(toMap(identity(), identity())));
-	}
-
 	default ProjectComboField<String> newSelectField(String key, String label, Map<String, String> values) {
 		return new ProjectComboField<>(key, label, values);
+	}
+
+	default ProjectCheckboxField<String> newCheckboxField(String key, String label, Map<Boolean, String> values) {
+		return new ProjectCheckboxField<>(key, label, values);
 	}
 
 	boolean isReady();

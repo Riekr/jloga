@@ -1,6 +1,7 @@
 package org.riekr.jloga.ext;
 
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
 import java.time.Duration;
@@ -34,24 +35,40 @@ public class ExtProcessComponentProject extends ProjectComponent {
 		_manager = new ExtProcessManager(command, workingDir);
 		_params.forEach((key, param) -> {
 			switch (param.type) {
+
 				case STRING:
 					param._field = newStringField(key, param.description);
 					break;
+
 				case PATTERN:
 					param._field = newPatternField(key, param.description, param.min);
 					break;
+
 				case DURATION:
 					param._field = newDurationField(key, param.description, param.deflt == null ? null : Duration.parse(param.deflt));
 					break;
+
 				case COMBO:
 					if (param.values == null)
 						throw new IllegalArgumentException("No values specified for combo type");
-					if (param.values instanceof List)
-						param._field = newSelectField(key, param.description, (List<String>)param.values);
-					else if (param.values instanceof Map)
-						param._field = newSelectField(key, param.description, (Map<String, String>)param.values);
+					if (param.values instanceof List) {
+						param._field = newSelectField(key, param.description, ((List<?>)param.values).stream()
+								.collect(toMap(Object::toString, Object::toString)));
+					} else if (param.values instanceof Map)
+						param._field = newSelectField(key, param.description, ((Map<?, ?>)param.values).entrySet().stream()
+								.collect(toMap(e -> e.getKey().toString(), e -> e.getValue().toString())));
 					else
 						throw new IllegalArgumentException("Invalid values specified for combo type");
+					break;
+
+				case CHECKBOX:
+					if (param.values == null)
+						throw new IllegalArgumentException("No values specified for checkbox type");
+					if (param.values instanceof Map) {
+						param._field = newCheckboxField(key, param.description, ((Map<?, ?>)param.values).entrySet().stream()
+								.collect(toMap(e -> Boolean.valueOf(e.getKey().toString()), e -> e.getValue().toString())));
+					} else
+						throw new IllegalArgumentException("Invalid values specified for checkbox type");
 			}
 		});
 		buildUI();

@@ -1,5 +1,8 @@
 package org.riekr.jloga.search;
 
+import static org.riekr.jloga.react.Observer.async;
+import static org.riekr.jloga.react.Observer.uniq;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
@@ -11,10 +14,11 @@ import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.prefs.PrefsUtils;
 import org.riekr.jloga.react.BoolBehaviourSubject;
-import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.MRUComboWithLabels;
+import org.riekr.jloga.utils.SpringUtils;
 
 public abstract class SearchComponentWithExpandablePanel extends JLabel implements SearchComponent {
 	private static final long serialVersionUID = 7751803744482675483L;
@@ -51,7 +55,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 			_configFrame.setVisible(false);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
-			Box configPane = Box.createVerticalBox();
+			JPanel configPane = new JPanel(new SpringLayout());
 			configPane.setBorder(new EmptyBorder(8, 8, 8, 8));
 			setupConfigPane(configPane);
 			_configFrame.add(configPane);
@@ -59,10 +63,11 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 			Box configPaneButtons = Box.createHorizontalBox();
 			configPane.add(configPaneButtons);
 			setupConfigPaneButtons(configPaneButtons);
-			configPaneButtons.add(newButtonSpacer());
-			configPaneButtons.add(newButtonSpacer());
+			configPaneButtons.add(newButtonSpacer(2, 1));
 			configPaneButtons.add(newButton("Start analysis", this::search));
 			configPaneButtons.add(Box.createGlue());
+
+			SpringUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
 
 			addMouseListener(_mouseListener);
 			addMouseListener(new MouseAdapter() {
@@ -71,7 +76,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 					_configVisible.toggle();
 				}
 			});
-			_configVisible.subscribe(Observer.async(Observer.uniq(this::setExpanded)));
+			_configVisible.subscribe(async(uniq(this::setExpanded)));
 
 			calcTitle();
 		}
@@ -108,6 +113,23 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 		return editableField;
 	}
 
+	public JCheckBox newCheckbox(String key, String label, Consumer<String> onResult) {
+		JCheckBox checkBox = new JCheckBox(label);
+		checkBox.addActionListener((e) -> {
+			boolean val = checkBox.isSelected();
+			onResult.accept(Boolean.toString(val));
+			PrefsUtils.save(_prefsPrefix + '.' + key, val);
+		});
+		checkBox.addMouseListener(_mouseListener);
+		// TODO: ugly!
+		EventQueue.invokeLater(() -> _configVisible.subscribe((visible) -> {
+			if (!visible)
+				onResult.accept(Boolean.toString(PrefsUtils.load(_prefsPrefix + '.' + key)));
+		}));
+
+		return checkBox;
+	}
+
 	protected abstract void calcTitle();
 
 	protected JComponent newButton(String label, Runnable action) {
@@ -118,7 +140,11 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 	}
 
 	protected Component newButtonSpacer() {
-		return Box.createRigidArea(new Dimension(16, 16));
+		return newButtonSpacer(1, 1);
+	}
+
+	protected Component newButtonSpacer(int hmult, int vmult) {
+		return Box.createRigidArea(new Dimension(16 * hmult, 16 * vmult));
 	}
 
 	public void setExpanded(boolean expanded) {

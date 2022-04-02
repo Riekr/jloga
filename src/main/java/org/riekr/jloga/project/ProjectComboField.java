@@ -1,5 +1,7 @@
 package org.riekr.jloga.project;
 
+import static org.riekr.jloga.utils.Utils.findKeyForValue;
+
 import java.util.Map;
 
 import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
@@ -9,14 +11,11 @@ public class ProjectComboField<T> extends ProjectEditableField<T> {
 
 	private final Map<String, T> _values;
 
-	private static <T> String valueToKey(Map<String, T> values, T value) {
-		return values.entrySet().stream().filter((e) -> e.getValue().equals(value)).findAny().map(Map.Entry::getKey).orElse(null);
-	}
-
 	public ProjectComboField(String key, String label, Map<String, T> values) {
 		super(key, label,
 				(text, ui) -> values.get(text),
-				(value) -> valueToKey(values, value)
+				(value) -> findKeyForValue(values, value).orElse(null),
+				values.values().stream().findFirst().orElseThrow()
 		);
 		_values = values;
 	}
