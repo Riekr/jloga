@@ -5,22 +5,22 @@
   "description": "Cygwin grep",
   "command": [
     "D:\\Gian\\Cygwin64\\bin\\grep.exe",
-    "%IgnoreCase%",
+    "%Case%",
     "%Text%"
   ],
   "params": {
     "Text": {
       "type": "STRING",
-      "description": "Text to search",
+      "description": "Search",
       "mandatory": true
     },
-    "IgnoreCase": {
+    "Case": {
       "type": "COMBO",
-      "description": "Ingore case",
+      "description": "Case",
       "mandatory": false,
       "values": {
-        "Case sensitive": "",
-        "Case insensitive": "-i"
+        "sensitive": "",
+        "insensitive": "-i"
       }
     }
   }

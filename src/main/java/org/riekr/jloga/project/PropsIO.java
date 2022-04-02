@@ -82,7 +82,7 @@ class PropsIO {
 	public static void save(File dest, Project project) throws IOException {
 		Properties props = new Properties();
 		project.fields()
-				.filter(Project.Field::hasValue)
+				.filter(ProjectField::hasValue)
 				.forEach((f) -> props.setProperty(f.key, f.toString()));
 		try (Writer writer = new FileWriter(dest, false)) {
 			props.store(writer, project.getClass().getSimpleName());

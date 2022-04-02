@@ -7,11 +7,13 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.ext.ExtProcessConfig.Param;
 import org.riekr.jloga.project.ProjectComponent;
+import org.riekr.jloga.project.ProjectField;
 import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessComponentProject extends ProjectComponent {
@@ -57,7 +59,7 @@ public class ExtProcessComponentProject extends ProjectComponent {
 	}
 
 	@Override
-	public Stream<? extends Field<?>> fields() {
+	public Stream<? extends ProjectField<?, ?>> fields() {
 		return _params.values().stream().map((param) -> param._field);
 	}
 
@@ -88,7 +90,10 @@ public class ExtProcessComponentProject extends ProjectComponent {
 	@Override
 	protected SearchPredicate getSearchPredicate() {
 		Map<String, String> vars = new HashMap<>(_vars);
-		_params.forEach((key, val) -> vars.put(key, val._field.toString()));
+		_params.forEach((key, val) -> {
+			Object fieldValue = val._field.get();
+			vars.put(key, fieldValue == null ? "" : fieldValue.toString());
+		});
 		_manager.setSearchVars(vars);
 		return _manager.newSearchPredicate();
 	}

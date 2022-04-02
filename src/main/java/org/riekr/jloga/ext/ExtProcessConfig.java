@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import org.riekr.jloga.project.Project;
+import org.riekr.jloga.project.ProjectField;
 import org.riekr.jloga.search.SearchComponent;
 
 public class ExtProcessConfig {
@@ -26,7 +26,7 @@ public class ExtProcessConfig {
 		public String    deflt;
 		public Object    values;
 
-		public transient Project.Field<?> _field;
+		public transient ProjectField<?, ?> _field;
 	}
 
 	public String             workingDirectory;

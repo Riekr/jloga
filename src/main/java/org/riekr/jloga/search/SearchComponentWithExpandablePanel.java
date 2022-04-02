@@ -81,7 +81,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 	protected abstract void setupConfigPaneButtons(Container configPaneButtons);
 
-	protected MRUComboWithLabels<String> newEditableComponent(String key, String label, Consumer<String> onResult) {
+	public MRUComboWithLabels<String> newEditableComponent(String key, String label, Consumer<String> onResult) {
 		MRUComboWithLabels<String> editableField = MRUComboWithLabels.forString(_prefsPrefix + '.' + key, label, onResult);
 		editableField.combo.addMouseListener(_mouseListener);
 		editableField.combo.addPopupMenuListener(new PopupMenuListener() {

@@ -1,7 +1,5 @@
 package org.riekr.jloga.search;
 
-import org.riekr.jloga.project.ProjectComponentWithStdWizard;
-
 import static org.riekr.jloga.project.StdFields.Func;
 import static org.riekr.jloga.project.StdFields.Period;
 
@@ -9,13 +7,16 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
 
+import org.riekr.jloga.project.ProjectComponentWithStdWizard;
+import org.riekr.jloga.project.ProjectEditableField;
+
 public class FrequencyAnalysisComponent extends ProjectComponentWithStdWizard {
 	private static final long serialVersionUID = -3621473265054156767L;
 
 	public static final String ID = "FrequencyAnalysisComponent";
 
-	public final Field<Pattern>  patFunc        = newPatternField(Func, "Function pattern:", 0);
-	public final Field<Duration> periodDuration = newDurationField(Period, "Period:", Duration.of(1, ChronoUnit.MINUTES));
+	public final ProjectEditableField<Pattern>  patFunc        = newPatternField(Func, "Function pattern:", 0);
+	public final ProjectEditableField<Duration> periodDuration = newDurationField(Period, "Period:", Duration.of(1, ChronoUnit.MINUTES));
 
 	public FrequencyAnalysisComponent(int level) {
 		super(ID, level, "Frequency analysis project");

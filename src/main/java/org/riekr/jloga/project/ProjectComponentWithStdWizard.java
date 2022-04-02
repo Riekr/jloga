@@ -11,8 +11,8 @@ import static org.riekr.jloga.project.StdFields.DateExtractor;
 public abstract class ProjectComponentWithStdWizard extends ProjectComponent implements AutoDetect.Wizard {
 	private static final long serialVersionUID = -7459674268125654646L;
 
-	public final Field<Pattern>              patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
-	public final Field<DateTimeFormatterRef> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
+	public final ProjectEditableField<Pattern>              patDateExtract = newPatternField(DateExtractor, "Date extractor pattern:", 1);
+	public final ProjectEditableField<DateTimeFormatterRef> patDate        = newDateTimeFormatterField(Date, "Date pattern:");
 
 	public ProjectComponentWithStdWizard(String id, int level, String fileDescr) {
 		super(id, level, fileDescr);
