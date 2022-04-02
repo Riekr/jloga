@@ -6,6 +6,7 @@
   - Script definitions supports `values` shown in a combo ([sample](ext-search-samples/cyggrep.jloga.json))
 - Bug fixes:
   - Toggle buttons in text and regex
+  - Fix for "Key too long" error
 
 ## v0.0.11
 - Pick'n'mix:
