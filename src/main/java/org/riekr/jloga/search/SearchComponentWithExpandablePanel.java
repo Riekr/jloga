@@ -103,7 +103,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 		// TODO: ugly!
 		EventQueue.invokeLater(() -> _configVisible.subscribe((visible) -> {
 			if (!visible)
-				editableField.combo.subject.next((String)editableField.combo.getSelectedItem());
+				editableField.combo.resend();
 		}));
 		return editableField;
 	}

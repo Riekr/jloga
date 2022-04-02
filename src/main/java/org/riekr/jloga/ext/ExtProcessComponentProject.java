@@ -5,6 +5,7 @@ import static java.util.Collections.emptyMap;
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -23,6 +24,7 @@ public class ExtProcessComponentProject extends ProjectComponent {
 
 	private Map<String, String> _vars = emptyMap();
 
+	@SuppressWarnings("unchecked")
 	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, String[] command, Map<String, Param> params) {
 		super(id, level, id);
 		_id = id;
@@ -40,6 +42,15 @@ public class ExtProcessComponentProject extends ProjectComponent {
 				case DURATION:
 					param._field = newDurationField(key, param.description, param.deflt == null ? null : Duration.parse(param.deflt));
 					break;
+				case COMBO:
+					if (param.values == null)
+						throw new IllegalArgumentException("No values specified for combo type");
+					if (param.values instanceof List)
+						param._field = newSelectField(key, param.description, (List<String>)param.values);
+					else if (param.values instanceof Map)
+						param._field = newSelectField(key, param.description, (Map<String, String>)param.values);
+					else
+						throw new IllegalArgumentException("Invalid values specified for combo type");
 			}
 		});
 		buildUI();

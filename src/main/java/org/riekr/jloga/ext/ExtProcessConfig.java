@@ -15,8 +15,7 @@ import org.riekr.jloga.search.SearchComponent;
 public class ExtProcessConfig {
 
 	public enum ParamType {
-		STRING, PATTERN, DURATION
-		// TODO: BOOLEAN
+		STRING, PATTERN, DURATION, COMBO
 	}
 
 	public static class Param {
@@ -25,6 +24,7 @@ public class ExtProcessConfig {
 		public boolean   mandatory;
 		public int       min;
 		public String    deflt;
+		public Object    values;
 
 		public transient Project.Field<?> _field;
 	}

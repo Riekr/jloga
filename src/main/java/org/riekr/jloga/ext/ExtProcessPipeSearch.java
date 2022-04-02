@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TempTextSource;
@@ -14,11 +16,18 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessPipeSearch implements SearchPredicate {
 
-	private final File     _workingDir;
-	private final String[] _command;
+	private final File         _workingDir;
+	private final List<String> _command;
 
 	public ExtProcessPipeSearch(File workingDir, String... command) {
 		if (command == null || command.length == 0)
+			throw new IllegalArgumentException("No command specified");
+		_workingDir = workingDir;
+		_command = Arrays.asList(command);
+	}
+
+	public ExtProcessPipeSearch(File workingDir, List<String> command) {
+		if (command == null || command.isEmpty())
 			throw new IllegalArgumentException("No command specified");
 		_workingDir = workingDir;
 		_command = command;

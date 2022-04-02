@@ -57,7 +57,10 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 					setSelectedIndex(0);
 					//noinspection fallthrough
 				case "comboBoxChanged":
-					requestFocusInWindow();
+					if (isEditable())
+						requestFocusInWindow();
+					else
+						resend();
 					break;
 				default:
 					System.err.println(e);

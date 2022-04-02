@@ -1,14 +1,18 @@
 package org.riekr.jloga.ext;
 
+import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
+import static org.riekr.jloga.utils.TextUtils.replaceRegex;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -16,7 +20,6 @@ import org.riekr.jloga.Main;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchPredicate;
-import org.riekr.jloga.utils.TextUtils;
 
 public class ExtProcessManager {
 
@@ -25,7 +28,7 @@ public class ExtProcessManager {
 
 	private Map<String, String> _searchVars;
 	private JTextArea           _stdErr;
-	private String[]            _lastCommand;
+	private List<String>        _lastCommand;
 	private LocalDateTime       _lastStart;
 
 	public ExtProcessManager(String[] command, File workingDirectory) {
@@ -35,11 +38,12 @@ public class ExtProcessManager {
 
 	public SearchPredicate newSearchPredicate() {
 		try {
-			_lastCommand = new String[_command.length];
 			Map<String, String> env = getAllVars(_workingDirectory);
 			Pattern pattern = Pattern.compile("%([\\w._]+)%");
-			for (int i = 0; i < _command.length; i++)
-				_lastCommand[i] = TextUtils.replaceRegex(_command[i], pattern, env);
+			_lastCommand = Arrays.stream(_command)
+					.map((param) -> replaceRegex(param, pattern, env))
+					.filter((param) -> !param.isEmpty())
+					.collect(toList());
 			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand) {
 				@Override
 				public FilteredTextSource start(TextSource master) {

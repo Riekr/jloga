@@ -37,7 +37,7 @@ public abstract class ProjectComponent extends SearchComponentWithExpandablePane
 			MRUComboWithLabels<String> combo = newEditableComponent(f.key, f.label, f);
 			configPane.add(combo);
 			_combos.put(f.key, combo);
-			f.ui = combo;
+			f.ui(combo);
 		});
 	}
 
