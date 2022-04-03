@@ -70,7 +70,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					resend();
+					EventQueue.invokeLater(MRUTextCombo.this::resend);
 			}
 		});
 		addComponentListener(new ComponentAdapter() {
