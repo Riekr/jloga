@@ -32,13 +32,21 @@ public class KeyUtils {
 	}
 
 	public static void addKeyStrokeAction(JComponent component, KeyStroke key, Runnable action) {
-		component.registerKeyboardAction((e) -> action.run(), key, WHEN_IN_FOCUSED_WINDOW);
+		addKeyStrokeAction(component, key, action, WHEN_IN_FOCUSED_WINDOW);
+	}
+
+	public static void addKeyStrokeAction(JComponent component, KeyStroke key, Runnable action, int when) {
+		component.registerKeyboardAction((e) -> action.run(), key, when);
 	}
 
 	public static void addKeyStrokeAction(JComponent component, Preference<KeyStroke> keyPref, Runnable action) {
+		addKeyStrokeAction(component, keyPref, action, WHEN_IN_FOCUSED_WINDOW);
+	}
+
+	public static void addKeyStrokeAction(JComponent component, Preference<KeyStroke> keyPref, Runnable action, int when) {
 		keyPref.subscribe((key) -> {
 			component.unregisterKeyboardAction(key);
-			addKeyStrokeAction(component, key, action);
+			addKeyStrokeAction(component, key, action, when);
 		});
 	}
 

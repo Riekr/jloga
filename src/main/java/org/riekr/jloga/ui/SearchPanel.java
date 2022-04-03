@@ -87,9 +87,9 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	 * after having checked that the key combinations does not have side effect on the editor.
 	 */
 	private void setupKeyBindings() {
-		addKeyStrokeAction(this, KeyBindings.KB_FINDTEXT, () -> selectSearchInFocusedTab(PlainTextComponent.ID));
-		addKeyStrokeAction(this, KeyBindings.KB_FINDREGEX, () -> selectSearchInFocusedTab(RegExComponent.ID));
-		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null));
+		addKeyStrokeAction(this, KeyBindings.KB_FINDTEXT, () -> selectSearchInFocusedTab(PlainTextComponent.ID), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		addKeyStrokeAction(this, KeyBindings.KB_FINDREGEX, () -> selectSearchInFocusedTab(RegExComponent.ID), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 	}
 
 	private void selectSearchInFocusedTab(String id) {

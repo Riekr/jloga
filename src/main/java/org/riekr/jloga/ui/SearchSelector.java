@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.Main;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.prefs.Preferences;
@@ -76,22 +77,24 @@ public class SearchSelector extends JPanel {
 	}
 
 	public void setSearchUI(SearchComponent comp) {
-		boolean focus = _searchComponent != null;
-		if (_searchComponent != null)
-			_searchComponent.onSearch(null);
-		if (_searchUI != null)
-			remove(_searchUI);
-		_searchComponent = comp;
-		_searchUI = comp.getUIComponent();
-		if (comp instanceof AutoDetect.Wizard && _textSource != null)
-			((AutoDetect.Wizard)comp).setTextSourceSupplier(_textSource);
-		_searchComponent.onSearch(_onSearchConsumer);
-		_searchComponent.setVariables(_vars);
-		add(_searchUI, BorderLayout.CENTER);
-		_selectBtn.setText(_searchComponent.getSearchIconLabel());
-		if (focus)
-			_searchUI.requestFocusInWindow();
-		Preferences.LAST_SEARCH_TYPE.set(_searchComponent.getID(), _level);
+		if (_searchComponent != comp) {
+			if (_searchComponent != null)
+				_searchComponent.onSearch(null);
+			if (_searchUI != null)
+				remove(_searchUI);
+			_searchComponent = comp;
+			_searchUI = comp.getUIComponent();
+			if (comp instanceof AutoDetect.Wizard && _textSource != null)
+				((AutoDetect.Wizard)comp).setTextSourceSupplier(_textSource);
+			_searchComponent.onSearch(_onSearchConsumer);
+			_searchComponent.setVariables(_vars);
+			add(_searchUI, BorderLayout.CENTER);
+			_selectBtn.setText(_searchComponent.getSearchIconLabel());
+			Preferences.LAST_SEARCH_TYPE.set(_searchComponent.getID(), _level);
+		}
+		_searchUI.requestFocusInWindow();
+		// this seems needed as sometime focus does not work as expected!
+		Main.getMain().validate();
 	}
 
 	@Override
