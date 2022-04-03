@@ -29,6 +29,6 @@ public class ProjectEditableField<T> extends ProjectField<T, MRUComboWithLabels<
 
 	@Override
 	protected MRUComboWithLabels<?> newUI(ProjectComponent panel) {
-		return panel.newEditableComponent(key, label, this);
+		return panel.newEditableComponent(key, null, this);
 	}
 }

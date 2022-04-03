@@ -19,8 +19,10 @@ public class MRUComboWithLabels<T> extends JPanel {
 	public final JLabel               error;
 
 	public MRUComboWithLabels(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
-		this.setLayout(new BorderLayout());
-		this.add(new JLabel(label.trim() + " "), BorderLayout.LINE_START);
+		super(new BorderLayout());
+
+		if (label != null && !(label = label.trim()).isEmpty())
+			this.add(new JLabel(label + " "), BorderLayout.LINE_START);
 
 		this.combo = newMRUTextCombo(key);
 		this.add(combo, BorderLayout.CENTER);

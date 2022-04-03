@@ -28,13 +28,12 @@ public class SearchPanelBottomArea extends JPanel {
 	private       Future<?>      _searching;
 
 	public SearchPanelBottomArea(String title, SearchPanel parent, JobProgressBar progressBar, int level) {
+		super(new BorderLayout());
 		_title = title;
 		_parent = parent;
 		_level = level;
-		setLayout(new BorderLayout());
 		_progressBar = progressBar;
-		JPanel searchHeader = new JPanel();
-		searchHeader.setLayout(new BorderLayout());
+		JPanel searchHeader = new JPanel(new BorderLayout());
 		_searchUI = new SearchSelector(level, this::search, parent::getTextSource, Map.of(
 				"Title", title,
 				"RootTitle", parent.getRootTitle()

@@ -31,12 +31,12 @@ public class SearchSelector extends JPanel {
 	private final @Nullable Supplier<TextSource> _textSource;
 
 	public SearchSelector(int level, Consumer<SearchPredicate> onSearchConsumer, @Nullable Supplier<TextSource> textSource, Map<String, String> vars) {
+		super(new BorderLayout());
+
 		_level = level;
 		_onSearchConsumer = onSearchConsumer;
 		_textSource = textSource;
 		_vars = vars;
-
-		setLayout(new BorderLayout());
 
 		_selectBtn = UIUtils.newBorderlessButton("\u26A7", this::openSelection);
 		add(_selectBtn, BorderLayout.LINE_START);

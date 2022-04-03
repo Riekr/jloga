@@ -1,5 +1,8 @@
 package org.riekr.jloga.project;
 
+import static org.riekr.jloga.utils.SpringUtils.makeCompactGrid;
+
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +11,6 @@ import java.util.function.Supplier;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
-
-import javax.swing.*;
 
 public abstract class ProjectComponent extends SearchComponentWithExpandablePanel implements Project {
 	private static final long serialVersionUID = -1685626672776376188L;
@@ -32,16 +33,34 @@ public abstract class ProjectComponent extends SearchComponentWithExpandablePane
 
 	@Override
 	protected void setupConfigPane(Container configPane) {
-		List<ProjectCheckboxField<?>> checkboxFieldList = new ArrayList<>();
-		fields().forEach((ProjectField<?, ?> f) -> {
+		List<ProjectCheckboxField<?>> checkboxFields = new ArrayList<>();
+		List<ProjectField<?, ?>> otherFields = new ArrayList<>();
+		fields().sequential().forEachOrdered((ProjectField<?, ?> f) -> {
 			if (f instanceof ProjectCheckboxField)
-				checkboxFieldList.add((ProjectCheckboxField<?>)f);
+				checkboxFields.add((ProjectCheckboxField<?>)f);
 			else
-				configPane.add(f.ui(this));
+				otherFields.add(f);
 		});
-		if (!checkboxFieldList.isEmpty()) {
+
+		if (!otherFields.isEmpty()) {
+			JPanel labeledComponents = new JPanel(new SpringLayout());
+			configPane.add(labeledComponents);
+			for (ProjectField<?, ?> f : otherFields) {
+				String labelText = f.label.trim();
+				if (!labelText.endsWith(":"))
+					labelText += ':';
+				JLabel label = new JLabel(labelText + ' ');
+				Component comp = f.ui(this);
+				label.setLabelFor(comp);
+				labeledComponents.add(label);
+				labeledComponents.add(comp);
+			}
+			makeCompactGrid(labeledComponents, otherFields.size(), 2, 0, 0, 0, 0);
+		}
+
+		if (!checkboxFields.isEmpty()) {
 			Box checkboxPanel = Box.createHorizontalBox();
-			checkboxFieldList.forEach((f) -> checkboxPanel.add(f.ui(this)));
+			checkboxFields.forEach((f) -> checkboxPanel.add(f.ui(this)));
 			checkboxPanel.add(Box.createHorizontalGlue());
 			configPane.add(checkboxPanel);
 		}

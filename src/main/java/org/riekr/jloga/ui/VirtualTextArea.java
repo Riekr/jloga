@@ -71,8 +71,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_parent = parent;
 
 		setOpaque(false);
-		JPanel root = new JPanel();
-		root.setLayout(new BorderLayout());
+		JPanel root = new JPanel(new BorderLayout());
 		root.setOpaque(false);
 
 		_lineNumbers = new LineNumbersTextArea();
