@@ -51,8 +51,9 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 	protected void buildUI() {
 		if (_configFrame == null) {
 			_configFrame = new JFrame();
-			_configFrame.setUndecorated(true);
 			_configFrame.setVisible(false);
+			_configFrame.setUndecorated(true);
+			_configFrame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
 			JPanel configPane = new JPanel(new SpringLayout());
