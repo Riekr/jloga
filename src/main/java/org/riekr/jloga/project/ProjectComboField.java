@@ -4,7 +4,6 @@ import static org.riekr.jloga.utils.Utils.findKeyForValue;
 
 import java.util.Map;
 
-import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public class ProjectComboField<T> extends ProjectEditableField<T> {
@@ -21,7 +20,7 @@ public class ProjectComboField<T> extends ProjectEditableField<T> {
 	}
 
 	@Override
-	protected MRUComboWithLabels<?> newUI(SearchComponentWithExpandablePanel panel) {
+	protected MRUComboWithLabels<?> newUI(ProjectComponent panel) {
 		MRUComboWithLabels<?> res = super.newUI(panel);
 		res.combo.removeAllItems();
 		_values.keySet().forEach(res.combo::addItem);

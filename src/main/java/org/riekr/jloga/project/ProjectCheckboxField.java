@@ -6,8 +6,6 @@ import static org.riekr.jloga.utils.Utils.findKeyForValue;
 import javax.swing.*;
 import java.util.Map;
 
-import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
-
 public class ProjectCheckboxField<T> extends ProjectField<T, JCheckBox> {
 
 	private final Map<Boolean, T> _values;
@@ -22,7 +20,7 @@ public class ProjectCheckboxField<T> extends ProjectField<T, JCheckBox> {
 	}
 
 	@Override
-	protected JCheckBox newUI(SearchComponentWithExpandablePanel panel) {
+	protected JCheckBox newUI(ProjectComponent panel) {
 		return panel.newCheckbox(key, label, this);
 	}
 

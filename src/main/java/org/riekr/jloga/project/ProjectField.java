@@ -1,8 +1,6 @@
 package org.riekr.jloga.project;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
+import static java.util.Objects.requireNonNullElse;
 
 import java.awt.*;
 import java.util.function.BiFunction;
@@ -10,7 +8,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.Objects.requireNonNullElse;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class ProjectField<T, UIType extends Component> implements Supplier<T>, Consumer<String> {
 
@@ -61,14 +60,14 @@ public abstract class ProjectField<T, UIType extends Component> implements Suppl
 	}
 
 	@NotNull
-	public UIType ui(SearchComponentWithExpandablePanel panel) {
+	public UIType ui(ProjectComponent panel) {
 		if (_ui == null)
 			_ui = newUI(panel);
 		return _ui;
 	}
 
 	@Contract("_->new")
-	protected abstract UIType newUI(SearchComponentWithExpandablePanel panel);
+	protected abstract UIType newUI(ProjectComponent panel);
 
 	@Override
 	public String toString() {

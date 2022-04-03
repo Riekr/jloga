@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public class ProjectEditableField<T> extends ProjectField<T, MRUComboWithLabels<?>> {
@@ -29,7 +28,7 @@ public class ProjectEditableField<T> extends ProjectField<T, MRUComboWithLabels<
 	}
 
 	@Override
-	protected MRUComboWithLabels<?> newUI(SearchComponentWithExpandablePanel panel) {
+	protected MRUComboWithLabels<?> newUI(ProjectComponent panel) {
 		return panel.newEditableComponent(key, label, this);
 	}
 }

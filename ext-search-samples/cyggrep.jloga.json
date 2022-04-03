@@ -7,6 +7,8 @@
     "D:\\Gian\\Cygwin64\\bin\\grep.exe",
     "%Case%",
     "%Invert%",
+    "%CountOnly%",
+    "%Type%",
     "%Text%"
   ],
   "params": {
@@ -24,12 +26,30 @@
         "insensitive": "-i"
       }
     },
+    "Type": {
+      "type": "COMBO",
+      "description": "Type",
+      "values": {
+        "Fixed strings": "--fixed-strings",
+        "Basic regexp": "--basic-regexp",
+        "Extended regexp": "--extended-regexp",
+        "Perl regexp": "--perl-regexp"
+      }
+    },
     "Invert": {
       "type": "CHECKBOX",
       "description": "Invert",
       "values": {
-        "true": "-v",
-        "false": ""
+        "false": "",
+        "true": "-v"
+      }
+    },
+    "CountOnly": {
+      "type": "CHECKBOX",
+      "description": "Count only",
+      "values": {
+        "false": "",
+        "true": "-c"
       }
     }
   }
