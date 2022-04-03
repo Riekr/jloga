@@ -25,7 +25,7 @@ public interface KeyBindings {
 	GUIPreference<KeyStroke> KB_FINDTEXT   = keyPref("kb.findText", KeyUtils.CTRL_F, "Find plain text");
 	GUIPreference<KeyStroke> KB_FINDREGEX  = keyPref("kb.findRegex", KeyUtils.CTRL_R, "Find regex text");
 	GUIPreference<KeyStroke> KB_FINDSELECT = keyPref("kb.findSelect", KeyUtils.CTRL_DOT, "Open search type selector");
-
+	GUIPreference<KeyStroke> KB_CLOSETAB   = keyPref("kb.closeTab", KeyUtils.CTRL_W, "Close current tab");
 
 	static List<GUIPreference<?>> getGUIKeyBindings() {
 		ArrayList<GUIPreference<?>> res = new ArrayList<>();

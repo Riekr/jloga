@@ -91,6 +91,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		addKeyStrokeAction(this, KeyBindings.KB_FINDTEXT, () -> selectSearchInFocusedTab(PlainTextComponent.ID), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyBindings.KB_FINDREGEX, () -> selectSearchInFocusedTab(RegExComponent.ID), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		addKeyStrokeAction(this, KeyBindings.KB_CLOSETAB, this::removeCurrentBottomArea, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 	}
 
 	private void selectSearchInFocusedTab(String id) {
@@ -185,6 +186,12 @@ public class SearchPanel extends JComponent implements FileDropListener {
 
 	public VirtualTextArea getTextArea() {
 		return _textArea;
+	}
+
+	private void removeCurrentBottomArea() {
+		SearchPanelBottomArea tab = getSelectedSearchPanelBottomArea();
+		if (tab != null)
+			removeBottomArea(tab);
 	}
 
 	public void removeBottomArea(SearchPanelBottomArea bottomArea) {
