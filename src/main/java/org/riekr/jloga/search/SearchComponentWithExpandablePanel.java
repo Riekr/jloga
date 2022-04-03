@@ -19,8 +19,9 @@ import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.SpringUtils;
+import org.riekr.jloga.utils.UIUtils;
 
-public abstract class SearchComponentWithExpandablePanel extends JLabel implements SearchComponent {
+public abstract class SearchComponentWithExpandablePanel extends JComponent implements SearchComponent {
 	private static final long serialVersionUID = 7751803744482675483L;
 
 	private final String               _prefsPrefix;
@@ -29,6 +30,8 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 	private JFrame                    _configFrame;
 	private Consumer<SearchPredicate> _onSearchConsumer;
 	private boolean                   _mouseListenerEnabled = true;
+
+	private final JLabel _collapsedLabel = new JLabel();
 
 	private final MouseListener _mouseListener = new MouseAdapter() {
 		@Override
@@ -45,7 +48,14 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 	};
 
 	public SearchComponentWithExpandablePanel(String prefsPrefix) {
+		setLayout(new BorderLayout());
+		add(_collapsedLabel, BorderLayout.CENTER);
+		add(UIUtils.newBorderlessButton("Repeat", this::search, "Repeat analysis with current parameters"), BorderLayout.LINE_END);
 		_prefsPrefix = prefsPrefix;
+	}
+
+	public void setText(String text) {
+		_collapsedLabel.setText(text);
 	}
 
 	protected void buildUI() {
@@ -70,7 +80,7 @@ public abstract class SearchComponentWithExpandablePanel extends JLabel implemen
 
 			SpringUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
 
-			addMouseListener(_mouseListener);
+			_collapsedLabel.addMouseListener(_mouseListener);
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
