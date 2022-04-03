@@ -100,6 +100,14 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		PrefsUtils.save(_key, _model);
 	}
 
+	public void markInvalidValue(String val) {
+		int pos = _model.getIndexOf(val);
+		if (pos != -1) {
+			_model.removeElementAt(pos);
+			save();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private T convert(Object elem) {
 		if (elem instanceof String)

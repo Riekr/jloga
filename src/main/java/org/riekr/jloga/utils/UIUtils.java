@@ -158,10 +158,11 @@ public final class UIUtils {
 		return box;
 	}
 
-	private static void dispatchErrorMessage(Component component, String message, String title) {
-		if (component instanceof MRUComboWithLabels)
+	private static void dispatchErrorMessage(Component component, String message, String title, String value) {
+		if (component instanceof MRUComboWithLabels) {
 			((MRUComboWithLabels<?>)component).setError(title + ": " + message);
-		else
+			((MRUComboWithLabels<?>)component).combo.markInvalidValue(value);
+		} else
 			JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -179,13 +180,13 @@ public final class UIUtils {
 			try {
 				Pattern pat = Pattern.compile(text, flags);
 				if (minGroups > 0 && pat.matcher("").groupCount() < minGroups)
-					dispatchErrorMessage(component, "This field requires " + minGroups + " groups", "RegEx syntax error");
+					dispatchErrorMessage(component, "This field requires " + minGroups + " groups", "RegEx syntax error", text);
 				else {
 					dispatchErrorCleared(component);
 					return pat;
 				}
 			} catch (PatternSyntaxException pse) {
-				dispatchErrorMessage(component, pse.getLocalizedMessage(), "RegEx syntax error");
+				dispatchErrorMessage(component, pse.getLocalizedMessage(), "RegEx syntax error", text);
 			}
 		}
 		return null;
@@ -198,7 +199,7 @@ public final class UIUtils {
 				dispatchErrorCleared(component);
 				return res;
 			} catch (DateTimeParseException e) {
-				dispatchErrorMessage(component, e.getLocalizedMessage(), "Duration syntax error");
+				dispatchErrorMessage(component, e.getLocalizedMessage(), "Duration syntax error", text);
 			}
 		}
 		return null;
@@ -211,7 +212,7 @@ public final class UIUtils {
 				dispatchErrorCleared(component);
 				return res;
 			} catch (IllegalArgumentException iae) {
-				dispatchErrorMessage(component, iae.getLocalizedMessage(), "Date/time pattern error");
+				dispatchErrorMessage(component, iae.getLocalizedMessage(), "Date/time pattern error", patDate);
 			}
 		}
 		return null;
