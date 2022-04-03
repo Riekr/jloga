@@ -35,7 +35,7 @@ public interface Preferences extends KeyBindings {
 			.addDescription("Font used in text viewers, using a monospace font is recommended.");
 
 	GUIPreference<Integer> PAGE_SCROLL_DIVIDER = of("PageDivider", 3, 1, Integer.MAX_VALUE)
-			.describe(Type.Combo, "Page scroll size:")
+			.describe(Type.Combo, "Page scroll size")
 			.group(GENERAL)
 			.addDescription("Select how many of the visible lines should be scrolled when paging text.")
 			.add("Full page", 1)
@@ -43,6 +43,11 @@ public interface Preferences extends KeyBindings {
 			.add("\u2153 of page", 3)
 			.add("\u00BC of page", 4)
 			.add("\u2155 of page", 5);
+
+	GUIPreference<Boolean> FIND_NEWTAB = of("KSFindNewType", () -> false)
+			.describe(Type.Toggle, "New tab on search")
+			.group(GENERAL)
+			.addDescription("If set, searches initiated with a key stroke will create a new tab instead of reusing the last one.");
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
 			.group(GRID)

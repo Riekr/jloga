@@ -3,6 +3,7 @@
 - General:
   - Search button in text and regex searches (you can still press "enter")
   - Cosmetic cleanup of projects (ext, duration, etc..)
+  - New preference about creating tabs with key shortcuts
 - External scripts:
   - Script definitions supports `values` shown in a combo or checkbox ([sample](ext-search-samples/cyggrep.jloga.json))
 - Bug fixes:

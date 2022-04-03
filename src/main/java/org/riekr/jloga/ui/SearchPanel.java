@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.KeyBindings;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.PlainTextComponent;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.utils.ContextMenu;
@@ -93,15 +94,15 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	}
 
 	private void selectSearchInFocusedTab(String id) {
-		SearchPanelBottomArea tab = getSelectedSearchPanelBottomArea();
-		if (tab != null) {
-			SearchSelector searchSelector = tab.getSearchUI();
-			if (searchSelector != null) {
-				if (id == null)
-					searchSelector.openSelection();
-				else
-					searchSelector.setSearchUI(id);
-			}
+		SearchPanelBottomArea tab;
+		if (Preferences.FIND_NEWTAB.get() || (tab = getSelectedSearchPanelBottomArea()) == null)
+			tab = addNewTab();
+		SearchSelector searchSelector = tab.getSearchUI();
+		if (searchSelector != null) {
+			if (id == null)
+				searchSelector.openSelection();
+			else
+				searchSelector.setSearchUI(id);
 		}
 	}
 
@@ -115,7 +116,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		return _TAB_PREFIX + (char)('A' + _level) + (++_searchId);
 	}
 
-	private void addNewTab() {
+	private SearchPanelBottomArea addNewTab() {
 		String tabTitle = newTabTempTitle();
 		SearchPanelBottomArea body = new SearchPanelBottomArea(getChildTitle(tabTitle), SearchPanel.this, _progressBar, _level);
 		body.setFont(getFont());
@@ -126,6 +127,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		invalidate();
 		if (_splitPane.getDividerLocation() >= _splitPane.getMaximumDividerLocation())
 			collapseBottomArea();
+		return body;
 	}
 
 	private JComponent newTabHeader(String title, SearchPanelBottomArea tabContent) {
@@ -191,6 +193,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_bottomTabs.removeTabAt(idx);
 		if (_bottomTabs.getTabCount() == 1) // + button is a tab!
 			collapseBottomArea();
+		_textArea.requestFocusInWindow();
 	}
 
 	public void onClose() {
