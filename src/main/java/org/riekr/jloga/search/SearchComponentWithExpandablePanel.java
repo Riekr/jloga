@@ -14,6 +14,7 @@ import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.Main;
 import org.riekr.jloga.prefs.PrefsUtils;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
@@ -27,7 +28,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 	private final String               _prefsPrefix;
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();
 
-	private JFrame                    _configFrame;
+	private JDialog                   _configFrame;
 	private Consumer<SearchPredicate> _onSearchConsumer;
 	private boolean                   _mouseListenerEnabled = true;
 
@@ -60,10 +61,9 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 
 	protected void buildUI() {
 		if (_configFrame == null) {
-			_configFrame = new JFrame();
+			_configFrame = new JDialog(Main.getMain(), false);
 			_configFrame.setVisible(false);
 			_configFrame.setUndecorated(true);
-			_configFrame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
 			JPanel configPane = new JPanel(new SpringLayout());

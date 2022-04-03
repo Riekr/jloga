@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
@@ -50,7 +49,6 @@ public class Main extends JFrame implements FileDropListener {
 
 	private static Main _INSTANCE;
 
-	@Nullable
 	public static Main getMain() {return _INSTANCE;}
 
 	private final JTabbedPane             _tabs;
