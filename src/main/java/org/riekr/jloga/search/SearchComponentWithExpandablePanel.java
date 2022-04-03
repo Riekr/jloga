@@ -1,16 +1,13 @@
 package org.riekr.jloga.search;
 
+import static javax.swing.BorderFactory.createEmptyBorder;
 import static org.riekr.jloga.react.Observer.async;
 import static org.riekr.jloga.react.Observer.uniq;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +15,7 @@ import org.riekr.jloga.Main;
 import org.riekr.jloga.prefs.PrefsUtils;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
+import org.riekr.jloga.ui.HoverMonitor;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.SpringUtils;
 import org.riekr.jloga.utils.UIUtils;
@@ -30,23 +28,9 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 
 	private JDialog                   _configFrame;
 	private Consumer<SearchPredicate> _onSearchConsumer;
-	private boolean                   _mouseListenerEnabled = true;
 
-	private final JLabel _collapsedLabel = new JLabel();
-
-	private final MouseListener _mouseListener = new MouseAdapter() {
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			if (_mouseListenerEnabled)
-				_configVisible.next(true);
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-			if (_mouseListenerEnabled)
-				_configVisible.next(false);
-		}
-	};
+	private final JLabel       _collapsedLabel = new JLabel();
+	private final HoverMonitor _mouseListener  = new HoverMonitor(_configVisible::next);
 
 	public SearchComponentWithExpandablePanel(String prefsPrefix) {
 		setLayout(new BorderLayout());
@@ -67,16 +51,17 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 
 			JPanel configPane = new JPanel(new SpringLayout());
-			configPane.setBorder(new EmptyBorder(8, 8, 8, 8));
+			configPane.setBorder(createEmptyBorder(8, 8, 8, 8));
 			setupConfigPane(configPane);
-			_configFrame.add(configPane);
+			_configFrame.setContentPane(configPane);
 
 			Box configPaneButtons = Box.createHorizontalBox();
-			configPane.add(configPaneButtons);
 			setupConfigPaneButtons(configPaneButtons);
 			configPaneButtons.add(newButtonSpacer(2, 1));
 			configPaneButtons.add(newButton("Start analysis", this::search));
 			configPaneButtons.add(Box.createGlue());
+			configPaneButtons.setBorder(createEmptyBorder(8, 0, 0, 0));
+			configPane.add(configPaneButtons);
 
 			SpringUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
 
@@ -100,22 +85,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 	public MRUComboWithLabels<String> newEditableComponent(String key, String label, Consumer<String> onResult) {
 		MRUComboWithLabels<String> editableField = MRUComboWithLabels.forString(_prefsPrefix + '.' + key, label, onResult);
 		editableField.combo.addMouseListener(_mouseListener);
-		editableField.combo.addPopupMenuListener(new PopupMenuListener() {
-			@Override
-			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				_mouseListenerEnabled = false;
-			}
-
-			@Override
-			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-				_mouseListenerEnabled = true;
-			}
-
-			@Override
-			public void popupMenuCanceled(PopupMenuEvent e) {
-				_mouseListenerEnabled = true;
-			}
-		});
+		editableField.combo.addPopupMenuListener(_mouseListener);
 		// TODO: ugly!
 		EventQueue.invokeLater(() -> _configVisible.subscribe((visible) -> {
 			if (!visible)
