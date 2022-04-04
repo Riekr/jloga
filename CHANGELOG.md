@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.0.12
 - General:
   - Search button in text and regex searches (you can still press "enter")
   - Cosmetic cleanup of projects (ext, duration, etc..)
