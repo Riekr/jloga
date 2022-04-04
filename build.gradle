@@ -38,7 +38,7 @@ sourceSets {
 compileJava {
 	options.warnings = true
 	options.deprecation = true
-	options.debug = false
+	options.debug = true
 	options.compilerArgs = ["-Xlint:unchecked"]
 }
 
