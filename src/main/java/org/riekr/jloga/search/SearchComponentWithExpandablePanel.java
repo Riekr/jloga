@@ -3,6 +3,8 @@ package org.riekr.jloga.search;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static org.riekr.jloga.react.Observer.async;
 import static org.riekr.jloga.react.Observer.uniq;
+import static org.riekr.jloga.utils.KeyUtils.ESC;
+import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,6 +51,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			_configFrame.setVisible(false);
 			_configFrame.setUndecorated(true);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
+			addKeyStrokeAction(_configFrame, ESC, () -> _configVisible.next(false));
 
 			JPanel configPane = new JPanel(new SpringLayout());
 			configPane.setBorder(createEmptyBorder(8, 8, 8, 8));
