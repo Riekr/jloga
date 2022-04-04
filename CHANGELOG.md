@@ -1,6 +1,6 @@
 ## In progress:
 
-## v0.0.12
+## v0.0.12a
 - General:
   - Search button in text and regex searches (you can still press "enter")
   - Cosmetic cleanup of projects (ext, duration, etc..)
@@ -11,6 +11,7 @@
 - Bug fixes:
   - Toggle buttons in text and regex
   - Fix for "Key too long" error
+  - Fixed cr/lf sequence in indexing
 
 ## v0.0.11
 - Pick'n'mix:

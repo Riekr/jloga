@@ -54,7 +54,7 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-				"Implementation-Version": '0.0.12',
+				"Implementation-Version": '0.0.12a',
 				"Main-Class": 'org.riekr.jloga.Main'
 		)
 	}

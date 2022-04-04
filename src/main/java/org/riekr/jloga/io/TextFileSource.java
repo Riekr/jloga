@@ -103,9 +103,11 @@ public class TextFileSource implements TextSource {
 						decoder.decode(byteBuffer.flip(), charBuffer, false);
 						charBuffer.flip();
 						while (charBuffer.hasRemaining()) {
-							if (charBuffer.get() == '\n') {
-								_lineCount++;
-								charBuffer.mark();
+							switch (charBuffer.get()) {
+								case '\n':
+								case '\r':
+									_lineCount++;
+									charBuffer.mark();
 							}
 						}
 						// fetch last read char
