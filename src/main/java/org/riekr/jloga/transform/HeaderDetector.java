@@ -27,7 +27,7 @@ public class HeaderDetector {
 	}
 
 	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
-		TextSource.AUX_EXECUTOR.submit(() -> {
+		source.defaultAsyncIO(() -> {
 			int lineCount;
 			try {
 				lineCount = source.getLineCount();

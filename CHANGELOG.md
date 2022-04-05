@@ -1,5 +1,10 @@
 ## In progress:
 
+- General:
+  - One I/O thread for each file root
+- Bug fixes:
+  - Fixed app sometime hanging
+
 ## v0.0.12a
 - General:
   - Search button in text and regex searches (you can still press "enter")

@@ -12,6 +12,7 @@ import org.riekr.jloga.pmem.PagedIntToObjList;
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.utils.CancellableFuture;
 
 public class TempTextSource implements FilteredTextSource {
 
@@ -35,28 +36,30 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+
 		if (_data.isSealed()) {
-			enqueueTextRequest(() -> {
+			return defaultAsyncIO(() -> {
 				StringsReader reader = new StringsReader(getText(fromLine, Math.min(Math.toIntExact(_data.size()) - fromLine, count)));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			});
-		} else {
-			AtomicReference<Runnable> unsubscribe = new AtomicReference<>(() -> {});
-			unsubscribe.set(_lineCountSubject.subscribe(lastLine -> {
-				int toLine = Math.min(fromLine + count, Math.toIntExact(_data.size()));
-				if (fromLine < lastLine) {
-					StringsReader reader = new StringsReader(getText(fromLine, toLine - fromLine));
-					EventQueue.invokeLater(() -> consumer.accept(reader));
-					if (toLine >= lastLine) {
-						unsubscribe.get().run();
-						return;
-					}
-				}
-				if (_data.isSealed())
-					unsubscribe.get().run();
-			})::unsubscribe);
 		}
+
+		AtomicReference<Runnable> unsubscribe = new AtomicReference<>(() -> {});
+		unsubscribe.set(_lineCountSubject.subscribe(lastLine -> {
+			int toLine = Math.min(fromLine + count, Math.toIntExact(_data.size()));
+			if (fromLine < lastLine) {
+				StringsReader reader = new StringsReader(getText(fromLine, toLine - fromLine));
+				EventQueue.invokeLater(() -> consumer.accept(reader));
+				if (toLine >= lastLine) {
+					unsubscribe.get().run();
+					return;
+				}
+			}
+			if (_data.isSealed())
+				unsubscribe.get().run();
+		})::unsubscribe);
+		return new CancellableFuture(unsubscribe.get());
 	}
 
 	@Override

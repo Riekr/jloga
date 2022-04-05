@@ -1,6 +1,7 @@
 package org.riekr.jloga.io;
 
 import static java.util.Objects.requireNonNullElse;
+import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 
 import javax.swing.*;
 import java.awt.*;
@@ -102,7 +103,7 @@ public class MixFileSource implements TextSource {
 			throw new IllegalArgumentException("Not enough mix sources");
 		_sources = new TextSource[config.sources.size()];
 		_padding = config.prefixWithID ? (int)(Math.log10(_sources.length)) + 1 : -1;
-		_indexing = IO_EXECUTOR.submit(() -> {
+		_indexing = defaultAsyncIO(() -> {
 			final MutableInt totLineCount = new MutableInt();
 			final MutableInt parsedLines = new MutableInt();
 			ScheduledFuture<?> updateTask = monitorProgress(parsedLines, totLineCount, indexingListener);

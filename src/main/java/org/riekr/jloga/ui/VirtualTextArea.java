@@ -20,6 +20,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Pattern;
@@ -62,6 +63,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
+	private Future<?>      _prevRequireTextRequest;
 
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
@@ -294,7 +296,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			setHighlightedLine(_allLinesCount);
 		else {
 			int limit = _allLinesCount - 100;
-			TextSource.IO_EXECUTOR.submit(() -> {
+			_textSource.defaultAsyncIO(() -> {
 				for (int line = _allLinesCount; line > limit; line--) {
 					String text = _textSource.getText(line);
 					if (text != null && !text.isEmpty()) {
@@ -378,7 +380,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		if (_textSource == null)
 			_text.setText("");
 		else {
-			_textSource.requestText(_fromLine, _lineCount, (reader) -> {
+			if (_prevRequireTextRequest != null)
+				_prevRequireTextRequest.cancel(false);
+			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (reader) -> {
+				_prevRequireTextRequest = null;
 				try {
 					// _text.setText(text); simply does not work every time
 					_text.read(reader, _fromLine);

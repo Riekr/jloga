@@ -114,9 +114,9 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		if (_tie.isIndexing()) {
-			enqueueTextRequest(() -> {
+			return defaultAsyncIO(() -> {
 				try {
 					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
 					EventQueue.invokeLater(() -> consumer.accept(reader));
@@ -126,8 +126,7 @@ public class ChildTextSource implements FilteredTextSource {
 					e.printStackTrace(System.err);
 				}
 			});
-			return;
 		}
-		FilteredTextSource.super.requestText(fromLine, count, consumer);
+		return FilteredTextSource.super.requestText(fromLine, count, consumer);
 	}
 }

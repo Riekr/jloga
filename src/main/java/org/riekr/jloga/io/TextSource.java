@@ -1,5 +1,9 @@
 package org.riekr.jloga.io;
 
+import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
+import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
+
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,17 +12,12 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -30,31 +29,13 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public interface TextSource extends Iterable<String> {
 
-	ExecutorService          IO_EXECUTOR      = Executors.newSingleThreadExecutor();
-	ScheduledExecutorService MONITOR_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
-	ExecutorService          AUX_EXECUTOR     = Executors.newCachedThreadPool();
-
-	default ScheduledFuture<?> monitorProgress(LongSupplier current, long total, ProgressListener progressListener) {
-		return monitorProgress(current, () -> total, progressListener);
-	}
-
-	default ScheduledFuture<?> monitorProgress(LongSupplier current, LongSupplier total, ProgressListener progressListener) {
-		return MONITOR_EXECUTOR.scheduleWithFixedDelay(
-				() -> progressListener.onIntermediate(current.getAsLong(), total.getAsLong()),
-				200, 200, TimeUnit.MILLISECONDS);
-	}
-
-	/**
-	 * Runs in a background executor, may be overridden if the source has a performance
-	 * constraint running multiple threads concurrently
-	 */
-	default void enqueueTextRequest(Runnable task) {
-		AUX_EXECUTOR.submit(task);
+	default Future<?> defaultAsyncIO(Runnable task) {
+		return asyncIO(task);
 	}
 
 	/** Runs in AWT thread when ready */
-	default void requestText(int fromLine, int count, Consumer<Reader> consumer) {
-		enqueueTextRequest(() -> {
+	default Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+		return defaultAsyncIO(() -> {
 			try {
 				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount() - fromLine, count)));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
@@ -88,7 +69,7 @@ public interface TextSource extends Iterable<String> {
 
 	/** Runs in AWT thread when ready */
 	default Future<Integer> requestCompleteLineCount(IntConsumer consumer) {
-		return AUX_EXECUTOR.submit(() -> {
+		return asyncTask(() -> {
 			int lineCount = getLineCount();
 			EventQueue.invokeLater(() -> consumer.accept(lineCount));
 			return lineCount;
@@ -107,7 +88,7 @@ public interface TextSource extends Iterable<String> {
 			Future<?> future = resRef.get();
 			return future == null || !future.isCancelled();
 		};
-		Future<?> res = AUX_EXECUTOR.submit(() -> {
+		Future<?> res = defaultAsyncIO(() -> {
 			try {
 				FilteredTextSource searchResult = predicate.start(this);
 				EventQueue.invokeLater(() -> consumer.accept(searchResult));
@@ -148,7 +129,7 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default void requestSave(File file, ProgressListener progressListener) {
-		IO_EXECUTOR.execute(() -> {
+		asyncIO(file, () -> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
@@ -192,8 +173,8 @@ public interface TextSource extends Iterable<String> {
 		return StreamSupport.stream(spliterator(), false);
 	}
 
-	default void requestStream(Consumer<Stream<String>> streamConsumer) {
-		IO_EXECUTOR.execute(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
+	default Future<?> requestStream(Consumer<Stream<String>> streamConsumer) {
+		return defaultAsyncIO(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
 	}
 
 	default void onClose() {}
