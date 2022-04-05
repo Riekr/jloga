@@ -1,9 +1,11 @@
 ## In progress:
 
+## v0.0.12b
 - General:
   - One I/O thread for each file root
 - Bug fixes:
-  - Fixed app sometime hanging
+  - Fixed sporadic freezing during text load
+  - Fixed missing lines in displayed text (searches were not affected)
 
 ## v0.0.12a
 - General:

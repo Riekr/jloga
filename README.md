@@ -1,7 +1,7 @@
 # jLoga, a log analyzer written in Java
 
 jLoga is a log analyzer, optimized for performance, written in [java 11](https://openjdk.java.net/projects/jdk/11/) and capable to open huge files.
-The UI is designed to for heavy log analysis and to show multiple files and multiple search results.
+The UI is designed to for heavy log analysis and to show multiple files and multiple search results, inspired by [glogg](https://glogg.bonnefon.org/) a great native and multiplatform log analyzer. 
 
 Files and results can be view in grid mode and inspected with [finos perspective](https://perspective.finos.org/), a standalone perspective viewer launcher is also provided.
 
@@ -26,9 +26,12 @@ Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for
 - Capable of running [external commands](#external-commands) as new analyzers
 - Convert and show data into [finos perspective](#finos-perspective)
 
-## File limits
-The only limit is the amout of memory available to jloga: when a file is opened it is indexed using the specified charset then only a line number and a position on the disk is kept in memory once in a while.\
+## File and memory limits
+There is no limit in file size, maximum number of lines is 2<sup>63</sup>-1.\
+Each open file is indexed keeping a reference to the position on disk each (for example) 1MB, so the heap impact is minimum even for very big files.\
 Past pages of the files are kept in memory until garbage collection starts in order to reduce disk i/o activity, due to the nature of the application, the best performance is achieved when reading files from a ssd.
+
+jLoga can open many 4GB log files in few senconds and with default jvm settings, you can increase heap if you have a slow disk in order to explicitly cache text pages and reduce disk accesses.
 
 ## External commands
 
@@ -46,15 +49,21 @@ In addition to `env.jloga.properties` a `env-windows.jloga.properties` will be r
 
 Inside the `.json.jloga` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
 
-### Current provided variables:
-| Name      | Description                                                          |
-|-----------|----------------------------------------------------------------------|
-| Title     | The title of the search panel                                        |
-| RootTitle | The title of the root search panel, ususally contains the file name. |
+### Variables
+By specifing a `%VarName%` in each part of the *.json.jloga* file you can access to system environment variables plus some
+more predefined one as in the below table:
+
+| Name        | Description                                                          |
+|-------------|----------------------------------------------------------------------|
+| *Title*     | The title of the search panel                                        |
+| *RootTitle* | The title of the root search panel, ususally contains the file name. |
 
 The variables are read in sequence from: system environment, custom provided variables and search provided variables. Each source takes precedence over the previous ones.
 
-See the folder `ext-search-samples` for some examples.
+See the folder [ext-search-samples](ext-search-samples) for some examples.
+
+#### Custom parameters
+Inside *.json.jloga* files you can define new variables bound to UI widgets, by now the most complete example is [cyggrep.jloga.json](ext-search-samples/cyggrep.jloga.json).
 
 ## Finos perspective
 I've fallen in love with [Data Preview](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-preview) for Visual Studio Code then discovered [finos perspective](https://perspective.finos.org/). \
@@ -79,4 +88,5 @@ As a spare time project this source base is updated only when needed, don't expe
 - NanoHTTPD – a tiny web server in Java ([home](https://github.com/NanoHttpd/nanohttpd) - [license](https://github.com/NanoHttpd/nanohttpd/blob/master/LICENSE.md))
 - Gson ([home](https://github.com/google/gson) - [license](https://github.com/google/gson/blob/master/LICENSE))
 - Launch4J - Cross-platform Java executable wrapper ([license](https://sourceforge.net/p/launch4j/git/ci/master/tree/LICENSE.txt) - [home](http://launch4j.sourceforge.net/) - [gradle plugin](https://github.com/TheBoegl/gradle-launch4j))
-- [IntelliJ Idea Community Edition](https://www.jetbrains.com/idea/)
+- Perspective ([home](https://perspective.finos.org/) - [license](https://github.com/finos/perspective/blob/master/LICENSE))
+- Last but not least [IntelliJ Idea Community Edition](https://www.jetbrains.com/idea/)
