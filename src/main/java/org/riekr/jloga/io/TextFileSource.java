@@ -1,7 +1,10 @@
 package org.riekr.jloga.io;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
+import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
+import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -45,6 +47,7 @@ import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.CancellableFuture;
 
 public class TextFileSource implements TextSource {
 
@@ -72,12 +75,10 @@ public class TextFileSource implements TextSource {
 	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
 
-	private final AtomicReference<Future<?>> _textRequest = new AtomicReference<>();
-
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
 		_charset = charset;
-		_indexing = IO_EXECUTOR.submit(() -> {
+		_indexing = asyncIO(file, () -> {
 			System.out.println("Indexing " + _file);
 			final long start = System.currentTimeMillis();
 			_lineCount = 0;
@@ -152,39 +153,40 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void enqueueTextRequest(Runnable task) {
-		Future<?> oldFuture = _textRequest.getAndSet(AUX_EXECUTOR.submit(task));
-		if (oldFuture != null)
-			oldFuture.cancel(false);
+	public Future<?> defaultAsyncIO(Runnable task) {
+		return asyncIO(_file, task);
 	}
 
 	@Override
-	public void requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+
 		if (_indexing.isDone()) {
-			enqueueTextRequest(() -> {
+			return asyncIO(_file, () -> {
 				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			});
-		} else {
-			_indexChangeListeners.add(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
-							_indexChangeListeners.remove(this);
-							StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
-							EventQueue.invokeLater(() -> consumer.accept(reader));
-						}
-					} catch (Throwable e) {
-						_indexChangeListeners.remove(this);
-						consumer.accept(new StringsReader.ErrorReader(e));
-						if (e instanceof RuntimeException)
-							throw (RuntimeException)e;
-						throw new RuntimeException(e);
-					}
-				}
-			});
 		}
+
+		Runnable task = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
+						_indexChangeListeners.remove(this);
+						StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+						EventQueue.invokeLater(() -> consumer.accept(reader));
+					}
+				} catch (Throwable e) {
+					_indexChangeListeners.remove(this);
+					consumer.accept(new StringsReader.ErrorReader(e));
+					if (e instanceof RuntimeException)
+						throw (RuntimeException)e;
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		_indexChangeListeners.add(task);
+		return new CancellableFuture(() -> _indexChangeListeners.remove(task));
 	}
 
 	@Override
@@ -306,36 +308,22 @@ public class TextFileSource implements TextSource {
 	public String[] getText(int fromLine, int count) {
 		// This method exists to make sure all data is read from disk without interruptions.
 		// Reading line-by-line may cause loaded page to be changed multiple times.
-		switch (count) {
-			case 0:
-				return EMPTY_STRINGS;
-			case 1:
-				return new String[]{getText(fromLine)};
-		}
-		String[] res;
+		final int currentLineCount = _lineCount;
+		if ((count = Math.min(count, currentLineCount - fromLine)) <= 0)
+			return EMPTY_STRINGS;
+		final String[] res = new String[count];
+		final int endLineExcl = fromLine + count;
+		int resStart = 0;
 		synchronized (this) {
-			count = Math.min(count, _lineCount - fromLine);
-			int endLine = fromLine + count;
-			res = new String[count + 1];
-			if (_lines == null || fromLine < _fromLine || res.length > _lines.length || fromLine >= (_fromLine + _lines.length)) {
-				Map.Entry<Integer, IndexData> entry = _index.floorEntry(fromLine);
-				do {
+			Set<Map.Entry<Integer, IndexData>> list = _index.subMap(_index.floorKey(fromLine), true, endLineExcl, false).entrySet();
+			for (Map.Entry<Integer, IndexData> entry : list) {
+				int pageStart = entry.getKey();
+				if (_lines == null || pageStart < _fromLine || pageStart >= (_fromLine + _lines.length)) {
 					IndexData indexData = entry.getValue();
-					int pageFromLine = entry.getKey();
+					int pageEnd = requireNonNullElse(_index.higherKey(pageStart), _lineCount);
 					if (indexData.data == null || (_lines = indexData.data.get()) == null) {
-						//				System.out.println("MISS");
-						entry = _index.higherEntry(entry.getKey());
-						int toLine;
-						if (entry == null)
-							toLine = _lineCount;
-						else {
-							toLine = entry.getKey();
-							if (toLine >= endLine)
-								entry = null;
-						}
 						try {
-							_lines = loadPage(pageFromLine, toLine, indexData.startPos);
-							_fromLine = pageFromLine;
+							_lines = loadPage(pageStart, pageEnd, indexData.startPos);
 							indexData.data = new WeakReference<>(_lines);
 						} catch (ClosedByInterruptException ignored) {
 							return EMPTY_STRINGS;
@@ -343,24 +331,16 @@ public class TextFileSource implements TextSource {
 							e.printStackTrace(System.err);
 							throw new UncheckedIOException(e);
 						}
-					} else {
-						//				System.out.println("HIT");
-						_fromLine = pageFromLine;
-						if (_fromLine + _lines.length >= endLine)
-							entry = null;
 					}
-					int from = fromLine - _fromLine;
-					int len = Math.min(res.length, _lines.length - from);
-					System.arraycopy(_lines, from, res, 0, len);
-					fromLine += len;
-				} while (entry != null);
-			} else {
-				int from = fromLine - _fromLine;
-				System.arraycopy(_lines, from, res, 0, Math.min(res.length, _lines.length - from));
+					_fromLine = pageStart;
+				}
+				int from = fromLine - pageStart;
+				int len = Math.min(res.length - resStart, _lines.length - from);
+				System.arraycopy(_lines, from, res, resStart, len);
+				resStart += len;
+				fromLine += len;
 			}
 		}
-		if (res[count] == null)
-			res[count] = "";
 		return res;
 	}
 
