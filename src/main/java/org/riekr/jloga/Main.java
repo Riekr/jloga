@@ -130,13 +130,7 @@ public class Main extends JFrame implements FileDropListener {
 
 	public void openFileDialog() {
 		List<File> files = FileUtils.selectFilesDialog(this, Preferences.LAST_OPEN_PATH.get());
-		File lastFile = null;
-		for (File selectedFile : files) {
-			lastFile = selectedFile;
-			openFile(selectedFile);
-		}
-		if (lastFile != null)
-			Preferences.LAST_OPEN_PATH.set(lastFile.getParentFile());
+		files.forEach(this::openFile);
 	}
 
 	public void openFiles(@NotNull List<File> files) {
@@ -155,6 +149,7 @@ public class Main extends JFrame implements FileDropListener {
 				files.add(0, file);
 				Preferences.RECENT_FILES.set(files);
 			}
+			Preferences.LAST_OPEN_PATH.set(file.getParentFile());
 		}
 	}
 
