@@ -7,10 +7,25 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.ui.FileChooserWithRecentDirs;
+
 public class FileUtils {
+
+	public static String getDisplayName(File f) {
+		return getDisplayName(f.toPath());
+	}
+
+	public static String getDisplayName(Path p) {
+		int count = p.getNameCount();
+		if (count <= 3)
+			return p.toString();
+		return "..." + File.separatorChar + p.getName(count - 2) + File.separatorChar + p.getName(count - 1);
+	}
 
 	public static FileFilter directoryFileFilter(boolean hidden) {
 		return new FileFilter() {
@@ -55,9 +70,11 @@ public class FileUtils {
 	}
 
 	public static List<File> selectFilesDialog(Component parent, File initialDir) {
-		JFileChooser chooser = new JFileChooser();
+		if (initialDir == null || !initialDir.isDirectory())
+			initialDir = Preferences.RECENT_DIRS.get().stream().findFirst().orElseGet(() -> new File("."));
+		JFileChooser chooser = new FileChooserWithRecentDirs();
 		chooser.setMultiSelectionEnabled(true);
-		chooser.setCurrentDirectory(initialDir == null || !initialDir.isDirectory() ? new File(".") : initialDir);
+		chooser.setCurrentDirectory(initialDir);
 		chooser.setDialogTitle("Open files");
 		int userSelection = chooser.showOpenDialog(parent);
 		if (userSelection == JFileChooser.APPROVE_OPTION)

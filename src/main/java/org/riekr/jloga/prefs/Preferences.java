@@ -127,6 +127,7 @@ public interface Preferences extends KeyBindings {
 	Preference<File>              LAST_SAVE_PATH   = of("LastSave", () -> ".").withConversion(File::new, File::getAbsolutePath);
 	KeyedPreference<String>       LAST_SEARCH_TYPE = of("SearchType", () -> RegExComponent.ID);
 	Preference<LimitedList<File>> RECENT_FILES     = of("RecentFiles", () -> new LimitedList<File>(10)).withConversion(LimitedList::new, (l) -> l);
+	Preference<LimitedList<File>> RECENT_DIRS      = of("RecentDirs", () -> new LimitedList<File>(10)).withConversion(LimitedList::new, (l) -> l);
 	//endregion
 
 	static List<GUIPreference<?>> getGUIPreferences() {

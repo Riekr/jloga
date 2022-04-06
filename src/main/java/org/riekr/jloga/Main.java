@@ -32,7 +32,6 @@ import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.KeyBindings;
-import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.CharsetCombo;
@@ -129,7 +128,9 @@ public class Main extends JFrame implements FileDropListener {
 	}
 
 	public void openFileDialog() {
-		List<File> files = FileUtils.selectFilesDialog(this, Preferences.LAST_OPEN_PATH.get());
+		List<File> files = FileUtils.selectFilesDialog(this,
+				Preferences.RECENT_FILES.get().stream().findFirst().map(File::getParentFile).orElse(null)
+		);
 		files.forEach(this::openFile);
 	}
 
@@ -139,16 +140,11 @@ public class Main extends JFrame implements FileDropListener {
 
 	public void openFile(File file) {
 		if (file.canRead()) {
-			LimitedList<File> files = Preferences.RECENT_FILES.get();
-			files.remove(file);
-			try {
-				open(file, file.getName(), file.getAbsolutePath(),
-						(closer) -> new TextFileSource(file.toPath(), Preferences.CHARSET.get(), _progressBar.addJob("Indexing"), closer)
-				);
-			} finally {
-				files.add(0, file);
-				Preferences.RECENT_FILES.set(files);
-			}
+			Preferences.RECENT_FILES.tap((p) -> p.roll(file));
+			Preferences.RECENT_DIRS.tap((p) -> p.roll(file.getParentFile()));
+			open(file, file.getName(), file.getAbsolutePath(),
+					(closer) -> new TextFileSource(file.toPath(), Preferences.CHARSET.get(), _progressBar.addJob("Indexing"), closer)
+			);
 			Preferences.LAST_OPEN_PATH.set(file.getParentFile());
 		}
 	}

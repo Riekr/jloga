@@ -3,6 +3,7 @@ package org.riekr.jloga.prefs;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -18,6 +19,12 @@ public interface Preference<T> extends Observable<T> {
 	boolean set(T t);
 
 	T reset();
+
+	default void tap(Consumer<T> consumer) {
+		T t = get();
+		consumer.accept(t);
+		set(t);
+	}
 
 	static <T extends Serializable> KeyedPreference<T> of(String key, Supplier<T> deflt) {
 		return new KeyedPreference<>(key, deflt);

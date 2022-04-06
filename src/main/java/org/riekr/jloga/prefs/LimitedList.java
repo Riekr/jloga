@@ -3,6 +3,7 @@ package org.riekr.jloga.prefs;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 
 public class LimitedList<T extends Serializable> extends ArrayList<T> {
 	private static final long serialVersionUID = -2914897583298816672L;
@@ -17,6 +18,19 @@ public class LimitedList<T extends Serializable> extends ArrayList<T> {
 	public LimitedList(LimitedList<T> orig) {
 		_size = orig._size;
 		super.addAll(orig);
+	}
+
+	public void roll(T t) {
+		remove(t);
+		add(0, t);
+	}
+
+	public <R> R peekFirst(Function<T, R> conv) {
+		return isEmpty() ? null : conv.apply(get(0));
+	}
+
+	public T peekFirst() {
+		return isEmpty() ? null : get(0);
 	}
 
 	@Override

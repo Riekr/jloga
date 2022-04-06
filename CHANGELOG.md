@@ -1,5 +1,11 @@
 ## In progress:
 
+- General:
+  - Recent folders in open file dialog
+- Bug fixes:
+  - Fix recent files not being updated
+  - Change last open path for each file opened and not only for "file open dialog"
+
 ## v0.0.12b
 - General:
   - One I/O thread for each file root
