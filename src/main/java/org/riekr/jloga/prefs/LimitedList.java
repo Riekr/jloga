@@ -37,7 +37,7 @@ public class LimitedList<T extends Serializable> extends ArrayList<T> {
 			super.add(index, element);
 		} finally {
 			if (super.size() > _size)
-				remove(0);
+				remove(_size);
 		}
 	}
 
