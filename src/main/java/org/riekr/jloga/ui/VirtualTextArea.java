@@ -1,6 +1,7 @@
 package org.riekr.jloga.ui;
 
 import static java.lang.Integer.min;
+import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
@@ -367,7 +368,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = max(1, (int)Math.floor(getHeight() / (double)_lineHeight) - 1);
+		final int newValue = 1 + (int)floor((float)getHeight() / (float)_lineHeight);
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);
