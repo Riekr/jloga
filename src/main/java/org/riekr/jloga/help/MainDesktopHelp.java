@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import org.riekr.jloga.prefs.KeyBindings;
+import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
@@ -64,8 +65,9 @@ public class MainDesktopHelp extends JComponent {
 				JButton openBtn = newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent));
 				row.add(openBtn);
 				row.add(drawOnHover(newBorderlessButton("\u274C", () -> {
-					files.remove(recent);
-					Preferences.RECENT_FILES.set(files);
+					LimitedList<File> snap = Preferences.RECENT_FILES.get();
+					snap.remove(recent);
+					Preferences.RECENT_FILES.set(snap);
 				}), openBtn));
 				recentBox.add(row, i + 1);
 			}
