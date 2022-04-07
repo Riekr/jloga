@@ -1,5 +1,9 @@
 ## In progress:
 
+- Bug fixes:
+  - Fixed unwanted empty lines in combos
+  - Fixed text selection in search results
+
 ## v0.0.13
 - General:
   - Recent folders in open file dialog

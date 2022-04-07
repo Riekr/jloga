@@ -446,10 +446,13 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			MouseListener mouseListener = new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					if (e.getButton() == MouseEvent.BUTTON1)
-						listener.accept(_fromLine + (e.getY() / _lineHeight));
-					else
-						_highlightedLine.next(null);
+					if (e.getClickCount() == 1) {
+						if (e.getButton() == MouseEvent.BUTTON1)
+							listener.accept(_fromLine + (e.getY() / _lineHeight));
+						else
+							_highlightedLine.next(null);
+						e.consume();
+					}
 				}
 			};
 			_text.addMouseListener(mouseListener);
