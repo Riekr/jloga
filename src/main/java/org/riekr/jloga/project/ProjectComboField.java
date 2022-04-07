@@ -22,9 +22,9 @@ public class ProjectComboField<T> extends ProjectEditableField<T> {
 	@Override
 	protected MRUComboWithLabels<?> newUI(ProjectComponent panel) {
 		MRUComboWithLabels<?> res = super.newUI(panel);
+		res.combo.setEditable(false);
 		res.combo.removeAllItems();
 		_values.keySet().forEach(res.combo::addItem);
-		res.combo.setEditable(false);
 		res.combo.resend();
 		return res;
 	}
