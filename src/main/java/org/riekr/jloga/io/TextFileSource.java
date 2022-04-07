@@ -139,14 +139,13 @@ public class TextFileSource implements TextSource {
 		while (fileChannel.read(byteBuffer) > 0) {
 			decoder.decode(byteBuffer.flip(), charBuffer, false);
 			charBuffer.flip();
-			char prec = 0;
 			while (charBuffer.hasRemaining()) {
 				final char curr = charBuffer.get();
 				switch (curr) {
 					// from java.io.BufferedReader.readLine():
 					// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
 					case '\n':
-						if (prec == '\r')
+						if (lastChar == '\r')
 							break;
 						//noinspection fallthrough
 					case '\r':
@@ -154,12 +153,8 @@ public class TextFileSource implements TextSource {
 						charBuffer.mark();
 						break;
 				}
-				prec = curr;
+				lastChar = curr;
 			}
-			// fetch last read char
-			int lastCharPos = charBuffer.position() - 1;
-			if (lastCharPos < charBuffer.limit())
-				lastChar = charBuffer.get(lastCharPos);
 			// finalize indexed page
 			_lastPos.value = fileChannel.position();
 			_index.put(_lineCount, new IndexData(_lastPos.value - encoder.encode(charBuffer.reset()).limit()));
