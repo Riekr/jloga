@@ -56,14 +56,13 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 					Object elem = getSelectedItem();
 					T newSelection = convert(elem);
 					selection.next(newSelection);
-					if (isEditable())
-						requestFocusInWindow();
-					else {
+					if (isEditable()) {
 						_model.removeElement(elem);
 						_model.insertElementAt(newSelection, 0);
 						setSelectedIndex(0);
+						requestFocusInWindow();
+					} else
 						resend();
-					}
 					save();
 					break;
 				default:
