@@ -22,6 +22,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.PlainTextComponent;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.KeyUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanel extends JComponent implements FileDropListener {
@@ -92,6 +93,11 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		addKeyStrokeAction(this, KeyBindings.KB_FINDREGEX, () -> selectSearchInFocusedTab(RegExComponent.ID), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyBindings.KB_CLOSETAB, this::removeCurrentBottomArea, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		addKeyStrokeAction(this, KeyUtils.F5, this::reloadTextSource);
+	}
+
+	private void reloadTextSource() {
+		_textArea.reload(() -> _progressBar.addJob("Reloading"));
 	}
 
 	private void selectSearchInFocusedTab(String id) {

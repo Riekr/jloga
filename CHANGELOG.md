@@ -5,6 +5,9 @@
 - Bug fixes:
   - Fix recent files not being updated
   - Change last open path for each file opened and not only for "file open dialog"
+  - Fixed line count again to match with "java.io.BufferedReader.readLine()" behaviour
+- Experimental
+  - Reload of current open file by pressing "F5" (search results are not refreshed)
 
 ## v0.0.12b
 - General:

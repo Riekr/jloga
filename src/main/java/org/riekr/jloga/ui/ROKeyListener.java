@@ -66,10 +66,9 @@ public class ROKeyListener implements KeyListener {
 				if (e.isControlDown())
 					return;
 				break;
-			case 115: // f4
-				if (e.isAltDown() || e.isAltGraphDown())
-					return;
-				break;
+			case 115: // F4
+			case 116: // F5
+				return;
 		}
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
 		if (KeyBindings.getGUIKeyBindings().stream().noneMatch((pref) -> keyStroke.equals(pref.get())))

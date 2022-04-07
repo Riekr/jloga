@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -183,4 +184,13 @@ public interface TextSource extends Iterable<String> {
 
 	default boolean mayHaveTabularData() {return false;}
 
+	default boolean supportsReload() {return false;}
+
+	default Future<?> requestReload(Supplier<ProgressListener> progressListenerSupplier) {
+		throw new UnsupportedOperationException(getClass().getName() + " does not support reloading");
+	}
+
+	default void reload(Supplier<ProgressListener> progressListenerSupplier) {
+		throw new UnsupportedOperationException(getClass().getName() + " does not support reloading");
+	}
 }

@@ -23,6 +23,7 @@ public class KeyUtils {
 	public static KeyStroke CTRL_R     = KeyStroke.getKeyStroke('R', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_W     = KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_DOT   = KeyStroke.getKeyStroke('.', InputEvent.CTRL_DOWN_MASK);
+	public static KeyStroke F5         = KeyStroke.getKeyStroke("F5");
 
 	public static void addKeyStrokeAction(RootPaneContainer container, KeyStroke key, Runnable action) {
 		addKeyStrokeAction(container.getRootPane(), key, action);

@@ -24,12 +24,14 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
+import org.riekr.jloga.io.ProgressListener;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.Preferences;
@@ -196,6 +198,19 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		recalcLineHeight();
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+	}
+
+	@Nullable
+	public Future<?> reload(Supplier<ProgressListener> progressListenerSupplier) {
+		if (_textSource != null && _textSource.supportsReload() && !_textSource.isIndexing()) {
+			return _textSource.requestReload(() -> {
+				if (_textSourceUnsubscribable != null)
+					_textSourceUnsubscribable.unsubscribe();
+				_textSourceUnsubscribable = _textSource.subscribeLineCount(this::setFileLineCount);
+				return progressListenerSupplier.get();
+			});
+		}
+		return null;
 	}
 
 	private void setGridView(boolean active, boolean fromDetection) {

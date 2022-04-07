@@ -1,5 +1,6 @@
 package org.riekr.jloga.io;
 
+import static java.lang.System.currentTimeMillis;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
@@ -37,6 +38,7 @@ import java.util.concurrent.Semaphore;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.Main;
@@ -64,11 +66,12 @@ public class TextFileSource implements TextSource {
 	private final Path    _file;
 	private       Charset _charset;
 
-	private final Future<?>                   _indexing;
-	private       TreeMap<Integer, IndexData> _index;
+	private Future<?>                   _indexing;
+	private TreeMap<Integer, IndexData> _index;
 
 	private       int                 _lineCount;
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
+	private final MutableLong         _lastPos          = new MutableLong();
 
 	private final Set<Runnable> _indexChangeListeners = new CopyOnWriteArraySet<>();
 
@@ -79,77 +82,158 @@ public class TextFileSource implements TextSource {
 		_file = file;
 		_charset = charset;
 		_indexing = asyncIO(file, () -> {
-			System.out.println("Indexing " + _file);
-			final long start = System.currentTimeMillis();
-			_lineCount = 0;
-			_lineCountSubject.next(0);
-			_index = new TreeMap<>();
-			_index.put(0, new IndexData(0));
-			ByteBuffer byteBuffer = ByteBuffer.allocate(_pageSize);
-			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
-			CharsetDecoder decoder = _charset.newDecoder()
-					.onMalformedInput(CodingErrorAction.REPLACE)
-					.onUnmappableCharacter(CodingErrorAction.REPLACE);
-			CharsetEncoder encoder = _charset.newEncoder();
-			try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
-				final long totalSize = fileChannel.size();
-				final MutableLong pos = new MutableLong();
-				ScheduledFuture<?> updateTask = monitorProgress(pos, totalSize, indexingListener.andThen(() -> {
+			try {
+				reindex(indexingListener);
+			} catch (IndexingException e) {
+				closer.run();
+				throw e;
+			}
+		});
+	}
+
+	private void reindex(@NotNull ProgressListener indexingListener) {
+		System.out.println("Indexing " + _file);
+		final long start = currentTimeMillis();
+		_lineCount = 0;
+		_lineCountSubject.next(0);
+		_index = new TreeMap<>();
+		_index.put(0, new IndexData(0));
+		_lastPos.value = 0;
+		_lines = null;
+		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
+			final long totalSize = fileChannel.size();
+			ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, indexingListener.andThen(() -> {
+				_indexChangeListeners.forEach(Runnable::run);
+				_lineCountSubject.next(_lineCount);
+			}));
+			try {
+				scanFile(fileChannel);
+			} finally {
+				finishIndexing(updateTask, indexingListener);
+			}
+			System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
+		} catch (ClosedByInterruptException ignored) {
+			System.out.println("Indexing cancelled");
+		} catch (IOException | InvalidMarkException e) {
+			EventQueue.invokeLater(() -> {
+				String msg = e.getLocalizedMessage();
+				if (msg == null)
+					msg = "";
+				else if (!(msg = msg.trim()).isEmpty())
+					msg += '\n';
+				JOptionPane.showMessageDialog(Main.getMain(), msg + "\nWrong charset?", "Indexing error", JOptionPane.ERROR_MESSAGE);
+			});
+			e.printStackTrace(System.err);
+			throw new IndexingException("Error indexing " + _file, e);
+		}
+	}
+
+	private void scanFile(FileChannel fileChannel) throws IOException {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(_pageSize);
+		CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
+		CharsetDecoder decoder = _charset.newDecoder()
+				.onMalformedInput(CodingErrorAction.REPLACE)
+				.onUnmappableCharacter(CodingErrorAction.REPLACE);
+		CharsetEncoder encoder = _charset.newEncoder();
+		char lastChar = 0;
+		while (fileChannel.read(byteBuffer) > 0) {
+			decoder.decode(byteBuffer.flip(), charBuffer, false);
+			charBuffer.flip();
+			char prec = 0;
+			while (charBuffer.hasRemaining()) {
+				final char curr = charBuffer.get();
+				switch (curr) {
+					// from java.io.BufferedReader.readLine():
+					// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
+					case '\n':
+						if (prec == '\r')
+							break;
+						//noinspection fallthrough
+					case '\r':
+						_lineCount++;
+						charBuffer.mark();
+						break;
+				}
+				prec = curr;
+			}
+			// fetch last read char
+			int lastCharPos = charBuffer.position() - 1;
+			if (lastCharPos < charBuffer.limit())
+				lastChar = charBuffer.get(lastCharPos);
+			// finalize indexed page
+			_lastPos.value = fileChannel.position();
+			_index.put(_lineCount, new IndexData(_lastPos.value - encoder.encode(charBuffer.reset()).limit()));
+			charBuffer.flip();
+			byteBuffer.flip();
+		}
+		// if the last char is not a new-line adjust the line count
+		if (lastChar != '\n') {
+			IndexData t = _index.remove(_lineCount);
+			_index.put(_lineCount + 1, t);
+		}
+	}
+
+	private void finishIndexing(Future<?> updateTask, ProgressListener progressListener) {
+		updateTask.cancel(false);
+		_lineCountSubject.last(_lineCount);
+		progressListener.onProgressChanged(_lastPos.value, _lastPos.value);
+		_indexChangeListeners.forEach(Runnable::run);
+		_indexChangeListeners.clear();
+	}
+
+	@Override
+	public boolean supportsReload() {
+		return true;
+	}
+
+	public Future<?> requestReload(Supplier<ProgressListener> progressListenerSupplier) {
+		if (_indexing == null || _indexing.isDone())
+			_indexing = defaultAsyncIO(() -> reload(progressListenerSupplier));
+		return _indexing;
+	}
+
+	@Override
+	public void reload(Supplier<ProgressListener> progressListenerSupplier) {
+		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
+			final long totalSize = fileChannel.size();
+			if (_lastPos.value < totalSize) {
+				System.out.println("Reloading " + _file);
+				final long start = currentTimeMillis();
+				final int initialLineCount = _lineCount;
+				final int initialPageCount = _index.size();
+				final int lastLine = _index.lastKey();
+				IndexData lastIndexPart = _index.remove(lastLine);
+				fileChannel.position(lastIndexPart.startPos);
+				_lastPos.value = lastIndexPart.startPos;
+				ProgressListener progressListener = progressListenerSupplier.get();
+				ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, progressListener.andThen(() -> {
 					_indexChangeListeners.forEach(Runnable::run);
 					_lineCountSubject.next(_lineCount);
 				}));
 				try {
-					char lastChar = 0;
-					while (fileChannel.read(byteBuffer) > 0) {
-						decoder.decode(byteBuffer.flip(), charBuffer, false);
-						charBuffer.flip();
-						while (charBuffer.hasRemaining()) {
-							switch (charBuffer.get()) {
-								case '\n':
-								case '\r':
-									_lineCount++;
-									charBuffer.mark();
-							}
-						}
-						// fetch last read char
-						int lastCharPos = charBuffer.position() - 1;
-						if (lastCharPos < charBuffer.limit())
-							lastChar = charBuffer.get(lastCharPos);
-						// finalize indexed page
-						pos.value = fileChannel.position();
-						_index.put(_lineCount, new IndexData(pos.value - encoder.encode(charBuffer.reset()).limit()));
-						charBuffer.flip();
-						byteBuffer.flip();
-					}
-					// if the last char is not a new-line adjust the line count
-					if (lastChar != '\n') {
-						IndexData t = _index.remove(_lineCount);
-						_index.put(_lineCount + 1, t);
+					scanFile(fileChannel);
+					// user may have hit reload due to a bug so all caches must be invalidated
+					// even a change in the file before the previous indexing will be detected this way
+					synchronized (this) {
+						_index.values().forEach((id) -> id.data = null);
+						_lines = null;
 					}
 				} finally {
-					updateTask.cancel(false);
-					_lineCountSubject.last(_lineCount);
-					indexingListener.onProgressChanged(totalSize, totalSize);
-					_indexChangeListeners.forEach(Runnable::run);
-					_indexChangeListeners.clear();
+					finishIndexing(updateTask, progressListener);
 				}
-				System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (System.currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
-			} catch (ClosedByInterruptException ignored) {
-				System.out.println("Indexing cancelled");
-			} catch (IOException | InvalidMarkException e) {
-				EventQueue.invokeLater(() -> {
-					String msg = e.getLocalizedMessage();
-					if (msg == null)
-						msg = "";
-					else if (!(msg = msg.trim()).isEmpty())
-						msg += '\n';
-					JOptionPane.showMessageDialog(Main.getMain(), msg + "\nWrong charset?", "Indexing error", JOptionPane.ERROR_MESSAGE);
-					closer.run();
-				});
-				e.printStackTrace(System.err);
-				throw new IndexingException("Error indexing " + file, e);
+				System.out.println("Reloaded " + _file + " +" + (_lineCount - initialLineCount) + " lines in " + (currentTimeMillis() - start) + "ms (+" + (_index.size() + initialPageCount) + " pages)");
+			} else if (_lastPos.value > totalSize) {
+				System.out.println("Skipped reload of " + _file + " (file size decreased!)");
+				reindex(progressListenerSupplier.get());
+			} else {
+				System.out.println("Skipped reloaded of " + _file + " (file size did not change)");
 			}
-		});
+		} catch (ClosedByInterruptException ignored) {
+			System.out.println("Reloading cancelled");
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			throw new IndexingException("Error reloading " + _file, e);
+		}
 	}
 
 	@Override
@@ -240,7 +324,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
-		long start = System.currentTimeMillis();
+		long start = currentTimeMillis();
 		final MutableInt lineNumber = new MutableInt();
 		ScheduledFuture<?> updateTask = monitorProgress(lineNumber, _lineCount, progressListener.andThen(out::dispatchLineCount));
 		try {
@@ -268,7 +352,7 @@ public class TextFileSource implements TextSource {
 			updateTask.cancel(false);
 			progressListener.onProgressChanged(_lineCount, _lineCount);
 		}
-		System.out.println("Search finished in " + (System.currentTimeMillis() - start) + "ms");
+		System.out.println("Search finished in " + (currentTimeMillis() - start) + "ms");
 	}
 
 	/**
