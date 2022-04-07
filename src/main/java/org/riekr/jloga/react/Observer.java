@@ -1,5 +1,6 @@
 package org.riekr.jloga.react;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,7 +16,7 @@ public interface Observer<T> {
 
 			@Override
 			public void onNext(T item) {
-				if (_lastValue != item) {
+				if (!Objects.equals(_lastValue, item)) {
 					observer.onNext(item);
 					_lastValue = item;
 				}

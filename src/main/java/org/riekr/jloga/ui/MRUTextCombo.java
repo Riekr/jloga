@@ -34,11 +34,11 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	private int     _valueIndex;
 	private boolean _propagateMouseListener = true;
 
-	public final Subject<T> subject = new Subject<>();
+	public final Subject<T> subject   = new Subject<>();
+	public final Subject<T> selection = new Subject<>();
 
 	public MRUTextCombo(String key, BiFunction<String, T, T> mapper) {
 		_key = key;
-		_value = mapper.apply(null, null);
 		subject.subscribe((value) -> {
 			_value = value;
 			_valueIndex = getSelectedIndex();
@@ -46,21 +46,23 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		_model = PrefsUtils.loadDefaultComboBoxModel(_key);
 		_mapper = mapper;
 		setModel(_model);
+		_value = convert(getSelectedItem());
 		setEditable(true);
 		addActionListener(e -> {
 			Object elem = getSelectedItem();
 			switch (e.getActionCommand()) {
 				case "comboBoxEdited":
-					_model.removeElement(elem);
-					_model.insertElementAt(convert(elem), 0);
-					save();
-					setSelectedIndex(0);
-					//noinspection fallthrough
 				case "comboBoxChanged":
+					T newSelection = convert(elem);
+					_model.removeElement(elem);
+					_model.insertElementAt(newSelection, 0);
+					setSelectedIndex(0);
+					selection.next(newSelection);
 					if (isEditable())
 						requestFocusInWindow();
 					else
 						resend();
+					save();
 					break;
 				default:
 					System.err.println(e);
@@ -75,9 +77,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		});
 		addComponentListener(new ComponentAdapter() {
 			@Override
-			public void componentHidden(ComponentEvent e) {
-				subject.next(convert(getSelectedItem()));
-			}
+			public void componentHidden(ComponentEvent e) {resend();}
 		});
 		addHierarchyListener(e -> {
 			if (e.getID() == HierarchyEvent.PARENT_CHANGED && getParent() == null)

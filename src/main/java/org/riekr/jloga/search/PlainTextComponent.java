@@ -5,6 +5,7 @@ import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,26 +23,39 @@ public class PlainTextComponent extends Box implements SearchComponent {
 	private final MRUTextCombo<SearchComboEntry> _combo;
 	private       Unsubscribable                 _comboListener;
 
+	private final JToggleButton _negateBtn;
+	private final JToggleButton _caseBtn;
+
 	public PlainTextComponent(int level) {
 		super(BoxLayout.LINE_AXIS);
-		_combo = new MRUTextCombo<>("plainTextSearch." + level, SearchComboEntry::new);
+		_negateBtn = newToggleButton("!", "Negate", false);
+		_caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", false);
+		_combo = new MRUTextCombo<>("plainTextSearch." + level, this::newEntry);
+		_combo.selection.subscribe(uniq(this::updateButtons));
+		updateButtons(_combo.getValue());
 		add(_combo);
-		SearchComboEntry initialValue = _combo.getValue();
-		JToggleButton negateBtn = newToggleButton("!", "Negate", initialValue.negate, (b) -> {
-			_combo.getValue().negate = b;
-			_combo.save();
-		});
-		JToggleButton caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", initialValue.caseInsensitive, (b) -> {
-			_combo.getValue().caseInsensitive = b;
-			_combo.save();
-		});
-		_combo.subject.subscribe(uniq((value) -> {
-			negateBtn.setSelected(value.negate);
-			caseBtn.setSelected(value.caseInsensitive);
-		}));
 		add(newBorderlessButton("\uD83D\uDD0D", _combo::resend));
-		add(negateBtn);
-		add(caseBtn);
+		add(_negateBtn);
+		add(_caseBtn);
+	}
+
+	private void updateButtons(SearchComboEntry entry) {
+		if (entry != null) {
+			_negateBtn.setSelected(entry.negate);
+			_caseBtn.setSelected(entry.caseInsensitive);
+		}
+	}
+
+	private SearchComboEntry newEntry(String pattern, SearchComboEntry old) {
+		SearchComboEntry res = new SearchComboEntry(pattern);
+		if (old == null) {
+			res.negate = _negateBtn.isSelected();
+			res.caseInsensitive = _caseBtn.isSelected();
+		} else {
+			res.negate = old.negate;
+			res.caseInsensitive = old.caseInsensitive;
+		}
+		return res;
 	}
 
 	@Override
@@ -53,11 +67,14 @@ public class PlainTextComponent extends Box implements SearchComponent {
 		if (consumer != null) {
 			_comboListener = _combo.subject.subscribe((value) -> {
 				if (value != null && value.pattern != null && !value.pattern.isEmpty()) {
+					value.negate = _negateBtn.isSelected();
+					value.caseInsensitive = _caseBtn.isSelected();
 					consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyContains(
 							value.pattern,
 							value.caseInsensitive,
 							value.negate
 					)));
+					_combo.save();
 				}
 			});
 		}

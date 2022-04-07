@@ -3,6 +3,7 @@
 - General:
   - Recent folders in open file dialog
   - Text viewport overscroll
+  - Negate and case buttons now changes state on selection and not on search
 - Bug fixes:
   - Fix recent files not being updated
   - Change last open path for each file opened and not only for "file open dialog"

@@ -10,12 +10,8 @@ public class SearchComboEntry implements Serializable {
 	public boolean negate;
 	public boolean caseInsensitive;
 
-	public SearchComboEntry(String pattern, SearchComboEntry old) {
+	public SearchComboEntry(String pattern) {
 		this.pattern = pattern;
-		if (old != null) {
-			negate = old.negate;
-			caseInsensitive = old.caseInsensitive;
-		}
 	}
 
 	@Override

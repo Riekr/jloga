@@ -24,26 +24,39 @@ public class RegExComponent extends Box implements SearchComponent {
 	private final MRUTextCombo<SearchComboEntry> _combo;
 	private       Unsubscribable                 _comboListener;
 
+	private final JToggleButton _negateBtn;
+	private final JToggleButton _caseBtn;
+
 	public RegExComponent(int level) {
 		super(BoxLayout.LINE_AXIS);
-		_combo = new MRUTextCombo<>("regex." + level, SearchComboEntry::new);
+		_negateBtn = newToggleButton("!", "Negate", false);
+		_caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", false);
+		_combo = new MRUTextCombo<>("regex." + level, this::newEntry);
+		_combo.selection.subscribe(uniq(this::updateButtons));
+		updateButtons(_combo.getValue());
 		add(_combo);
-		SearchComboEntry initialValue = _combo.getValue();
-		JToggleButton negateBtn = newToggleButton("!", "Negate", initialValue.negate, (b) -> {
-			_combo.getValue().negate = b;
-			_combo.save();
-		});
-		JToggleButton caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", initialValue.caseInsensitive, (b) -> {
-			_combo.getValue().caseInsensitive = b;
-			_combo.save();
-		});
-		_combo.subject.subscribe(uniq((value) -> {
-			negateBtn.setSelected(value.negate);
-			caseBtn.setSelected(value.caseInsensitive);
-		}));
 		add(newBorderlessButton("\uD83D\uDD0D", _combo::resend));
-		add(negateBtn);
-		add(caseBtn);
+		add(_negateBtn);
+		add(_caseBtn);
+	}
+
+	private void updateButtons(SearchComboEntry entry) {
+		if (entry != null) {
+			_negateBtn.setSelected(entry.negate);
+			_caseBtn.setSelected(entry.caseInsensitive);
+		}
+	}
+
+	private SearchComboEntry newEntry(String pattern, SearchComboEntry old) {
+		SearchComboEntry res = new SearchComboEntry(pattern);
+		if (old == null) {
+			res.negate = _negateBtn.isSelected();
+			res.caseInsensitive = _caseBtn.isSelected();
+		} else {
+			res.negate = old.negate;
+			res.caseInsensitive = old.caseInsensitive;
+		}
+		return res;
 	}
 
 	@Override
@@ -56,10 +69,13 @@ public class RegExComponent extends Box implements SearchComponent {
 			_comboListener = _combo.subject.subscribe((value) -> {
 				Pattern pat = UIUtils.toPattern(this, value.pattern, 0, value.caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
 				if (pat != null) {
+					value.negate = _negateBtn.isSelected();
+					value.caseInsensitive = _caseBtn.isSelected();
 					if (pat.matcher("").groupCount() == 0)
 						consumer.accept(SimpleSearchPredicate.FACTORY.from(Predicates.supplyFind(pat, value.negate)));
 					else
 						consumer.accept(new RegExSearch(pat));
+					_combo.save();
 				}
 			});
 		}

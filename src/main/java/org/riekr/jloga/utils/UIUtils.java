@@ -116,6 +116,10 @@ public final class UIUtils {
 		return btn;
 	}
 
+	public static JToggleButton newToggleButton(String text, String tooltip, boolean initialValue) {
+		return newToggleButton(text, tooltip, initialValue, null);
+	}
+
 	public static JToggleButton newToggleButton(String text, String tooltip, boolean initialValue, BoolConsumer consumer) {
 		JToggleButton btn = new JToggleButton(text);
 		btn.setBorder(FLAT_BUTTON_BORDER);
