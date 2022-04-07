@@ -46,22 +46,24 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		_model = PrefsUtils.loadDefaultComboBoxModel(_key);
 		_mapper = mapper;
 		setModel(_model);
-		_value = convert(getSelectedItem());
+		Object firstItem = getSelectedItem();
+		_value = firstItem == null ? mapper.apply(null, null) : convert(firstItem);
 		setEditable(true);
 		addActionListener(e -> {
-			Object elem = getSelectedItem();
 			switch (e.getActionCommand()) {
 				case "comboBoxEdited":
 				case "comboBoxChanged":
+					Object elem = getSelectedItem();
 					T newSelection = convert(elem);
-					_model.removeElement(elem);
-					_model.insertElementAt(newSelection, 0);
-					setSelectedIndex(0);
 					selection.next(newSelection);
 					if (isEditable())
 						requestFocusInWindow();
-					else
+					else {
+						_model.removeElement(elem);
+						_model.insertElementAt(newSelection, 0);
+						setSelectedIndex(0);
 						resend();
+					}
 					save();
 					break;
 				default:
