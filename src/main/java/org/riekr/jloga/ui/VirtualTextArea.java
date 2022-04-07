@@ -383,7 +383,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = 1 + (int)floor((float)getHeight() / (float)_lineHeight);
+		final int newValue = max(1, (int)floor((float)getHeight() / (float)_lineHeight));
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);
@@ -481,7 +481,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			if (line < _fromLine)
 				setFromLine(line);
 			else if (line > (_fromLine + _lineCount))
-				setFromLine(line - _lineCount);
+				setFromLine(line - _lineCount + 1);
 		}
 	}
 

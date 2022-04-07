@@ -10,16 +10,6 @@ public final class RangeIterator<T> implements Iterator<T> {
 	private       int            _index;
 	private final IntFunction<T> _getter;
 
-	@SafeVarargs
-	public RangeIterator(T... data) {
-		this(0, data.length, data);
-	}
-
-	@SafeVarargs
-	public RangeIterator(int fromInclusive, int toExclusive, T... data) {
-		this(fromInclusive, Math.min(toExclusive, data.length), (i) -> data[i]);
-	}
-
 	public RangeIterator(int fromInclusive, int toExclusive, IntFunction<T> getter) {
 		_index = fromInclusive;
 		_toExclusive = toExclusive;

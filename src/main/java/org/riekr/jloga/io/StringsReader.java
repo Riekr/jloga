@@ -2,7 +2,9 @@ package org.riekr.jloga.io;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +12,7 @@ public class StringsReader extends Reader {
 
 	public static class ErrorReader extends StringsReader {
 		public ErrorReader(@NotNull Throwable e) {
-			super(new RangeIterator<>(e.getLocalizedMessage()));
+			super(Stream.of(e.getLocalizedMessage()).iterator());
 		}
 	}
 
@@ -18,7 +20,7 @@ public class StringsReader extends Reader {
 	private int              _start = 0;
 
 	public StringsReader(@NotNull String[] strings) {
-		this(new RangeIterator<>(0, strings.length, strings));
+		this(Arrays.stream(strings).iterator());
 	}
 
 	public StringsReader(@NotNull Iterator<String> strings) {
