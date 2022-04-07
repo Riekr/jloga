@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.0.13
 - General:
   - Recent folders in open file dialog
   - Text viewport overscroll
