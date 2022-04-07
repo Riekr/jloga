@@ -3,6 +3,7 @@
 - Bug fixes:
   - Fixed unwanted empty lines in combos
   - Fixed text selection in search results
+  - Fixed text highlight disappearing in searches
 
 ## v0.0.13
 - General:

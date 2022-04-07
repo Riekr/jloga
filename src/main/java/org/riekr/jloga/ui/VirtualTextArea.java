@@ -47,10 +47,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private int _lineHeight;
 
-	private       int                       _fromLine        = 0;
-	private       int                       _lineCount       = 0;
-	private       int                       _allLinesCount   = 0;
+	private int _fromLine      = 0;
+	private int _lineCount     = 0;
+	private int _allLinesCount = 0;
+
 	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
+	private       Object                    _lineHighlight;
 
 	private final String          _title;
 	private final VirtualTextArea _parent;
@@ -408,10 +410,13 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			int line = highlightedLine - _fromLine;
 			try {
 				Highlighter highlighter = _text.getHighlighter();
-				highlighter.removeAllHighlights();
+				if (_lineHighlight != null) {
+					highlighter.removeHighlight(_lineHighlight);
+					_lineHighlight = null;
+				}
 				if (line >= 0 && line <= _lineCount) {
 					int start = _text.getLineStartOffset(line);
-					highlighter.addHighlight(
+					_lineHighlight = highlighter.addHighlight(
 							start,
 							_text.getLineEndOffset(line),
 							new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
