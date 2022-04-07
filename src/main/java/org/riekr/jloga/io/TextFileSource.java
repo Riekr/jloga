@@ -246,7 +246,7 @@ public class TextFileSource implements TextSource {
 
 		if (_indexing.isDone()) {
 			return asyncIO(_file, () -> {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			});
 		}
@@ -257,7 +257,7 @@ public class TextFileSource implements TextSource {
 				try {
 					if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
 						_indexChangeListeners.remove(this);
-						StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+						StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
 						EventQueue.invokeLater(() -> consumer.accept(reader));
 					}
 				} catch (Throwable e) {

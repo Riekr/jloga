@@ -2,6 +2,7 @@
 
 - General:
   - Recent folders in open file dialog
+  - Text viewport overscroll
 - Bug fixes:
   - Fix recent files not being updated
   - Change last open path for each file opened and not only for "file open dialog"

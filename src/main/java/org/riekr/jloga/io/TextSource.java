@@ -38,7 +38,7 @@ public interface TextSource extends Iterable<String> {
 	default Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
 		return defaultAsyncIO(() -> {
 			try {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount() - fromLine, count)));
+				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount() - fromLine, count)), count);
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			} catch (CancellationException ignored) {
 				System.out.println("Text request cancelled");

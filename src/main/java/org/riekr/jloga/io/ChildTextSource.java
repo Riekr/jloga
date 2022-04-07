@@ -118,7 +118,7 @@ public class ChildTextSource implements FilteredTextSource {
 		if (_tie.isIndexing()) {
 			return defaultAsyncIO(() -> {
 				try {
-					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)));
+					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
 					EventQueue.invokeLater(() -> consumer.accept(reader));
 				} catch (CancellationException ignored) {
 					System.out.println("Text request cancelled");

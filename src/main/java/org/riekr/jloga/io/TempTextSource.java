@@ -40,7 +40,7 @@ public class TempTextSource implements FilteredTextSource {
 
 		if (_data.isSealed()) {
 			return defaultAsyncIO(() -> {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(Math.toIntExact(_data.size()) - fromLine, count)));
+				StringsReader reader = new StringsReader(getText(fromLine, Math.min(Math.toIntExact(_data.size()) - fromLine, count)), count);
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 			});
 		}
@@ -49,7 +49,7 @@ public class TempTextSource implements FilteredTextSource {
 		unsubscribe.set(_lineCountSubject.subscribe(lastLine -> {
 			int toLine = Math.min(fromLine + count, Math.toIntExact(_data.size()));
 			if (fromLine < lastLine) {
-				StringsReader reader = new StringsReader(getText(fromLine, toLine - fromLine));
+				StringsReader reader = new StringsReader(getText(fromLine, toLine - fromLine), count);
 				EventQueue.invokeLater(() -> consumer.accept(reader));
 				if (toLine >= lastLine) {
 					unsubscribe.get().run();

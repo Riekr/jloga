@@ -3,6 +3,7 @@ package org.riekr.jloga.io;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -19,8 +20,11 @@ public class StringsReader extends Reader {
 	private Iterator<String> _strings;
 	private int              _start = 0;
 
-	public StringsReader(@NotNull String[] strings) {
-		this(Arrays.stream(strings).iterator());
+	public StringsReader(@NotNull String[] strings, int count) {
+		this(Stream.concat(
+				Arrays.stream(strings),
+				Collections.nCopies(count - strings.length, "").stream()
+		).iterator());
 	}
 
 	public StringsReader(@NotNull Iterator<String> strings) {

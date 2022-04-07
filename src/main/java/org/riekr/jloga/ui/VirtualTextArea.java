@@ -285,8 +285,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private boolean setFromLineNoScroll(int fromLine) {
 		if (fromLine < 0)
 			fromLine = 0;
-		else if (fromLine >= _allLinesCount - _lineCount)
-			fromLine = max(0, _allLinesCount - _lineCount - 1);
+		else if (fromLine >= _allLinesCount - (_lineCount / 2))
+			fromLine = max(0, _allLinesCount - (_lineCount / 2) - 1);
 		if (fromLine != _fromLine) {
 			_fromLine = fromLine;
 			requireText();
@@ -304,25 +304,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void toBeginning() {
-		setHighlightedLine(0);
+		setFromLine(0);
 	}
 
 	public void toEnding() {
-		if (_textSource.isIndexing())
-			setHighlightedLine(_allLinesCount);
-		else {
-			int limit = _allLinesCount - 100;
-			_textSource.defaultAsyncIO(() -> {
-				for (int line = _allLinesCount; line > limit; line--) {
-					String text = _textSource.getText(line);
-					if (text != null && !text.isEmpty()) {
-						setHighlightedLine(line);
-						return;
-					}
-				}
-				setHighlightedLine(_allLinesCount);
-			});
-		}
+		setFromLine(_allLinesCount - (_lineCount / 2));
 	}
 
 	public void centerOn(int line) {
@@ -371,7 +357,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void recalcScrollBarMaximum() {
-		_scrollBar.setMaximum(_allLinesCount - _lineCount);
+		_scrollBar.setMaximum(_allLinesCount - (_lineCount / 2));
 	}
 
 	private void recalcLineHeight() {
