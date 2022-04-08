@@ -80,32 +80,34 @@ public class InterComm extends ServerSocket implements Runnable {
 	}
 
 	static void start(Consumer<List<File>> openFile) {
-		InterComm interComm;
-		try {
-			interComm = new InterComm(openFile);
-			interComm.bind(interComm.getLocalSocketAddress());
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-			return;
-		}
-		PREFS.putLong(PREF_PID, ProcessHandle.current().pid());
-		PREFS.putInt(PREF_PORT, interComm.getLocalPort());
-		if (sync()) {
-			Thread th = new Thread(interComm, "InterComm");
-			th.setDaemon(true);
-			th.start();
-		} else {
+		Thread th = new Thread(() -> {
+			InterComm interComm;
 			try {
-				interComm.close();
+				interComm = new InterComm(openFile);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
+				return;
 			}
-		}
+			PREFS.putLong(PREF_PID, ProcessHandle.current().pid());
+			PREFS.putInt(PREF_PORT, interComm.getLocalPort());
+			if (sync()) {
+				interComm.run();
+			} else {
+				try {
+					interComm.close();
+				} catch (IOException e) {
+					e.printStackTrace(System.err);
+				}
+			}
+		}, "InterComm");
+		th.setDaemon(true);
+		th.start();
 	}
 
 	private final Consumer<List<File>> _openFile;
 
 	private InterComm(Consumer<List<File>> openFile) throws IOException {
+		super(0, 0, InetAddress.getLocalHost());
 		_openFile = openFile;
 	}
 
