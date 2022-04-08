@@ -353,10 +353,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			// +1 to ensure last line is shown even if window borders fall across it
 			_allLinesCount = lineCount + 1;
 			recalcScrollBarMaximum();
-			if (_fromLine <= lineCount && lineCount <= _fromLine + _lineCount) {
-				_scrollBar.setEnabled(true);
+			_scrollBar.setEnabled(true); // TODO: moving this line below disables scrollbar
+			if (_fromLine <= lineCount && lineCount <= _fromLine + _lineCount)
 				requireText();
-			}
 		}
 	}
 
