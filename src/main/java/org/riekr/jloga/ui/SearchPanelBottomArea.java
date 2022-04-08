@@ -2,7 +2,6 @@ package org.riekr.jloga.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -11,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JPanel {
@@ -56,16 +56,14 @@ public class SearchPanelBottomArea extends JPanel {
 	private void saveResults() {
 		if (_resultTextArea == null)
 			return;
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(Preferences.LAST_SAVE_PATH.get());
-		fileChooser.setDialogTitle("Specify a file to save");
-		int userSelection = fileChooser.showSaveDialog(SearchPanelBottomArea.this);
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File fileToSave = fileChooser.getSelectedFile();
+		FileUtils.fileDialog(
+				FileUtils.DialogType.SAVE,
+				Preferences.LAST_SAVE_PATH.get()
+		).findFirst().ifPresent((fileToSave) -> {
 			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
 			_resultTextArea.getTextSource().requestSave(fileToSave, _progressBar.addJob("Saving"));
 			Preferences.LAST_SAVE_PATH.set(fileToSave.getParentFile());
-		}
+		});
 	}
 
 	private synchronized void search(SearchPredicate predicate) {

@@ -1,7 +1,6 @@
 package org.riekr.jloga.project;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
@@ -16,6 +15,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.riekr.jloga.prefs.PrefsUtils;
+import org.riekr.jloga.utils.FileUtils;
 
 class PropsIO {
 
@@ -99,14 +99,12 @@ class PropsIO {
 	}
 
 	public static void requestSave(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
-		JFileChooser fileChooser = new JFileChooser();
-		if (ext != null && !ext.isBlank())
-			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
-		fileChooser.setCurrentDirectory(PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
-		fileChooser.setDialogTitle("Specify a file to open");
-		int userSelection = fileChooser.showSaveDialog(owner);
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = fileChooser.getSelectedFile();
+		FileUtils.fileDialog(
+				FileUtils.DialogType.SAVE,
+				PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")),
+				"Save project",
+				ext, extDescription
+		).findFirst().ifPresent((selectedFile) -> {
 			try {
 				save(selectedFile, pojo);
 			} catch (Throwable e) {
@@ -118,18 +116,16 @@ class PropsIO {
 			if (onSuccess != null)
 				for (Runnable task : onSuccess)
 					task.run();
-		}
+		});
 	}
 
 	public static void requestLoad(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
-		JFileChooser fileChooser = new JFileChooser();
-		if (ext != null && !ext.isBlank())
-			fileChooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
-		fileChooser.setCurrentDirectory(PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")));
-		fileChooser.setDialogTitle("Specify a file to open");
-		int userSelection = fileChooser.showOpenDialog(owner);
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = fileChooser.getSelectedFile();
+		FileUtils.fileDialog(
+				FileUtils.DialogType.OPEN,
+				PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")),
+				"Open project",
+				ext, extDescription
+		).findFirst().ifPresent((selectedFile) -> {
 			try {
 				load(selectedFile, pojo);
 			} catch (Throwable e) {
@@ -141,7 +137,7 @@ class PropsIO {
 			if (onSuccess != null)
 				for (Runnable task : onSuccess)
 					task.run();
-		}
+		});
 	}
 
 }
