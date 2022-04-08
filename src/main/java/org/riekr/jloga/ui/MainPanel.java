@@ -44,6 +44,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 
 	private       Font            _font;
 	private final MainDesktopHelp _help;
+	private final JButton         _refreshBtn;
 
 	public MainPanel(Main main) {
 		Objects.requireNonNull(main);
@@ -61,6 +62,9 @@ public class MainPanel extends JFrame implements FileDropListener {
 		addKeyStrokeAction(this, KeyBindings.KB_OPENFILE, this::openFileDialog);
 		toolBar.addSeparator();
 		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
+		toolBar.addSeparator();
+		toolBar.add(_refreshBtn = newBorderlessButton("\uD83D\uDDD8 Refresh", this::refreshCurrentTab, "Refresh current tab"));
+		_refreshBtn.setEnabled(false);
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		addKeyStrokeAction(this, KeyBindings.KB_SETTINGS, this::openPreferences);
@@ -89,6 +93,12 @@ public class MainPanel extends JFrame implements FileDropListener {
 				}
 			}
 		});
+	}
+
+	private void refreshCurrentTab() {
+		Object comp = _tabs.getSelectedComponent();
+		if (comp instanceof SearchPanel)
+			((SearchPanel)comp).reloadTextSource();
 	}
 
 	private void openMixDialog() {
@@ -142,6 +152,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		remove(_help);
 		_help.setHideArrows(true);
 		_tabs.addTab(TAB_ADD, _help);
+		_refreshBtn.setEnabled(true);
 	}
 
 	private void onRemoveLastTab() {
@@ -151,6 +162,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		remove(_tabs);
 		_help.setHideArrows(false);
 		add(_help, BorderLayout.CENTER);
+		_refreshBtn.setEnabled(false);
 	}
 
 	public void open(Object key, String title, String description, Function<Runnable, TextSource> src) {

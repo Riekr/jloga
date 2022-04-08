@@ -96,7 +96,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		addKeyStrokeAction(this, KeyUtils.F5, this::reloadTextSource);
 	}
 
-	private void reloadTextSource() {
+	public void reloadTextSource() {
 		_textArea.reload(() -> _progressBar.addJob("Reloading"));
 	}
 
