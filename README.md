@@ -33,6 +33,16 @@ Past pages of the files are kept in memory until garbage collection starts in or
 
 jLoga can open many 4GB log files in few senconds and with default jvm settings, you can increase heap if you have a slow disk in order to explicitly cache text pages and reduce disk accesses.
 
+You can check current memory usage and limits of a running instance by running the command line in this example:
+```
+# java -jar jloga-all.jar -remote-info
+
+Available Processors = 8
+Heap Memory = 536870912
+Free Memory = 503673600
+Max Memory = 8558477312
+```
+
 ## External commands
 
 **WARNING:** executing unsafe scripts may be a security risk!\

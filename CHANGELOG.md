@@ -1,5 +1,7 @@
 ## In progress:
 
+- General:
+  - Same instance is reused if possible
 - Bug fixes:
   - Fixed unwanted empty lines in combos
   - Fixed text selection in search results

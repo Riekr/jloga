@@ -1,9 +1,9 @@
 package org.riekr.jloga.transform;
 
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
+
 import java.util.ArrayList;
 import java.util.function.Function;
-
-import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 
 public class FastSplitOperation implements Function<String, String[]> {
 
@@ -89,7 +89,7 @@ public class FastSplitOperation implements Function<String, String[]> {
 			if (start <= s.length())
 				add(s.substring(start));
 		}
-		return _buffer.toArray(EMPTY_STRINGS);
+		return _buffer.toArray(String[]::new);
 	}
 
 	private String[] detect(String s) {
