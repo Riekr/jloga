@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.1.0
 - General:
   - Same instance is reused if possible
   - Added refresh button in main toolbar (or use F5)
