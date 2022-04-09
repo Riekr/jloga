@@ -21,6 +21,7 @@ public class KeyUtils {
 	public static KeyStroke CTRL_COMMA = KeyStroke.getKeyStroke(',', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_F     = KeyStroke.getKeyStroke('F', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_R     = KeyStroke.getKeyStroke('R', InputEvent.CTRL_DOWN_MASK);
+	public static KeyStroke CTRL_T     = KeyStroke.getKeyStroke('T', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_W     = KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke CTRL_DOT   = KeyStroke.getKeyStroke('.', InputEvent.CTRL_DOWN_MASK);
 	public static KeyStroke F5         = KeyStroke.getKeyStroke("F5");

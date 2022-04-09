@@ -3,6 +3,7 @@
 - General:
   - Same instance is reused if possible
   - Added refresh button in main toolbar (or use F5)
+  - Press CTRL+T to add new search tab
 - Bug fixes:
   - Fixed unwanted empty lines in combos
   - Fixed text selection in search results

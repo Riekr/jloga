@@ -62,6 +62,7 @@ public class ROKeyListener implements KeyListener {
 			case 70: // F
 			case 79: // O
 			case 82: // R
+			case 84: // T
 			case 155: // ins
 				if (e.isControlDown())
 					return;

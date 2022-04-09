@@ -94,6 +94,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		addKeyStrokeAction(this, KeyBindings.KB_FINDSELECT, () -> selectSearchInFocusedTab(null), WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyBindings.KB_CLOSETAB, this::removeCurrentBottomArea, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		addKeyStrokeAction(this, KeyUtils.F5, this::reloadTextSource);
+		addKeyStrokeAction(this, KeyUtils.CTRL_T, this::addNewTab, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 	}
 
 	public void reloadTextSource() {
