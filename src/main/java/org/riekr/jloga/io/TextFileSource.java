@@ -2,9 +2,11 @@ package org.riekr.jloga.io;
 
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.StandardOpenOption.READ;
+import static java.util.Collections.newSetFromMap;
 import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 
 import javax.swing.*;
@@ -30,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -53,6 +55,10 @@ import org.riekr.jloga.utils.CancellableFuture;
 
 public class TextFileSource implements TextSource {
 
+	interface IndexTask {
+		boolean run();
+	}
+
 	static final class IndexData {
 		final long startPos;
 		WeakReference<String[]> data;
@@ -73,7 +79,7 @@ public class TextFileSource implements TextSource {
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 	private final MutableLong         _lastPos          = new MutableLong();
 
-	private final Set<Runnable> _indexChangeListeners = new CopyOnWriteArraySet<>();
+	private final Set<IndexTask> _indexChangeListeners = newSetFromMap(new ConcurrentHashMap<>());
 
 	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
@@ -102,10 +108,7 @@ public class TextFileSource implements TextSource {
 		_lines = null;
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			final long totalSize = fileChannel.size();
-			ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, indexingListener.andThen(() -> {
-				_indexChangeListeners.forEach(Runnable::run);
-				_lineCountSubject.next(_lineCount);
-			}));
+			ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, indexingListener.andThen(() -> _lineCountSubject.next(_lineCount)));
 			try {
 				scanFile(fileChannel);
 			} finally {
@@ -130,41 +133,48 @@ public class TextFileSource implements TextSource {
 
 	private void scanFile(FileChannel fileChannel) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(_pageSize);
-		CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
-		CharsetDecoder decoder = _charset.newDecoder()
-				.onMalformedInput(CodingErrorAction.REPLACE)
-				.onUnmappableCharacter(CodingErrorAction.REPLACE);
-		CharsetEncoder encoder = _charset.newEncoder();
-		char lastChar = 0;
-		while (fileChannel.read(byteBuffer) > 0) {
-			decoder.decode(byteBuffer.flip(), charBuffer, false);
-			charBuffer.flip();
-			while (charBuffer.hasRemaining()) {
-				final char curr = charBuffer.get();
-				switch (curr) {
-					// from java.io.BufferedReader.readLine():
-					// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
-					case '\n':
-						if (lastChar == '\r')
+		long read = fileChannel.read(byteBuffer);
+		if (read > 0) {
+			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
+			CharsetDecoder decoder = _charset.newDecoder()
+					.onMalformedInput(CodingErrorAction.REPLACE)
+					.onUnmappableCharacter(CodingErrorAction.REPLACE);
+			CharsetEncoder encoder = _charset.newEncoder();
+			char lastChar = 0;
+			for (; ; ) {
+				decoder.decode(byteBuffer.flip(), charBuffer, false);
+				charBuffer.flip();
+				while (charBuffer.hasRemaining()) {
+					final char curr = charBuffer.get();
+					switch (curr) {
+						// from java.io.BufferedReader.readLine():
+						// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
+						case '\n':
+							if (lastChar == '\r')
+								break;
+							//noinspection fallthrough
+						case '\r':
+							_lineCount++;
+							charBuffer.mark();
 							break;
-						//noinspection fallthrough
-					case '\r':
-						_lineCount++;
-						charBuffer.mark();
-						break;
+					}
+					lastChar = curr;
 				}
-				lastChar = curr;
+				// finalize indexed page
+				_lastPos.value = fileChannel.position();
+				_index.put(_lineCount, new IndexData(_lastPos.value - encoder.encode(charBuffer.reset()).limit()));
+				byteBuffer.flip();
+				read = fileChannel.read(byteBuffer);
+				if (read <= 0)
+					break;
+				_indexChangeListeners.removeIf(IndexTask::run);
+				charBuffer.flip();
 			}
-			// finalize indexed page
-			_lastPos.value = fileChannel.position();
-			_index.put(_lineCount, new IndexData(_lastPos.value - encoder.encode(charBuffer.reset()).limit()));
-			charBuffer.flip();
-			byteBuffer.flip();
-		}
-		// if the last char is not a new-line adjust the line count
-		if (lastChar != '\n') {
-			IndexData t = _index.remove(_lineCount);
-			_index.put(_lineCount + 1, t);
+			// if the last char is not a new-line adjust the line count
+			if (lastChar != '\n') {
+				IndexData t = _index.remove(_lineCount);
+				_index.put(_lineCount + 1, t);
+			}
 		}
 	}
 
@@ -172,7 +182,7 @@ public class TextFileSource implements TextSource {
 		updateTask.cancel(false);
 		_lineCountSubject.last(_lineCount);
 		progressListener.onProgressChanged(_lastPos.value, _lastPos.value);
-		_indexChangeListeners.forEach(Runnable::run);
+		_indexChangeListeners.forEach(IndexTask::run);
 		_indexChangeListeners.clear();
 	}
 
@@ -202,7 +212,7 @@ public class TextFileSource implements TextSource {
 				_lastPos.value = lastIndexPart.startPos;
 				ProgressListener progressListener = progressListenerSupplier.get();
 				ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, progressListener.andThen(() -> {
-					_indexChangeListeners.forEach(Runnable::run);
+					_indexChangeListeners.removeIf(IndexTask::run);
 					_lineCountSubject.next(_lineCount);
 				}));
 				try {
@@ -239,6 +249,20 @@ public class TextFileSource implements TextSource {
 	@Override
 	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
 
+		if (_index.ceilingKey(fromLine + count) != null) {
+			Map.Entry<Integer, IndexData> entry = _index.floorEntry(fromLine);
+			if (entry != null) {
+				IndexData indexData = entry.getValue();
+				String[] lines;
+				if (indexData.data != null && (lines = indexData.data.get()) != null) {
+					return asyncTask(() -> {
+						StringsReader reader = new StringsReader(fromLine - entry.getKey(), Math.min(count, _lineCount), lines, count);
+						EventQueue.invokeLater(() -> consumer.accept(reader));
+					});
+				}
+			}
+		}
+
 		if (_indexing.isDone()) {
 			return asyncIO(_file, () -> {
 				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
@@ -246,22 +270,19 @@ public class TextFileSource implements TextSource {
 			});
 		}
 
-		Runnable task = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
-						_indexChangeListeners.remove(this);
-						StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
-						EventQueue.invokeLater(() -> consumer.accept(reader));
-					}
-				} catch (Throwable e) {
-					_indexChangeListeners.remove(this);
-					consumer.accept(new StringsReader.ErrorReader(e));
-					if (e instanceof RuntimeException)
-						throw (RuntimeException)e;
-					throw new RuntimeException(e);
+		IndexTask task = () -> {
+			try {
+				if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
+					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
+					EventQueue.invokeLater(() -> consumer.accept(reader));
+					return true;
 				}
+				return false;
+			} catch (Throwable e) {
+				consumer.accept(new StringsReader.ErrorReader(e));
+				if (e instanceof RuntimeException)
+					throw (RuntimeException)e;
+				throw new RuntimeException(e);
 			}
 		};
 		_indexChangeListeners.add(task);
@@ -324,7 +345,10 @@ public class TextFileSource implements TextSource {
 		ScheduledFuture<?> updateTask = monitorProgress(lineNumber, _lineCount, progressListener.andThen(out::dispatchLineCount));
 		try {
 			Semaphore semaphore = new Semaphore(0);
-			_indexChangeListeners.add(() -> semaphore.release(1));
+			_indexChangeListeners.add(() -> {
+				semaphore.release(1);
+				return false;
+			});
 			BooleanSupplier continueCond = () -> {
 				if (!_indexing.isDone()) {
 					// wait for at least 1 page to be loaded
@@ -392,9 +416,9 @@ public class TextFileSource implements TextSource {
 			return EMPTY_STRINGS;
 		final String[] res = new String[count];
 		final int endLineExcl = fromLine + count;
+		Set<Map.Entry<Integer, IndexData>> list = _index.subMap(_index.floorKey(fromLine), true, endLineExcl, false).entrySet();
 		int resStart = 0;
 		synchronized (this) {
-			Set<Map.Entry<Integer, IndexData>> list = _index.subMap(_index.floorKey(fromLine), true, endLineExcl, false).entrySet();
 			for (Map.Entry<Integer, IndexData> entry : list) {
 				int pageStart = entry.getKey();
 				if (_lines == null || pageStart < _fromLine || pageStart >= (_fromLine + _lines.length)) {

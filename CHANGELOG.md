@@ -1,5 +1,10 @@
 ## In progress:
 
+- Geneal:
+  - Improved caching
+- Bug fixes:
+  - Scrolling during indexing does not lag anymore
+
 ## v0.1.0
 - General:
   - Same instance is reused if possible

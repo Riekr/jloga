@@ -24,6 +24,10 @@ public class StringsReader extends Reader {
 		this(arrayAsStreamOfLength(strings, count, "").iterator());
 	}
 
+	public StringsReader(int from, int len, @NotNull String[] strings, int count) {
+		this(arrayAsStreamOfLength(from, len, strings, count, "").iterator());
+	}
+
 	public StringsReader(@NotNull Iterator<String> strings) {
 		_strings = strings;
 	}
