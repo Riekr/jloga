@@ -144,21 +144,25 @@ public class TextFileSource implements TextSource {
 			for (; ; ) {
 				decoder.decode(byteBuffer.flip(), charBuffer, false);
 				charBuffer.flip();
-				while (charBuffer.hasRemaining()) {
-					final char curr = charBuffer.get();
-					switch (curr) {
-						// from java.io.BufferedReader.readLine():
-						// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
-						case '\n':
-							if (lastChar == '\r')
+				if (charBuffer.hasRemaining()) {
+					int lineCount = _lineCount;
+					do {
+						final char curr = charBuffer.get();
+						switch (curr) {
+							// from java.io.BufferedReader.readLine():
+							// "A line is considered to be terminated by any one of a line feed ('\n'), a carriage return ('\r'), a carriage return followed immediately by a line feed"
+							case '\n':
+								if (lastChar == '\r')
+									break;
+								//noinspection fallthrough
+							case '\r':
+								lineCount++;
+								charBuffer.mark();
 								break;
-							//noinspection fallthrough
-						case '\r':
-							_lineCount++;
-							charBuffer.mark();
-							break;
-					}
-					lastChar = curr;
+						}
+						lastChar = curr;
+					} while (charBuffer.hasRemaining());
+					_lineCount = lineCount;
 				}
 				// finalize indexed page
 				_lastPos.value = fileChannel.position();
