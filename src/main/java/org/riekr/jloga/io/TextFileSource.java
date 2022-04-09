@@ -141,6 +141,7 @@ public class TextFileSource implements TextSource {
 					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			CharsetEncoder encoder = _charset.newEncoder();
 			char lastChar = 0;
+			long lastPos = read;
 			for (; ; ) {
 				decoder.decode(byteBuffer.flip(), charBuffer, false);
 				charBuffer.flip();
@@ -165,10 +166,11 @@ public class TextFileSource implements TextSource {
 					_lineCount = lineCount;
 				}
 				// finalize indexed page
-				_lastPos.value = fileChannel.position();
-				_index.put(_lineCount, new IndexData(_lastPos.value - encoder.encode(charBuffer.reset()).limit()));
+				_lastPos.value = lastPos;
+				_index.put(_lineCount, new IndexData(lastPos - encoder.encode(charBuffer.reset()).limit()));
 				byteBuffer.flip();
 				read = fileChannel.read(byteBuffer);
+				lastPos += read;
 				if (read <= 0)
 					break;
 				_indexChangeListeners.removeIf(IndexTask::run);
