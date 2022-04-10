@@ -2,6 +2,7 @@
 
 - Geneal:
   - Improved caching
+  - Line numbers starts from 1 instead of zero, you can revert to old behaviour in preferences.
 - Bug fixes:
   - Scrolling during indexing does not lag anymore
 

@@ -49,6 +49,11 @@ public interface Preferences extends KeyBindings {
 			.group(GENERAL)
 			.addDescription("If set, searches initiated with a key stroke will create a new tab instead of reusing the last one.");
 
+	GUIPreference<Boolean> LINES_FROM1 = of("LineNumbersFrom1", () -> true)
+			.describe(Type.Toggle, "Line numbers from 1")
+			.group(GENERAL)
+			.addDescription("When selected line numbers will start from one (conventional) instead of zero (index)");
+
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
 			.group(GRID)
 			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");

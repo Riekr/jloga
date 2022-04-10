@@ -431,7 +431,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void reNumerate() {
-		_lineNumbers.reNumerate(
+		_lineNumbers.renumerate(
 				_fromLine,
 				_fromLine + _lineCount,
 				_allLinesCount
