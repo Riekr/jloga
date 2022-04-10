@@ -1,7 +1,7 @@
 ## In progress:
 
 ## v0.1.1
-- Geneal:
+- General:
   - Improved caching
   - Line numbers starts from 1 instead of zero, you can revert to old behaviour in preferences.
 - Bug fixes:
