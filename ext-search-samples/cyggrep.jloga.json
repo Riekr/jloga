@@ -5,12 +5,15 @@
   "description": "Cygwin grep",
   "command": [
     "D:\\Gian\\Cygwin64\\bin\\grep.exe",
+    "--with-filename",
+    "--line-number",
     "%Case%",
     "%Invert%",
     "%CountOnly%",
     "%Type%",
     "%Text%"
   ],
+  "matchRegex": "^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)",
   "params": {
     "Text": {
       "type": "STRING",

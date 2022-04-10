@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,12 +28,12 @@ public class ExtProcessComponentProject extends ProjectComponent {
 	private Map<String, String> _vars = emptyMap();
 
 	@SuppressWarnings("unchecked")
-	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, String[] command, Map<String, Param> params) {
+	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, List<String> command, Map<String, Param> params, Pattern matchRegex) {
 		super(id, level, id);
 		_id = id;
 		_icon = icon;
 		_params = params;
-		_manager = new ExtProcessManager(command, workingDir);
+		_manager = new ExtProcessManager(workingDir, command, matchRegex);
 		_params.forEach((key, param) -> {
 			switch (param.type) {
 

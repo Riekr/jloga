@@ -1,5 +1,8 @@
 ## In progress:
 
+- External scripts:
+  - Line matched via named regex like: `^(?<file>[^:]*):(?<line>\d*):(?<text>.*)`
+
 ## v0.1.1
 - General:
   - Improved caching

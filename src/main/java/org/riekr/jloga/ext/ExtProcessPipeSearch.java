@@ -5,9 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TempTextSource;
 import org.riekr.jloga.io.TextSource;
@@ -16,24 +20,11 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessPipeSearch implements SearchPredicate {
 
-	private final File         _workingDir;
-	private final List<String> _command;
-
-	public ExtProcessPipeSearch(File workingDir, String... command) {
-		if (command == null || command.length == 0)
-			throw new IllegalArgumentException("No command specified");
-		_workingDir = workingDir;
-		_command = Arrays.asList(command);
-	}
-
-	public ExtProcessPipeSearch(File workingDir, List<String> command) {
-		if (command == null || command.isEmpty())
-			throw new IllegalArgumentException("No command specified");
-		_workingDir = workingDir;
-		_command = command;
-	}
-
 	private final String _LINE_SEP = System.lineSeparator();
+
+	private final File             _workingDir;
+	private final List<String>     _command;
+	private final Consumer<String> _onStdOut;
 
 	private volatile int            _line;
 	private          TempTextSource _textSource;
@@ -42,6 +33,29 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 	private          ReadThread     _stdErrReader;
 	private volatile Throwable      _err;
 	private          Process        _process;
+
+	public ExtProcessPipeSearch(@NotNull File workingDir, @NotNull List<String> command, @Nullable Pattern matchRegex) {
+		if (command.isEmpty())
+			throw new IllegalArgumentException("No command specified");
+		_workingDir = workingDir;
+		_command = command;
+		if (matchRegex == null) {
+			_onStdOut = (line) -> _textSource.addLine(_line, line);
+		} else {
+			Matcher matcher = matchRegex.matcher("");
+			_onStdOut = (line) -> {
+				try {
+					matcher.reset(line);
+					if (matcher.matches())
+						_textSource.addLine(Integer.parseInt(matcher.group("line")) - 1, matcher.group("text"));
+					else
+						_textSource.addLine(_line, line);
+				} catch (Throwable e) {
+					e.printStackTrace(System.err);
+				}
+			};
+		}
+	}
 
 	@Override
 	public FilteredTextSource start(TextSource master) {
@@ -57,17 +71,13 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 		}
 		_toProc = new BufferedWriter(new OutputStreamWriter(_process.getOutputStream()));
 		_textSource = new TempTextSource();
-		_stdOutReader = new ReadThread(_process.getInputStream(), this::onStdOut, this::onError, "stdout").startNow();
+		_stdOutReader = new ReadThread(_process.getInputStream(), _onStdOut, this::onError, "stdout").startNow();
 		_stdErrReader = new ReadThread(_process.getErrorStream(), this::onStdErr, this::onError, "stderr").startNow();
 		return _textSource;
 	}
 
 	private void onError(Throwable e) {
 		_err = e;
-	}
-
-	private void onStdOut(String line) {
-		_textSource.addLine(_line, line);
 	}
 
 	// protected for catching lines in a dump window

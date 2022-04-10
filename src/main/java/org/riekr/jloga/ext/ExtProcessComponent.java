@@ -2,8 +2,10 @@ package org.riekr.jloga.ext;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.search.SearchComponent;
@@ -19,10 +21,10 @@ public class ExtProcessComponent extends JButton implements SearchComponent {
 	private       Consumer<SearchPredicate> _searchPredicateConsumer;
 	private final ExtProcessManager         _manager;
 
-	public ExtProcessComponent(String id, String icon, String label, File workingDirectory, String[] command) {
+	public ExtProcessComponent(String id, String icon, String label, File workingDirectory, List<String> command, Pattern matchRegex) {
 		_id = id;
 		_icon = icon;
-		_manager = new ExtProcessManager(command, workingDirectory);
+		_manager = new ExtProcessManager(workingDirectory, command, matchRegex);
 		UIUtils.makeBorderless(this);
 		setText(label);
 		addActionListener((e) -> {

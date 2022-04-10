@@ -34,8 +34,8 @@ Past pages of the files are kept in memory until garbage collection starts in or
 jLoga can open many 4GB log files in few senconds and with default jvm settings, you can increase heap if you have a slow disk in order to explicitly cache text pages and reduce disk accesses.
 
 You can check current memory usage and limits of a running instance by running the command line in this example:
-```
-# java -jar jloga-all.jar -remote-info
+```shell
+$ java -jar jloga-all.jar -remote-info
 
 Available Processors = 8
 Heap Memory = 536870912
@@ -58,6 +58,32 @@ Processes will be started in the folder where the json files are stored, if a `e
 In addition to `env.jloga.properties` a `env-windows.jloga.properties` will be read when running in Windows environment and a `env-unix.jloga.properties` otherwise. The more specific env file will override the less specific properties.
 
 Inside the `.json.jloga` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
+
+### Line matching
+By default, lines are matched with the source files at the moment the child process emits an output.\
+If your analyzer supports emitting the line number you can specify a full-line-match regex to extract the line number
+and the rest of the text line.
+
+For example, grep emits matches in this form:
+```shell
+$ find . -name "*.java" | xargs grep -n printStackTrace
+./ext/ExtEnv.java:47:                           e.printStackTrace(System.err);
+./ext/ExtProcessManager.java:71:                                ex.printStackTrace(System.err);
+./ext/ExtProcessPipeSearch.java:54:                                     e.printStackTrace(System.err);
+./ext/ExtProcessPipeSearch.java:104:                    _err.printStackTrace(System.err);
+...
+```
+and you can specify inside the `.json.jloga` file something like:
+```
+  "command": [...],
+  "matchRegex": "^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)",
+  "params": {
+```
+Consider that:
+1. only groups named with "line" and "text" are considered and are mandatory
+2. the regex **must** match the whole line, if not old behaviour will be applied for that line
+3. line numbers emitted by the child process are considered starting from 1 (one)
+4. specifying `grep` as regular expression will be translated into `^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)` which should be quite common
 
 ### Variables
 By specifing a `%VarName%` in each part of the *.json.jloga* file you can access to system environment variables plus some

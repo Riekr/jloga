@@ -10,12 +10,13 @@ import java.awt.*;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.Main;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
@@ -23,28 +24,30 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessManager {
 
-	private final String[] _command;
-	private final File     _workingDirectory;
+	private final List<String> _command;
+	private final File         _workingDirectory;
+	private final Pattern      _matchRegex;
 
 	private Map<String, String> _searchVars;
 	private JTextArea           _stdErr;
 	private List<String>        _lastCommand;
 	private LocalDateTime       _lastStart;
 
-	public ExtProcessManager(String[] command, File workingDirectory) {
-		_command = command;
+	public ExtProcessManager(@NotNull File workingDirectory, @NotNull List<String> command, @Nullable Pattern matchRegex) {
 		_workingDirectory = workingDirectory;
+		_command = command;
+		_matchRegex = matchRegex;
 	}
 
 	public SearchPredicate newSearchPredicate() {
 		try {
 			Map<String, String> env = getAllVars(_workingDirectory);
 			Pattern pattern = Pattern.compile("%([\\w._]+)%");
-			_lastCommand = Arrays.stream(_command)
+			_lastCommand = _command.stream()
 					.map((param) -> replaceRegex(param, pattern, env))
 					.filter((param) -> !param.isEmpty())
 					.collect(toList());
-			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand) {
+			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand, _matchRegex) {
 				@Override
 				public FilteredTextSource start(TextSource master) {
 					_lastStart = LocalDateTime.now();
