@@ -1,8 +1,7 @@
 package org.riekr.jloga.ext;
 
-import static javax.swing.JOptionPane.showMessageDialog;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,7 +13,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.Main;
 import org.riekr.jloga.utils.OSUtils;
 import org.riekr.jloga.utils.TextUtils;
 
@@ -43,8 +41,7 @@ class ExtEnv {
 				props.load(reader);
 				props.forEach((k, v) -> dest.put(String.valueOf(k), mapper.apply(TextUtils.replaceRegex(String.valueOf(v), selfPropPattern, dest))));
 			} catch (IOException e) {
-				showMessageDialog(Main.getMain(), e.getLocalizedMessage(), "Unable to read " + envFile, JOptionPane.WARNING_MESSAGE);
-				e.printStackTrace(System.err);
+				popupError("Unable to read " + envFile, e);
 			}
 		}
 	}

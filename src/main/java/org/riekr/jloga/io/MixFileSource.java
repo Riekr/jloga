@@ -2,8 +2,8 @@ package org.riekr.jloga.io;
 
 import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.time.Duration;
@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.Main;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.pmem.PagedIntBag;
 
@@ -180,10 +179,7 @@ public class MixFileSource implements TextSource {
 				System.out.println("Mixed " + _index.size() + " lines of " + totLineCount + " using " + _index.pages() + " pages");
 			} catch (Throwable e) {
 				EventQueue.invokeLater(() -> {
-					String msg = e.getLocalizedMessage();
-					if (msg == null || msg.isBlank())
-						msg = "Error mixing files";
-					JOptionPane.showMessageDialog(Main.getMain(), msg, "Mixing error", JOptionPane.ERROR_MESSAGE);
+					popupError("Error mixing files", "Mixing error", e);
 					closer.run();
 				});
 				e.printStackTrace(System.err);

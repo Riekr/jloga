@@ -43,15 +43,23 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 			_onStdOut = (line) -> _textSource.addLine(_line, line);
 		} else {
 			Matcher matcher = matchRegex.matcher("");
-			_onStdOut = (line) -> {
-				try {
-					matcher.reset(line);
-					if (matcher.matches())
-						_textSource.addLine(Integer.parseInt(matcher.group("line")) - 1, matcher.group("text"));
-					else
-						_textSource.addLine(_line, line);
-				} catch (Throwable e) {
-					e.printStackTrace(System.err);
+			_onStdOut = new Consumer<>() {
+				private int _lastDecodedLine = -1;
+
+				@Override
+				public void accept(String line) {
+					try {
+						matcher.reset(line);
+						if (matcher.matches()) {
+							_lastDecodedLine = Integer.parseInt(matcher.group("line")) - 1;
+							_textSource.addLine(_lastDecodedLine, matcher.group("text"));
+						} else if (_lastDecodedLine == -1)
+							_textSource.addLine(_line, line);
+						else
+							_textSource.addLine(_lastDecodedLine, line);
+					} catch (Throwable err) {
+						err.printStackTrace(System.err);
+					}
 				}
 			};
 		}

@@ -1,6 +1,7 @@
 package org.riekr.jloga.project;
 
-import javax.swing.*;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
+
 import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
@@ -98,7 +99,7 @@ class PropsIO {
 				.forEach((f) -> f.accept(props.getProperty(f.key)));
 	}
 
-	public static void requestSave(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
+	public static void requestSave(Object pojo, String ext, String extDescription, Runnable... onSuccess) {
 		FileUtils.fileDialog(
 				FileUtils.DialogType.SAVE,
 				PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")),
@@ -108,8 +109,7 @@ class PropsIO {
 			try {
 				save(selectedFile, pojo);
 			} catch (Throwable e) {
-				JOptionPane.showMessageDialog(owner, e.getLocalizedMessage(), "Error saving file", JOptionPane.ERROR_MESSAGE);
-				e.printStackTrace(System.err);
+				popupError("Error saving file", e);
 				return;
 			}
 			PrefsUtils.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());
@@ -119,7 +119,7 @@ class PropsIO {
 		});
 	}
 
-	public static void requestLoad(Component owner, Object pojo, String ext, String extDescription, Runnable... onSuccess) {
+	public static void requestLoad(Object pojo, String ext, String extDescription, Runnable... onSuccess) {
 		FileUtils.fileDialog(
 				FileUtils.DialogType.OPEN,
 				PrefsUtils.loadFile(PATH_PREFS_PREFIX + ext, () -> new File(".")),
@@ -129,8 +129,7 @@ class PropsIO {
 			try {
 				load(selectedFile, pojo);
 			} catch (Throwable e) {
-				JOptionPane.showMessageDialog(owner, e.getLocalizedMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
-				e.printStackTrace(System.err);
+				popupError("Error loading file", e);
 				return;
 			}
 			PrefsUtils.save(PATH_PREFS_PREFIX + ext, selectedFile.getParentFile());

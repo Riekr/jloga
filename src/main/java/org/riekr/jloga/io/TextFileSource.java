@@ -8,8 +8,9 @@ import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
+import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.Main;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.prefs.Preferences;
@@ -118,15 +118,7 @@ public class TextFileSource implements TextSource {
 		} catch (ClosedByInterruptException ignored) {
 			System.out.println("Indexing cancelled");
 		} catch (IOException | InvalidMarkException e) {
-			EventQueue.invokeLater(() -> {
-				String msg = e.getLocalizedMessage();
-				if (msg == null)
-					msg = "";
-				else if (!(msg = msg.trim()).isEmpty())
-					msg += '\n';
-				JOptionPane.showMessageDialog(Main.getMain(), msg + "\nWrong charset?", "Indexing error", JOptionPane.ERROR_MESSAGE);
-			});
-			e.printStackTrace(System.err);
+			popupError("Wrong charset?", "Indexing error", e);
 			throw new IndexingException("Error indexing " + _file, e);
 		}
 	}
@@ -325,7 +317,10 @@ public class TextFileSource implements TextSource {
 						loadPage(pos, lines);
 						System.out.println("Changed charset from " + orig + " to " + _charset);
 						Preferences.CHARSET.set(_charset);
-						EventQueue.invokeLater(this::showCharsetWarning);
+						popupWarning("Charset has been automatically changed to " + _charset + ",\n"
+										+ "if text is corrupted please select another charset and reopen the file.\n"
+										+ "You can disable charset auto detection in preferences.",
+								"Charset changed");
 						return lines;
 					} catch (MalformedInputException ignored) {}
 				}
@@ -333,15 +328,6 @@ public class TextFileSource implements TextSource {
 			}
 			throw e;
 		}
-	}
-
-	private void showCharsetWarning() {
-		JOptionPane.showMessageDialog(Main.getMain(), "Charset has been automatically changed to " + _charset + ",\n"
-						+ "if text is corrupted please select another charset and reopen the file.\n"
-						+ "You can disable charset auto detection in preferences.",
-				"Charset changed",
-				JOptionPane.WARNING_MESSAGE
-		);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.riekr.jloga.ext;
 
 import static java.util.stream.Collectors.joining;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.riekr.jloga.project.ProjectField;
 import org.riekr.jloga.search.SearchComponent;
@@ -55,7 +57,7 @@ public class ExtProcessConfig {
 				res.add(arg.toString());
 		}
 		if (res.isEmpty())
-			throw new IllegalArgumentException("No command specified in '" + label + '\'');
+			throw popupError(new IllegalArgumentException("No command specified in '" + label + '\''));
 		res.trimToSize();
 		return res;
 	}
@@ -64,7 +66,11 @@ public class ExtProcessConfig {
 		if (matchRegex != null && !matchRegex.isBlank()) {
 			if (matchRegex.equalsIgnoreCase("grep"))
 				return Pattern.compile("^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)");
-			return Pattern.compile(matchRegex);
+			try {
+				return Pattern.compile(matchRegex);
+			} catch (PatternSyntaxException err) {
+				throw popupError("Invalid 'matchRegex' in '" + label + '\'', err);
+			}
 		}
 		return null;
 	}

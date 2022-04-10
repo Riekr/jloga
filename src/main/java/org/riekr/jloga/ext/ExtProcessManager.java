@@ -1,8 +1,8 @@
 package org.riekr.jloga.ext;
 
 import static java.util.stream.Collectors.toList;
-import static javax.swing.JOptionPane.showMessageDialog;
 import static org.riekr.jloga.utils.KeyUtils.closeOnEscape;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.TextUtils.replaceRegex;
 
 import javax.swing.*;
@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.Main;
 import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchPredicate;
@@ -67,9 +66,7 @@ public class ExtProcessManager {
 				}
 			};
 		} catch (Exception ex) {
-			if (!(ex instanceof IllegalArgumentException))
-				ex.printStackTrace(System.err);
-			showMessageDialog(Main.getMain(), ex.getLocalizedMessage(), "Can't execute", JOptionPane.ERROR_MESSAGE);
+			popupError("Can't execute", ex);
 			return null;
 		}
 	}

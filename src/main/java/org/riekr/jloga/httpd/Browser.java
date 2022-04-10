@@ -1,9 +1,8 @@
 package org.riekr.jloga.httpd;
 
-import static javax.swing.JOptionPane.showMessageDialog;
-import static org.riekr.jloga.Main.getMain;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
+import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +80,7 @@ class Browser {
 			if (custom.canExecute())
 				command = new String[]{custom.getAbsolutePath(), url};
 			else {
-				showMessageDialog(getMain(), '\'' + custom.getAbsolutePath() + "'\nis not executable, check you preferences.", "Invalid executable", JOptionPane.ERROR_MESSAGE);
+				popupError('\'' + custom.getAbsolutePath() + "'\nis not executable, check you preferences.", "Invalid executable");
 				Preferences.BROWSER_CUSTOM.reset();
 			}
 		}
@@ -100,7 +99,7 @@ class Browser {
 			}
 			// if no supported chromium based browser has been found try the standard/uglier/maybe unsupported one
 			if (Preferences.BROWSER_WARN.get()) {
-				showMessageDialog(getMain(), "No supported browser found, you may select one in preferences.", "Invalid browser", JOptionPane.WARNING_MESSAGE);
+				popupWarning("No supported browser found, you may select one in preferences.", "Invalid browser");
 				Preferences.BROWSER_WARN.set(false);
 			}
 		}

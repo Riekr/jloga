@@ -72,8 +72,8 @@ public abstract class ProjectComponent extends SearchComponentWithExpandablePane
 			configPaneButtons.add(newButton(AutoDetect.GLYPH, ((AutoDetect.Wizard)this)::onWizard));
 			configPaneButtons.add(newButtonSpacer());
 		}
-		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, this, _fileExt, _fileDescr)));
-		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, this, _fileExt, _fileDescr)));
+		configPaneButtons.add(newButton("Load...", () -> PropsIO.requestLoad(this, _fileExt, _fileDescr)));
+		configPaneButtons.add(newButton("Save...", () -> PropsIO.requestSave(this, _fileExt, _fileDescr)));
 		configPaneButtons.add(newButtonSpacer());
 		configPaneButtons.add(newButton("Reset!", this::clear));
 	}
