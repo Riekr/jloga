@@ -1,10 +1,13 @@
 ## In progress:
 
+## v0.1.1
 - Geneal:
   - Improved caching
   - Line numbers starts from 1 instead of zero, you can revert to old behaviour in preferences.
 - Bug fixes:
   - Scrolling during indexing does not lag anymore
+  - Line numbers not correctly displaying while indexing
+  - `.exe` bundle dependencies are included
 
 ## v0.1.0
 - General:

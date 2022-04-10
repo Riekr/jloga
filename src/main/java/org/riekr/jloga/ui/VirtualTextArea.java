@@ -356,6 +356,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_scrollBar.setEnabled(true); // TODO: moving this line below disables scrollbar
 			if (_fromLine <= lineCount && lineCount <= _fromLine + _lineCount)
 				requireText();
+			reNumerate();
 		}
 	}
 
