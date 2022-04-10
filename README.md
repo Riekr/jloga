@@ -8,7 +8,7 @@ Files and results can be view in grid mode and inspected with [finos perspective
 The project started in my spare time to simplify crash analisys.
 
 ## Downloads and installation
-For each jloga variant Java 11 or later is required, you can download it from [Oracle's java.com](https://java.com/it/download/) or use OpenJDK available from [Adoptium](https://adoptium.net/releases.html?variant=openjdk11&jvmVariant=hotspot) or [Adopt OpenJDK](https://adoptopenjdk.net/releases.html).
+For each jloga variant Java 11 or later is required, you can download OpenJDK jre available from [Adoptium](https://adoptium.net/releases.html?variant=openjdk11&jvmVariant=hotspot), search it from [Oracle's java.com](https://java.com/it/download/) or use the one bundled with your operating system if any.
 
 The `.exe` file is an all-in-one executable file built with Launch4J for windows in order to simplify file associations. You don't need to extract it, just double click to run. The app uses the standard java preferences to store the user selections.
 

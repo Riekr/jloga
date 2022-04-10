@@ -51,10 +51,12 @@ dependencies {
 	compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
+version '0.1.0'
+
 jar {
 	manifest {
 		attributes(
-				"Implementation-Version": '0.1.0',
+				"Implementation-Version": project.version,
 				"Main-Class": 'org.riekr.jloga.Main'
 		)
 	}
@@ -77,6 +79,9 @@ launch4j {
 	// convert icon.png -resize 256x256 -channel rgb -negate icon.ico
 	icon = "${projectDir}/src/main/resources/org/riekr/jloga/icon.ico"
 	jarTask = fatJar
+	copyConfigurable = []
+	downloadUrl 'https://adoptium.net/download'
+	supportUrl 'https://github.com/Riekr/jloga'
 }
 
 task updateFinos {
