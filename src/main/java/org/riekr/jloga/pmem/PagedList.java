@@ -85,17 +85,18 @@ public class PagedList<T extends Serializable> implements Closeable {
 
 	private final int _limit;
 
-	private final @NotNull TreeMap<Integer, Page<T>> _pages = new TreeMap<>();
-	private @Nullable      Live<T>                   _writing;
-	private @NotNull       Live<T>                   _reading;
-	private                long                      _size  = 0;
+	private final @NotNull     TreeMap<Integer, Page<T>> _pages = new TreeMap<>();
+	private volatile @Nullable Live<T>                   _writing;
+	private volatile @NotNull  Live<T>                   _reading;
+	private                    long                      _size  = 0;
 
 	public PagedList(int pageSizeLimit) {
 		if (pageSizeLimit <= 0)
 			throw new IllegalArgumentException("Invalid page limit size: " + pageSizeLimit);
 		_limit = pageSizeLimit;
-		_writing = new Live<>(new ArrayList<>(_limit), 0);
-		_reading = _writing;
+		Live<T> initial = new Live<>(new ArrayList<>(_limit), 0);
+		_writing = initial;
+		_reading = initial;
 	}
 
 	private File createTempFile() {
@@ -106,11 +107,12 @@ public class PagedList<T extends Serializable> implements Closeable {
 		}
 	}
 
-	public void seal() {
-		if (_writing != null) {
-			if (!_writing.data.isEmpty())
-				save();
+	public synchronized void seal() {
+		Live<T> writing = _writing;
+		if (writing != null) {
 			_writing = null;
+			if (!writing.data.isEmpty())
+				save();
 		}
 	}
 
@@ -119,25 +121,27 @@ public class PagedList<T extends Serializable> implements Closeable {
 	}
 
 	private void save() {
-		if (_writing == null)
+		Live<T> writing = _writing;
+		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
-		_writing.data.trimToSize();
-		if (_writing.page != null || _pages.put(_writing.start, _writing.page = new Page<>(createTempFile(), _writing.data, _pages.size() + 1)) != null)
-			throw new IllegalStateException("Page " + _writing.start + " already saved");
+		writing.data.trimToSize();
+		if (writing.page != null || _pages.put(writing.start, writing.page = new Page<>(createTempFile(), writing.data, _pages.size() + 1)) != null)
+			throw new IllegalStateException("Page " + writing.start + " already saved");
 	}
 
-	public final void add(T value) {
-		if (_writing == null)
+	public synchronized final void add(T value) {
+		Live<T> writing = _writing;
+		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
-		_writing.data.add(value);
+		writing.data.add(value);
 		_size++;
-		if (_writing.data.size() == _limit) {
+		if (writing.data.size() == _limit) {
 			save();
-			_writing = new Live<>(new ArrayList<>(_limit), _writing.start + _writing.data.size());
+			_writing = new Live<>(new ArrayList<>(_limit), writing.start + writing.data.size());
 		}
 	}
 
-	public T get(int index) {
+	public synchronized T get(int index) {
 		int idx = index - _reading.start;
 		if (idx < 0 || idx >= _reading.data.size()) {
 			Map.Entry<Integer, Page<T>> e = _pages.floorEntry(index);
@@ -150,9 +154,10 @@ public class PagedList<T extends Serializable> implements Closeable {
 			if (idx < _reading.data.size()) {
 				_reading = new Live<>(e.getValue(), newStart);
 			} else {
-				if (_writing == null)
+				Live<T> writing = _writing;
+				if (writing == null)
 					throw new IndexOutOfBoundsException("Requested index " + index + " while page size is " + _reading.data.size() + " (total=" + _size + ')');
-				_reading = _writing;
+				_reading = writing;
 				idx = index - _reading.start;
 			}
 		}
@@ -160,7 +165,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
 		_pages.values().forEach((p) -> {
 			if (!p._file.delete())
 				System.err.println("Unable to delete paging file " + p._file);
