@@ -18,7 +18,7 @@ import org.riekr.jloga.utils.CancellableFuture;
 
 public class TempTextSource implements FilteredTextSource {
 
-	private final PagedIntToObjList<String> _data             = newPagedIntToStringList(10000);
+	private final PagedIntToObjList<String> _data             = newPagedIntToStringList();
 	private final IntBehaviourSubject       _lineCountSubject = new IntBehaviourSubject();
 
 	@Override

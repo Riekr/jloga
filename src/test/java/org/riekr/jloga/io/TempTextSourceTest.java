@@ -35,7 +35,7 @@ public class TempTextSourceTest {
 						Assert.assertTrue(line.startsWith(id + " "));
 						id++;
 					}
-					// Assert.assertEquals(count, id - from+1);
+					// TODO: Assert.assertEquals(count, id - from);
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}

@@ -94,7 +94,7 @@ public class MixFileSource implements TextSource {
 
 	private final TextSource[] _sources;
 	private final Future<?>    _indexing;
-	private final PagedIntBag  _index = new PagedIntBag(2);
+	private final PagedIntBag  _index = new PagedIntBag();
 	private final int          _padding;
 
 	public MixFileSource(@NotNull Config config, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {

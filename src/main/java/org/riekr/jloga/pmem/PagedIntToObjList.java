@@ -4,12 +4,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class PagedIntToObjList<T> extends PagedList<IntToObject<T>> {
 
-	public static PagedIntToObjList<String> newPagedIntToStringList(int pageSizeLimit) {
-		return new PagedIntToObjList<>(pageSizeLimit, DataEncoder.STRING, DataDecoder.STRING);
+	public static PagedIntToObjList<String> newPagedIntToStringList() {
+		return new PagedIntToObjList<>(DataEncoder.STRING, DataDecoder.STRING);
 	}
 
-	public PagedIntToObjList(int pageSizeLimit, @NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
-		super(pageSizeLimit,
+	public PagedIntToObjList(@NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
+		super(
 				(ito, dos) -> {
 					dos.writeInt(ito.tag);
 					encoder.accept(ito.value, dos);

@@ -17,26 +17,23 @@ import java.util.TreeMap;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.prefs.Preferences;
 
 public class PagedList<T> implements Closeable {
 
 	class Page {
 		private final     File                        _file;
 		private @Nullable WeakReference<ArrayList<T>> _cache;
-		final             int                         id;
+		private final     int                         _id = _pages.size() + 1;
 
-		Page(File file, ArrayList<T> data, int id) {
+		Page(File file, byte[] buf, ArrayList<T> data) throws IOException {
 			_file = file;
-			this.id = id;
 			// save
 			try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(_file)))) {
 				dos.writeInt(data.size());
-				for (T obj : data)
-					_encoder.accept(obj, dos);
-				_cache = new WeakReference<>(data);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				dos.write(buf);
 			}
+			_cache = new WeakReference<>(data);
 		}
 
 		public ArrayList<T> load() {
@@ -54,45 +51,83 @@ public class PagedList<T> implements Closeable {
 				}
 				_cache = new WeakReference<>(res);
 			}
-			System.out.println("Loaded page " + id + " from " + from);
+			System.out.println("Loaded page " + _id + " from " + from);
 			return res;
 		}
 	}
 
 	class Live {
-		final ArrayList<T> data;
-		final int          start;
-		Page page;
+		private final ArrayList<T> _data;
 
-		Live(ArrayList<T> data, int start) {
-			this.data = data;
+		final long start;
+
+		private Page                      _page;
+		private ByteArrayDataOutputStream _buf;
+
+		Live(long start) {
+			_data = new ArrayList<>(1000);
 			this.start = start;
+			_buf = new ByteArrayDataOutputStream(_pageSize);
 		}
 
-		Live(@NotNull Page page, int start) {
-			this.page = page;
-			this.data = page.load();
+		Live(@NotNull Page page, long start) {
+			_data = page.load();
+			_page = page;
 			this.start = start;
+			_buf = null;
+		}
+
+		public Page page() {
+			if (_page != null)
+				throw new IllegalStateException("Already paged");
+			try {
+				_page = new Page(createTempFile(), _buf.toByteArray(), _data);
+				_buf.close();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			_buf = null;
+			return _page;
+		}
+
+		public boolean isEmpty() {
+			return _data.isEmpty();
+		}
+
+		public boolean add(T value) {
+			if (_buf == null)
+				throw new IllegalStateException("Already paged");
+			_data.add(value);
+			try {
+				_encoder.accept(value, _buf);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			return _buf.size() >= _pageSize;
+		}
+
+		public int size() {
+			return _data.size();
+		}
+
+		public T get(int idx) {
+			return _data.get(idx);
 		}
 	}
 
-	private final int _limit;
-
-	private final @NotNull TreeMap<Integer, Page> _pages = new TreeMap<>();
-	private final @NotNull DataEncoder<T>         _encoder;
-	private final @NotNull DataDecoder<T>         _decoder;
+	private final          int                 _pageSize = Preferences.PAGE_SIZE.get();
+	private final @NotNull TreeMap<Long, Page> _pages    = new TreeMap<>();
+	private final @NotNull DataEncoder<T>      _encoder;
+	private final @NotNull DataDecoder<T>      _decoder;
 
 	private volatile @Nullable Live _writing;
 	private volatile @NotNull  Live _reading;
 	private                    long _size = 0;
 
-	public PagedList(int pageSizeLimit, @NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
+	public PagedList(@NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
 		_encoder = encoder;
 		_decoder = decoder;
-		if (pageSizeLimit <= 0)
-			throw new IllegalArgumentException("Invalid page limit size: " + pageSizeLimit);
-		_limit = pageSizeLimit;
-		Live initial = new Live(new ArrayList<>(_limit), 0);
+		Live initial = new Live(0);
 		_writing = initial;
 		_reading = initial;
 	}
@@ -109,7 +144,7 @@ public class PagedList<T> implements Closeable {
 		Live writing = _writing;
 		if (writing != null) {
 			_writing = null;
-			if (!writing.data.isEmpty())
+			if (!writing.isEmpty())
 				save(writing);
 		}
 	}
@@ -121,44 +156,42 @@ public class PagedList<T> implements Closeable {
 	private void save(Live writing) {
 		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
-		writing.data.trimToSize();
-		if (writing.page != null || _pages.put(writing.start, writing.page = new Page(createTempFile(), writing.data, _pages.size() + 1)) != null)
-			throw new IllegalStateException("Page " + writing.start + " already saved");
+		if (_pages.put(writing.start, writing.page()) != null)
+			throw new IllegalStateException("Duplicate writing start " + writing.start);
 	}
 
 	public synchronized final void add(T value) {
 		Live writing = _writing;
 		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
-		writing.data.add(value);
-		_size++;
-		if (writing.data.size() == _limit) {
+		if (writing.add(value)) {
 			save(writing);
-			_writing = new Live(new ArrayList<>(_limit), writing.start + writing.data.size());
+			_writing = new Live(writing.start + writing.size());
 		}
+		_size++;
 	}
 
-	public synchronized T get(int index) {
-		int idx = index - _reading.start;
-		if (idx < 0 || idx >= _reading.data.size()) {
-			Map.Entry<Integer, Page> e = _pages.floorEntry(index);
+	public synchronized T get(long index) {
+		int idx = Math.toIntExact(index - _reading.start);
+		if (idx < 0 || idx >= _reading.size()) {
+			Map.Entry<Long, Page> e = _pages.floorEntry(index);
 			if (e == null) {
 				// no pages
 				return null;
 			}
-			int newStart = e.getKey();
-			idx = index - newStart;
-			if (idx < _reading.data.size()) {
+			long newStart = e.getKey();
+			idx = Math.toIntExact(index - newStart);
+			if (idx < _reading.size()) {
 				_reading = new Live(e.getValue(), newStart);
 			} else {
 				Live writing = _writing;
 				if (writing == null)
-					throw new IndexOutOfBoundsException("Requested index " + idx + " while page size is " + _reading.data.size() + " (" + index + '/' + _size + ')');
+					throw new IndexOutOfBoundsException("Requested index " + idx + " while page size is " + _reading.size() + " (" + index + '/' + _size + ')');
 				_reading = writing;
-				idx = index - _reading.start;
+				idx = Math.toIntExact(index - writing.start);
 			}
 		}
-		return _reading.data.get(idx);
+		return _reading.get(idx);
 	}
 
 	@Override
