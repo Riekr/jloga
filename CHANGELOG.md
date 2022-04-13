@@ -4,6 +4,7 @@
   - Line matched via named regex like: `^(?<file>[^:]*):(?<line>\d*):(?<text>.*)`
 - Bug fixes:
   - Text not loading while searching
+  - Index out of bounds while scrolling on script results
  
 ## v0.1.1
 - General:

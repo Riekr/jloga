@@ -24,7 +24,7 @@ public class PagedList<T> implements Closeable {
 	class Page {
 		private final     File                        _file;
 		private @Nullable WeakReference<ArrayList<T>> _cache;
-		private final     int                         _id = _pages.size() + 1;
+		// private final     int                         _id = _pages.size() + 1;
 
 		Page(File file, byte[] buf, ArrayList<T> data) throws IOException {
 			_file = file;
@@ -38,9 +38,9 @@ public class PagedList<T> implements Closeable {
 
 		public ArrayList<T> load() {
 			ArrayList<T> res;
-			String from = "memory";
+			// String from = "memory";
 			if (_cache == null || (res = _cache.get()) == null) {
-				from = "disk";
+				// from = "disk";
 				try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(_file)))) {
 					int size = dis.readInt();
 					res = new ArrayList<>(size);
@@ -51,7 +51,7 @@ public class PagedList<T> implements Closeable {
 				}
 				_cache = new WeakReference<>(res);
 			}
-			System.out.println("Loaded page " + _id + " from " + from);
+			// System.out.println("Loaded page " + _id + " from " + from);
 			return res;
 		}
 	}
@@ -181,9 +181,8 @@ public class PagedList<T> implements Closeable {
 			}
 			long newStart = e.getKey();
 			idx = Math.toIntExact(index - newStart);
-			if (idx < _reading.size()) {
-				_reading = new Live(e.getValue(), newStart);
-			} else {
+			_reading = new Live(e.getValue(), newStart);
+			if (idx >= _reading.size()) {
 				Live writing = _writing;
 				if (writing == null)
 					throw new IndexOutOfBoundsException("Requested index " + idx + " while page size is " + _reading.size() + " (" + index + '/' + _size + ')');

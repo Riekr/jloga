@@ -16,7 +16,7 @@ public class TempTextSourceTest {
 	@Test
 	public void main() throws ExecutionException, InterruptedException {
 		TempTextSource tts = new TempTextSource();
-		int lines = 100000;
+		int lines = 200000;
 		for (int i = 0; i < lines; i++)
 			tts.addLine(i, i + " XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 		tts.complete();
@@ -24,7 +24,7 @@ public class TempTextSourceTest {
 		Assert.assertNotEquals(0, tts.pages());
 		Random random = new Random();
 		ArrayList<Future<?>> futures = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int count = random.nextInt(20) + 10;
 			int from = random.nextInt(lines - count);
 			futures.add(tts.requestText(from, count, (reader) -> {
