@@ -120,20 +120,21 @@ public class PagedList<T extends Serializable> implements Closeable {
 
 	private void save() {
 		if (_writing == null)
-			throw new IllegalStateException("PagedIntBag is sealed");
+			throw new IllegalStateException("PagedList is sealed");
 		_writing.data.trimToSize();
 		if (_writing.page != null || _pages.put(_writing.start, _writing.page = new Page<>(createTempFile(), _writing.data, _pages.size() + 1)) != null)
 			throw new IllegalStateException("Page " + _writing.start + " already saved");
-		_writing = new Live<>(new ArrayList<>(_limit), _writing.start + _writing.data.size());
 	}
 
 	public final void add(T value) {
 		if (_writing == null)
-			throw new IllegalStateException("PagedIntBag is sealed");
+			throw new IllegalStateException("PagedList is sealed");
 		_writing.data.add(value);
 		_size++;
-		if (_writing.data.size() == _limit)
+		if (_writing.data.size() == _limit) {
 			save();
+			_writing = new Live<>(new ArrayList<>(_limit), _writing.start + _writing.data.size());
+		}
 	}
 
 	public T get(int index) {
@@ -150,7 +151,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 				_reading = new Live<>(e.getValue(), newStart);
 			} else {
 				if (_writing == null)
-					throw new IndexOutOfBoundsException("Requested index " + index + " while size is " + _size);
+					throw new IndexOutOfBoundsException("Requested index " + index + " while page size is " + _reading.data.size() + " (total=" + _size + ')');
 				_reading = _writing;
 				idx = index - _reading.start;
 			}
