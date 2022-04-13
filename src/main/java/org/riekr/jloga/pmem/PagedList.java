@@ -112,7 +112,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 		if (writing != null) {
 			_writing = null;
 			if (!writing.data.isEmpty())
-				save();
+				save(writing);
 		}
 	}
 
@@ -120,8 +120,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 		return _writing == null;
 	}
 
-	private void save() {
-		Live<T> writing = _writing;
+	private void save(Live<T> writing) {
 		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
 		writing.data.trimToSize();
@@ -136,7 +135,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 		writing.data.add(value);
 		_size++;
 		if (writing.data.size() == _limit) {
-			save();
+			save(writing);
 			_writing = new Live<>(new ArrayList<>(_limit), writing.start + writing.data.size());
 		}
 	}
