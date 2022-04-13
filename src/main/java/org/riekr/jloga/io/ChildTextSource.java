@@ -1,5 +1,7 @@
 package org.riekr.jloga.io;
 
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
+
 import java.awt.*;
 import java.io.Reader;
 import java.util.Map;
@@ -11,7 +13,6 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import org.riekr.jloga.react.IntBehaviourSubject;
-import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 
 public class ChildTextSource implements FilteredTextSource {
@@ -35,8 +36,8 @@ public class ChildTextSource implements FilteredTextSource {
 	private final TextSource              _tie;
 	private final TreeMap<Integer, Range> _lines = new TreeMap<>();
 
-	private       int                 _lineCount        = 0;
-	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
+	private volatile int                 _lineCount        = 0;
+	private final    IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
 
 	private int _lastLine = -1;
 
@@ -44,7 +45,7 @@ public class ChildTextSource implements FilteredTextSource {
 		_tie = tie;
 	}
 
-	public void addLine(int line) {
+	public synchronized void addLine(int line) {
 		if (line > _lastLine)
 			_lastLine = line;
 		Map.Entry<Integer, Range> entry = _lines.floorEntry(line);
@@ -75,12 +76,12 @@ public class ChildTextSource implements FilteredTextSource {
 
 	@Override
 	public Future<Integer> requestIntermediateLineCount(IntConsumer consumer) {
-		return _lineCountSubject.once(Observer.async(consumer::accept));
+		return _lineCountSubject.once(consumer::accept);
 	}
 
 	@Override
 	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
+		return _lineCountSubject.subscribe(consumer::accept);
 	}
 
 	@Override
@@ -111,6 +112,12 @@ public class ChildTextSource implements FilteredTextSource {
 		for (int i = 0; i < lines.length; i++)
 			lines[i] = getText(i + fromLine);
 		return lines;
+	}
+
+	@Override
+	public Future<?> defaultAsyncIO(Runnable task) {
+		// real i/o is done by the tie!
+		return asyncTask(task);
 	}
 
 	@Override

@@ -2,7 +2,9 @@
 
 - External scripts:
   - Line matched via named regex like: `^(?<file>[^:]*):(?<line>\d*):(?<text>.*)`
-
+- Bug fixes:
+  - Text not loading while searching
+ 
 ## v0.1.1
 - General:
   - Improved caching

@@ -76,7 +76,7 @@ public class TempTextSource implements FilteredTextSource {
 
 	@Override
 	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
+		return _lineCountSubject.subscribe(consumer::accept);
 	}
 
 	@Override

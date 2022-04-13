@@ -446,7 +446,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
-		return _lineCountSubject.subscribe(Observer.async(consumer::accept));
+		return _lineCountSubject.subscribe(consumer::accept);
 	}
 
 	@Override
