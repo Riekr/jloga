@@ -3,28 +3,24 @@ package org.riekr.jloga.pmem;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PagedList<T extends Serializable> implements Closeable {
+public class PagedList<T> implements Closeable {
 
-	@SuppressWarnings("unchecked")
-	static class Page<T> implements Supplier<ArrayList<T>>, Consumer<ArrayList<T>> {
+	class Page {
 		private final     File                        _file;
 		private @Nullable WeakReference<ArrayList<T>> _cache;
 		final             int                         id;
@@ -32,69 +28,71 @@ public class PagedList<T extends Serializable> implements Closeable {
 		Page(File file, ArrayList<T> data, int id) {
 			_file = file;
 			this.id = id;
-			accept(data);
+			// save
+			try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(_file)))) {
+				dos.writeInt(data.size());
+				for (T obj : data)
+					_encoder.accept(obj, dos);
+				_cache = new WeakReference<>(data);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
 		}
 
-		@Override
-		public ArrayList<T> get() {
+		public ArrayList<T> load() {
 			ArrayList<T> res;
 			String from = "memory";
 			if (_cache == null || (res = _cache.get()) == null) {
 				from = "disk";
-				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(_file)))) {
-					res = (ArrayList<T>)ois.readObject();
+				try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(_file)))) {
+					int size = dis.readInt();
+					res = new ArrayList<>(size);
+					for (int i = 0; i < size; i++)
+						res.add(_decoder.apply(dis));
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException(e);
 				}
 				_cache = new WeakReference<>(res);
 			}
 			System.out.println("Loaded page " + id + " from " + from);
 			return res;
 		}
-
-		@Override
-		public void accept(ArrayList<T> data) {
-			data.trimToSize();
-			try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(_file)))) {
-				oos.writeObject(data);
-				_cache = new WeakReference<>(data);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		}
 	}
 
-	static class Live<T> {
+	class Live {
 		final ArrayList<T> data;
 		final int          start;
-		Page<T> page;
+		Page page;
 
 		Live(ArrayList<T> data, int start) {
 			this.data = data;
 			this.start = start;
 		}
 
-		Live(@NotNull Page<T> page, int start) {
+		Live(@NotNull Page page, int start) {
 			this.page = page;
-			this.data = page.get();
+			this.data = page.load();
 			this.start = start;
 		}
 	}
 
 	private final int _limit;
 
-	private final @NotNull     TreeMap<Integer, Page<T>> _pages = new TreeMap<>();
-	private volatile @Nullable Live<T>                   _writing;
-	private volatile @NotNull  Live<T>                   _reading;
-	private                    long                      _size  = 0;
+	private final @NotNull TreeMap<Integer, Page> _pages = new TreeMap<>();
+	private final @NotNull DataEncoder<T>         _encoder;
+	private final @NotNull DataDecoder<T>         _decoder;
 
-	public PagedList(int pageSizeLimit) {
+	private volatile @Nullable Live _writing;
+	private volatile @NotNull  Live _reading;
+	private                    long _size = 0;
+
+	public PagedList(int pageSizeLimit, @NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
+		_encoder = encoder;
+		_decoder = decoder;
 		if (pageSizeLimit <= 0)
 			throw new IllegalArgumentException("Invalid page limit size: " + pageSizeLimit);
 		_limit = pageSizeLimit;
-		Live<T> initial = new Live<>(new ArrayList<>(_limit), 0);
+		Live initial = new Live(new ArrayList<>(_limit), 0);
 		_writing = initial;
 		_reading = initial;
 	}
@@ -108,7 +106,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 	}
 
 	public synchronized void seal() {
-		Live<T> writing = _writing;
+		Live writing = _writing;
 		if (writing != null) {
 			_writing = null;
 			if (!writing.data.isEmpty())
@@ -120,30 +118,30 @@ public class PagedList<T extends Serializable> implements Closeable {
 		return _writing == null;
 	}
 
-	private void save(Live<T> writing) {
+	private void save(Live writing) {
 		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
 		writing.data.trimToSize();
-		if (writing.page != null || _pages.put(writing.start, writing.page = new Page<>(createTempFile(), writing.data, _pages.size() + 1)) != null)
+		if (writing.page != null || _pages.put(writing.start, writing.page = new Page(createTempFile(), writing.data, _pages.size() + 1)) != null)
 			throw new IllegalStateException("Page " + writing.start + " already saved");
 	}
 
 	public synchronized final void add(T value) {
-		Live<T> writing = _writing;
+		Live writing = _writing;
 		if (writing == null)
 			throw new IllegalStateException("PagedList is sealed");
 		writing.data.add(value);
 		_size++;
 		if (writing.data.size() == _limit) {
 			save(writing);
-			_writing = new Live<>(new ArrayList<>(_limit), writing.start + writing.data.size());
+			_writing = new Live(new ArrayList<>(_limit), writing.start + writing.data.size());
 		}
 	}
 
 	public synchronized T get(int index) {
 		int idx = index - _reading.start;
 		if (idx < 0 || idx >= _reading.data.size()) {
-			Map.Entry<Integer, Page<T>> e = _pages.floorEntry(index);
+			Map.Entry<Integer, Page> e = _pages.floorEntry(index);
 			if (e == null) {
 				// no pages
 				return null;
@@ -151,9 +149,9 @@ public class PagedList<T extends Serializable> implements Closeable {
 			int newStart = e.getKey();
 			idx = index - newStart;
 			if (idx < _reading.data.size()) {
-				_reading = new Live<>(e.getValue(), newStart);
+				_reading = new Live(e.getValue(), newStart);
 			} else {
-				Live<T> writing = _writing;
+				Live writing = _writing;
 				if (writing == null)
 					throw new IndexOutOfBoundsException("Requested index " + idx + " while page size is " + _reading.data.size() + " (" + index + '/' + _size + ')');
 				_reading = writing;

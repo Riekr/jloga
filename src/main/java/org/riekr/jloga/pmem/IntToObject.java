@@ -3,7 +3,7 @@ package org.riekr.jloga.pmem;
 import java.io.Serializable;
 import java.util.Objects;
 
-public final class IntToObject<T extends Serializable> implements Serializable {
+public final class IntToObject<T> implements Serializable {
 	private static final long serialVersionUID = 8021199321369057110L;
 
 	public final int tag;

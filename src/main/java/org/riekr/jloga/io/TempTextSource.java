@@ -1,5 +1,7 @@
 package org.riekr.jloga.io;
 
+import static org.riekr.jloga.pmem.PagedIntToObjList.newPagedIntToStringList;
+
 import java.awt.*;
 import java.io.Reader;
 import java.util.concurrent.ExecutionException;
@@ -16,7 +18,7 @@ import org.riekr.jloga.utils.CancellableFuture;
 
 public class TempTextSource implements FilteredTextSource {
 
-	private final PagedIntToObjList<String> _data             = new PagedIntToObjList<>(10000);
+	private final PagedIntToObjList<String> _data             = newPagedIntToStringList(10000);
 	private final IntBehaviourSubject       _lineCountSubject = new IntBehaviourSubject();
 
 	@Override
@@ -105,5 +107,9 @@ public class TempTextSource implements FilteredTextSource {
 
 	public void addLine(int origSrcLine, String text) {
 		_data.add(origSrcLine, text);
+	}
+
+	public int pages() {
+		return _data.pages();
 	}
 }

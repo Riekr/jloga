@@ -1,10 +1,21 @@
 package org.riekr.jloga.pmem;
 
-import java.io.Serializable;
+import org.jetbrains.annotations.NotNull;
 
-public class PagedIntToObjList<T extends Serializable> extends PagedList<IntToObject<T>> {
-	public PagedIntToObjList(int pageSizeLimit) {
-		super(pageSizeLimit);
+public class PagedIntToObjList<T> extends PagedList<IntToObject<T>> {
+
+	public static PagedIntToObjList<String> newPagedIntToStringList(int pageSizeLimit) {
+		return new PagedIntToObjList<>(pageSizeLimit, DataEncoder.STRING, DataDecoder.STRING);
+	}
+
+	public PagedIntToObjList(int pageSizeLimit, @NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
+		super(pageSizeLimit,
+				(ito, dos) -> {
+					dos.writeInt(ito.tag);
+					encoder.accept(ito.value, dos);
+				},
+				(dis) -> new IntToObject<>(dis.readInt(), decoder.apply(dis))
+		);
 	}
 
 	public final void add(int tag, T value) {
