@@ -155,7 +155,7 @@ public class PagedList<T extends Serializable> implements Closeable {
 			} else {
 				Live<T> writing = _writing;
 				if (writing == null)
-					throw new IndexOutOfBoundsException("Requested index " + index + " while page size is " + _reading.data.size() + " (total=" + _size + ')');
+					throw new IndexOutOfBoundsException("Requested index " + idx + " while page size is " + _reading.data.size() + " (" + index + '/' + _size + ')');
 				_reading = writing;
 				idx = index - _reading.start;
 			}
