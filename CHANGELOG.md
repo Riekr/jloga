@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.1.2
 - External scripts:
   - Line matched via named regex like: `^(?<file>[^:]*):(?<line>\d*):(?<text>.*)`
 - Bug fixes:
