@@ -65,7 +65,9 @@ public class MainPanel extends JFrame implements FileDropListener {
 		toolBar.addSeparator();
 		toolBar.add(_refreshBtn = newBorderlessButton("\uD83D\uDDD8 Refresh", this::refreshCurrentTab, "Refresh current tab"));
 		_refreshBtn.setEnabled(false);
-		toolBar.add(Box.createHorizontalGlue());
+		Component glue = Box.createGlue();
+		FrameDragListener.associate(this, glue);
+		toolBar.add(glue);
 		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		addKeyStrokeAction(this, KeyBindings.KB_SETTINGS, this::openPreferences);
 		toolBar.add(charsetCombo);
