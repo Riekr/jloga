@@ -17,7 +17,7 @@ import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.search.SearchRegistry;
 import org.riekr.jloga.utils.UIUtils;
 
-public class SearchSelector extends JPanel {
+public class SearchSelector extends JComponent {
 	private static final long serialVersionUID = 1562652212113703845L;
 
 	private static final String _TITLE = "Choose search type";
@@ -32,7 +32,7 @@ public class SearchSelector extends JPanel {
 	private final @Nullable Supplier<TextSource> _textSource;
 
 	public SearchSelector(int level, Consumer<SearchPredicate> onSearchConsumer, @Nullable Supplier<TextSource> textSource, Map<String, String> vars) {
-		super(new BorderLayout());
+		setLayout(new BorderLayout());
 
 		_level = level;
 		_onSearchConsumer = onSearchConsumer;

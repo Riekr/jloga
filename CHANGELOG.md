@@ -2,6 +2,7 @@
 
 - General:
   - Hierarchical line highlighting (enable it in settings)
+  - Search panel tabs does not grow anymore
 - Bug fixes:
   - Temp files cleanup\
    **IMPORTANT:** altough operating systems should automatically delete temp files this was not the intended behaviour and now temp files\

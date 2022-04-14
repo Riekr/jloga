@@ -14,7 +14,7 @@ import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
-public class SearchPanelBottomArea extends JPanel {
+public class SearchPanelBottomArea extends JComponent {
 	private static final long serialVersionUID = 8509725982053259245L;
 
 	private final String _title;
@@ -29,7 +29,7 @@ public class SearchPanelBottomArea extends JPanel {
 	private       Future<?>      _searching;
 
 	public SearchPanelBottomArea(String title, SearchPanel parent, JobProgressBar progressBar, int level) {
-		super(new BorderLayout());
+		setLayout(new BorderLayout());
 		_title = title;
 		_parent = parent;
 		_level = level;

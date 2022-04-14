@@ -61,12 +61,13 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_textArea = new VirtualTextArea(tabNavigation, title, parent == null ? null : parent.getTextArea());
 		_textArea.setMinimumSize(new Dimension(0, 0));
 		_splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		_splitPane.setOneTouchExpandable(true);
 		_splitPane.setResizeWeight(1);
 
 		// layout
 		add(_splitPane, BorderLayout.CENTER);
 		_splitPane.add(_textArea);
-		_bottomTabs = new JTabbedPane();
+		_bottomTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
 		// add first empty tab
 		String tabTitle = newTabTempTitle();
