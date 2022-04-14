@@ -1,5 +1,7 @@
 ## In progress:
 
+- General:
+  - Hierarchical line highlighting (enable it in settings)
 - Bug fixes:
   - Temp files cleanup\
    **IMPORTANT:** altough operating systems should automatically delete temp files this was not the intended behaviour and now temp files\

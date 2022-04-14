@@ -318,7 +318,7 @@ public class TextFileSource implements TextSource {
 						System.out.println("Changed charset from " + orig + " to " + _charset);
 						Preferences.CHARSET.set(_charset);
 						popupWarning("Charset has been automatically changed to " + _charset + ",\n"
-										+ "if text is corrupted please select another charset and reopen the file.\n"
+										+ "if text is corrupted please select correct charset and reopen the file.\n"
 										+ "You can disable charset auto detection in preferences.",
 								"Charset changed");
 						return lines;

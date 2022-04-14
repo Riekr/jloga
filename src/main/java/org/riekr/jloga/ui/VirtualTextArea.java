@@ -34,6 +34,7 @@ import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.ProgressListener;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.HighlightType;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
@@ -424,6 +425,13 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 							new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
 					);
 					_text.setCaretPosition(start);
+					if (_parent != null && Preferences.HLTYPE.get() == HighlightType.ALL_HIERARCHY) {
+						Integer parentLine = _textSource.getSrcLine(highlightedLine);
+						if (parentLine != null) {
+							_parent.centerOn(parentLine);
+							_parent.setHighlightedLine(parentLine);
+						}
+					}
 				}
 			} catch (BadLocationException e) {
 				e.printStackTrace(System.err);

@@ -21,12 +21,13 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 
 public interface Preferences extends KeyBindings {
 
-	String GENERAL = "General";
-	String GRID    = "Grid";
-	String BROWSER = "Browser";
-	String FORMATS = "Formats";
-	String IO      = "I/O";
-	String SCRIPTS = "Scripting";
+	String GENERAL    = "General";
+	String BEHAVIOURS = "Behaviours";
+	String GRID       = "Grid";
+	String BROWSER    = "Browser";
+	String FORMATS    = "Formats";
+	String IO         = "I/O";
+	String SCRIPTS    = "Scripting";
 
 	//region GUI editable preferences
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
@@ -44,15 +45,24 @@ public interface Preferences extends KeyBindings {
 			.add("\u00BC of page", 4)
 			.add("\u2155 of page", 5);
 
-	GUIPreference<Boolean> FIND_NEWTAB = of("KSFindNewType", () -> false)
-			.describe(Type.Toggle, "New tab on search")
-			.group(GENERAL)
-			.addDescription("If set, searches initiated with a key stroke will create a new tab instead of reusing the last one.");
-
 	GUIPreference<Boolean> LINES_FROM1 = of("LineNumbersFrom1", () -> true)
 			.describe(Type.Toggle, "Line numbers from 1")
 			.group(GENERAL)
 			.addDescription("When selected line numbers will start from one (conventional) instead of zero (index)");
+
+	GUIPreference<Boolean> FIND_NEWTAB = of("KSFindNewType", () -> false)
+			.describe(Type.Toggle, "New tab on search")
+			.group(BEHAVIOURS)
+			.addDescription("If set, searches initiated with a key stroke will create a new tab instead of reusing the last one.");
+
+	GUIPreference<HighlightType> HLTYPE = of("Highlight.Type", () -> HighlightType.PARENT_ONLY)
+			.describe(Type.Combo, "Highlighting type")
+			.group(BEHAVIOURS)
+			.addDescription("When selecting a search result the corresponding line in the parent view can be highlighted.")
+			.addDescription("Select how deep to highlight lines or disable completely.")
+			.add("No highlight", HighlightType.DISABLED)
+			.add("Highlight line in parent only", HighlightType.PARENT_ONLY)
+			.add("Highlight line in whole hierarchy", HighlightType.ALL_HIERARCHY);
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
 			.group(GRID)

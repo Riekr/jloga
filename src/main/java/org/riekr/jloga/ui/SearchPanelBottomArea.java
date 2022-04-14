@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.prefs.HighlightType;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
@@ -99,10 +100,12 @@ public class SearchPanelBottomArea extends JPanel {
 			_resultTextArea.setFont(getFont());
 			_resultTextArea.setMinimumSize(new Dimension(0, 0));
 			_resultTextArea.getTextArea().setLineClickListener((line) -> {
-				Integer srcLine = _resultTextArea.getTextSource().getSrcLine(line);
-				if (srcLine != null) {
-					_parent.getTextArea().centerOn(srcLine);
-					_resultTextArea.getTextArea().setHighlightedLine(line);
+				if (Preferences.HLTYPE.get() != HighlightType.DISABLED) {
+					Integer srcLine = _resultTextArea.getTextSource().getSrcLine(line);
+					if (srcLine != null) {
+						_parent.getTextArea().centerOn(srcLine);
+						_resultTextArea.getTextArea().setHighlightedLine(line);
+					}
 				}
 			});
 			add(_resultTextArea, BorderLayout.CENTER);

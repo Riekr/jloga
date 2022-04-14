@@ -126,7 +126,7 @@ public interface TextSource extends Iterable<String> {
 	}
 
 	default Integer getSrcLine(int line) {
-		return line;
+		return null;
 	}
 
 	default void requestSave(File file, ProgressListener progressListener) {
