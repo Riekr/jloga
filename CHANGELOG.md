@@ -1,5 +1,11 @@
 ## In progress:
 
+- Bug fixes:
+  - Temp files cleanup\
+   **IMPORTANT:** altough operating systems should automatically delete temp files this was not the intended behaviour and now temp files\
+   are deleted on jloga shutdown and startup (in case o crash).\
+   If you suspect low disk space after using jloga check your temp directory for files starting with "jloga" and delete them.
+
 ## v0.1.2
 - External scripts:
   - Line matched via named regex like: `^(?<file>[^:]*):(?<line>\d*):(?<text>.*)`
