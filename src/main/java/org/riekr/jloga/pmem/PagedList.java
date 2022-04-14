@@ -18,6 +18,7 @@ import java.util.TreeMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.utils.TempFiles;
 
 public class PagedList<T> implements Closeable {
 
@@ -123,6 +124,7 @@ public class PagedList<T> implements Closeable {
 	private volatile @Nullable Live _writing;
 	private volatile @NotNull  Live _reading;
 	private                    long _size = 0;
+	private                    File _tempDir;
 
 	public PagedList(@NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
 		_encoder = encoder;
@@ -133,11 +135,9 @@ public class PagedList<T> implements Closeable {
 	}
 
 	private File createTempFile() {
-		try {
-			return File.createTempFile("jloga", Integer.toHexString(PagedList.this.hashCode()));
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		if (_tempDir == null)
+			_tempDir = TempFiles.createTempDirectory("PagedList");
+		return TempFiles.createTempFile("Page", _tempDir);
 	}
 
 	public synchronized void seal() {

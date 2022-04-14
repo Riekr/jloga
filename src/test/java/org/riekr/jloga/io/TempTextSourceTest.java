@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.riekr.jloga.utils.TempFiles;
 
 public class TempTextSourceTest {
 
@@ -43,6 +44,10 @@ public class TempTextSourceTest {
 		}
 		for (Future<?> future : futures)
 			future.get();
+	}
 
+	@Test
+	public void cleanup() {
+		TempFiles.cleanup();
 	}
 }

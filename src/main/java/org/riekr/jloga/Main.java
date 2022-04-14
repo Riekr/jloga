@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.ui.MainPanel;
+import org.riekr.jloga.utils.TempFiles;
 import org.riekr.jloga.utils.UIUtils;
 
 public class Main {
@@ -29,13 +30,11 @@ public class Main {
 			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
 			UIManager.put("ScrollBar.minimumThumbSize", new Dimension(8, 20));
 			return true;
-		} catch (Throwable ignored) {
-		}
+		} catch (Throwable ignored) {}
 		try {
 			UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
 			return true;
-		} catch (Throwable ignored) {
-		}
+		} catch (Throwable ignored) {}
 		// https://stackoverflow.com/a/65805346/1326326
 		return false;
 	}
@@ -64,6 +63,16 @@ public class Main {
 						else
 							System.err.println("No other instance found");
 						return;
+
+					case "-cleanup":
+						if (InterComm.isAlive()) {
+							System.err.println("Another instance is running, close it first.");
+							return;
+						}
+						//noinspection fallthrough
+					case "-force-cleanup":
+						TempFiles.cleanup();
+						return;
 				}
 			}
 
@@ -72,6 +81,7 @@ public class Main {
 			if (InterComm.isAlive())
 				openFile = InterComm::sendFileOpenCommand;
 			else {
+				TempFiles.cleanup();
 				newInstance();
 				InterComm.start(
 						openFile = _INSTANCE::openFiles
