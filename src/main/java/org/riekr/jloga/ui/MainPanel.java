@@ -228,4 +228,17 @@ public class MainPanel extends JFrame implements FileDropListener {
 		UIUtils.setFileDropListener(this, this::openFiles);
 		UIUtils.setFileDropListener(_help, this::openFiles);
 	}
+
+	public void bringToFront() {
+		int state = getExtendedState();
+		if ((state & Frame.ICONIFIED) == Frame.ICONIFIED)
+			setExtendedState(state ^ Frame.ICONIFIED);
+		toFront();
+		requestFocus();
+		// https://stackoverflow.com/a/643000/1326326
+		EventQueue.invokeLater(() -> {
+			setAlwaysOnTop(true);
+			EventQueue.invokeLater(() -> setAlwaysOnTop(false));
+		});
+	}
 }

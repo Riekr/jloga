@@ -17,9 +17,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.function.Consumer;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import org.riekr.jloga.ui.MainPanel;
 
 public class InterComm extends ServerSocket implements Runnable {
 
@@ -79,11 +80,11 @@ public class InterComm extends ServerSocket implements Runnable {
 		}
 	}
 
-	static void start(Consumer<List<File>> openFile) {
+	static void start() {
 		Thread th = new Thread(() -> {
 			InterComm interComm;
 			try {
-				interComm = new InterComm(openFile);
+				interComm = new InterComm();
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 				return;
@@ -104,11 +105,8 @@ public class InterComm extends ServerSocket implements Runnable {
 		th.start();
 	}
 
-	private final Consumer<List<File>> _openFile;
-
-	private InterComm(Consumer<List<File>> openFile) throws IOException {
+	private InterComm() throws IOException {
 		super(0, 0, InetAddress.getLocalHost());
-		_openFile = openFile;
 	}
 
 	public void run() {
@@ -125,12 +123,16 @@ public class InterComm extends ServerSocket implements Runnable {
 
 							case CMD_OPEN: {
 								String files = in.readUTF();
-								_openFile.accept(
-										list(new StringTokenizer(files, pathSeparator)).stream()
-												.map((fileName) -> new File((String)fileName))
-												.filter(File::canRead)
-												.collect(toList())
-								);
+								MainPanel mainPanel = Main.getMain();
+								if (mainPanel != null) {
+									mainPanel.openFiles(
+											list(new StringTokenizer(files, pathSeparator)).stream()
+													.map((fileName) -> new File((String)fileName))
+													.filter(File::canRead)
+													.collect(toList())
+									);
+									mainPanel.bringToFront();
+								}
 								break;
 							}
 

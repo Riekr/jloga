@@ -83,9 +83,8 @@ public class Main {
 			else {
 				TempFiles.cleanup();
 				newInstance();
-				InterComm.start(
-						openFile = _INSTANCE::openFiles
-				);
+				openFile = _INSTANCE::openFiles;
+				InterComm.start();
 			}
 
 			// load files
