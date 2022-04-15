@@ -60,7 +60,7 @@ public class PrefPanel extends JDialog {
 		JPanel cp = new JPanel(new BorderLayout());
 		getContentPane().add(cp);
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
-		_tabs = new JTabbedPane();
+		_tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		cp.add(_tabs, BorderLayout.NORTH);
 		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
 				.filter((p) -> {

@@ -78,7 +78,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		// add new tab code: I can't use a change listener to avoid loops
 		// the "+" tab should never be selected and must stick as last tab
 		_bottomTabs.addTab(TAB_ADD, null);
-		_bottomTabsNavigation = TabNavigation.createFor(_bottomTabs);
+		_bottomTabsNavigation = new TabNavigation(_bottomTabs);
 		_splitPane.add(_bottomTabs);
 		// ugly but working (otherwise you have to hit "+" text)
 		_bottomTabs.addMouseListener(onClickListener(this::addNewTab));

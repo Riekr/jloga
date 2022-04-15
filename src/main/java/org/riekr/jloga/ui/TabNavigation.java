@@ -1,29 +1,33 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
+
 import javax.swing.*;
 
-public interface TabNavigation {
+public final class TabNavigation {
 
-	static TabNavigation createFor(JTabbedPane tabbedPane) {
-		return new TabNavigation() {
-			private void set(int newIndex) {
-				if (newIndex >= 0 && newIndex < tabbedPane.getTabCount())
-					tabbedPane.setSelectedIndex(newIndex);
-			}
+	private final JTabbedPane _tabbedPane;
 
-			@Override
-			public void goToPreviousTab() {
-				set(tabbedPane.getSelectedIndex() - 1);
-			}
-
-			@Override
-			public void goToNextTab() {
-				set(tabbedPane.getSelectedIndex() + 1);
-			}
-		};
+	public TabNavigation(JTabbedPane tabbedPane) {
+		_tabbedPane = tabbedPane;
+		_tabbedPane.addMouseWheelListener(e -> {
+			int units = e.getWheelRotation();
+			int oldIndex = _tabbedPane.getSelectedIndex();
+			set(oldIndex + units);
+		});
 	}
 
-	void goToPreviousTab();
+	private void set(int newIndex) {
+		if (newIndex >= 0 && newIndex < _tabbedPane.getTabCount() && !TAB_ADD.equals(_tabbedPane.getTitleAt(newIndex)))
+			_tabbedPane.setSelectedIndex(newIndex);
+	}
 
-	void goToNextTab();
+	public void goToPreviousTab() {
+		set(_tabbedPane.getSelectedIndex() - 1);
+	}
+
+	public void goToNextTab() {
+		set(_tabbedPane.getSelectedIndex() + 1);
+	}
+
 }

@@ -49,7 +49,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 	public MainPanel(Main main) {
 		Objects.requireNonNull(main);
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
-		_tabs = new JTabbedPane();
+		_tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		_progressBar = new JobProgressBar();
 		JToolBar toolBar = new JToolBar();
 
@@ -200,7 +200,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 				add(_tabs, BorderLayout.CENTER);
 			}
 
-			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, TabNavigation.createFor(_tabs));
+			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, new TabNavigation(_tabs));
 			searchPanel.setFileDropListener(this::openFiles);
 			searchPanel.setFont(_font);
 
