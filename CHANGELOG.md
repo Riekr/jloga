@@ -1,8 +1,11 @@
 ## In progress:
 
+## v0.1.3
 - General:
   - Hierarchical line highlighting (enable it in settings)
   - Search panel tabs does not grow anymore
+  - ~30% more speed in page loading
+  - Updated to perspective 1.3.8
 - Bug fixes:
   - Temp files cleanup\
    **IMPORTANT:** altough operating systems should automatically delete temp files this was not the intended behaviour and now temp files\
