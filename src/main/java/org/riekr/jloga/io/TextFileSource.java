@@ -68,9 +68,10 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	private final int     _pageSize = Preferences.PAGE_SIZE.get();
-	private final Path    _file;
-	private       Charset _charset;
+	private final int            _pageSize = Preferences.PAGE_SIZE.get();
+	private final Path           _file;
+	private       Charset        _charset;
+	private       CharsetDecoder _charsetDecoder;
 
 	private Future<?>                   _indexing;
 	private TreeMap<Integer, IndexData> _index;
@@ -86,7 +87,7 @@ public class TextFileSource implements TextSource {
 
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
-		_charset = charset;
+		setCharset(charset);
 		_indexing = asyncIO(file, () -> {
 			try {
 				reindex(indexingListener);
@@ -95,6 +96,11 @@ public class TextFileSource implements TextSource {
 				throw e;
 			}
 		});
+	}
+
+	public void setCharset(@NotNull Charset charset) {
+		_charset = charset;
+		_charsetDecoder = charset.newDecoder();
 	}
 
 	private void reindex(@NotNull ProgressListener indexingListener) {
@@ -295,10 +301,9 @@ public class TextFileSource implements TextSource {
 	private void loadPage(long pos, String[] lines) throws IOException {
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			fileChannel.position(pos);
-			try (BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charset), _pageSize)) {
-				for (int i = 0; i < lines.length; i++)
-					lines[i] = br.readLine();
-			}
+			BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charsetDecoder, _pageSize), 2048);
+			for (int i = 0; i < lines.length; i++)
+				lines[i] = br.readLine();
 		}
 	}
 
@@ -313,7 +318,7 @@ public class TextFileSource implements TextSource {
 				Charset orig = _charset;
 				for (Charset charset : Charsets.nextOf(orig)) {
 					try {
-						_charset = charset;
+						setCharset(charset);
 						loadPage(pos, lines);
 						System.out.println("Changed charset from " + orig + " to " + _charset);
 						Preferences.CHARSET.set(_charset);
@@ -324,7 +329,7 @@ public class TextFileSource implements TextSource {
 						return lines;
 					} catch (MalformedInputException ignored) {}
 				}
-				_charset = orig;
+				setCharset(orig);
 			}
 			throw e;
 		}
