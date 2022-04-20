@@ -299,6 +299,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	private void loadPage(long pos, String[] lines) throws IOException {
+		_charsetDecoder.reset();
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			fileChannel.position(pos);
 			BufferedReader br = new BufferedReader(Channels.newReader(fileChannel, _charsetDecoder, _pageSize), 2048);
