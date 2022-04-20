@@ -100,7 +100,9 @@ public class TextFileSource implements TextSource {
 
 	public void setCharset(@NotNull Charset charset) {
 		_charset = charset;
-		_charsetDecoder = charset.newDecoder();
+		_charsetDecoder = charset.newDecoder()
+				.onMalformedInput(CodingErrorAction.REPLACE)
+				.onUnmappableCharacter(CodingErrorAction.REPLACE);
 	}
 
 	private void reindex(@NotNull ProgressListener indexingListener) {
@@ -134,9 +136,7 @@ public class TextFileSource implements TextSource {
 		long read = fileChannel.read(byteBuffer);
 		if (read > 0) {
 			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
-			CharsetDecoder decoder = _charset.newDecoder()
-					.onMalformedInput(CodingErrorAction.REPLACE)
-					.onUnmappableCharacter(CodingErrorAction.REPLACE);
+			CharsetDecoder decoder = _charsetDecoder;
 			CharsetEncoder encoder = _charset.newEncoder();
 			char lastChar = 0;
 			long lastPos = read;
