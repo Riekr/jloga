@@ -71,7 +71,7 @@ public class TextFileSource implements TextSource {
 	private final int            _pageSize = Preferences.PAGE_SIZE.get();
 	private final Path           _file;
 	private       Charset        _charset;
-	private       CharsetDecoder _charsetDecoder;
+	private       CharsetDecoder _charsetDecoder; // for loadPage only
 
 	private Future<?>                   _indexing;
 	private TreeMap<Integer, IndexData> _index;
@@ -136,7 +136,9 @@ public class TextFileSource implements TextSource {
 		long read = fileChannel.read(byteBuffer);
 		if (read > 0) {
 			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
-			CharsetDecoder decoder = _charsetDecoder;
+			CharsetDecoder decoder = _charset.newDecoder()
+					.onMalformedInput(CodingErrorAction.REPLACE)
+					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			CharsetEncoder encoder = _charset.newEncoder();
 			char lastChar = 0;
 			long lastPos = read;
