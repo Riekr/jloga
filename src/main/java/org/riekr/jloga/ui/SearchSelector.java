@@ -94,7 +94,7 @@ public class SearchSelector extends JComponent {
 		}
 		_searchUI.requestFocusInWindow();
 		// this seems needed as sometime focus does not work as expected!
-		Main.getMain().invalidate();
+		EventQueue.invokeLater(Main.getMain()::validate);
 	}
 
 	@Override

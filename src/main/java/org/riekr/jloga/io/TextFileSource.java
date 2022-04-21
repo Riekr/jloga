@@ -298,8 +298,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
-
-		if (_index.ceilingKey(fromLine + count) != null) {
+		if (_index != null && _index.ceilingKey(fromLine + count) != null) {
 			Map.Entry<Integer, IndexData> entry = _index.floorEntry(fromLine);
 			if (entry != null) {
 				IndexData indexData = entry.getValue();

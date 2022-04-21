@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +136,22 @@ public class MainPanel extends JFrame implements FileDropListener {
 		).forEach(this::openFile);
 	}
 
-	public void openFiles(@NotNull java.util.List<File> files) {
-		files.forEach(this::openFile);
+	public void openFiles(@NotNull List<File> files) {
+		openFiles(files.iterator());
+	}
+
+	public void openFiles(@NotNull Iterator<File> files) {
+		if (files.hasNext()) {
+			openFile(files.next());
+			int firstOpenedTab = _tabs.getSelectedIndex();
+			// "invokeLater" to avoid ArrayIndexOOB in laf
+			EventQueue.invokeLater(() -> {
+				while (files.hasNext()) {
+					openFile(files.next());
+					_tabs.setSelectedIndex(firstOpenedTab);
+				}
+			});
+		}
 	}
 
 	public void openFile(File file) {
