@@ -158,5 +158,9 @@ public class FileUtils {
 		}
 	}
 
+	public static String sizeToString(File file) {
+		return humanReadableByteCountSI(file.length());
+	}
+
 	private FileUtils() {}
 }

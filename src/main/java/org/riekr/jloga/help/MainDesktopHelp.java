@@ -19,6 +19,7 @@ import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class MainDesktopHelp extends JComponent {
@@ -60,9 +61,14 @@ public class MainDesktopHelp extends JComponent {
 				recentBox.remove(1);
 			for (int i = 0, filesSize = files.size(); i < filesSize; i++) {
 				final File recent = files.get(i);
+				if (!recent.canRead())
+					continue;
 				Box row = Box.createHorizontalBox();
 				row.setAlignmentX(0);
-				JButton openBtn = newBorderlessButton(recent.getAbsolutePath(), () -> opener.accept(recent));
+				JButton openBtn = newBorderlessButton(
+						recent.getAbsolutePath() + " (" + FileUtils.sizeToString(recent) + ')',
+						() -> opener.accept(recent)
+				);
 				row.add(openBtn);
 				row.add(drawOnHover(newBorderlessButton("\u274C", () -> {
 					LimitedList<File> snap = Preferences.RECENT_FILES.get();

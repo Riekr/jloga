@@ -2,7 +2,7 @@
 
 - General:
   - Check file creation time and fingerprint when before reloading
-  - File size tooltip
+  - File size in tooltip and recent files
 - Bug fixes:
   - Fixed opening multiple files
     
