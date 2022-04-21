@@ -5,11 +5,15 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.Main;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.ui.FileChooserWithRecentDirs;
@@ -131,6 +135,18 @@ public class FileUtils {
 			return chooser.getSelectedFile();
 		return null;
 	}
+
+	@Nullable
+	public static FileTime getFileCreationTime(@NotNull Path file) {
+		try {
+			return (FileTime)Files.getAttribute(file, "creationTime");
+		} catch (UnsupportedOperationException ignored) {
+		} catch (Throwable e) {
+			e.printStackTrace(System.err);
+		}
+		return null;
+	}
+
 
 	private FileUtils() {}
 }

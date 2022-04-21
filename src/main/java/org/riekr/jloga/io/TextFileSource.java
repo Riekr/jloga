@@ -8,6 +8,7 @@ import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
+import static org.riekr.jloga.utils.FileUtils.getFileCreationTime;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 
@@ -29,6 +30,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -84,6 +86,9 @@ public class TextFileSource implements TextSource {
 
 	private int      _fromLine = Integer.MAX_VALUE;
 	private String[] _lines;
+
+	private final ByteBuffer _fingerPrint = ByteBuffer.allocate(100);
+	private       FileTime   _fileCreationTime;
 
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
@@ -185,6 +190,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	private void finishIndexing(Future<?> updateTask, ProgressListener progressListener) {
+		fingerprint();
 		updateTask.cancel(false);
 		_lineCountSubject.last(_lineCount);
 		progressListener.onProgressChanged(_lastPos.value, _lastPos.value);
@@ -203,12 +209,53 @@ public class TextFileSource implements TextSource {
 		return _indexing;
 	}
 
+	private void fingerprint() {
+		_fingerPrint.clear();
+		try {
+			_fileCreationTime = getFileCreationTime(_file);
+			try (FileChannel fc = FileChannel.open(_file, READ)) {
+				fc.read(_fingerPrint);
+				_fingerPrint.flip();
+			}
+		} catch (Throwable e) {
+			System.err.println("Unable to fingerprint " + _file);
+			e.printStackTrace(System.err);
+			_fingerPrint.clear();
+			_fingerPrint.limit(0);
+		}
+	}
+
+	private boolean isSameFile() {
+		try {
+			if (_fileCreationTime != null) {
+				FileTime fileCreationTime = getFileCreationTime(_file);
+				// some file system may not update or support creation, or contents simply may have changed,
+				// so I will check fingerprint if creation time did not change
+				if (!_fileCreationTime.equals(fileCreationTime))
+					return false;
+			}
+			ByteBuffer buf = ByteBuffer.allocate(_fingerPrint.capacity());
+			try (FileChannel fc = FileChannel.open(_file, READ)) {
+				fc.read(buf);
+				buf.flip();
+			}
+			return _fingerPrint.equals(buf);
+		} catch (Throwable e) {
+			System.err.println("Unable to check fingerprint of " + _file);
+			e.printStackTrace(System.err);
+			return false;
+		}
+	}
+
 	@Override
 	public void reload(Supplier<ProgressListener> progressListenerSupplier) {
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			final long totalSize = fileChannel.size();
-			if (_lastPos.value < totalSize) {
-				System.out.println("Reloading " + _file);
+			if (_lastPos.value > totalSize || !isSameFile()) {
+				System.out.println("Reindex of " + _file);
+				reindex(progressListenerSupplier.get());
+			} else if (_lastPos.value < totalSize) {
+				System.out.println("Updating " + _file);
 				final long start = currentTimeMillis();
 				final int initialLineCount = _lineCount;
 				final int initialPageCount = _index.size();
@@ -233,11 +280,8 @@ public class TextFileSource implements TextSource {
 					finishIndexing(updateTask, progressListener);
 				}
 				System.out.println("Reloaded " + _file + " +" + (_lineCount - initialLineCount) + " lines in " + (currentTimeMillis() - start) + "ms (+" + (_index.size() + initialPageCount) + " pages)");
-			} else if (_lastPos.value > totalSize) {
-				System.out.println("Skipped reload of " + _file + " (file size decreased!)");
-				reindex(progressListenerSupplier.get());
 			} else {
-				System.out.println("Skipped reloaded of " + _file + " (file size did not change)");
+				System.out.println("Skipped reloaded of " + _file + " (file did not change)");
 			}
 		} catch (ClosedByInterruptException ignored) {
 			System.out.println("Reloading cancelled");

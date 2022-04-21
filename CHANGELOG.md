@@ -1,5 +1,8 @@
 ## In progress:
 
+- General:
+  - Check file creation time and fingerprint when before reloading
+
 ## v0.1.3
 - General:
   - Hierarchical line highlighting (enable it in settings)
