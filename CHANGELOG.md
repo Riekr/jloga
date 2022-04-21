@@ -2,7 +2,9 @@
 
 - General:
   - Check file creation time and fingerprint when before reloading
-
+- Bug fixes:
+  - Fixed hang when opening multiple files
+    
 ## v0.1.3
 - General:
   - Hierarchical line highlighting (enable it in settings)
