@@ -4,6 +4,8 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
 import javax.swing.*;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,6 +66,19 @@ public class TextUtils {
 		if (description != null && !(description = description.trim()).isEmpty())
 			res += "&nbsp;=&nbsp;" + description.replace(" ", "&nbsp;");
 		return res;
+	}
+
+	public static String humanReadableByteCountSI(long bytes) {
+		// yes, it is! -> https://programming.guide/worlds-most-copied-so-snippet.html
+		if (-1000 < bytes && bytes < 1000)
+			return bytes + " bytes";
+		//noinspection SpellCheckingInspection
+		CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+		while (bytes <= -999_950 || bytes >= 999_950) {
+			bytes /= 1000;
+			ci.next();
+		}
+		return String.format("%.1f %cB", bytes / 1000.0, ci.current());
 	}
 
 	private TextUtils() {}

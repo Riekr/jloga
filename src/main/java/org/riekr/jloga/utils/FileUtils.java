@@ -1,10 +1,13 @@
 package org.riekr.jloga.utils;
 
+import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -147,6 +150,13 @@ public class FileUtils {
 		return null;
 	}
 
+	public static String sizeToString(Path file) {
+		try {
+			return humanReadableByteCountSI(Files.size(file));
+		} catch (IOException e) {
+			return e.getLocalizedMessage();
+		}
+	}
 
 	private FileUtils() {}
 }

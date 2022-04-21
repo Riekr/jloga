@@ -520,4 +520,8 @@ public class TextFileSource implements TextSource {
 	public boolean isIndexing() {
 		return !_indexing.isDone();
 	}
+
+	public Path getFile() {
+		return _file;
+	}
 }

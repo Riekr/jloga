@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.utils.FileUtils.sizeToString;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.onClickListener;
@@ -7,7 +8,10 @@ import static org.riekr.jloga.utils.UIUtils.onClickListener;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -15,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.KeyBindings;
@@ -46,6 +51,16 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
 		this(title, progressBar, 0, tabNavigation, null);
 		JLabel descriptionLabel = ContextMenu.addActionCopy(new JLabel(description));
+		if (src instanceof TextFileSource) {
+			Path file = ((TextFileSource)src).getFile();
+			descriptionLabel.setToolTipText(sizeToString(file));
+			descriptionLabel.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					descriptionLabel.setToolTipText(sizeToString(file));
+				}
+			});
+		}
 		add(descriptionLabel, BorderLayout.NORTH);
 		setTextSource(src);
 	}
