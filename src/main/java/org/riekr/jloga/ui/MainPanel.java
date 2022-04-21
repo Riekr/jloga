@@ -130,10 +130,10 @@ public class MainPanel extends JFrame implements FileDropListener {
 	}
 
 	public void openFileDialog() {
-		FileUtils.fileDialog(
+		openFiles(FileUtils.fileDialog(
 				FileUtils.DialogType.OPEN_MULTI,
 				Preferences.RECENT_FILES.get().stream().findFirst().map(File::getParentFile).orElse(null)
-		).forEach(this::openFile);
+		).iterator());
 	}
 
 	public void openFiles(@NotNull List<File> files) {
