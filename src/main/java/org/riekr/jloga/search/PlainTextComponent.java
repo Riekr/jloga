@@ -5,7 +5,6 @@ import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;

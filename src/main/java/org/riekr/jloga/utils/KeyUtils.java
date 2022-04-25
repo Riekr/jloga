@@ -15,16 +15,16 @@ import org.riekr.jloga.prefs.Preference;
 
 public class KeyUtils {
 
-	public static KeyStroke ESC = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+	public static final KeyStroke ESC = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 
-	public static KeyStroke CTRL_O     = KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_COMMA = KeyStroke.getKeyStroke(',', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_F     = KeyStroke.getKeyStroke('F', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_R     = KeyStroke.getKeyStroke('R', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_T     = KeyStroke.getKeyStroke('T', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_W     = KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke CTRL_DOT   = KeyStroke.getKeyStroke('.', InputEvent.CTRL_DOWN_MASK);
-	public static KeyStroke F5         = KeyStroke.getKeyStroke("F5");
+	public static final KeyStroke CTRL_O     = KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_COMMA = KeyStroke.getKeyStroke(',', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_F     = KeyStroke.getKeyStroke('F', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_R     = KeyStroke.getKeyStroke('R', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_T     = KeyStroke.getKeyStroke('T', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_W     = KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke CTRL_DOT   = KeyStroke.getKeyStroke('.', InputEvent.CTRL_DOWN_MASK);
+	public static final KeyStroke F5         = KeyStroke.getKeyStroke("F5");
 
 	public static void addKeyStrokeAction(RootPaneContainer container, KeyStroke key, Runnable action) {
 		addKeyStrokeAction(container.getRootPane(), key, action);

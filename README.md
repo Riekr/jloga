@@ -18,7 +18,7 @@ Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for
 
 ## Features
 - Hierarchical panel structure to ease files and results navigation
-- [No size limit](#file-limits) on open files, each file is indexed and paged from disk. The only limit is the memory of your computer
+- [No size limit](#file-and-memory-limits) on open files, each file is indexed and paged from disk. The only limit is the memory of your computer
 - Fast and multithread simple searches like text and regex, each can be case-sensitive or not, inclusive or exclusive
 - More advanced analysis such as frequency and function duration reports
 - Autodetect most common log lines formats for timestamp extraction

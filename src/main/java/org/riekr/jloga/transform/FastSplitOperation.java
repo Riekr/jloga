@@ -49,7 +49,7 @@ public class FastSplitOperation implements Function<String, String[]> {
 
 	public char getDelim() {
 		if (_detect)
-			throw new IllegalStateException("Delimiter has not been autodetected yet");
+			throw new IllegalStateException("Delimiter has not been auto detected yet");
 		return _delim;
 	}
 

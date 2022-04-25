@@ -19,9 +19,9 @@ import org.riekr.jloga.io.TextSource;
 
 public class RegExSearch implements SearchPredicate {
 
-	protected static char   DELIM    = '|';
-	protected static String DELIMSTR = "|";
-	protected static String DELIMESC = "\\|";
+	protected static final char   DELIM    = '|';
+	protected static final String DELIMSTR = "|";
+	protected static final String DELIMESC = "\\|";
 
 	protected final Pattern           _pattern;
 	protected       int               _groupCount;

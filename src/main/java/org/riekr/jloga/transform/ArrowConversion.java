@@ -75,7 +75,7 @@ public class ArrowConversion {
 
 	/**
 	 * Finos perspective works in UTC only
-	 * https://github.com/finos/perspective/issues/1700
+	 * <a href="https://github.com/finos/perspective/issues/1700">https://github.com/finos/perspective/issues/1700</a>
 	 */
 	protected String fixDate(int col, String dateString) {
 		for (int i = 0, dateTimeFormattersSize = _dateTimeFormatters.size(); i < dateTimeFormattersSize; i++) {
