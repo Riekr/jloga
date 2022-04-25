@@ -3,6 +3,7 @@
 - General:
   - Check file creation time and fingerprint when before reloading
   - File size in tooltip and recent files
+  - Updated finos resources
 - Bug fixes:
   - Fixed opening multiple files
     
