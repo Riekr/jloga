@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.1.4
 - General:
   - Check file creation time and fingerprint when before reloading
   - File size in tooltip and recent files
