@@ -1,5 +1,8 @@
 ## In progress:
 
+- Bug fixes:
+  - Solved startup failure if some recent file is missing
+
 ## v0.1.4
 - General:
   - Check file creation time and fingerprint when before reloading

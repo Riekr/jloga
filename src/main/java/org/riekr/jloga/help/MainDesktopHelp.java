@@ -59,8 +59,8 @@ public class MainDesktopHelp extends JComponent {
 		Preferences.RECENT_FILES.subscribe((files) -> {
 			while (recentBox.getComponentCount() != 2)
 				recentBox.remove(1);
-			for (int i = 0, filesSize = files.size(); i < filesSize; i++) {
-				final File recent = files.get(i);
+			int i = 0;
+			for (File recent : files) {
 				if (!recent.canRead())
 					continue;
 				Box row = Box.createHorizontalBox();
@@ -75,7 +75,7 @@ public class MainDesktopHelp extends JComponent {
 					snap.remove(recent);
 					Preferences.RECENT_FILES.set(snap);
 				}), openBtn));
-				recentBox.add(row, i + 1);
+				recentBox.add(row, ++i);
 			}
 			recentBox.setVisible(!files.isEmpty());
 			recentBox.revalidate();
