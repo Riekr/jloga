@@ -33,7 +33,7 @@ public class MRUComboWithLabels<T> extends JPanel {
 		error.setVisible(false);
 		this.add(error, BorderLayout.SOUTH);
 
-		combo.subject.subscribe(uniq((text) -> {
+		combo.selection.subscribe(uniq((text) -> {
 			T res = mapper.apply(text);
 			if (res == null)
 				combo.setSelectedIndex(-1);

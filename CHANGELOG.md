@@ -2,6 +2,7 @@
 
 - General
   - Updated to perspective 1.3.10
+  - Project combos does not update values
 - Bug fixes:
   - Solved startup failure if some recent file is missing
 

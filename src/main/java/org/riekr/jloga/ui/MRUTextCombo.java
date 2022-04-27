@@ -55,12 +55,11 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 				case "comboBoxChanged":
 					Object elem = getSelectedItem();
 					T newSelection = convert(elem);
-					selection.next(newSelection);
 					if (isEditable()) {
 						_model.removeElement(elem);
 						_model.insertElementAt(newSelection, 0);
 						setSelectedIndex(0);
-						requestFocusInWindow();
+						selection.next(newSelection);
 					} else
 						resend();
 					save();
@@ -94,7 +93,9 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	}
 
 	public void resend() {
-		subject.next(convert(getSelectedItem()));
+		T val = convert(getSelectedItem());
+		selection.next(val);
+		subject.next(val);
 	}
 
 	public void save() {
