@@ -1,5 +1,7 @@
 ## In progress:
 
+- General
+  - Updated to perspective 1.3.10
 - Bug fixes:
   - Solved startup failure if some recent file is missing
 
@@ -7,7 +9,7 @@
 - General:
   - Check file creation time and fingerprint when before reloading
   - File size in tooltip and recent files
-  - Updated finos resources
+  - Updated perspective resources
 - Bug fixes:
   - Fixed opening multiple files
     
