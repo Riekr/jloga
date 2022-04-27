@@ -38,8 +38,10 @@ public class HeaderDetector {
 			if (_parent != null)
 				_parent.waitCompletion();
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
-			for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++)
-				detect(lineNumber, source.getText(lineNumber));
+			for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++) {
+				if (detect(lineNumber, source.getText(lineNumber)))
+					break;
+			}
 			// finished the file
 			complete();
 			if (onComplete != null)
@@ -68,9 +70,9 @@ public class HeaderDetector {
 		notifyAll();
 	}
 
-	private void detect(int lineNumber, String line) {
+	private boolean detect(int lineNumber, String line) {
 		if (line == null || line.isEmpty() || _checkSet == null)
-			return;
+			return false;
 		if (_checkSet.add(lineNumber)) {
 			int count = FastSplitOperation.count(line);
 			if (_colCount == -1) {
@@ -82,13 +84,14 @@ public class HeaderDetector {
 					_own = true;
 					_header = line;
 				}
+				return false;
 			} else if (_colCount != count) {
 				_header = "";
-				complete();
+				return true;
 			}
-			if (_checkSet != null && _checkSet.size() >= _checkTarget)
-				complete();
+			return _checkSet != null && _checkSet.size() >= _checkTarget;
 		}
+		return false;
 	}
 
 	private boolean requireComplete() {

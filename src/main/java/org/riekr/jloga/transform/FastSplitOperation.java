@@ -12,7 +12,7 @@ public class FastSplitOperation implements Function<String, String[]> {
 		if (s != null && !s.isEmpty()) {
 			for (int di = 0, dlen = _DELIMS.length(); di < dlen; di++) {
 				char delim = _DELIMS.charAt(di);
-				int count = 0;
+				int count = 1;
 				for (int si = 0, slen = s.length(); si < slen; si++) {
 					if (s.charAt(si) == delim)
 						count++;
