@@ -70,6 +70,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private TextSource     _textSource;
 	private Unsubscribable _textSourceUnsubscribable;
 	private Future<?>      _prevRequireTextRequest;
+	private Future<?>      _prevReloadRequest;
 
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
@@ -203,17 +204,17 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
 	}
 
-	@Nullable
-	public Future<?> reload(Supplier<ProgressListener> progressListenerSupplier) {
+	public void reload(Supplier<ProgressListener> progressListenerSupplier) {
 		if (_textSource != null && _textSource.supportsReload() && !_textSource.isIndexing()) {
-			return _textSource.requestReload(() -> {
+			if (_prevReloadRequest != null)
+				_prevReloadRequest.cancel(false);
+			_prevReloadRequest = _textSource.requestReload(() -> {
 				if (_textSourceUnsubscribable != null)
 					_textSourceUnsubscribable.unsubscribe();
 				_textSourceUnsubscribable = _textSource.subscribeLineCount(this::setFileLineCount);
 				return progressListenerSupplier.get();
 			});
 		}
-		return null;
 	}
 
 	private void setGridView(boolean active, boolean fromDetection) {
