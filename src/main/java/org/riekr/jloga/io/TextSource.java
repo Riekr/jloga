@@ -28,7 +28,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
 
-public interface TextSource extends Iterable<String> {
+public interface TextSource extends Iterable<String>, AutoCloseable {
 
 	default Future<?> defaultAsyncIO(Runnable task) {
 		return asyncIO(task);

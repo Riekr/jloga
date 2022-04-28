@@ -1,11 +1,13 @@
 package org.riekr.jloga.utils;
 
+import static java.util.Comparator.reverseOrder;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +41,14 @@ public class TempFiles {
 		}
 	}
 
+	public static void deleteTemp(File fileOrDirectory) {
+		Path path = fileOrDirectory.toPath();
+		if (isTemp(path))
+			deleteRecurs(path);
+		else
+			System.err.println("Not a temp file: " + fileOrDirectory.getAbsolutePath());
+	}
+
 	private static boolean isTemp(Path path) {
 		// \AppData\Local\Temp\jloga-PagedList-9049821355325028396\jloga-Page-810638474214795088.tmp
 		// \AppData\Local\Temp\jloga97252669508416147431c7d68ff
@@ -48,9 +58,9 @@ public class TempFiles {
 
 	private static void deleteRecurs(Path path) {
 		System.out.println("Removing " + path);
-		try {
-			Files.walk(path)
-					.sorted(Comparator.reverseOrder())
+		try (Stream<Path> pathStream = Files.walk(path)) {
+			pathStream.
+					sorted(reverseOrder())
 					.map(Path::toFile)
 					.forEach(file -> {
 						if (!file.delete())
@@ -69,8 +79,8 @@ public class TempFiles {
 		//noinspection SpellCheckingInspection
 		String tmp = System.getProperty("java.io.tmpdir");
 		if (tmp != null && tmp.length() > 2) {
-			try {
-				Files.list(Path.of(tmp))
+			try (Stream<Path> pathStream = Files.list(Path.of(tmp))) {
+				pathStream
 						.filter(TempFiles::isTemp)
 						.forEach(TempFiles::deleteRecurs);
 			} catch (IOException e) {

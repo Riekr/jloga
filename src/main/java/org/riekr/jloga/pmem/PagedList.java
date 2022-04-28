@@ -195,10 +195,7 @@ public class PagedList<T> implements Closeable {
 
 	@Override
 	public synchronized void close() {
-		_pages.values().forEach((p) -> {
-			if (!p._file.delete())
-				System.err.println("Unable to delete paging file " + p._file);
-		});
+		TempFiles.deleteTemp(_tempDir);
 		_writing = null;
 		_pages.clear();
 	}
