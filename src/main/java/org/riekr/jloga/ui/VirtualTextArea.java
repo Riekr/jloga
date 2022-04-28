@@ -331,7 +331,10 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	public void setTextSource(TextSource textSource) {
 		if (_textSourceUnsubscribable != null)
 			_textSourceUnsubscribable.unsubscribe();
+		TextSource old = _textSource;
 		_textSource = textSource;
+		if (old != null)
+			old.close();
 		if (textSource != null) {
 			_header = new HeaderDetector(_parent == null ? null : _parent._header);
 			_header.detect(textSource, this::detectHeaderDone);
@@ -491,7 +494,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void onClose() {
-		_textSource.onClose();
+		_textSource.close();
 		if (_lineListenerUnsubscribe != null)
 			_lineListenerUnsubscribe.run();
 		if (_textSourceUnsubscribable != null)

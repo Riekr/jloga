@@ -512,7 +512,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void onClose() {
+	public void close() {
 		_indexing.cancel(true);
 	}
 

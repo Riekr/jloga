@@ -217,4 +217,10 @@ public class MixFileSource implements TextSource {
 	public boolean isIndexing() {
 		return !_indexing.isDone();
 	}
+
+	@Override
+	public void close() {
+		if (_indexing != null)
+			_indexing.cancel(true);
+	}
 }

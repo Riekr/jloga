@@ -178,7 +178,7 @@ public interface TextSource extends Iterable<String> {
 		return defaultAsyncIO(() -> streamConsumer.accept(StreamSupport.stream(spliterator(), false)));
 	}
 
-	default void onClose() {}
+	default void close() {}
 
 	default boolean isIndexing() {return false;}
 

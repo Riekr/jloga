@@ -89,7 +89,7 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public void onClose() {
+	public void close() {
 		_data.close();
 	}
 
