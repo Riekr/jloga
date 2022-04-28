@@ -6,6 +6,7 @@
 - Bug fixes:
   - Solved failures if some recent file is missing
   - Close sources on search rerun
+  - Header detection fixes
 
 ## v0.1.4
 - General:

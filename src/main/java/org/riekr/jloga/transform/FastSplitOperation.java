@@ -7,24 +7,6 @@ import java.util.function.Function;
 
 public class FastSplitOperation implements Function<String, String[]> {
 
-	public static int count(String s) {
-		int max = 0;
-		if (s != null && !s.isEmpty()) {
-			for (int di = 0, dlen = _DELIMS.length(); di < dlen; di++) {
-				char delim = _DELIMS.charAt(di);
-				int count = 1;
-				for (int si = 0, slen = s.length(); si < slen; si++) {
-					if (s.charAt(si) == delim)
-						count++;
-				}
-				if (max < count)
-					max = count;
-			}
-		}
-		return max;
-	}
-
-
 	private static final String            _DELIMS = "\t,;:|";
 	private final        ArrayList<String> _buffer;
 	private              boolean           _detect;

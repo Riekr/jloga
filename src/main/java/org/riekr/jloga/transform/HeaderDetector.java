@@ -16,11 +16,14 @@ public class HeaderDetector {
 
 	private final @Nullable HeaderDetector _parent;
 
-	private int          _checkTarget = CHECK_LINES;
-	private Set<Integer> _checkSet    = new HashSet<>();
-	private int          _colCount    = -1;
-	private String       _header;
-	private Boolean      _own;
+	private Set<Integer>       _checkSet       = new HashSet<>();
+	private FastSplitOperation _splitOperation = new FastSplitOperation();
+
+	private int     _checkTarget = CHECK_LINES;
+	private int     _colCount    = -1;
+	private String  _header;
+	private Boolean _own;
+	private char    _delim;
 
 	public HeaderDetector(@Nullable HeaderDetector parent) {
 		_parent = parent;
@@ -60,6 +63,8 @@ public class HeaderDetector {
 	}
 
 	private synchronized void complete() {
+		_delim = _splitOperation.getDelim();
+		_splitOperation = null;
 		_checkSet = null;
 		if (_header == null) {
 			_header = "";
@@ -74,7 +79,7 @@ public class HeaderDetector {
 		if (line == null || line.isEmpty() || _checkSet == null)
 			return false;
 		if (_checkSet.add(lineNumber)) {
-			int count = FastSplitOperation.count(line);
+			int count = _splitOperation.apply(line).length;
 			if (_colCount == -1) {
 				_colCount = count;
 				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount) {
@@ -87,6 +92,7 @@ public class HeaderDetector {
 				return false;
 			} else if (_colCount != count) {
 				_header = "";
+				_colCount = -1;
 				return true;
 			}
 			return _checkSet != null && _checkSet.size() >= _checkTarget;
@@ -107,8 +113,7 @@ public class HeaderDetector {
 	}
 
 	public boolean isOwnHeader() {
-		if (!isComplete())
-			throw new IllegalStateException("Didn't finish checking");
+		requireComplete();
 		return Objects.requireNonNull(_own);
 	}
 
@@ -118,5 +123,20 @@ public class HeaderDetector {
 
 	public int getCheckTarget() {
 		return _checkTarget;
+	}
+
+	public int getColCount() {
+		requireComplete();
+		return _colCount;
+	}
+
+	@Override public String toString() {
+		return "HeaderDetector{" +
+				"parent=" + _parent +
+				", colCount=" + _colCount +
+				", header='" + _header + '\'' +
+				", own=" + _own +
+				", delimiter='" + _delim + '\'' +
+				'}';
 	}
 }
