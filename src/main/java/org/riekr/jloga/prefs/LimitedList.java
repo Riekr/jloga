@@ -3,6 +3,7 @@ package org.riekr.jloga.prefs;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class LimitedList<T extends Serializable> extends ArrayList<T> {
@@ -77,5 +78,11 @@ public class LimitedList<T extends Serializable> extends ArrayList<T> {
 			if (sz > _size)
 				removeRange(0, sz - _size);
 		}
+	}
+
+	public LimitedList<T> nonNulls() {
+		LimitedList<T> res = new LimitedList<>(_size);
+		stream().filter(Objects::nonNull).forEach(res::add);
+		return res;
 	}
 }
