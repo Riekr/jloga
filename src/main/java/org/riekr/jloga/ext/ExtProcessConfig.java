@@ -43,6 +43,9 @@ public class ExtProcessConfig {
 	public int                order;
 	public Map<String, Param> params;
 	public String             matchRegex;
+	public boolean            enabled = true;
+
+	public transient String _id;
 
 	public List<String> getCommand() {
 		ArrayList<String> res = new ArrayList<>();

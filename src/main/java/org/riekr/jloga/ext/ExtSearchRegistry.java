@@ -7,11 +7,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchRegistry;
@@ -37,36 +33,33 @@ public class ExtSearchRegistry {
 			_ENTRIES.forEach(SearchRegistry::remove);
 			if (extPath != null) {
 				Gson gson = new Gson();
-				ArrayList<Map.Entry<Integer, Entry>> res = new ArrayList<>();
-				for (Path f : Files.list(extPath.toPath()).collect(toList())) {
-					try {
-						if (Files.isRegularFile(f) && f.toString().toLowerCase().endsWith(".jloga.json")) {
+				_ENTRIES = Files.list(extPath.toPath())
+						.filter((f) -> Files.isRegularFile(f) && f.toString().toLowerCase().endsWith(".jloga.json"))
+						.map((f) -> {
+							// System.out.println("LOADING EXT: " + config);
 							try (BufferedReader reader = Files.newBufferedReader(f)) {
 								ExtProcessConfig config = gson.fromJson(reader, ExtProcessConfig.class);
-								// System.out.println("LOADING EXT: " + config);
 								if (config.workingDirectory == null)
 									config.workingDirectory = extPath.getAbsolutePath();
-								String id = f.getFileName().toString();
-								res.add(new AbstractMap.SimpleEntry<>(
-										config.order,
-										new Entry(id, (level) -> config.toComponent(id, level), config.description) {
-											@Override
-											public String toString() {
-												if (Preferences.EXT_PREFIX_SKIP.get())
-													return super.toString();
-												return "EXT: " + super.toString();
-											}
-										})
-								);
+								config._id = f.getFileName().toString();
+								return config;
+							} catch (Throwable e) {
+								System.err.println("Unable to read " + f);
+								e.printStackTrace(System.err);
+								return null;
 							}
-						}
-					} catch (Throwable e) {
-						System.err.println("Unable to parse " + f + " as external script");
-						e.printStackTrace(System.err);
-					}
-				}
-				res.sort(comparingInt(Map.Entry::getKey));
-				_ENTRIES = res.stream().map(Map.Entry::getValue).collect(toList());
+						})
+						.filter((config) -> config != null && config.enabled)
+						.sorted(comparingInt(c -> c.order))
+						.map((config) -> new Entry(config._id, (level) -> config.toComponent(config._id, level), config.description) {
+							@Override
+							public String toString() {
+								if (Preferences.EXT_PREFIX_SKIP.get())
+									return super.toString();
+								return "EXT: " + super.toString();
+							}
+						})
+						.collect(toList());
 				_ENTRIES.forEach(SearchRegistry::register);
 				return;
 			}

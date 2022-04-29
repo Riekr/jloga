@@ -14,6 +14,7 @@
     "%Text%"
   ],
   "matchRegex": "^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)",
+  "enabled": "true",
   "params": {
     "Text": {
       "type": "STRING",
