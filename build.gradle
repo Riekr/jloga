@@ -87,7 +87,7 @@ launch4j {
 	downloadUrl 'https://adoptium.net/download'
 }
 
-task updateFinos {
+task updatePerspective {
 	// https://github.com/michel-kraemer/gradle-download-task
 	doLast {
 		def repo = "https://cdn.jsdelivr.net/npm/@finos"
