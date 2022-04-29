@@ -5,7 +5,7 @@
   - Project combos does not update values
 - Bug fixes:
   - Solved failures if some recent file is missing
-  - Close sources on search rerun
+  - Close sources on search rerun or tab close
   - Header detection fixes
   - Missing buttons if search pattern is too long
 

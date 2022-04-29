@@ -218,6 +218,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	}
 
 	public void removeBottomArea(SearchPanelBottomArea bottomArea) {
+		bottomArea.onClose();
 		int idx = _bottomTabs.indexOfComponent(bottomArea);
 		_bottomTabs.setSelectedIndex(Math.max(0, idx - 1));
 		_bottomTabs.removeTabAt(idx);
