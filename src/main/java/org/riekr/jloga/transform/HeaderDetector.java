@@ -1,5 +1,7 @@
 package org.riekr.jloga.transform;
 
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
+
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,7 +32,8 @@ public class HeaderDetector {
 	}
 
 	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
-		source.defaultAsyncIO(() -> {
+		// using "asyncIO" may lead to thread deadlock
+		asyncTask(() -> {
 			int lineCount;
 			try {
 				lineCount = source.getLineCount();
@@ -41,14 +44,17 @@ public class HeaderDetector {
 			if (_parent != null)
 				_parent.waitCompletion();
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
-			for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++) {
-				if (detect(lineNumber, source.getText(lineNumber)))
-					break;
-			}
-			// finished the file
-			complete();
-			if (onComplete != null)
-				EventQueue.invokeLater(onComplete);
+			// I'm not waiting anymore, I can switch to IO thread
+			source.defaultAsyncIO(() -> {
+				for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++) {
+					if (detect(lineNumber, source.getText(lineNumber)))
+						break;
+				}
+				// finished the file
+				complete();
+				if (onComplete != null)
+					EventQueue.invokeLater(onComplete);
+			});
 		});
 	}
 
