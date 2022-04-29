@@ -195,7 +195,8 @@ public class PagedList<T> implements Closeable {
 
 	@Override
 	public synchronized void close() {
-		TempFiles.deleteTemp(_tempDir);
+		if (_tempDir != null)
+			TempFiles.deleteTemp(_tempDir);
 		_writing = null;
 		_pages.clear();
 	}
