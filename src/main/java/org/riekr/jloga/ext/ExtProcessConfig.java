@@ -16,6 +16,8 @@ import java.util.regex.PatternSyntaxException;
 import org.riekr.jloga.project.ProjectField;
 import org.riekr.jloga.search.SearchComponent;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ExtProcessConfig {
 
 	public enum ParamType {
@@ -23,12 +25,12 @@ public class ExtProcessConfig {
 	}
 
 	public static class Param {
-		public String    description;
-		public ParamType type;
-		public boolean   mandatory;
-		public int       min;
-		public String    deflt;
-		public Object    values;
+		public                            String    description;
+		public                            ParamType type;
+		public                            boolean   mandatory;
+		public                            int       min;
+		@SerializedName("default") public String    deflt;
+		public                            Object    values;
 
 		public transient ProjectField<?, ?> _field;
 	}
