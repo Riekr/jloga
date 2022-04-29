@@ -37,7 +37,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 	public SearchComponentWithExpandablePanel(String prefsPrefix) {
 		setLayout(new BorderLayout());
 		add(_collapsedLabel, BorderLayout.CENTER);
-		add(UIUtils.newBorderlessButton("Repeat", this::search, "Repeat analysis with current parameters"), BorderLayout.LINE_END);
+		add(UIUtils.newBorderlessButton("Run", this::search, "Run analysis with current parameters"), BorderLayout.LINE_END);
 		_prefsPrefix = prefsPrefix;
 	}
 
