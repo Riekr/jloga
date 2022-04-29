@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import java.util.prefs.BackingStoreException;
 
 import org.riekr.jloga.Main;
+import org.riekr.jloga.utils.TaggedObject;
 
 public class PrefsUtils {
 
@@ -21,7 +22,7 @@ public class PrefsUtils {
 		Object[] data = new Object[o.getSize()];
 		for (int i = 0; i < Math.min(20, data.length); i++)
 			data[i] = o.getElementAt(i);
-		save(key, data);
+		save(key, new TaggedObject<>(o.getSelectedItem(), data));
 	}
 
 	public static void save(String key, File o) {
@@ -55,6 +56,22 @@ public class PrefsUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> DefaultComboBoxModel<T> loadDefaultComboBoxModel(String key) {
+		try {
+			TaggedObject<T, Object[]> data = load(key, null);
+			DefaultComboBoxModel<T> res = new DefaultComboBoxModel<>();
+			if (data != null) {
+				for (Object o : data.value)
+					res.addElement((T)o);
+				res.setSelectedItem(data.tag);
+			}
+			return res;
+		} catch (ClassCastException e) {
+			return loadOldDefaultComboBoxModel(key);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> DefaultComboBoxModel<T> loadOldDefaultComboBoxModel(String key) {
 		Object[] data = load(key, null);
 		DefaultComboBoxModel<T> res = new DefaultComboBoxModel<>();
 		if (data != null) {
@@ -63,6 +80,7 @@ public class PrefsUtils {
 		}
 		return res;
 	}
+
 
 	public static File loadFile(String key, Supplier<File> deflt) {
 		String path = load(key, null);
