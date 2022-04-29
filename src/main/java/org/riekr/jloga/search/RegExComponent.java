@@ -1,10 +1,12 @@
 package org.riekr.jloga.search;
 
 import static org.riekr.jloga.react.Observer.uniq;
+import static org.riekr.jloga.utils.UIUtils.horizontalBox;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -16,7 +18,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.MRUTextCombo;
 import org.riekr.jloga.utils.UIUtils;
 
-public class RegExComponent extends Box implements SearchComponent {
+public class RegExComponent extends JComponent implements SearchComponent {
 	private static final long serialVersionUID = -2681776106341733771L;
 
 	public static final String ID = "RegExComponent";
@@ -28,16 +30,18 @@ public class RegExComponent extends Box implements SearchComponent {
 	private final JToggleButton _caseBtn;
 
 	public RegExComponent(int level) {
-		super(BoxLayout.LINE_AXIS);
+		setLayout(new BorderLayout());
 		_negateBtn = newToggleButton("!", "Negate", false);
 		_caseBtn = newToggleButton("\uD83D\uDDDA", "Case insensitive", false);
 		_combo = new MRUTextCombo<>("regex." + level, this::newEntry);
 		_combo.selection.subscribe(uniq(this::updateButtons));
 		updateButtons(_combo.getValue());
-		add(_combo);
-		add(newBorderlessButton("\uD83D\uDD0D", _combo::resend));
-		add(_negateBtn);
-		add(_caseBtn);
+		add(_combo, BorderLayout.CENTER);
+		add(horizontalBox(
+				newBorderlessButton("\uD83D\uDD0D", _combo::resend),
+				_negateBtn,
+				_caseBtn
+		), BorderLayout.LINE_END);
 	}
 
 	private void updateButtons(SearchComboEntry entry) {

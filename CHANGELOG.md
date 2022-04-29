@@ -7,6 +7,7 @@
   - Solved failures if some recent file is missing
   - Close sources on search rerun
   - Header detection fixes
+  - Missing buttons if search pattern is too long
 
 ## v0.1.4
 - General:
