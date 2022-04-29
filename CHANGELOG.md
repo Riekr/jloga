@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.0
 - General
   - Updated to perspective 1.3.10
   - Project combos does not update values
@@ -8,6 +9,7 @@
   - Close sources on search rerun or tab close
   - Header detection fixes
   - Missing buttons if search pattern is too long
+  - Non-editable project combos not being saved
 
 ## v0.1.4
 - General:

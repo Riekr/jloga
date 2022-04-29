@@ -8,7 +8,7 @@ import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MRUComboWithLabels<T> extends JPanel {
+public class MRUComboWithLabels<T> extends JComponent {
 	private static final long serialVersionUID = -4669818889063163941L;
 
 	public static MRUComboWithLabels<String> forString(String key, String label, Consumer<String> onResult) {
@@ -19,7 +19,7 @@ public class MRUComboWithLabels<T> extends JPanel {
 	public final JLabel               error;
 
 	public MRUComboWithLabels(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
-		super(new BorderLayout());
+		setLayout(new BorderLayout());
 
 		if (label != null && !(label = label.trim()).isEmpty())
 			this.add(new JLabel(label + " "), BorderLayout.LINE_START);

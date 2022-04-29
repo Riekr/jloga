@@ -18,13 +18,15 @@ public class ProjectEditableField<T> extends ProjectField<T, MRUComboWithLabels<
 	@Override
 	public void set(T value) {
 		super.set(value);
-		_ui.combo.setValue(_src);
+		if (_ui != null)
+			_ui.combo.setValue(_src);
 	}
 
 	@Override
 	public void accept(String s) {
 		super.accept(s);
-		_ui.combo.setValue(_src);
+		if (_ui != null)
+			_ui.combo.setValue(_src);
 	}
 
 	@Override

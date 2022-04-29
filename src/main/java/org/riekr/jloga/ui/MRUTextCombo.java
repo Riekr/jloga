@@ -33,6 +33,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 	private T       _value;
 	private int     _valueIndex;
 	private boolean _propagateMouseListener = true;
+	private boolean _saveEnabled            = true;
 
 	public final Subject<T> subject   = new Subject<>();
 	public final Subject<T> selection = new Subject<>();
@@ -45,8 +46,8 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		});
 		_model = PrefsUtils.loadDefaultComboBoxModel(_key);
 		_mapper = mapper;
+		Object firstItem = _model.getSelectedItem();
 		setModel(_model);
-		Object firstItem = getSelectedItem();
 		_value = firstItem == null ? mapper.apply(null, null) : convert(firstItem);
 		setEditable(true);
 		addActionListener(e -> {
@@ -98,8 +99,13 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 		subject.next(val);
 	}
 
+	public void setSaveEnabled(boolean state) {
+		_saveEnabled = state;
+	}
+
 	public void save() {
-		PrefsUtils.save(_key, _model);
+		if (_saveEnabled)
+			PrefsUtils.save(_key, _model);
 	}
 
 	public void markInvalidValue(String val) {

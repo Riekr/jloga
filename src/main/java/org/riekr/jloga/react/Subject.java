@@ -15,8 +15,7 @@ public class Subject<T> implements Observable<T>, Publisher<T>, Closeable {
 		} catch (Throwable t) {
 			try {
 				observer.onError(t);
-			} catch (Throwable ignored) {
-			}
+			} catch (Throwable ignored) {}
 		}
 	}
 
