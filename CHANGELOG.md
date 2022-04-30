@@ -1,7 +1,7 @@
 ## In progress:
 
 - General
-  - Desktop help callouts auto hide
+  - Desktop help auto hide
 
 ## v0.2.0
 - General

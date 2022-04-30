@@ -42,6 +42,7 @@ public class MainDesktopHelp extends JComponent {
 
 	private final Point _recentBoxLoc = new Point();
 	private       int   _leftArrowsX, _rightArrowsX;
+	private int _keyBindingsLastLim = -1;
 
 	public MainDesktopHelp(JToolBar toolBar, Consumer<File> opener) {
 		ArrayList<JComponent> lc = new ArrayList<>();
@@ -134,6 +135,16 @@ public class MainDesktopHelp extends JComponent {
 		boolean rightArrows = _rightArrowsX > _recentBoxLoc.x + _recentBox.getWidth();
 		// System.out.println("R " + rightArrows + " = " + _rightArrowsX + " > " + _recentBoxLoc.x + " + " + _recentBox.getWidth());
 		_arrowsUncovered = leftArrows && rightArrows;
+		if (_keyBindingsLastLim == -1) {
+			if (_recentBoxLoc.y + _recentBox.getHeight() > _keyBindings.getY()) {
+				_keyBindingsLastLim = getHeight();
+				_keyBindings.setVisible(false);
+			}
+		} else if (getHeight() > _keyBindingsLastLim) {
+			_keyBindingsLastLim = -1;
+			_keyBindings.setVisible(true);
+		}
+		// System.out.println("K " + getHeight() + " " + _keyBindingsLastLim);
 	}
 
 	@Override
