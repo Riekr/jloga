@@ -7,9 +7,12 @@ import static org.riekr.jloga.utils.UIUtils.getComponentHorizontalCenter;
 import static org.riekr.jloga.utils.UIUtils.makeBorderless;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newButton;
+import static org.riekr.jloga.utils.UIUtils.relativeLocation;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -32,8 +35,13 @@ public class MainDesktopHelp extends JComponent {
 	private final JComponent[] _leftComponents;
 	private final JComponent[] _rightComponents;
 	private final JLabel       _keyBindings;
+	private final Box          _recentBox;
 
-	private boolean _hideArrows;
+	private boolean _arrowsHidden    = false;
+	private boolean _arrowsUncovered = true;
+
+	private final Point _recentBoxLoc = new Point();
+	private       int   _leftArrowsX, _rightArrowsX;
 
 	public MainDesktopHelp(JToolBar toolBar, Consumer<File> opener) {
 		ArrayList<JComponent> lc = new ArrayList<>();
@@ -53,12 +61,12 @@ public class MainDesktopHelp extends JComponent {
 
 		// recent files
 		setLayout(new BorderLayout());
-		Box recentBox = Box.createVerticalBox();
-		recentBox.add(makeBorderless(new JLabel("Recent files:")));
-		recentBox.add(newButton("Clear recent files", Preferences.RECENT_FILES::reset));
+		_recentBox = Box.createVerticalBox();
+		_recentBox.add(makeBorderless(new JLabel("Recent files:")));
+		_recentBox.add(newButton("Clear recent files", Preferences.RECENT_FILES::reset));
 		Preferences.RECENT_FILES.subscribe((files) -> {
-			while (recentBox.getComponentCount() != 2)
-				recentBox.remove(1);
+			while (_recentBox.getComponentCount() != 2)
+				_recentBox.remove(1);
 			int i = 0;
 			for (File recent : files) {
 				if (!recent.canRead())
@@ -75,13 +83,13 @@ public class MainDesktopHelp extends JComponent {
 					snap.remove(recent);
 					Preferences.RECENT_FILES.set(snap);
 				}), openBtn));
-				recentBox.add(row, ++i);
+				_recentBox.add(row, ++i);
 			}
-			recentBox.setVisible(!files.isEmpty());
-			recentBox.revalidate();
+			_recentBox.setVisible(!files.isEmpty());
+			_recentBox.revalidate();
 		});
 
-		add(center(recentBox), BorderLayout.CENTER);
+		add(center(_recentBox), BorderLayout.CENTER);
 		_keyBindings = new JLabel();
 		_keyBindings.setBorder(UIUtils.createEmptyBorder(16));
 		add(_keyBindings, BorderLayout.SOUTH);
@@ -95,6 +103,12 @@ public class MainDesktopHelp extends JComponent {
 				.map((pref) -> pref.subscribe(Observer.skip(1, (ks) -> updateKeyBindings())))
 				.toArray(Unsubscribable[]::new);
 		updateKeyBindings();
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				onResize();
+			}
+		});
 	}
 
 	private void updateKeyBindings() {
@@ -109,13 +123,22 @@ public class MainDesktopHelp extends JComponent {
 		) + "</html>");
 	}
 
-	public void setHideArrows(boolean hideArrows) {
-		_hideArrows = hideArrows;
+	public void setArrowsHidden(boolean arrowsHidden) {
+		_arrowsHidden = arrowsHidden;
+	}
+
+	private void onResize() {
+		relativeLocation(_recentBox, this, _recentBoxLoc);
+		boolean leftArrows = _leftArrowsX < _recentBoxLoc.x;
+		// System.out.println("L " + leftArrows + " = " + _leftArrowsX + " < " + _recentBoxLoc.x);
+		boolean rightArrows = _rightArrowsX > _recentBoxLoc.x + _recentBox.getWidth();
+		// System.out.println("R " + rightArrows + " = " + _rightArrowsX + " > " + _recentBoxLoc.x + " + " + _recentBox.getWidth());
+		_arrowsUncovered = leftArrows && rightArrows;
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (_hideArrows)
+		if (_arrowsHidden)
 			return;
 		if (g instanceof Graphics2D)
 			((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -126,40 +149,53 @@ public class MainDesktopHelp extends JComponent {
 		FontMetrics f = g.getFontMetrics();
 
 		final int leftMargin = getComponentHorizontalCenter(_leftComponents[_leftComponents.length - 1]) + 32;
+		int leftArrowsX = Integer.MIN_VALUE;
 		for (JComponent component : _leftComponents) {
-			int x = getComponentHorizontalCenter(component);
-			String text = component.getToolTipText();
-			char[] chars = text.toCharArray();
-			int radius = leftMargin - x;
-			int diameter = radius * 2;
-			g.drawArc(x, -radius + dy + my, diameter, diameter, 270, -90);
-			g.drawChars(chars, 0, chars.length,
-					leftMargin + 6,
-					dy + radius + (f.getAscent() / 2) - 1 + my
-			);
-			g.drawChars(_ARROW, 0, 1,
-					x - (f.charWidth('\u25B2') / 2) - 1,
-					g.getFont().getSize() - 4 + my
-			);
+			char[] chars = component.getToolTipText().toCharArray();
+			int charsX = leftMargin + 6;
+			int charsEnd = charsX + f.charsWidth(chars, 0, chars.length);
+			if (charsEnd > leftArrowsX)
+				leftArrowsX = charsEnd;
+			if (_arrowsUncovered) {
+				int x = getComponentHorizontalCenter(component);
+				int radius = leftMargin - x;
+				int diameter = radius * 2;
+				g.drawArc(x, -radius + dy + my, diameter, diameter, 270, -90);
+				g.drawChars(chars, 0, chars.length,
+						charsX,
+						dy + radius + (f.getAscent() / 2) - 1 + my
+				);
+				g.drawChars(_ARROW, 0, 1,
+						x - (f.charWidth('\u25B2') / 2) - 1,
+						g.getFont().getSize() - 4 + my
+				);
+			}
 		}
+		_leftArrowsX = leftArrowsX;
 
 		final int rightStart = _rightComponents[0].getX();
+		int rightArrowsX = Integer.MAX_VALUE;
 		for (JComponent component : _rightComponents) {
 			int x = getComponentHorizontalCenter(component);
-			String text = component.getToolTipText();
-			char[] chars = text.toCharArray();
+			char[] chars = component.getToolTipText().toCharArray();
 			int radius = x - rightStart;
-			int diameter = radius * 2;
-			g.drawArc(x - diameter, -radius + dy + my, diameter, diameter, -90, 90);
-			g.drawChars(chars, 0, chars.length,
-					x - 6 - f.charsWidth(chars, 0, chars.length) - radius,
-					dy + radius + (f.getAscent() / 2) - 1 + my
-			);
-			g.drawChars(_ARROW, 0, 1,
-					x - (f.charWidth('\u25B2') / 2),
-					g.getFont().getSize() - 4 + my
-			);
+			int charsX = x - 6 - f.charsWidth(chars, 0, chars.length) - radius;
+			if (_arrowsUncovered) {
+				int diameter = radius * 2;
+				g.drawArc(x - diameter, -radius + dy + my, diameter, diameter, -90, 90);
+				g.drawChars(chars, 0, chars.length,
+						charsX,
+						dy + radius + (f.getAscent() / 2) - 1 + my
+				);
+				g.drawChars(_ARROW, 0, 1,
+						x - (f.charWidth('\u25B2') / 2),
+						g.getFont().getSize() - 4 + my
+				);
+			}
+			if (charsX < rightArrowsX)
+				rightArrowsX = charsX;
 		}
+		_rightArrowsX = rightArrowsX;
 	}
 
 }

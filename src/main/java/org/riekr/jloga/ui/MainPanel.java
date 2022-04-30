@@ -167,7 +167,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 
 	private void onAddFirstTab() {
 		remove(_help);
-		_help.setHideArrows(true);
+		_help.setArrowsHidden(true);
 		_tabs.addTab(TAB_ADD, _help);
 		_refreshBtn.setEnabled(true);
 	}
@@ -177,7 +177,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		if (helpIdx != -1)
 			_tabs.removeTabAt(helpIdx);
 		remove(_tabs);
-		_help.setHideArrows(false);
+		_help.setArrowsHidden(false);
 		add(_help, BorderLayout.CENTER);
 		_refreshBtn.setEnabled(false);
 	}

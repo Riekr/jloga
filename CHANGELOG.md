@@ -1,5 +1,8 @@
 ## In progress:
 
+- General
+  - Desktop help callouts auto hide
+
 ## v0.2.0
 - General
   - Updated to perspective 1.3.10

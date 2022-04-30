@@ -342,4 +342,14 @@ public final class UIUtils {
 			}
 		};
 	}
+
+	public static void relativeLocation(Component currComponent, Component parent, Point currComponentLocation) {
+		currComponentLocation.x = 0;
+		currComponentLocation.y = 0;
+		while (currComponent != null && currComponent != parent) {
+			Point relativeLocation = currComponent.getLocation();
+			currComponentLocation.translate(relativeLocation.x, relativeLocation.y);
+			currComponent = currComponent.getParent();
+		}
+	}
 }
