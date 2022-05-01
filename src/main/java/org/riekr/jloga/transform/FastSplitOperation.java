@@ -106,7 +106,7 @@ public class FastSplitOperation implements Function<String, String[]> {
 		} else
 			res = split(s);
 		if (res.length != _cols)
-			throw new IllegalArgumentException("Number of columns changed from " + _cols + " to " + res.length + " at line " + _line);
+			throw new ColumnsChangedException(_cols, res.length, _line);
 		return res;
 	}
 }

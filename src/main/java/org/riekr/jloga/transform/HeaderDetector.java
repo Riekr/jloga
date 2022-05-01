@@ -46,14 +46,19 @@ public class HeaderDetector {
 			_checkTarget = Math.min(CHECK_LINES, lineCount);
 			// I'm not waiting anymore, I can switch to IO thread
 			source.defaultAsyncIO(() -> {
-				for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++) {
-					if (detect(lineNumber, source.getText(lineNumber)))
-						break;
+				try {
+					for (int lineNumber = 0; lineNumber < _checkTarget && _checkSet != null; lineNumber++) {
+						if (detect(lineNumber, source.getText(lineNumber)))
+							break;
+					}
+				} catch (Throwable e) {
+					e.printStackTrace(System.err);
+				} finally {
+					// finished the file
+					complete();
+					if (onComplete != null)
+						EventQueue.invokeLater(onComplete);
 				}
-				// finished the file
-				complete();
-				if (onComplete != null)
-					EventQueue.invokeLater(onComplete);
 			});
 		});
 	}
@@ -85,7 +90,12 @@ public class HeaderDetector {
 		if (line == null || line.isEmpty() || _checkSet == null)
 			return false;
 		if (_checkSet.add(lineNumber)) {
-			int count = _splitOperation.apply(line).length;
+			int count;
+			try {
+				count = _splitOperation.apply(line).length;
+			} catch (ColumnsChangedException e) {
+				count = -1;
+			}
 			if (_colCount == -1) {
 				_colCount = count;
 				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount) {

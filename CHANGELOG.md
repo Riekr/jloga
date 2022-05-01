@@ -2,6 +2,8 @@
 
 - General
   - Desktop help auto hide
+- Bug fixes:
+  - Header detection fixes
 
 ## v0.2.0
 - General
