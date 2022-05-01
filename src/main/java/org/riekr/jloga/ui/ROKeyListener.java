@@ -25,6 +25,8 @@ public class ROKeyListener implements KeyListener {
 	protected void discard(KeyEvent e) {
 		//		System.out.println(e);
 		switch (e.getKeyCode()) {
+			case 27: // esc
+				return;
 			case 33: // pgup
 				if (e.isControlDown())
 					onPreviousTab();

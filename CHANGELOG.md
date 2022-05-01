@@ -2,6 +2,7 @@
 
 - General
   - Desktop help auto hide
+  - Clear highlight by pressing ESC
 - Bug fixes:
   - Header detection fixes
 

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 
 import org.jetbrains.annotations.NotNull;
 
+import static javax.swing.JComponent.WHEN_FOCUSED;
+
 public class SelectionHighlight {
 
 	private final JTextArea                    _textArea;
@@ -45,6 +47,7 @@ public class SelectionHighlight {
 				}
 			}
 		});
+		KeyUtils.addKeyStrokeAction(_textArea, KeyUtils.ESC, this::clear, WHEN_FOCUSED);
 		if (_textArea.isEditable()) {
 			DocumentListener documentListener = new DocumentListener() {
 				@Override
