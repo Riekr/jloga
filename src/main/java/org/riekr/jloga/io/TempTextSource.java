@@ -3,7 +3,6 @@ package org.riekr.jloga.io;
 import static org.riekr.jloga.pmem.PagedIntToObjList.newPagedIntToStringList;
 
 import java.awt.*;
-import java.io.Reader;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,6 +14,7 @@ import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.utils.CancellableFuture;
+import org.riekr.jloga.utils.TextUtils;
 
 public class TempTextSource implements FilteredTextSource {
 
@@ -38,12 +38,12 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
 
 		if (_data.isSealed()) {
 			return defaultAsyncIO(() -> {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(Math.toIntExact(_data.size()) - fromLine, count)), count);
-				EventQueue.invokeLater(() -> consumer.accept(reader));
+				String text = TextUtils.toString(getText(fromLine, Math.min(Math.toIntExact(_data.size()) - fromLine, count)), count);
+				EventQueue.invokeLater(() -> consumer.accept(text));
 			});
 		}
 
@@ -51,8 +51,8 @@ public class TempTextSource implements FilteredTextSource {
 		unsubscribe.set(_lineCountSubject.subscribe(lastLine -> {
 			int toLine = Math.min(fromLine + count, Math.toIntExact(_data.size()));
 			if (fromLine < lastLine) {
-				StringsReader reader = new StringsReader(getText(fromLine, toLine - fromLine), count);
-				EventQueue.invokeLater(() -> consumer.accept(reader));
+				String text = TextUtils.toString(getText(fromLine, toLine - fromLine), count);
+				EventQueue.invokeLater(() -> consumer.accept(text));
 				if (toLine >= lastLine) {
 					unsubscribe.get().run();
 					return;

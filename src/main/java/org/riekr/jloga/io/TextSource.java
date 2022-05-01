@@ -8,7 +8,6 @@ import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.Reader;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +26,7 @@ import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.TextUtils;
 
 public interface TextSource extends Iterable<String>, AutoCloseable {
 
@@ -35,11 +35,11 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	}
 
 	/** Runs in AWT thread when ready */
-	default Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	default Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
 		return defaultAsyncIO(() -> {
 			try {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(getLineCount() - fromLine, count)), count);
-				EventQueue.invokeLater(() -> consumer.accept(reader));
+				String text = TextUtils.toString(getText(fromLine, Math.min(getLineCount() - fromLine, count)), count);
+				EventQueue.invokeLater(() -> consumer.accept(text));
 			} catch (CancellationException ignored) {
 				System.out.println("Text request cancelled");
 			} catch (Throwable e) {

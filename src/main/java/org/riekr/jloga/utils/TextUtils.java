@@ -81,5 +81,48 @@ public class TextUtils {
 		return String.format("%.1f %cB", bytes / 1000.0, ci.current());
 	}
 
+	public static String toString(@NotNull String[] strings, int count) {
+		switch (count) {
+			case 0:
+				return "";
+			case 1:
+				return strings.length != 0 ? strings[0] : "";
+			default:
+				if (count < 0)
+					throw new IllegalArgumentException();
+		}
+		StringBuilder buf = new StringBuilder(100 * count);
+		buf.append(strings[0]);
+		int len = Math.min(strings.length, count);
+		int i = 1;
+		for (; i < len; i++)
+			buf.append('\n').append(strings[i]);
+		for (; i < count; i++)
+			buf.append('\n');
+		return buf.toString();
+	}
+
+	public static String toString(int from, int len, @NotNull String[] strings, int count) {
+		switch (count) {
+			case 0:
+				return "";
+			case 1:
+				return strings.length > from ? strings[from] : "";
+			default:
+				if (count < 0)
+					throw new IllegalArgumentException();
+		}
+		final int lim = Math.min(from + len, strings.length);
+		StringBuilder buf = new StringBuilder(100 * count);
+		buf.append(strings[from]);
+		int i = from;
+		for (; i < lim; i++)
+			buf.append('\n').append(strings[i]);
+		len = from + count;
+		for (; i < len; i++)
+			buf.append('\n');
+		return buf.toString();
+	}
+
 	private TextUtils() {}
 }

@@ -3,7 +3,6 @@ package org.riekr.jloga.io;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 
 import java.awt.*;
-import java.io.Reader;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
@@ -14,6 +13,7 @@ import java.util.function.IntConsumer;
 
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.utils.TextUtils;
 
 public class ChildTextSource implements FilteredTextSource {
 
@@ -121,12 +121,12 @@ public class ChildTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
 		if (_tie.isIndexing()) {
 			return defaultAsyncIO(() -> {
 				try {
-					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
-					EventQueue.invokeLater(() -> consumer.accept(reader));
+					String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
+					EventQueue.invokeLater(() -> consumer.accept(text));
 				} catch (CancellationException ignored) {
 					System.out.println("Text request cancelled");
 				} catch (Throwable e) {

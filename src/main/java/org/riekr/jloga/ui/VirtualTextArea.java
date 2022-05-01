@@ -19,7 +19,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -393,14 +392,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		else {
 			if (_prevRequireTextRequest != null)
 				_prevRequireTextRequest.cancel(false);
-			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (reader) -> {
+			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (text) -> {
 				_prevRequireTextRequest = null;
-				try {
-					// _text.setText(text); simply does not work every time
-					_text.read(reader, _fromLine);
-				} catch (IOException e) {
-					e.printStackTrace(System.err);
-				}
+				_text.setText(text);
 				if (_gridView != null)
 					_gridView.refresh();
 				reNumerate();

@@ -15,7 +15,6 @@ import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
@@ -54,6 +53,7 @@ import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.utils.CancellableFuture;
+import org.riekr.jloga.utils.TextUtils;
 
 public class TextFileSource implements TextSource {
 
@@ -297,7 +297,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public Future<?> requestText(int fromLine, int count, Consumer<Reader> consumer) {
+	public Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
 		if (_index != null && _index.ceilingKey(fromLine + count) != null) {
 			Map.Entry<Integer, IndexData> entry = _index.floorEntry(fromLine);
 			if (entry != null) {
@@ -305,8 +305,8 @@ public class TextFileSource implements TextSource {
 				String[] lines;
 				if (indexData.data != null && (lines = indexData.data.get()) != null) {
 					return asyncTask(() -> {
-						StringsReader reader = new StringsReader(fromLine - entry.getKey(), Math.min(count, _lineCount), lines, count);
-						EventQueue.invokeLater(() -> consumer.accept(reader));
+						String text = TextUtils.toString(fromLine - entry.getKey(), Math.min(count, _lineCount), lines, count);
+						EventQueue.invokeLater(() -> consumer.accept(text));
 					});
 				}
 			}
@@ -314,21 +314,21 @@ public class TextFileSource implements TextSource {
 
 		if (_indexing.isDone()) {
 			return asyncIO(_file, () -> {
-				StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
-				EventQueue.invokeLater(() -> consumer.accept(reader));
+				String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
+				EventQueue.invokeLater(() -> consumer.accept(text));
 			});
 		}
 
 		IndexTask task = () -> {
 			try {
 				if (_index.floorKey(fromLine) != null && _index.ceilingKey(fromLine + count) != null) {
-					StringsReader reader = new StringsReader(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
-					EventQueue.invokeLater(() -> consumer.accept(reader));
+					String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
+					EventQueue.invokeLater(() -> consumer.accept(text));
 					return true;
 				}
 				return false;
 			} catch (Throwable e) {
-				consumer.accept(new StringsReader.ErrorReader(e));
+				consumer.accept(e.getLocalizedMessage());
 				if (e instanceof RuntimeException)
 					throw (RuntimeException)e;
 				throw new RuntimeException(e);
