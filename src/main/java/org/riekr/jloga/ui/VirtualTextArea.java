@@ -39,6 +39,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.HeaderDetector;
+import org.riekr.jloga.utils.CaretLimiter;
 import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.SelectionHighlight;
 import org.riekr.jloga.utils.UIUtils;
@@ -206,6 +207,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		recalcLineHeight();
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
+		CaretLimiter.setup(_text, () -> (_lineCount < _allLinesCount ? (_allLinesCount - _fromLine) % _lineCount : _allLinesCount) - 2);
 	}
 
 	public void reload(Supplier<ProgressListener> progressListenerSupplier) {

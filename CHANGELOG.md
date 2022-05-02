@@ -8,6 +8,7 @@
   - "Scroll beyond end-of-text" can be changed in preferences
 - Bug fixes:
   - Header detection fixes
+  - Fixed selection beyond end-of-text
 
 ## v0.2.0
 - General
