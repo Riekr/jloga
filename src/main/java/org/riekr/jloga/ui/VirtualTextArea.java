@@ -53,6 +53,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
 	private       Object                    _lineHighlight;
+	private final SelectionHighlight        _selectionHighlight;
 
 	private final String          _title;
 	private final VirtualTextArea _parent;
@@ -176,7 +177,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		root.add(_scrollBar, BorderLayout.LINE_END);
 
 		// setup selection highlight
-		new SelectionHighlight(_text);
+		_selectionHighlight = new SelectionHighlight(_text);
 
 		// floating buttons
 		final Box buttons = Box.createVerticalBox();
@@ -503,5 +504,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	public String getDisplayedText() {
 		return _text.getText();
+	}
+
+	public String getSelectedText() {
+		String res = _text.getSelectedText();
+		if (res == null)
+			return _selectionHighlight.getText();
+		return res;
 	}
 }

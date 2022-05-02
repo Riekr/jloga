@@ -45,15 +45,19 @@ public class SearchSelector extends JComponent {
 		JPopupMenu popupMenu = new JPopupMenu(_TITLE);
 		for (final SearchRegistry.Entry choice : SearchRegistry.getChoices()) {
 			JMenuItem item = new JMenuItem(choice.toString());
-			item.addActionListener(e -> setSearchUI(choice.newInstance(_level)));
+			item.addActionListener(e -> setSearchUI(choice.newInstance(_level), null));
 			popupMenu.add(item);
 		}
 		_selectBtn.setComponentPopupMenu(popupMenu);
 
-		setSearchUI(Preferences.LAST_SEARCH_TYPE.get(level));
+		setSearchUI(Preferences.LAST_SEARCH_TYPE.get(level), null);
 	}
 
 	public void openSelection() {
+		openSelection(null);
+	}
+
+	public void openSelection(String prefill) {
 		SearchRegistry.Entry[] choices = SearchRegistry.getChoices();
 		SearchRegistry.Entry initialSelectionValue = Arrays.stream(choices)
 				.filter((e) -> e.id.equals(_searchComponent.getID()))
@@ -69,14 +73,14 @@ public class SearchSelector extends JComponent {
 				initialSelectionValue
 		);
 		if (input != null)
-			setSearchUI(input.newInstance(_level));
+			setSearchUI(input.newInstance(_level), prefill);
 	}
 
-	public void setSearchUI(String id) {
-		setSearchUI(SearchRegistry.get(id, _level));
+	public void setSearchUI(String id, String prefill) {
+		setSearchUI(SearchRegistry.get(id, _level), prefill);
 	}
 
-	public void setSearchUI(SearchComponent comp) {
+	public void setSearchUI(SearchComponent comp, String prefill) {
 		if (_searchComponent != comp) {
 			if (_searchComponent != null)
 				_searchComponent.onSearch(null);
@@ -91,6 +95,8 @@ public class SearchSelector extends JComponent {
 			add(_searchUI, BorderLayout.CENTER);
 			_selectBtn.setText(_searchComponent.getSearchIconLabel());
 			Preferences.LAST_SEARCH_TYPE.set(_searchComponent.getID(), _level);
+			if (prefill != null)
+				_searchComponent.prefill(prefill);
 		}
 		_searchUI.requestFocusInWindow();
 		// this seems needed as sometime focus does not work as expected!

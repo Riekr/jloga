@@ -21,4 +21,8 @@ public interface SearchComponent {
 
 	@NotNull JComponent getUIComponent();
 
+	default void prefill(String text) {
+		// implementations supporting prefill should override this method
+	}
+
 }

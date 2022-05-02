@@ -121,12 +121,13 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		SearchPanelBottomArea tab;
 		if (Preferences.FIND_NEWTAB.get() || (tab = getSelectedSearchPanelBottomArea()) == null)
 			tab = addNewTab();
+		String prefill = _textArea.getSelectedText();
 		SearchSelector searchSelector = tab.getSearchUI();
 		if (searchSelector != null) {
 			if (id == null)
-				searchSelector.openSelection();
+				searchSelector.openSelection(prefill);
 			else
-				searchSelector.setSearchUI(id);
+				searchSelector.setSearchUI(id, prefill);
 		}
 	}
 

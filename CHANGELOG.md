@@ -3,6 +3,7 @@
 - General
   - Desktop help auto hide
   - Clear highlight by pressing ESC
+  - Serch prefill when pressing ctrl+f or ctrl+r
 - Bug fixes:
   - Header detection fixes
 

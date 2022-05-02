@@ -102,4 +102,18 @@ public class PlainTextComponent extends JComponent implements SearchComponent {
 	public boolean requestFocusInWindow() {
 		return _combo.requestFocusInWindow();
 	}
+
+	@Override
+	public void prefill(String text) {
+		if (text != null) {
+			for (int i = 0, len = _combo.getItemCount(); i < len; i++) {
+				SearchComboEntry entry = _combo.getItemAt(i);
+				if (entry != null && text.equals(entry.pattern)) {
+					_combo.setSelectedIndex(i);
+					return;
+				}
+			}
+			_combo.setSelectedItem(new SearchComboEntry(text));
+		}
+	}
 }
