@@ -4,6 +4,7 @@
   - Desktop help auto hide
   - Clear highlight by pressing ESC
   - Serch prefill when pressing ctrl+f or ctrl+r
+  - Updated to perspective 1.3.11
 - Bug fixes:
   - Header detection fixes
 
