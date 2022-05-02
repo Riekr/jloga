@@ -5,6 +5,7 @@
   - Clear highlight by pressing ESC
   - Serch prefill when pressing ctrl+f or ctrl+r
   - Updated to perspective 1.3.11
+  - "Scroll beyond end-of-text" can be changed in preferences
 - Bug fixes:
   - Header detection fixes
 

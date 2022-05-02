@@ -33,6 +33,7 @@ import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.ProgressListener;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.ExtraLines;
 import org.riekr.jloga.prefs.HighlightType;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.BehaviourSubject;
@@ -74,6 +75,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private @Nullable IntConsumer _lineListener;
 	private @Nullable Runnable    _lineListenerUnsubscribe;
+
+	private ExtraLines _extraLines = ExtraLines.HALF;
 
 	public VirtualTextArea(@Nullable TabNavigation tabNavigation, @Nullable String title, @Nullable VirtualTextArea parent) {
 		_title = title;
@@ -199,6 +202,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		add(root);
 
 		// finishing
+		Preferences.EXTRA_LINES.subscribe(this, (value) -> _extraLines = value);
 		recalcLineHeight();
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
@@ -289,8 +293,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private boolean setFromLineNoScroll(int fromLine) {
 		if (fromLine < 0)
 			fromLine = 0;
-		else if (fromLine >= _allLinesCount - (_lineCount / 2))
-			fromLine = max(0, _allLinesCount - (_lineCount / 2) - 1);
+		else {
+			int lineCount = _extraLines.apply(_lineCount);
+			if (fromLine >= _allLinesCount - lineCount)
+				fromLine = max(0, _allLinesCount - lineCount);
+		}
 		if (fromLine != _fromLine) {
 			_fromLine = fromLine;
 			requireText();
@@ -312,12 +319,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void toEnding() {
-		setFromLine(_allLinesCount - (_lineCount / 2));
+		setFromLine(_allLinesCount - _extraLines.apply(_lineCount));
 	}
 
 	public void centerOn(int line) {
 		_highlightedLine.next(line);
-		setFromLine(line - (_lineCount / 2));
+		setFromLine(line - _extraLines.apply(_lineCount));
 	}
 
 	@Override
@@ -366,7 +373,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void recalcScrollBarMaximum() {
-		_scrollBar.setMaximum(_allLinesCount - (_lineCount / 2));
+		_scrollBar.setMaximum(_allLinesCount - _extraLines.apply(_lineCount));
 	}
 
 	private void recalcLineHeight() {

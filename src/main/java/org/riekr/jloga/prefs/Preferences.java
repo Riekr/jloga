@@ -50,6 +50,13 @@ public interface Preferences extends KeyBindings {
 			.group(GENERAL)
 			.addDescription("When selected line numbers will start from one (conventional) instead of zero (index)");
 
+	GUIPreference<ExtraLines> EXTRA_LINES = of("ExtraLines", () -> ExtraLines.HALF)
+			.describe(Type.Combo, "Extra lines")
+			.group(GENERAL)
+			.addDescription("How much you can scroll beyond text")
+			.add("No extra lines", ExtraLines.NONE)
+			.add("Half screen", ExtraLines.HALF);
+
 	GUIPreference<Boolean> FIND_NEWTAB = of("KSFindNewType", () -> false)
 			.describe(Type.Toggle, "New tab on search")
 			.group(BEHAVIOURS)
