@@ -6,62 +6,72 @@ import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.util.function.IntSupplier;
 
-public class CaretLimiter implements CaretListener {
+public class CaretLimiter {
 
-	public static void setup(JTextArea text, IntSupplier lastValidLine) {
-		CaretLimiter limiter = new CaretLimiter(text, lastValidLine);
-		text.addCaretListener(limiter);
-		text.addMouseListener(new MouseAdapter() {
+	public static void setup(JTextArea text, IntSupplier lastValidLineSupplier) {
+		Runnable check = () -> {
+			try {
+				int start = text.getSelectionStart();
+				int end = text.getSelectionEnd();
+				int lastValidLine = Integer.max(0, lastValidLineSupplier.getAsInt());
+				if (start != end) {
+					int firstSelectedLine = text.getLineOfOffset(start);
+					int lastSelectedLine = text.getLineOfOffset(end);
+					// System.out.println("firstSelectedLine=" + firstSelectedLine + "\tlastSelectedLine=" + lastSelectedLine + "\tlastValidLine=" + lastValidLine);
+					if (firstSelectedLine > lastValidLine)
+						text.getLineStartOffset(lastValidLine);
+					if (lastSelectedLine > lastValidLine)
+						text.setSelectionEnd(text.getLineEndOffset(lastValidLine));
+				} else {
+					int currentLine = text.getLineOfOffset(start);
+					// System.out.println("currentLine=" + currentLine + "\tlastValidLine=" + lastValidLine);
+					if (currentLine > lastValidLine)
+						text.setCaretPosition(text.getLineEndOffset(lastValidLine));
+				}
+			} catch (BadLocationException ex) {
+				ex.printStackTrace(System.err);
+			}
+		};
+		MouseMotionListener motionListener = new MouseMotionAdapter() {
 			@Override
-			public void mousePressed(MouseEvent e) {limiter.check();}
+			public void mouseDragged(MouseEvent e) {
+				check.run();
+			}
+		};
+		text.addCaretListener(new CaretListener() {
+			private boolean _updating;
+
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				if (_updating)
+					return;
+				_updating = true;
+				try {
+					check.run();
+				} finally {
+					_updating = false;
+				}
+			}
+		});
+		text.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				check.run();
+				text.addMouseMotionListener(motionListener);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				text.removeMouseMotionListener(motionListener);
+			}
 		});
 	}
 
-	private final JTextArea   _text;
-	private final IntSupplier _lastValidLine;
+	private CaretLimiter() {}
 
-	private boolean _updating;
-
-	private CaretLimiter(JTextArea text, IntSupplier lastValidLine) {
-		_text = text;
-		_lastValidLine = lastValidLine;
-	}
-
-	@Override
-	public void caretUpdate(CaretEvent e) {
-		if (_updating)
-			return;
-		_updating = true;
-		try {
-			check();
-		} finally {
-			_updating = false;
-		}
-	}
-
-	public void check() {
-		try {
-			int start = _text.getSelectionStart();
-			int end = _text.getSelectionEnd();
-			int lastValidLine = Integer.max(0, _lastValidLine.getAsInt());
-			if (start != end) {
-				int firstSelectedLine = _text.getLineOfOffset(start);
-				int lastSelectedLine = _text.getLineOfOffset(end);
-				// System.out.println("firstSelectedLine=" + firstSelectedLine + "\tlastSelectedLine=" + lastSelectedLine + "\tlastValidLine=" + lastValidLine);
-				if (firstSelectedLine > lastValidLine)
-					_text.getLineStartOffset(lastValidLine);
-				if (lastSelectedLine > lastValidLine)
-					_text.setSelectionEnd(_text.getLineEndOffset(lastValidLine));
-			} else {
-				int currentLine = _text.getLineOfOffset(start);
-				// System.out.println("currentLine=" + currentLine + "\tlastValidLine=" + lastValidLine);
-				if (currentLine > lastValidLine)
-					_text.setCaretPosition(_text.getLineEndOffset(lastValidLine));
-			}
-		} catch (BadLocationException ex) {
-			ex.printStackTrace(System.err);
-		}
-	}
 }
