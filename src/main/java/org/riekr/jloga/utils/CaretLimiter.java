@@ -17,7 +17,7 @@ public class CaretLimiter {
 			try {
 				int start = text.getSelectionStart();
 				int end = text.getSelectionEnd();
-				int lastValidLine = Integer.max(0, lastValidLineSupplier.getAsInt());
+				int lastValidLine = Integer.max(0, lastValidLineSupplier.getAsInt() - 1);
 				if (start != end) {
 					int firstSelectedLine = text.getLineOfOffset(start);
 					int lastSelectedLine = text.getLineOfOffset(end);

@@ -207,7 +207,15 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		recalcLineHeight();
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
-		CaretLimiter.setup(_text, () -> (_lineCount < _allLinesCount ? (_allLinesCount - _fromLine) % _lineCount : _allLinesCount) - 2);
+		CaretLimiter.setup(_text, () -> {
+			// _allLinesCount is always +1
+			int allLinesCount = _allLinesCount - 1;
+			if (allLinesCount < _lineCount)
+				return allLinesCount;
+			if (_fromLine + _lineCount < allLinesCount)
+				return _lineCount;
+			return allLinesCount - _fromLine;
+		});
 	}
 
 	public void reload(Supplier<ProgressListener> progressListenerSupplier) {
