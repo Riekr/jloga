@@ -1,6 +1,7 @@
 package org.riekr.jloga;
 
 import static java.util.stream.Collectors.toList;
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 
 import javax.swing.*;
 import java.awt.*;
@@ -81,10 +82,10 @@ public class Main {
 			if (InterComm.isAlive())
 				openFile = InterComm::sendFileOpenCommand;
 			else {
-				TempFiles.cleanup();
 				newInstance();
 				openFile = _INSTANCE::openFiles;
-				InterComm.start();
+				asyncTask(TempFiles::cleanup);
+				asyncTask(InterComm::start);
 			}
 
 			// load files
@@ -106,7 +107,7 @@ public class Main {
 			boolean dark = loadLAF();
 
 			// init ui
-			_INSTANCE = new MainPanel(new Main());
+			_INSTANCE = new MainPanel();
 			_INSTANCE.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			_INSTANCE.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			_INSTANCE.setExtendedState(_INSTANCE.getExtendedState() | JFrame.MAXIMIZED_BOTH);

@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.io.TextSource.closeTextSource;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
@@ -14,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -22,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
-import org.riekr.jloga.Main;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.io.MixFileSource;
@@ -47,8 +46,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 	private final MainDesktopHelp _help;
 	private final JButton         _refreshBtn;
 
-	public MainPanel(Main main) {
-		Objects.requireNonNull(main);
+	public MainPanel() {
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		_progressBar = new JobProgressBar();
@@ -142,14 +140,16 @@ public class MainPanel extends JFrame implements FileDropListener {
 
 	public void openFiles(@NotNull Iterator<File> files) {
 		if (files.hasNext()) {
-			openFile(files.next());
-			int firstOpenedTab = _tabs.getSelectedIndex();
-			// "invokeLater" to avoid ArrayIndexOOB in laf
 			EventQueue.invokeLater(() -> {
-				while (files.hasNext()) {
-					openFile(files.next());
-					_tabs.setSelectedIndex(firstOpenedTab);
-				}
+				openFile(files.next());
+				int firstOpenedTab = _tabs.getSelectedIndex();
+				// "invokeLater" to avoid ArrayIndexOOB in laf
+				EventQueue.invokeLater(() -> {
+					while (files.hasNext()) {
+						openFile(files.next());
+						_tabs.setSelectedIndex(firstOpenedTab);
+					}
+				});
 			});
 		}
 	}
@@ -196,7 +196,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 				searchPanel.onClose();
 				_tabs.remove(searchPanel);
 			}
-			_openFiles.remove(key);
+			closeTextSource(_openFiles.remove(key));
 			if (_tabs.getTabCount() == 1)
 				onRemoveLastTab();
 			else {
@@ -226,7 +226,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 			searchPanelReference.set(searchPanel);
 			searchPanel.addHierarchyListener(e -> {
 				if (e.getID() == HierarchyEvent.PARENT_CHANGED && searchPanel.getParent() == null)
-					_openFiles.remove(key);
+					closeTextSource(_openFiles.remove(key));
 			});
 
 			JComponent tabHeader = newTabHeader(searchPanel.toString(), closer, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
@@ -234,7 +234,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 			_tabs.setTabComponentAt(idx, tabHeader);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-			_openFiles.remove(key);
+			closeTextSource(_openFiles.remove(key));
 		}
 	}
 

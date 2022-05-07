@@ -30,6 +30,11 @@ import org.riekr.jloga.utils.TextUtils;
 
 public interface TextSource extends Iterable<String>, AutoCloseable {
 
+	static void closeTextSource(TextSource textSource) {
+		if (textSource != null)
+			textSource.close();
+	}
+
 	default Future<?> defaultAsyncIO(Runnable task) {
 		return asyncIO(task);
 	}
