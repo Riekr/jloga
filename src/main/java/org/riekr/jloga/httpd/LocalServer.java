@@ -67,8 +67,14 @@ abstract class LocalServer extends NanoWSD {
 				String msg = webSocketFrame.getTextPayload();
 				// System.out.println("JS WebSocket received: " + msg);
 				String id = msg.substring(0, 8);
-				String result = msg.substring(8);
-				_completionExecutor.execute(() -> _pendingCompletions.remove(id).accept(result));
+				if (!id.isBlank()) {
+					String result = msg.substring(8);
+					_completionExecutor.execute(() -> {
+						Consumer<String> c = _pendingCompletions.remove(id);
+						if (c != null)
+							c.accept(result);
+					});
+				}
 			}
 		};
 

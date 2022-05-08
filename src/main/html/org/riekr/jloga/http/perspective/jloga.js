@@ -5,8 +5,8 @@ viewer.toggleConfig();
 let table;
 
 async function set(title, data) {
-		if(title && title.length)
-      window.document.title = title;
+    if (title && title.length)
+        window.document.title = title;
     table && table.clear();
     table = await worker.table(data);
     await viewer.load(table);
@@ -23,3 +23,6 @@ socket.onmessage = async (msg) => {
     await eval(msg.data.substr(8));
     socket.send(id + "OK");
 }
+setInterval(() => {
+    socket.send("        PING");
+}, 45000);
