@@ -80,10 +80,14 @@ public class GUIPreference<T> implements Preference<T> {
 		return this;
 	}
 
+	protected Map<String, T> newValuesMap() {
+		return new TreeMap<>();
+	}
+
 	public Set<Map.Entry<String, T>> values() {
 		if (_values == null || _values.isEmpty())
 			return Collections.emptySet();
-		Map<String, T> values = new TreeMap<>();
+		Map<String, T> values = newValuesMap();
 		_values.forEach((filler) -> filler.accept(values));
 		return values.entrySet();
 	}
@@ -138,5 +142,9 @@ public class GUIPreference<T> implements Preference<T> {
 	public <V> GUIPreference<T> require(GUIPreference<V> otherPref, V val) {
 		otherPref.subscribe((otherVal) -> enabled.next(Objects.equals(val, otherVal)));
 		return this;
+	}
+
+	public boolean available() {
+		return true;
 	}
 }

@@ -57,6 +57,8 @@ public class PrefPanel extends JDialog {
 		setResizable(false);
 		closeOnEscape(this);
 
+		_subscriptions.add(Preferences.THEME.subscribe((t) -> SwingUtilities.updateComponentTreeUI(this)));
+
 		JPanel cp = new JPanel(new BorderLayout());
 		getContentPane().add(cp);
 		cp.setBorder(BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));

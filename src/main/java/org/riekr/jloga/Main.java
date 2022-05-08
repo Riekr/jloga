@@ -8,12 +8,15 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
+import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.prefs.ThemePreference;
 import org.riekr.jloga.ui.MainPanel;
 import org.riekr.jloga.utils.TempFiles;
 import org.riekr.jloga.utils.UIUtils;
@@ -26,17 +29,22 @@ public class Main {
 
 	@SuppressWarnings("SpellCheckingInspection")
 	private static boolean loadLAF() {
-		try {
-			// https://www.formdev.com/flatlaf/themes/
-			UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarculaLaf");
-			UIManager.put("ScrollBar.minimumThumbSize", new Dimension(8, 20));
-			return true;
-		} catch (Throwable ignored) {}
-		try {
-			UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
-			return true;
-		} catch (Throwable ignored) {}
+		Preferences.THEME.subscribe((theme) -> {
+			if (ThemePreference.apply(theme)) {
+				if (_INSTANCE != null)
+					SwingUtilities.updateComponentTreeUI(_INSTANCE);
+			} else {
+				ThemePreference.Theme deflt = ThemePreference.getDefault();
+				if (deflt != null && deflt != theme) {
+					System.err.println("Failed to apply " + theme + ", switching to " + deflt);
+					Preferences.THEME.set(deflt);
+				}
+			}
+		});
 		// https://stackoverflow.com/a/65805346/1326326
+
+		Arrays.stream(UIManager.getInstalledLookAndFeels()).forEach(System.out::println);
+
 		return false;
 	}
 

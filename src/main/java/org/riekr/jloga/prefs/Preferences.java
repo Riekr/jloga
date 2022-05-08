@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import org.riekr.jloga.io.Charsets;
 import org.riekr.jloga.prefs.GUIPreference.Type;
+import org.riekr.jloga.prefs.ThemePreference.Theme;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
@@ -70,6 +71,10 @@ public interface Preferences extends KeyBindings {
 			.add("No highlight", HighlightType.DISABLED)
 			.add("Highlight line in parent only", HighlightType.PARENT_ONLY)
 			.add("Highlight line in whole hierarchy", HighlightType.ALL_HIERARCHY);
+
+	GUIPreference<Theme> THEME = new ThemePreference("Look and feel")
+			.group(BEHAVIOURS)
+			.addDescription("Change the current theme");
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
 			.group(GRID)
@@ -157,7 +162,9 @@ public interface Preferences extends KeyBindings {
 		for (Field f : Preferences.class.getFields()) {
 			if (GUIPreference.class.isAssignableFrom(f.getType())) {
 				try {
-					res.add((GUIPreference<?>)f.get(null));
+					GUIPreference<?> guiPreference = (GUIPreference<?>)f.get(null);
+					if (guiPreference != null && guiPreference.available())
+						res.add(guiPreference);
 				} catch (Throwable e) {
 					e.printStackTrace(System.err);
 				}

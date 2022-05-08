@@ -1,5 +1,8 @@
 ## In progress:
 
+- General
+  - Theme selection
+
 ## v0.2.1
 - General
   - Desktop help auto hide
