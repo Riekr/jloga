@@ -1,10 +1,9 @@
 package org.riekr.jloga.prefs;
 
-import static java.util.stream.Stream.concat;
+import static java.util.Collections.emptySet;
 import static org.riekr.jloga.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.BoolBehaviourSubject;
@@ -31,7 +29,7 @@ public class GUIPreference<T> implements Preference<T> {
 	private final Preference<T> _pref;
 	private final Type          _type;
 	private final String        _title;
-	private       String[]      _descriptions;
+	private       List<String>  _descriptions;
 	private       String        _group;
 
 	public GUIPreference(Preference<T> pref, Type type, String title) {
@@ -40,7 +38,7 @@ public class GUIPreference<T> implements Preference<T> {
 		_title = title;
 	}
 
-	private List<Consumer<Map<String, T>>> _values;
+	private Consumer<Map<String, T>> _values;
 
 	public Type type() {return _type;}
 
@@ -73,9 +71,8 @@ public class GUIPreference<T> implements Preference<T> {
 	public GUIPreference<T> addDescriptionHTML(String description) {
 		if (description != null && !description.isEmpty()) {
 			if (_descriptions == null)
-				_descriptions = new String[]{description};
-			else
-				_descriptions = concat(Stream.of(_descriptions), Stream.of(description)).toArray(String[]::new);
+				_descriptions = new ArrayList<>(1);
+			_descriptions.add(description);
 		}
 		return this;
 	}
@@ -85,28 +82,27 @@ public class GUIPreference<T> implements Preference<T> {
 	}
 
 	public Set<Map.Entry<String, T>> values() {
-		if (_values == null || _values.isEmpty())
-			return Collections.emptySet();
+		if (_values == null)
+			return emptySet();
 		Map<String, T> values = newValuesMap();
-		_values.forEach((filler) -> filler.accept(values));
+		_values.accept(values);
 		return values.entrySet();
 	}
 
-	public GUIPreference<T> add(Supplier<Map<String, T>> values) {
-		if (_values == null)
-			_values = new ArrayList<>();
-		_values.add((res) -> res.putAll(values.get()));
+	public GUIPreference<T> add(Consumer<Map<String, T>> filler) {
+		_values = _values == null ? filler : _values.andThen(filler);
 		return this;
 	}
 
+	public GUIPreference<T> add(Supplier<Map<String, T>> values) {
+		return add((res) -> res.putAll(values.get()));
+	}
+
 	public GUIPreference<T> add(Function<T, String> descriptor, Supplier<T[]> values) {
-		if (_values == null)
-			_values = new ArrayList<>();
-		_values.add((res) -> {
+		return add((res) -> {
 			for (T t : values.get())
 				res.put(descriptor.apply(t), t);
 		});
-		return this;
 	}
 
 	public GUIPreference<T> add(String description, T value) {
@@ -114,10 +110,7 @@ public class GUIPreference<T> implements Preference<T> {
 	}
 
 	public GUIPreference<T> add(String description, Supplier<T> value) {
-		if (_values == null)
-			_values = new ArrayList<>();
-		_values.add((res) -> res.put(description, value.get()));
-		return this;
+		return add((res) -> res.put(description, value.get()));
 	}
 
 	@Override
