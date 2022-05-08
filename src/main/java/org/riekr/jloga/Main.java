@@ -8,7 +8,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -28,11 +27,18 @@ public class Main {
 	public static MainPanel getMain() {return _INSTANCE;}
 
 	@SuppressWarnings("SpellCheckingInspection")
-	private static boolean loadLAF() {
+	private static void loadLAF() {
 		Preferences.THEME.subscribe((theme) -> {
 			if (ThemePreference.apply(theme)) {
-				if (_INSTANCE != null)
+				if (_INSTANCE != null) {
 					SwingUtilities.updateComponentTreeUI(_INSTANCE);
+					try {
+						UIUtils.setIcon(_INSTANCE, "icon.png", theme.dark);
+					} catch (IOException e) {
+						System.err.println("Unable to set window icon!");
+						e.printStackTrace(System.err);
+					}
+				}
 			} else {
 				ThemePreference.Theme deflt = ThemePreference.getDefault();
 				if (deflt != null && deflt != theme) {
@@ -42,10 +48,6 @@ public class Main {
 			}
 		});
 		// https://stackoverflow.com/a/65805346/1326326
-
-		Arrays.stream(UIManager.getInstalledLookAndFeels()).forEach(System.out::println);
-
-		return false;
 	}
 
 	public static void main(String[] vargs) {
@@ -112,7 +114,7 @@ public class Main {
 		if (_INSTANCE == null) {
 
 			// init themes
-			boolean dark = loadLAF();
+			loadLAF();
 
 			// init ui
 			_INSTANCE = new MainPanel();
@@ -120,12 +122,6 @@ public class Main {
 			_INSTANCE.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			_INSTANCE.setExtendedState(_INSTANCE.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 			_INSTANCE.setTitle("JLogA");
-			try {
-				UIUtils.setIcon(_INSTANCE, "icon.png", dark);
-			} catch (IOException e) {
-				System.err.println("Unable to set window icon!");
-				e.printStackTrace(System.err);
-			}
 			_INSTANCE.setVisible(true);
 		}
 	}

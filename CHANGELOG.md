@@ -1,7 +1,7 @@
 ## In progress:
 
 - General
-  - Theme selection
+  - Theme selection and many themes available
 
 ## v0.2.1
 - General
