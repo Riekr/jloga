@@ -1,11 +1,13 @@
 ## In progress:
 
+## v0.2.1
 - General
   - Desktop help auto hide
   - Clear highlight by pressing ESC
   - Serch prefill when pressing ctrl+f or ctrl+r
   - Updated to perspective 1.3.11
   - "Scroll beyond end-of-text" can be changed in preferences
+  - Updated FlatLaf theme
 - Bug fixes:
   - Header detection fixes
   - Fixed selection beyond end-of-text
