@@ -30,15 +30,8 @@ public class Main {
 	private static void loadLAF() {
 		Preferences.THEME.subscribe((theme) -> {
 			if (theme.apply()) {
-				if (_INSTANCE != null) {
+				if (_INSTANCE != null)
 					SwingUtilities.updateComponentTreeUI(_INSTANCE);
-					try {
-						UIUtils.setIcon(_INSTANCE, "icon.png", theme.dark());
-					} catch (IOException e) {
-						System.err.println("Unable to set window icon!");
-						e.printStackTrace(System.err);
-					}
-				}
 			} else {
 				Theme deflt = ThemePreference.getDefault();
 				if (deflt != null && deflt != theme) {
@@ -112,8 +105,8 @@ public class Main {
 
 	private static void newInstance() {
 		if (_INSTANCE == null) {
-			_INSTANCE = new MainPanel();
 			loadLAF();
+			_INSTANCE = new MainPanel();
 			_INSTANCE.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			_INSTANCE.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			_INSTANCE.setExtendedState(_INSTANCE.getExtendedState() | JFrame.MAXIMIZED_BOTH);

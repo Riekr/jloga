@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -92,6 +93,14 @@ public class MainPanel extends JFrame implements FileDropListener {
 					SearchPanel analyzer = (SearchPanel)_tabs.getComponentAt(i);
 					analyzer.setFont(selectedFont);
 				}
+			}
+		});
+		Preferences.THEME.subscribe((theme) -> {
+			try {
+				UIUtils.setIcon(MainPanel.this, "icon.png", theme.dark());
+			} catch (IOException e) {
+				System.err.println("Unable to set window icon!");
+				e.printStackTrace(System.err);
 			}
 		});
 	}
