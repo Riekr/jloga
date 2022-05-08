@@ -15,7 +15,8 @@ import java.util.Locale;
 
 import org.riekr.jloga.io.Charsets;
 import org.riekr.jloga.prefs.GUIPreference.Type;
-import org.riekr.jloga.prefs.ThemePreference.Theme;
+import org.riekr.jloga.theme.ThemePreference;
+import org.riekr.jloga.theme.Theme;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;

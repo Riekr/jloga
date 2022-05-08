@@ -15,7 +15,8 @@ import java.util.function.Consumer;
 
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.prefs.Preferences;
-import org.riekr.jloga.prefs.ThemePreference;
+import org.riekr.jloga.theme.Theme;
+import org.riekr.jloga.theme.ThemePreference;
 import org.riekr.jloga.ui.MainPanel;
 import org.riekr.jloga.utils.TempFiles;
 import org.riekr.jloga.utils.UIUtils;
@@ -26,10 +27,9 @@ public class Main {
 
 	public static MainPanel getMain() {return _INSTANCE;}
 
-	@SuppressWarnings("SpellCheckingInspection")
 	private static void loadLAF() {
 		Preferences.THEME.subscribe((theme) -> {
-			if (ThemePreference.apply(theme)) {
+			if (theme.apply()) {
 				if (_INSTANCE != null) {
 					SwingUtilities.updateComponentTreeUI(_INSTANCE);
 					try {
@@ -40,7 +40,7 @@ public class Main {
 					}
 				}
 			} else {
-				ThemePreference.Theme deflt = ThemePreference.getDefault();
+				Theme deflt = ThemePreference.getDefault();
 				if (deflt != null && deflt != theme) {
 					System.err.println("Failed to apply " + theme + ", switching to " + deflt);
 					Preferences.THEME.set(deflt);
