@@ -2,6 +2,8 @@ package org.riekr.jloga.theme;
 
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,7 +16,8 @@ public class ThemePreference extends GUIPreference<Theme> {
 
 	public ThemePreference(String title) {
 		super(Preference.of("Theme", ThemePreference::getDefault, Theme.class), Type.Combo, title);
-		availableThemes().forEach((theme) -> add(theme.name, theme));
+		add(() -> availableThemes()
+				.collect(toMap(Theme::description, identity(), (a, b) -> a, LinkedHashMap::new)));
 	}
 
 	@Override
@@ -24,7 +27,7 @@ public class ThemePreference extends GUIPreference<Theme> {
 
 	public static Stream<Theme> availableThemes() {
 		return stream(Theme.values())
-				.filter((theme) -> theme.name != null)
+				.filter(Theme::available)
 				.sorted(comparing(Theme::ordinal));
 	}
 

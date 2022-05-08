@@ -33,7 +33,7 @@ public class Main {
 				if (_INSTANCE != null) {
 					SwingUtilities.updateComponentTreeUI(_INSTANCE);
 					try {
-						UIUtils.setIcon(_INSTANCE, "icon.png", theme.dark);
+						UIUtils.setIcon(_INSTANCE, "icon.png", theme.dark());
 					} catch (IOException e) {
 						System.err.println("Unable to set window icon!");
 						e.printStackTrace(System.err);
@@ -112,12 +112,8 @@ public class Main {
 
 	private static void newInstance() {
 		if (_INSTANCE == null) {
-
-			// init themes
-			loadLAF();
-
-			// init ui
 			_INSTANCE = new MainPanel();
+			loadLAF();
 			_INSTANCE.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			_INSTANCE.setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 			_INSTANCE.setExtendedState(_INSTANCE.getExtendedState() | JFrame.MAXIMIZED_BOTH);

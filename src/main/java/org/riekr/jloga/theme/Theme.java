@@ -1,7 +1,7 @@
 package org.riekr.jloga.theme;
 
-import javax.swing.*;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @SuppressWarnings("SpellCheckingInspection")
 public enum Theme {
@@ -53,32 +53,36 @@ public enum Theme {
 	WindowsClassicLookAndFeel("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel", null),
 	MotifLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel", null);
 
-	public final String              clazz;
-	public final Map<Object, Object> params;
-	public final String              name;
-	public final boolean             dark;
+	private Supplier<ThemeData> _data;
 
 	Theme(String clazz, Map<Object, Object> params) {
-		String name = null;
-		boolean dark = false;
-		try {
-			Class<?> cl = Class.forName(clazz);
-			LookAndFeel laf = (LookAndFeel)cl.getConstructor().newInstance();
-			name = laf.getName();
-			dark = (boolean)cl.getMethod("isDark").invoke(laf);
-		} catch (Throwable ignored) {}
-		this.name = name;
-		this.dark = dark;
-		if (name == null) {
-			this.clazz = null;
-			this.params = null;
-		} else {
-			this.clazz = clazz;
-			this.params = params;
-		}
+		_data = () -> {
+			ThemeData resolved = new ThemeData(clazz, params);
+			if (resolved.name == null) {
+				_data = () -> null;
+				return null;
+			}
+			_data = () -> resolved;
+			return resolved;
+		};
+	}
+
+	public boolean available() {
+		return _data.get() != null;
+	}
+
+	public boolean dark() {
+		ThemeData resolved = _data.get();
+		return resolved != null && _data.get().dark;
+	}
+
+	public String description() {
+		ThemeData resolved = _data.get();
+		return resolved == null ? null : resolved.name;
 	}
 
 	public boolean apply() {
-		return ThemeData.apply(this);
+		ThemeData resolved = _data.get();
+		return resolved != null && resolved.apply();
 	}
 }
