@@ -6,6 +6,7 @@
   - Selection highlight persists on viewport change
   - Correct parent line highlighted
   - More header detection
+  - Rollback to flatlaf 2.1 due to JSplitPane regression
 
 ## v0.2.1
 - General
