@@ -2,6 +2,9 @@
 
 - General
   - Theme selection and many themes available
+- Bug fixes:
+  - Selection highlight persists on viewport change
+  - Correct parent line highlighted
 
 ## v0.2.1
 - General

@@ -413,7 +413,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (text) -> {
 				_prevRequireTextRequest = null;
 				_text.setText(text);
-				if (_gridView != null)
+				if (_gridView == null)
+					_selectionHighlight.refresh();
+				else
 					_gridView.refresh();
 				reNumerate();
 				EventQueue.invokeLater(() -> {
@@ -425,14 +427,14 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void highlightLine(Integer highlightedLine) {
+		Highlighter highlighter = _text.getHighlighter();
+		if (_lineHighlight != null) {
+			highlighter.removeHighlight(_lineHighlight);
+			_lineHighlight = null;
+		}
 		if (highlightedLine != null) {
 			int line = highlightedLine - _fromLine;
 			try {
-				Highlighter highlighter = _text.getHighlighter();
-				if (_lineHighlight != null) {
-					highlighter.removeHighlight(_lineHighlight);
-					_lineHighlight = null;
-				}
 				if (line >= 0 && line <= _lineCount) {
 					int start = _text.getLineStartOffset(line);
 					_lineHighlight = highlighter.addHighlight(
@@ -440,10 +442,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 							_text.getLineEndOffset(line),
 							new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
 					);
-					_text.setCaretPosition(start);
+					// _text.setCaretPosition(start);
 					if (_parent != null && Preferences.HLTYPE.get() == HighlightType.ALL_HIERARCHY) {
 						Integer parentLine = _textSource.getSrcLine(highlightedLine);
 						if (parentLine != null) {
+							if (Preferences.LINES_FROM1.get())
+								parentLine++;
 							_parent.centerOn(parentLine);
 							_parent.setHighlightedLine(parentLine);
 						}
