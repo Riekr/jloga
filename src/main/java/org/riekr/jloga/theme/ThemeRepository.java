@@ -1,11 +1,10 @@
 package org.riekr.jloga.theme;
 
 import javax.swing.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.formdev.flatlaf.intellijthemes.FlatAllIJThemes;
-import com.formdev.flatlaf.intellijthemes.FlatAllIJThemes.FlatIJLookAndFeelInfo;
 
 class ThemeRepository {
 
@@ -17,23 +16,25 @@ class ThemeRepository {
 			tryAdd("com.formdev.flatlaf.FlatDarculaLaf");
 			tryAdd("com.formdev.flatlaf.FlatIntelliJLaf");
 
-			// extras
-			for (FlatIJLookAndFeelInfo e : FlatAllIJThemes.INFOS)
-				tryAdd(e.getClassName());
-
-			// Built-ins
-			tryAdd("javax.swing.plaf.metal.MetalLookAndFeel");
-			tryAdd("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-			tryAdd("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-			tryAdd("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-			tryAdd("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
-			tryAdd("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-			LookAndFeel[] aux = UIManager.getAuxiliaryLookAndFeels();
-			if (aux != null) {
-				for (LookAndFeel laf : aux)
-					tryAdd(laf.getClass().getName());
+			// flatlaf extras
+			try {
+				Class<?> cl = Class.forName("com.formdev.flatlaf.intellijthemes.FlatAllIJThemes");
+				Field f = cl.getField("INFOS");
+				Object arr = f.get(null);
+				for (int i = 0, len = Array.getLength(arr); i < len; i++) {
+					UIManager.LookAndFeelInfo info = (UIManager.LookAndFeelInfo)Array.get(arr, i);
+					tryAdd(info.getClassName());
+				}
+			} catch (ClassNotFoundException ignored) {
+			} catch (Throwable e) {
+				e.printStackTrace(System.err);
 			}
 
+			// Built-ins
+			tryAdd(UIManager.getSystemLookAndFeelClassName());
+			UIManager.LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
+			for (UIManager.LookAndFeelInfo laf : installed)
+				tryAdd(laf.getClassName());
 		}
 		return _AVAILABLE;
 	}
