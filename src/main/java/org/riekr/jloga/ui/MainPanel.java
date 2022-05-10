@@ -97,7 +97,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		});
 		Preferences.THEME.subscribe((theme) -> {
 			try {
-				UIUtils.setIcon(MainPanel.this, "icon.png", theme.dark());
+				UIUtils.setIcon(MainPanel.this, "icon.png", theme.dark);
 			} catch (IOException e) {
 				System.err.println("Unable to set window icon!");
 				e.printStackTrace(System.err);

@@ -33,7 +33,7 @@ public class Main {
 					SwingUtilities.updateComponentTreeUI(_INSTANCE);
 			} else {
 				Theme deflt = ThemePreference.getDefault();
-				if (deflt != null && deflt != theme) {
+				if (deflt != theme) {
 					System.err.println("Failed to apply " + theme + ", switching to " + deflt);
 					Preferences.THEME.set(deflt);
 				}
