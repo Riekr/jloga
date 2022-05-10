@@ -423,7 +423,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					refreshHighlights();
 				else
 					_gridView.refresh();
-				_scrollPane.getHorizontalScrollBar().setValue(0);
+				EventQueue.invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
 				reNumerate();
 			});
 		}
