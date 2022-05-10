@@ -251,6 +251,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			if (_gridView != null) {
 				_gridView = null;
 				_scrollPane.setViewportView(_text);
+				refreshHighlights();
 			}
 		}
 	}
@@ -404,6 +405,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 	}
 
+	private void refreshHighlights() {
+		_selectionHighlight.refresh();
+		highlightLine(_highlightedLine.get());
+	}
+
 	private void requireText() {
 		if (_textSource == null)
 			_text.setText("");
@@ -414,14 +420,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				_prevRequireTextRequest = null;
 				_text.setText(text);
 				if (_gridView == null)
-					_selectionHighlight.refresh();
+					refreshHighlights();
 				else
 					_gridView.refresh();
+				_scrollPane.getHorizontalScrollBar().setValue(0);
 				reNumerate();
-				EventQueue.invokeLater(() -> {
-					_scrollPane.getHorizontalScrollBar().setValue(0);
-					highlightLine(_highlightedLine.get());
-				});
 			});
 		}
 	}
