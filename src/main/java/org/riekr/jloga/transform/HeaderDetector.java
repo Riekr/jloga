@@ -21,11 +21,11 @@ public class HeaderDetector {
 	private Set<Integer>       _checkSet       = new HashSet<>();
 	private FastSplitOperation _splitOperation = new FastSplitOperation();
 
-	private int     _checkTarget = CHECK_LINES;
-	private int     _colCount    = -1;
-	private String  _header;
-	private Boolean _own;
-	private char    _delim;
+	private int       _checkTarget = CHECK_LINES;
+	private int       _colCount    = -1;
+	private String    _header;
+	private Boolean   _own;
+	private Character _delim;
 
 	public HeaderDetector(@Nullable HeaderDetector parent) {
 		_parent = parent;
@@ -74,7 +74,11 @@ public class HeaderDetector {
 	}
 
 	private synchronized void complete() {
-		_delim = _splitOperation.getDelim();
+		try {
+			_delim = _splitOperation.getDelim();
+		} catch (IllegalStateException e) {
+			_delim = null;
+		}
 		_splitOperation = null;
 		_checkSet = null;
 		if (_header == null) {

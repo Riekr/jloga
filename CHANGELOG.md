@@ -5,6 +5,7 @@
 - Bug fixes:
   - Selection highlight persists on viewport change
   - Correct parent line highlighted
+  - More header detection
 
 ## v0.2.1
 - General

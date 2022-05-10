@@ -6,6 +6,7 @@ import java.awt.*;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -38,6 +39,7 @@ public class ChildTextSource implements FilteredTextSource {
 
 	private volatile int                 _lineCount        = 0;
 	private final    IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
+	private final    CountDownLatch      _latch            = new CountDownLatch(1);
 
 	private int _lastLine = -1;
 
@@ -72,6 +74,7 @@ public class ChildTextSource implements FilteredTextSource {
 
 	public void complete() {
 		_lineCountSubject.last();
+		_latch.countDown();
 	}
 
 	@Override
@@ -95,6 +98,7 @@ public class ChildTextSource implements FilteredTextSource {
 	@Override
 	public int getLineCount() throws ExecutionException, InterruptedException {
 		_tie.getLineCount(); // wait for indexing
+		_latch.await(); // wait for population
 		return _lineCount;
 	}
 
