@@ -37,8 +37,9 @@ public class MainDesktopHelp extends JComponent {
 	private final JLabel       _keyBindings;
 	private final Box          _recentBox;
 
-	private boolean _arrowsHidden    = false;
-	private boolean _arrowsUncovered = true;
+	private boolean _arrowsHidden        = false;
+	private boolean _arrowsUncovered     = true;
+	private boolean _arrowsUncoveredPrec = true;
 
 	private final Point _recentBoxLoc = new Point();
 	private       int   _leftArrowsX, _rightArrowsX;
@@ -145,6 +146,10 @@ public class MainDesktopHelp extends JComponent {
 			_keyBindings.setVisible(true);
 		}
 		// System.out.println("K " + getHeight() + " " + _keyBindingsLastLim);
+		if (_arrowsUncovered != _arrowsUncoveredPrec) {
+			_arrowsUncoveredPrec = _arrowsUncovered;
+			repaint();
+		}
 	}
 
 	@Override

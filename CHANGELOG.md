@@ -8,6 +8,7 @@
   - Correct parent line highlighted
   - More header detection
   - Rollback to flatlaf 2.1 due to JSplitPane regression
+  - Desktop help callouts auto hide
 
 ## v0.2.1
 - General
