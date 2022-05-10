@@ -2,6 +2,7 @@
 
 - General
   - Theme selection and many themes available
+  - Updated to perspective 1.3.12
 - Bug fixes:
   - Selection highlight persists on viewport change
   - Correct parent line highlighted
