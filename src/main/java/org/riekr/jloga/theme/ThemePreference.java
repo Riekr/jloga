@@ -9,14 +9,16 @@ import org.riekr.jloga.prefs.Preference;
 
 public class ThemePreference extends GUIPreference<Theme> {
 
-	private static Theme getTheme(String className) {
+	private static Theme getTheme(Preference<String> pref, String className) {
 		try {
 			return new Theme(className);
 		} catch (ClassNotFoundException ignored) {
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}
-		return getDefault();
+		Theme def = getDefault();
+		pref.set(def.toString());
+		return def;
 	}
 
 	@NotNull
@@ -26,7 +28,7 @@ public class ThemePreference extends GUIPreference<Theme> {
 
 	public ThemePreference(String title) {
 		super(Preference.of("Theme", () -> getDefault().toString())
-				.withConversion(ThemePreference::getTheme, Theme::toString), Type.Combo, title);
+				.withConversion(ThemePreference::getTheme, (p, t) -> t.className), Type.Combo, title);
 		add(ThemeRepository::availableThemes);
 	}
 

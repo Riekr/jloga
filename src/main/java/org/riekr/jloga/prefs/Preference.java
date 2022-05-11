@@ -3,6 +3,7 @@ package org.riekr.jloga.prefs;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -54,6 +55,10 @@ public interface Preference<T> extends Observable<T> {
 				Locale::forLanguageTag,
 				Locale::toLanguageTag
 		);
+	}
+
+	default <R> Preference<R> withConversion(BiFunction<Preference<T>, T, R> encoder, BiFunction<Preference<T>, R, T> decoder) {
+		return withConversion((t) -> encoder.apply(this, t), (r) -> decoder.apply(this, r));
 	}
 
 	default <R> Preference<R> withConversion(Function<T, R> encoder, Function<R, T> decoder) {

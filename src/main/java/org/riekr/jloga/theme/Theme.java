@@ -3,6 +3,7 @@ package org.riekr.jloga.theme;
 import static java.util.Collections.singletonMap;
 
 import javax.swing.*;
+import javax.swing.UIManager.LookAndFeelInfo;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -13,20 +14,31 @@ public class Theme {
 	private static final Map<Object, Object> _FLATLAF_DEFAULTS = singletonMap("ScrollBar.minimumThumbSize", new Dimension(8, 20));
 	private static       Map<Object, Object> _APPLIED_DEFAULTS;
 
-	public final String                       name;
-	public final String                       className;
-	public final Class<? extends LookAndFeel> clazz;
-	public final boolean                      dark;
+	public final String  name;
+	public final String  className;
+	public final boolean dark;
 
 	@SuppressWarnings("unchecked")
 	public Theme(String className) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-		this.clazz = (Class<? extends LookAndFeel>)Class.forName(className);
+		Class<? extends LookAndFeel> clazz = (Class<? extends LookAndFeel>)Class.forName(className);
 		LookAndFeel laf = clazz.getConstructor().newInstance();
 		this.name = laf.getName();
 		this.className = className;
 		boolean dark;
 		try {
 			dark = (boolean)clazz.getMethod("isDark").invoke(laf);
+		} catch (Throwable e) {
+			dark = false;
+		}
+		this.dark = dark;
+	}
+
+	public Theme(LookAndFeelInfo lookAndFeelInfo) {
+		this.name = lookAndFeelInfo.getName();
+		this.className = lookAndFeelInfo.getClassName();
+		boolean dark;
+		try {
+			dark = (boolean)lookAndFeelInfo.getClass().getMethod("isDark").invoke(lookAndFeelInfo);
 		} catch (Throwable e) {
 			dark = false;
 		}
@@ -41,6 +53,7 @@ public class Theme {
 		}
 		try {
 			UIManager.setLookAndFeel(this.className);
+			//noinspection SpellCheckingInspection
 			if (className.startsWith("com.formdev.flatlaf.")) {
 				defaults.putAll(_FLATLAF_DEFAULTS);
 				_APPLIED_DEFAULTS = _FLATLAF_DEFAULTS;
