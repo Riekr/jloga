@@ -25,6 +25,7 @@ public interface Preferences extends KeyBindings {
 
 	String GENERAL    = "General";
 	String BEHAVIOURS = "Behaviours";
+	String THEMES     = "Theme";
 	String GRID       = "Grid";
 	String BROWSER    = "Browser";
 	String FORMATS    = "Formats";
@@ -74,8 +75,8 @@ public interface Preferences extends KeyBindings {
 			.add("Highlight line in whole hierarchy", HighlightType.ALL_HIERARCHY);
 
 	GUIPreference<Theme> THEME = new ThemePreference("Look and feel")
-			.group(BEHAVIOURS)
-			.addDescription("Change the current theme");
+			.group(THEMES)
+			.addDescription("Change the current theme:");
 
 	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
 			.group(GRID)

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.theme.ThemePreview;
 import org.riekr.jloga.ui.ComboEntryWrapper;
 import org.riekr.jloga.ui.KeyStrokeToggleButton;
 import org.riekr.jloga.utils.ContextMenu;
@@ -77,12 +78,15 @@ public class PrefPanel extends JDialog {
 			String group = e.getKey();
 			final Tab tab = new Tab(e.getValue());
 			_tabs.addTab(group, tab);
+			Box themePanel = null;
 			for (GUIPreference<?> p : tab.prefs) {
 				Box panel = Box.createVerticalBox();
 				ContextMenu.addAction(panel, "Reset", p::reset);
 				String descr = p.description();
 				if (descr != null && !descr.isEmpty()) {
-					if (p.type() != KeyBinding) {
+					if (p.group().equals(Preferences.THEMES)) {
+						themePanel = panel;
+					} else if (p.type() != KeyBinding) {
 						panel.setBorder(BorderFactory.createCompoundBorder(
 								BorderFactory.createTitledBorder(p.title()),
 								BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
@@ -119,6 +123,16 @@ public class PrefPanel extends JDialog {
 				}
 				tab.contents.add(panel);
 				_subscriptions.add(p.enabled.subscribe((enabled) -> allComponents(panel).forEach((c) -> c.setEnabled(enabled))));
+			}
+			if (themePanel != null) {
+				ThemePreview preview = new ThemePreview();
+				preview.setAlignmentX(0);
+				preview.setBorder(BorderFactory.createCompoundBorder(
+						BorderFactory.createTitledBorder("Preview:"),
+						BorderFactory.createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING)
+				));
+				themePanel.add(Box.createVerticalStrut(_SPACING));
+				themePanel.add(preview);
 			}
 		}
 		_tabs.setSelectedIndex(_LAST_SELECTED_TAB);

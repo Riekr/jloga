@@ -503,13 +503,21 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void setHighlightedLine(Integer line) {
+		setHighlightedLine(line, true);
+	}
+
+	public void setHighlightedLine(Integer line, boolean scroll) {
 		_highlightedLine.next(line);
-		if (line != null) {
+		if (scroll && line != null) {
 			if (line < _fromLine)
 				setFromLine(line);
 			else if (line > (_fromLine + _lineCount))
 				setFromLine(line - _lineCount + 1);
 		}
+	}
+
+	public void setHighlightedText(String text) {
+		_selectionHighlight.setText(text);
 	}
 
 	public void onClose() {
@@ -535,5 +543,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		if (res == null)
 			return _selectionHighlight.getText();
 		return res;
+	}
+
+	public int getLineHeight() {
+		return _lineHeight;
 	}
 }
