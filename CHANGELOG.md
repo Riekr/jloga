@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.2
 - General
   - Theme selection and many themes available
   - Updated to perspective 1.3.12
