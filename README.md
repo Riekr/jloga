@@ -116,7 +116,7 @@ Once you close the browser, the app will automatically close.
 ## Future and licensing
 This software is free as in speech, do whatever you want with it.
 
-As a spare time project this source base is updated only when needed, don't expect fast response times to bug/issues or requests. I'll do my best anyway.
+As a spare time project sources are updated only when possible, don't expect fast response times to bug/issues or requests. I'll do my best anyway.
 
 ### Used libraries includes:
 - FlatLaf - Flat Look and Feel ([home](https://www.formdev.com/flatlaf/) - [license](https://github.com/JFormDesigner/FlatLaf/blob/main/LICENSE))
