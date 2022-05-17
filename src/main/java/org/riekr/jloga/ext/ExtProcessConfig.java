@@ -18,6 +18,7 @@ import org.riekr.jloga.search.SearchComponent;
 
 import com.google.gson.annotations.SerializedName;
 
+@SuppressWarnings("CanBeFinal")
 public class ExtProcessConfig {
 
 	public enum ParamType {

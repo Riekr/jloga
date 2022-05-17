@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class JPopupMenuWithMouseLoc extends JPopupMenu {
+	private static final long serialVersionUID = 4128574454805066731L;
 
 	public final AtomicReference<Point> lastClick;
 

@@ -92,7 +92,7 @@ abstract class LocalServer extends NanoWSD {
 			return newChunkedResponse(Response.Status.OK, "image/png", getClass().getResourceAsStream("/org/riekr/jloga/icon.png"));
 		if ("websocket".equalsIgnoreCase(session.getHeaders().get("upgrade")))
 			return super.serve(session);
-		Response response = serveResponse(session);
+		@SuppressWarnings("resource") Response response = serveResponse(session);
 		return response == null ? super.serveHttp(session) : response;
 	}
 

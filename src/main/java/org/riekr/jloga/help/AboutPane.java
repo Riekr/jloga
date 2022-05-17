@@ -1,16 +1,17 @@
 package org.riekr.jloga.help;
 
-import org.riekr.jloga.Main;
+import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.riekr.jloga.Main;
+
 public class AboutPane extends JOptionPane {
+	private static final long serialVersionUID = 5267265626558401149L;
 
 	private static final String _HOMEPAGE = "https://github.com/Riekr/jloga";
 
@@ -36,30 +37,20 @@ public class AboutPane extends JOptionPane {
 				DEFAULT_OPTION
 		);
 		JLabel link = new JLabel("<html><a href=\"\">" + _HOMEPAGE + "</a></html>");
-		link.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-				if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-					try {
-						desktop.browse(URI.create(_HOMEPAGE));
-					} catch (Exception ex) {
-						ex.printStackTrace(System.err);
-					}
+		link.addMouseListener(mouse().onClick((e) -> {
+			Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+			if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+				try {
+					desktop.browse(URI.create(_HOMEPAGE));
+				} catch (Exception ex) {
+					ex.printStackTrace(System.err);
 				}
 			}
-		});
-		link.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				link.setCursor(new Cursor(Cursor.HAND_CURSOR));
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				link.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			}
-		});
+		}));
+		link.addMouseListener(mouse()
+				.onEnter(e -> link.setCursor(new Cursor(Cursor.HAND_CURSOR)))
+				.onExit(e -> link.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)))
+		);
 		add(link, 1);
 	}
 

@@ -64,7 +64,7 @@ public class HeaderDetector {
 	}
 
 	private synchronized void waitCompletion() {
-		if (!isComplete()) {
+		if (isPending()) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -121,7 +121,7 @@ public class HeaderDetector {
 	}
 
 	private boolean requireComplete() {
-		if (!isComplete())
+		if (isPending())
 			throw new IllegalStateException("Didn't finish checking");
 		return true;
 	}
@@ -137,8 +137,8 @@ public class HeaderDetector {
 		return Objects.requireNonNull(_own);
 	}
 
-	public boolean isComplete() {
-		return _checkSet == null && _own != null && _header != null;
+	public boolean isPending() {
+		return _checkSet != null || _own == null || _header == null;
 	}
 
 	public int getCheckTarget() {

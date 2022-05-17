@@ -58,8 +58,8 @@ public class MainDesktopHelp extends JComponent {
 			if (comp instanceof JComponent && ((JComponent)comp).getToolTipText() != null)
 				arr.add((JComponent)comp);
 		}
-		_leftComponents = lc.toArray(new JComponent[0]);
-		_rightComponents = rc.toArray(new JComponent[0]);
+		_leftComponents = lc.toArray(JComponent[]::new);
+		_rightComponents = rc.toArray(JComponent[]::new);
 
 		// recent files
 		setLayout(new BorderLayout());

@@ -47,6 +47,18 @@ import org.riekr.jloga.utils.UIUtils;
 public class VirtualTextArea extends JComponent implements FileDropListener {
 	private static final long serialVersionUID = -2704231180724047955L;
 
+	public static class Dummy extends VirtualTextArea {
+		private static final long serialVersionUID = 8358979652181379726L;
+
+		public Dummy(String title) {
+			super(null, title, null);
+		}
+
+		@Override
+		public void openInPerspective() {}
+
+	}
+
 	private int _lineHeight;
 
 	private int _fromLine      = 0;
