@@ -1,5 +1,7 @@
 ## In progress:
 
+- General
+  - Updated to perspective 1.3.13
 - Bug fixes:
   - Search while indexing does not wait for indexing to finish
   - Now indexing is done in a dedicated fs thread with low priority

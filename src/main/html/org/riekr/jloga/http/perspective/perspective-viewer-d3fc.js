@@ -1,6 +1,6 @@
 /**
  * Minified by jsDelivr using Terser v5.10.0.
- * Original file: /npm/@finos/perspective-viewer-d3fc@1.3.12/dist/umd/perspective-viewer-d3fc.js
+ * Original file: /npm/@finos/perspective-viewer-d3fc@1.3.13/dist/umd/perspective-viewer-d3fc.js
  *
  * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
  */
