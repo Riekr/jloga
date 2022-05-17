@@ -27,25 +27,54 @@ public class AsyncOperations {
 		private final ThreadGroup   group;
 		private final AtomicInteger threadNumber = new AtomicInteger(1);
 		private final String        namePrefix;
+		private final int           priority;
 
-		NamedThreadFactory(@NotNull String name) {
+		NamedThreadFactory(@NotNull String name, int prio) {
 			SecurityManager s = System.getSecurityManager();
-			group = (s != null) ? s.getThreadGroup() :
-					Thread.currentThread().getThreadGroup();
+			group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 			namePrefix = name + "-thread-";
+			priority = prio;
 		}
 
 		public Thread newThread(@NotNull Runnable r) {
 			Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
 			t.setDaemon(true);
-			t.setPriority(Thread.NORM_PRIORITY);
+			t.setPriority(priority);
 			return t;
 		}
 	}
 
-	private static final HashMap<String, ExecutorService> _IO_EXECUTORS     = new HashMap<>();
-	private static final ScheduledExecutorService         _MONITOR_EXECUTOR = newSingleThreadScheduledExecutor(new NamedThreadFactory("monitor"));
-	private static final ExecutorService                  _AUX_EXECUTOR     = newCachedThreadPool(new NamedThreadFactory("aux"));
+	public static class ByRoot {
+		private final @NotNull String                           _name;
+		private final          int                              _priority;
+		private final          HashMap<String, ExecutorService> _executors = new HashMap<>();
+
+		public ByRoot(@NotNull String name, int priority) {
+			_name = name;
+			_priority = priority;
+		}
+
+		public Future<?> submit(@NotNull Runnable task) {
+			return submit((Path)null, task);
+		}
+
+		public Future<?> submit(@Nullable File file, Runnable task) {
+			return submit(file == null ? null : file.toPath(), task);
+		}
+
+		public Future<?> submit(@Nullable Path path, Runnable task) {
+			return _executors.computeIfAbsent(
+					path == null ? _name : _name + '-' + path.getRoot(),
+					(k) -> newSingleThreadExecutor(new NamedThreadFactory(k, _priority))
+			).submit(task);
+		}
+	}
+
+	public static final ByRoot IO    = new ByRoot("io", Thread.NORM_PRIORITY);
+	public static final ByRoot INDEX = new ByRoot("index", Thread.MIN_PRIORITY);
+
+	private static final ScheduledExecutorService _MONITOR_EXECUTOR = newSingleThreadScheduledExecutor(new NamedThreadFactory("monitor", Thread.NORM_PRIORITY));
+	private static final ExecutorService          _AUX_EXECUTOR     = newCachedThreadPool(new NamedThreadFactory("aux", Thread.NORM_PRIORITY));
 
 	public static ScheduledFuture<?> monitorProgress(LongSupplier current, long total, ProgressListener progressListener) {
 		return monitorProgress(current, () -> total, progressListener);
@@ -55,20 +84,6 @@ public class AsyncOperations {
 		return _MONITOR_EXECUTOR.scheduleWithFixedDelay(
 				() -> progressListener.onIntermediate(current.getAsLong(), total.getAsLong()),
 				200, 200, TimeUnit.MILLISECONDS);
-	}
-
-	public static Future<?> asyncIO(@NotNull Runnable task) {
-		return asyncIO((Path)null, task);
-	}
-
-	public static Future<?> asyncIO(@Nullable File file, Runnable task) {
-		return asyncIO(file == null ? null : file.toPath(), task);
-	}
-
-	public static Future<?> asyncIO(@Nullable Path path, Runnable task) {
-		String name = path == null ? "io" : "io-" + path.getRoot();
-		ExecutorService executorService = _IO_EXECUTORS.computeIfAbsent(name, (k) -> newSingleThreadExecutor(new NamedThreadFactory(k)));
-		return executorService.submit(task);
 	}
 
 	public static Future<?> asyncTask(Runnable task) {

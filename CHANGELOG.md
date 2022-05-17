@@ -1,5 +1,9 @@
 ## In progress:
 
+- Bug fixes:
+  - Search while indexing does not wait for indexing to finish
+  - Now indexing is done in a dedicated fs thread with low priority
+
 ## v0.2.2
 - General
   - Theme selection and many themes available

@@ -5,7 +5,6 @@ import static java.nio.file.StandardOpenOption.READ;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
-import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 import static org.riekr.jloga.utils.FileUtils.getFileCreationTime;
@@ -52,6 +51,7 @@ import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.AsyncOperations;
 import org.riekr.jloga.utils.CancellableFuture;
 import org.riekr.jloga.utils.TextUtils;
 
@@ -93,7 +93,7 @@ public class TextFileSource implements TextSource {
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
 		setCharset(charset);
-		_indexing = asyncIO(file, () -> {
+		_indexing = AsyncOperations.INDEX.submit(file, () -> {
 			try {
 				reindex(indexingListener);
 			} catch (IndexingException e) {
@@ -293,7 +293,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public Future<?> defaultAsyncIO(Runnable task) {
-		return asyncIO(_file, task);
+		return AsyncOperations.IO.submit(_file, task);
 	}
 
 	@Override
@@ -313,7 +313,7 @@ public class TextFileSource implements TextSource {
 		}
 
 		if (_indexing.isDone()) {
-			return asyncIO(_file, () -> {
+			return defaultAsyncIO(() -> {
 				String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
 				EventQueue.invokeLater(() -> consumer.accept(text));
 			});

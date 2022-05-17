@@ -1,6 +1,5 @@
 package org.riekr.jloga.io;
 
-import static org.riekr.jloga.utils.AsyncOperations.asyncIO;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 
@@ -26,6 +25,7 @@ import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
+import org.riekr.jloga.utils.AsyncOperations;
 import org.riekr.jloga.utils.TextUtils;
 
 public interface TextSource extends Iterable<String>, AutoCloseable {
@@ -36,7 +36,7 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	}
 
 	default Future<?> defaultAsyncIO(Runnable task) {
-		return asyncIO(task);
+		return AsyncOperations.IO.submit(task);
 	}
 
 	/** Runs in AWT thread when ready */
@@ -94,10 +94,10 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 			Future<?> future = resRef.get();
 			return future == null || !future.isCancelled();
 		};
+		FilteredTextSource searchResult = predicate.start(this);
+		consumer.accept(searchResult);
 		Future<?> res = defaultAsyncIO(() -> {
 			try {
-				FilteredTextSource searchResult = predicate.start(this);
-				EventQueue.invokeLater(() -> consumer.accept(searchResult));
 				search(predicate, searchResult, progressListener, running);
 				searchResult.complete();
 			} catch (SearchException e) {
@@ -135,7 +135,7 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	}
 
 	default void requestSave(File file, ProgressListener progressListener) {
-		asyncIO(file, () -> {
+		AsyncOperations.IO.submit(file, () -> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
