@@ -9,6 +9,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.riekr.jloga.Main;
+import org.riekr.jloga.ui.ROKeyListener;
+import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.Info;
+import org.riekr.jloga.utils.UIUtils;
 
 public class AboutPane extends JOptionPane {
 	private static final long serialVersionUID = 5267265626558401149L;
@@ -22,8 +26,9 @@ public class AboutPane extends JOptionPane {
 		return "<i>dev " + DateTimeFormatter.ofPattern("dd/MM/uuuu").format(LocalDate.now()) + "</i>";
 	}
 
-	public AboutPane() {
-		super(
+	private static Component compose() {
+		JTabbedPane root = new JTabbedPane(JTabbedPane.LEFT);
+		JLabel about = new JLabel(
 				"<html>" +
 						"Welcome to <b>JLogA</b> " + getVersion() + "<br><br>" +
 						"<p>This program is free as in speech, without any warranty<br>" +
@@ -32,10 +37,21 @@ public class AboutPane extends JOptionPane {
 						"this program please let me know.</p><br>" +
 						"<p>No developers were harmed during the making of<br>" +
 						"but please log consciously.<p><br>" +
-						"</html>",
-				INFORMATION_MESSAGE,
-				DEFAULT_OPTION
-		);
+						"</html>");
+		about.setBorder(BorderFactory.createEmptyBorder(0, UIUtils.VSPACE, 0, 0));
+		root.add("About", about);
+
+		JTextArea info = new JTextArea(Info.get());
+		info.setBorder(BorderFactory.createEmptyBorder(0, UIUtils.VSPACE, 0, 0));
+		info.addKeyListener(new ROKeyListener());
+		ContextMenu.addActionCopy(info);
+		info.setBackground(about.getBackground());
+		root.add("Info", info);
+		return root;
+	}
+
+	public AboutPane() {
+		super(compose(), PLAIN_MESSAGE, DEFAULT_OPTION);
 		JLabel link = new JLabel("<html><a href=\"\">" + _HOMEPAGE + "</a></html>");
 		link.addMouseListener(mouse().onClick((e) -> {
 			Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;

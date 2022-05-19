@@ -2,8 +2,9 @@
 
 - General
   - Updated to perspective 1.3.13
+  - Info in about pane (and "-info" cli switch)
 - Bug fixes:
-  - Search while indexing does not wait for indexing to finish
+  - Search while indexing does not wait for finish
   - Now indexing is done in a dedicated fs thread with low priority
 
 ## v0.2.2

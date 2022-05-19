@@ -17,6 +17,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.theme.Theme;
 import org.riekr.jloga.theme.ThemePreference;
 import org.riekr.jloga.ui.MainPanel;
+import org.riekr.jloga.utils.Info;
 import org.riekr.jloga.utils.TempFiles;
 import org.riekr.jloga.utils.UIUtils;
 
@@ -58,6 +59,10 @@ public class Main {
 					case "-perspective":
 						i.remove();
 						FinosPerspectiveServer.main(args.toArray(String[]::new));
+						return;
+
+					case "-info":
+						Info.writeTo(System.out);
 						return;
 
 					case "-remote-info":

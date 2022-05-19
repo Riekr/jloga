@@ -21,6 +21,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.riekr.jloga.ui.MainPanel;
+import org.riekr.jloga.utils.Info;
 
 public class InterComm extends ServerSocket implements Runnable {
 
@@ -138,11 +139,7 @@ public class InterComm extends ServerSocket implements Runnable {
 
 							case CMD_INFO: {
 								PrintStream out = new PrintStream(socket.getOutputStream(), false);
-								Runtime rt = Runtime.getRuntime();
-								out.println("Available Processors = " + rt.availableProcessors());
-								out.println("Heap Memory = " + rt.totalMemory());
-								out.println("Free Memory = " + rt.freeMemory());
-								out.println("Max Memory = " + rt.maxMemory());
+								Info.writeTo(out);
 								out.flush();
 								break;
 							}

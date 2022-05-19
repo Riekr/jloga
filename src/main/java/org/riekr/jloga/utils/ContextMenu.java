@@ -53,6 +53,25 @@ public class ContextMenu {
 		}
 	}
 
+	public static void addActionCopy(@NotNull JTextArea target) {
+		addActionCopy(target, COPY, (p, a) -> {
+			String text = target.getSelectedText();
+			if (text != null && !text.isEmpty())
+				return text;
+			// try searching line number
+			if (p != null) {
+				text = TextAreaUtils.getTextAtMouseLocation(target, p);
+				if (text != null && !text.isEmpty())
+					return text;
+			}
+			// try to fetch first highlight (should not pass here)
+			text = TextAreaUtils.getFirstHighlightedText(target);
+			if (text != null && !text.isEmpty())
+				return text;
+			// nothing found
+			return null;
+		});
+	}
 
 	public static <T extends JLabel> T addActionCopy(T component) {
 		return addActionCopy(component, COPY, (p, a) -> component.getText());
@@ -93,10 +112,9 @@ public class ContextMenu {
 		return component;
 	}
 
-	public static <T extends JComponent> T addAction(T component, String label, Runnable action) {
+	public static <T extends JComponent> void addAction(T component, String label, Runnable action) {
 		JPopupMenuWithMouseLoc popupMenu = JPopupMenuWithMouseLoc.ensurePopupMenu(component);
 		popupMenu.add(label).addActionListener((a) -> action.run());
-		return component;
 	}
 
 }
