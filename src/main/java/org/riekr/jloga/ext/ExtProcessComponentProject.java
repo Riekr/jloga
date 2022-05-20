@@ -34,12 +34,12 @@ public class ExtProcessComponentProject extends ProjectComponent {
 	private Map<String, String> _vars = emptyMap();
 
 	@SuppressWarnings("unchecked")
-	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, List<String> command, Map<String, Param> params, Pattern matchRegex) {
+	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, List<String> command, Map<String, Param> params, Pattern matchRegex, Pattern sectionRegex) {
 		super(id, level, id);
 		_id = id;
 		_icon = icon;
 		_params = params;
-		_manager = new ExtProcessManager(workingDir, command, matchRegex);
+		_manager = new ExtProcessManager(workingDir, command, matchRegex, sectionRegex);
 		_params.forEach((key, param) -> {
 			switch (param.type) {
 

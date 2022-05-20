@@ -3,6 +3,8 @@ package org.riekr.jloga.io;
 import static org.riekr.jloga.pmem.PagedIntToObjList.newPagedIntToStringList;
 
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,6 +22,7 @@ public class TempTextSource implements FilteredTextSource {
 
 	private final PagedIntToObjList<String> _data             = newPagedIntToStringList();
 	private final IntBehaviourSubject       _lineCountSubject = new IntBehaviourSubject();
+	private       LinkedList<Section>       _sectionList;
 
 	@Override
 	public String getText(int line) {
@@ -111,5 +114,21 @@ public class TempTextSource implements FilteredTextSource {
 
 	public int pages() {
 		return _data.pages();
+	}
+
+	@Override
+	public List<Section> sections() {
+		return _sectionList;
+	}
+
+	public synchronized void markSection(String title, boolean excludeStart) {
+		int from = _sectionList == null || _sectionList.isEmpty() ? 0 : _sectionList.getLast().to;
+		if (excludeStart)
+			from++;
+		int to = _lineCountSubject.get();
+		Section section = new Section(title, from, to);
+		if (_sectionList == null)
+			_sectionList = new LinkedList<>();
+		_sectionList.add(section);
 	}
 }

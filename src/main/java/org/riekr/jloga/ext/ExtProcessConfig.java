@@ -47,6 +47,7 @@ public class ExtProcessConfig {
 	public Map<String, Param> params;
 	public String             matchRegex;
 	public boolean            enabled = true;
+	public String             sectionRegex;
 
 	public transient String _id;
 
@@ -96,6 +97,17 @@ public class ExtProcessConfig {
 		return null;
 	}
 
+	public Pattern getSectionRegex() {
+		if (sectionRegex != null && !sectionRegex.isBlank()) {
+			try {
+				return Pattern.compile(matchRegex);
+			} catch (PatternSyntaxException err) {
+				throw popupError("Invalid 'matchRegex' in '" + label + '\'', err);
+			}
+		}
+		return null;
+	}
+
 	@Override public String toString() {
 		return "ExtProcessConfig{" +
 				"icon='" + icon + '\'' +
@@ -108,7 +120,7 @@ public class ExtProcessConfig {
 
 	public SearchComponent toComponent(String id, int level) {
 		if (params == null || params.isEmpty())
-			return new ExtProcessComponent(id, icon, label, new File(workingDirectory), getCommand(), getMatchRegex());
-		return new ExtProcessComponentProject(id, icon, level, new File(workingDirectory), getCommand(), params, getMatchRegex());
+			return new ExtProcessComponent(id, icon, label, new File(workingDirectory), getCommand(), getMatchRegex(), getSectionRegex());
+		return new ExtProcessComponentProject(id, icon, level, new File(workingDirectory), getCommand(), params, getMatchRegex(), getSectionRegex());
 	}
 }

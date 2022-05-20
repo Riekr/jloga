@@ -21,10 +21,10 @@ public class ExtProcessComponent extends JButton implements SearchComponent {
 	private       Consumer<SearchPredicate> _searchPredicateConsumer;
 	private final ExtProcessManager         _manager;
 
-	public ExtProcessComponent(String id, String icon, String label, File workingDirectory, List<String> command, Pattern matchRegex) {
+	public ExtProcessComponent(String id, String icon, String label, File workingDirectory, List<String> command, Pattern matchRegex, Pattern sectionRegex) {
 		_id = id;
 		_icon = icon;
-		_manager = new ExtProcessManager(workingDirectory, command, matchRegex);
+		_manager = new ExtProcessManager(workingDirectory, command, matchRegex, sectionRegex);
 		UIUtils.makeBorderless(this);
 		setText(label);
 		addActionListener((e) -> {

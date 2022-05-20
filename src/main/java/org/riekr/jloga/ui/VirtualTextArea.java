@@ -5,6 +5,7 @@ import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
+import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,7 +20,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -31,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.io.ProgressListener;
+import org.riekr.jloga.io.RangedTextSource;
+import org.riekr.jloga.io.Section;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.ExtraLines;
@@ -77,11 +83,13 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final LineNumbersTextArea _lineNumbers;
 	private final JScrollBar          _scrollBar;
 
+	private final Box               _floatingButtons;
 	private final JToggleButton     _gridToggle;
 	private       JTextAreaGridView _gridView;
 	private       HeaderDetector    _header;
 
 	private TextSource     _textSource;
+	private List<Section>  _sections;
 	private Unsubscribable _textSourceUnsubscribable;
 	private Future<?>      _prevRequireTextRequest;
 	private Future<?>      _prevReloadRequest;
@@ -196,18 +204,18 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_selectionHighlight = new SelectionHighlight(_text);
 
 		// floating buttons
-		final Box buttons = Box.createVerticalBox();
-		Box buttonsContainer = Box.createHorizontalBox();
-		buttons.add(buttonsContainer);
+		Box buttons = Box.createVerticalBox();
+		_floatingButtons = Box.createHorizontalBox();
+		buttons.add(_floatingButtons);
 		buttons.add(Box.createVerticalGlue());
-		buttonsContainer.add(Box.createHorizontalGlue());
+		_floatingButtons.add(Box.createHorizontalGlue());
 		_gridToggle = new JToggleButton("\u25A6");
-		buttonsContainer.add(_gridToggle);
+		_floatingButtons.add(_gridToggle);
 		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected(), false));
 		JButton perspectiveBtn = new JButton("\uD83D\uDCC8");
 		perspectiveBtn.addActionListener(e -> openInPerspective());
-		buttonsContainer.add(perspectiveBtn);
-		buttonsContainer.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
+		_floatingButtons.add(perspectiveBtn);
+		_floatingButtons.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));
 
 		// overlay layout
 		setLayout(new OverlayLayout(this));
@@ -359,6 +367,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void setTextSource(TextSource textSource) {
+		if (_textSource == textSource)
+			return;
 		if (_textSourceUnsubscribable != null)
 			_textSourceUnsubscribable.unsubscribe();
 		TextSource old = _textSource;
@@ -370,7 +380,38 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_header.detect(textSource, this::detectHeaderDone);
 			_textSourceUnsubscribable = textSource.subscribeLineCount(this::setFileLineCount);
 			requireText();
+			// I want to check sections only once and after the file has been loaded
+			if (_sections == null) {
+				asyncTask(() -> {
+					try {
+						textSource.getLineCount();
+						EventQueue.invokeLater(this::checkSections);
+					} catch (ExecutionException | InterruptedException ignored) {}
+				});
+			}
 		}
+	}
+
+	private void checkSections() {
+		_sections = _textSource.sections();
+		if (_sections == null || _sections.isEmpty())
+			return;
+		Section all = new Section("All", 0, _allLinesCount);
+		Section[] options = Stream.concat(Stream.of(all), _sections.stream()).toArray(Section[]::new);
+		JComboBox<Section> comboBox = new JComboBox<>(options);
+		comboBox.setMaximumSize(_floatingButtons.getSize());
+		_floatingButtons.add(comboBox, 1);
+		TextSource origTextSource = _textSource;
+		Map<Section, TextSource> sections = new HashMap<>();
+		comboBox.addActionListener(e -> {
+			Section sec = (Section)comboBox.getSelectedItem();
+			if (sec == null || sec == all)
+				setTextSource(origTextSource);
+			else {
+				setTextSource(sections.computeIfAbsent(sec, (k) -> new RangedTextSource(origTextSource, k.from, k.to)));
+				System.out.println(sec);
+			}
+		});
 	}
 
 	private void detectHeaderDone() {

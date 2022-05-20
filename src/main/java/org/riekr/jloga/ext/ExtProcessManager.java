@@ -28,6 +28,7 @@ public class ExtProcessManager {
 	private final List<String> _command;
 	private final File         _workingDirectory;
 	private final Pattern      _matchRegex;
+	private final Pattern      _sectionRegex;
 
 	private Map<String, String> _searchVars;
 	private Map<String, String> _allVars;
@@ -36,10 +37,11 @@ public class ExtProcessManager {
 	private List<String>  _lastCommand;
 	private LocalDateTime _lastStart;
 
-	public ExtProcessManager(@NotNull File workingDirectory, @NotNull List<String> command, @Nullable Pattern matchRegex) {
+	public ExtProcessManager(@NotNull File workingDirectory, @NotNull List<String> command, @Nullable Pattern matchRegex, @Nullable Pattern sectionRegex) {
 		_workingDirectory = workingDirectory;
 		_command = command;
 		_matchRegex = matchRegex;
+		_sectionRegex = sectionRegex;
 	}
 
 	public SearchPredicate newSearchPredicate() {
@@ -49,7 +51,7 @@ public class ExtProcessManager {
 					.map((param) -> replaceRegex(param, VAR_PATTERN, env))
 					.filter((param) -> !param.isEmpty())
 					.collect(toList());
-			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand, _matchRegex) {
+			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand, _matchRegex, _sectionRegex) {
 				@Override
 				public FilteredTextSource start(TextSource master) {
 					_lastStart = LocalDateTime.now();

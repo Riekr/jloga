@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -198,4 +199,6 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	default void reload(Supplier<ProgressListener> progressListenerSupplier) {
 		throw new UnsupportedOperationException(getClass().getName() + " does not support reloading");
 	}
+
+	default List<Section> sections() {return null;}
 }

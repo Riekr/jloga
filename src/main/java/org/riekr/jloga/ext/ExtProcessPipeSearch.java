@@ -24,7 +24,7 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 
 	private final File             _workingDir;
 	private final List<String>     _command;
-	private final Consumer<String> _onStdOut;
+	private       Consumer<String> _onStdOut;
 
 	private volatile int            _line;
 	private          TempTextSource _textSource;
@@ -33,8 +33,9 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 	private          ReadThread     _stdErrReader;
 	private volatile Throwable      _err;
 	private          Process        _process;
+	private          String         _sectionTitle;
 
-	public ExtProcessPipeSearch(@NotNull File workingDir, @NotNull List<String> command, @Nullable Pattern matchRegex) {
+	public ExtProcessPipeSearch(@NotNull File workingDir, @NotNull List<String> command, @Nullable Pattern matchRegex, @Nullable Pattern sectionRegex) {
 		if (command.isEmpty())
 			throw new IllegalArgumentException("No command specified");
 		_workingDir = workingDir;
@@ -42,17 +43,17 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 		if (matchRegex == null) {
 			_onStdOut = (line) -> _textSource.addLine(_line, line);
 		} else {
-			Matcher matcher = matchRegex.matcher("");
+			Matcher lineNumberMatcher = matchRegex.matcher("");
 			_onStdOut = new Consumer<>() {
 				private int _lastDecodedLine = -1;
 
 				@Override
 				public void accept(String line) {
 					try {
-						matcher.reset(line);
-						if (matcher.matches()) {
-							_lastDecodedLine = Integer.parseInt(matcher.group("line")) - 1;
-							_textSource.addLine(_lastDecodedLine, matcher.group("text"));
+						lineNumberMatcher.reset(line);
+						if (lineNumberMatcher.matches()) {
+							_lastDecodedLine = Integer.parseInt(lineNumberMatcher.group("line")) - 1;
+							_textSource.addLine(_lastDecodedLine, lineNumberMatcher.group("text"));
 						} else if (_lastDecodedLine == -1)
 							_textSource.addLine(_line, line);
 						else
@@ -62,6 +63,15 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 					}
 				}
 			};
+		}
+		if (sectionRegex != null) {
+			Matcher sectionMatcher = sectionRegex.matcher("");
+			_onStdOut = _onStdOut.andThen((line) -> {
+				if (sectionMatcher.reset(line).matches())
+					if (_sectionTitle != null)
+						_textSource.markSection(_sectionTitle, true);
+				_sectionTitle = sectionMatcher.groupCount() == 0 ? line : sectionMatcher.group(1);
+			});
 		}
 	}
 
@@ -130,6 +140,10 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 		_stdOutReader = null;
 		_stdErrReader.waitFor();
 		_stdErrReader = null;
+		if (_sectionTitle != null) {
+			_textSource.markSection(_sectionTitle, true);
+			_sectionTitle = null;
+		}
 		_textSource.complete();
 		_textSource = null;
 	}
