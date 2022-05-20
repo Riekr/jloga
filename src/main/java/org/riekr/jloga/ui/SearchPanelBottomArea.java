@@ -102,10 +102,8 @@ public class SearchPanelBottomArea extends JComponent {
 			_resultTextArea.getTextArea().setLineClickListener((line) -> {
 				if (Preferences.HLTYPE.get() != HighlightType.DISABLED) {
 					Integer srcLine = _resultTextArea.getTextSource().getSrcLine(line);
-					if (srcLine != null) {
-						_parent.getTextArea().centerOn(srcLine);
+					if (srcLine != null)
 						_resultTextArea.getTextArea().setHighlightedLine(line);
-					}
 				}
 			});
 			add(_resultTextArea, BorderLayout.CENTER);

@@ -346,8 +346,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void centerOn(int line) {
-		_highlightedLine.next(line);
 		setFromLine(line - _extraLines.apply(_lineCount));
+		_highlightedLine.next(line);
 	}
 
 	@Override
@@ -443,34 +443,38 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private void highlightLine(Integer highlightedLine) {
 		Highlighter highlighter = _text.getHighlighter();
+
+		// remove old highlight
 		if (_lineHighlight != null) {
 			highlighter.removeHighlight(_lineHighlight);
 			_lineHighlight = null;
 		}
-		if (highlightedLine != null) {
+
+		// stop if no highlight
+		if (highlightedLine == null)
+			return;
+
+		// highlight current text area
+		try {
 			int line = highlightedLine - _fromLine;
-			try {
-				if (line >= 0 && line <= _lineCount) {
-					int start = _text.getLineStartOffset(line);
-					_lineHighlight = highlighter.addHighlight(
-							start,
-							_text.getLineEndOffset(line),
-							new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
-					);
-					// _text.setCaretPosition(start);
-					if (_parent != null && Preferences.HLTYPE.get() == HighlightType.ALL_HIERARCHY) {
-						Integer parentLine = _textSource.getSrcLine(highlightedLine);
-						if (parentLine != null) {
-							if (Preferences.LINES_FROM1.get())
-								parentLine++;
-							_parent.centerOn(parentLine);
-							_parent.setHighlightedLine(parentLine);
-						}
-					}
-				}
-			} catch (BadLocationException e) {
-				e.printStackTrace(System.err);
+			if (line >= 0 && line <= _lineCount) {
+				int start = _text.getLineStartOffset(line);
+				_lineHighlight = highlighter.addHighlight(
+						start,
+						_text.getLineEndOffset(line),
+						new DefaultHighlighter.DefaultHighlightPainter(_text.getSelectionColor())
+				);
+				// _text.setCaretPosition(start);
 			}
+		} catch (BadLocationException e) {
+			e.printStackTrace(System.err);
+		}
+
+		// eventually highlight parent text area
+		if (_parent != null && Preferences.HLTYPE.get() == HighlightType.ALL_HIERARCHY) {
+			Integer parentLine = _textSource.getSrcLine(highlightedLine);
+			if (parentLine != null)
+				_parent.centerOn(parentLine);
 		}
 	}
 
