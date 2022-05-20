@@ -126,18 +126,15 @@ public class ChildTextSource implements FilteredTextSource {
 
 	@Override
 	public Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
-		if (_tie.isIndexing()) {
-			return defaultAsyncIO(() -> {
-				try {
-					String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
-					EventQueue.invokeLater(() -> consumer.accept(text));
-				} catch (CancellationException ignored) {
-					System.out.println("Text request cancelled");
-				} catch (Throwable e) {
-					e.printStackTrace(System.err);
-				}
-			});
-		}
-		return FilteredTextSource.super.requestText(fromLine, count, consumer);
+		return defaultAsyncIO(() -> {
+			try {
+				String text = TextUtils.toString(getText(fromLine, Math.min(_lineCount - fromLine, count)), count);
+				EventQueue.invokeLater(() -> consumer.accept(text));
+			} catch (CancellationException ignored) {
+				System.out.println("Text request cancelled");
+			} catch (Throwable e) {
+				e.printStackTrace(System.err);
+			}
+		});
 	}
 }
