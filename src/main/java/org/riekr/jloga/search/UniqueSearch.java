@@ -40,17 +40,13 @@ public class UniqueSearch extends RegExSearch {
 	protected Function<String, String> newExtractor() {
 		Function<String, String> base = super.newExtractor();
 		if (_dateExtractor != null) {
-			return new Function<>() {
-				private final Matcher _dateMatcher = _dateExtractor.matcher("");
-
-				@Override
-				public String apply(String line) {
-					String res = base.apply(line);
-					_dateMatcher.reset(line);
-					if (_dateMatcher.find())
-						res = escape(_dateFormatter.apply(_dateMatcher.group(1))) + DELIM + res;
-					return res;
-				}
+			Matcher dateMatcher = _dateExtractor.matcher("");
+			return line -> {
+				String res = base.apply(line);
+				dateMatcher.reset(line);
+				if (dateMatcher.find())
+					res = escape(_dateFormatter.apply(dateMatcher.group(1))) + DELIM + res;
+				return res;
 			};
 		}
 		return base;
