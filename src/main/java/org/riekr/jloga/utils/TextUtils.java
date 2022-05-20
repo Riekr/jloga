@@ -4,8 +4,6 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
 import javax.swing.*;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -124,7 +122,7 @@ public class TextUtils {
 		final int lim = Math.min(from + len, strings.length);
 		StringBuilder buf = new StringBuilder(100 * count);
 		buf.append(strings[from]);
-		int i = from;
+		int i = from + 1;
 		for (; i < lim; i++)
 			buf.append('\n').append(strings[i]);
 		len = from + count;
