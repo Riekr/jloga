@@ -4,12 +4,14 @@ import static java.util.stream.Collectors.joining;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -41,12 +43,25 @@ public class ExtProcessConfig {
 	public String             label;
 	public String             description;
 	public Object[]           command;
-	public int                order;
+	public Integer            order;
 	public Map<String, Param> params;
 	public String             matchRegex;
 	public boolean            enabled = true;
 
 	public transient String _id;
+
+	void normalize(Path f) {
+		_id = f.getFileName().toString();
+		if (workingDirectory == null)
+			workingDirectory = f.getParent().toAbsolutePath().toString();
+		if (order == null) {
+			Matcher orderExtract = Pattern.compile("^(\\d+)").matcher(_id);
+			if (orderExtract.find())
+				order = Integer.parseInt(orderExtract.group(1));
+			else
+				order = 0;
+		}
+	}
 
 	public List<String> getCommand() {
 		ArrayList<String> res = new ArrayList<>();

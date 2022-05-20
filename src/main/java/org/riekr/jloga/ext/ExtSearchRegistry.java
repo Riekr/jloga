@@ -39,9 +39,7 @@ public class ExtSearchRegistry {
 							// System.out.println("LOADING EXT: " + config);
 							try (BufferedReader reader = Files.newBufferedReader(f)) {
 								ExtProcessConfig config = gson.fromJson(reader, ExtProcessConfig.class);
-								if (config.workingDirectory == null)
-									config.workingDirectory = extPath.getAbsolutePath();
-								config._id = f.getFileName().toString();
+								config.normalize(f);
 								return config;
 							} catch (Throwable e) {
 								System.err.println("Unable to read " + f);
