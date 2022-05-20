@@ -1,12 +1,12 @@
 package org.riekr.jloga.ext;
 
 import static java.util.Collections.emptyList;
-import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Comparator;
 import java.util.List;
 
 import org.riekr.jloga.prefs.Preferences;
@@ -48,7 +48,7 @@ public class ExtSearchRegistry {
 							}
 						})
 						.filter((config) -> config != null && config.enabled)
-						.sorted(comparingInt(c -> c.order))
+						.sorted(Comparator.<ExtProcessConfig>comparingInt(c -> c.order).thenComparing(c -> c._id))
 						.map((config) -> new Entry(config._id, (level) -> config.toComponent(config._id, level), config.description) {
 							@Override
 							public String toString() {

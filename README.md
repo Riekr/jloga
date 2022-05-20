@@ -59,6 +59,13 @@ In addition to `env.jloga.properties` a `env-windows.jloga.properties` will be r
 
 Inside the `.json.jloga` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
 
+### Ordering
+Without any other specification, external scripts are ordered by filename. You can specify order in other ways:
+- inside the *.jloga.json* config file with the `order` tag
+- at the *.jloga.json* filename beginning with a number (will override alphabetical order)
+
+When the order value of two different scripts is the same, alphabetical filename ordering will take place.
+
 ### Line matching
 By default, lines are matched with the source files at the moment the child process emits an output.\
 If your analyzer supports emitting the line number you can specify a full-line-match regex to extract the line number
