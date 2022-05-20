@@ -6,6 +6,7 @@
 - External scripts:
   - External scripts are ordered by filename if it starts with a number
     and no order is specified inside the *.jloga.json* config file.
+  - Variables are now supported in combo values
 - Bug fixes:
   - Search while indexing does not wait for finish
   - Now indexing is done in a dedicated fs thread with low priority

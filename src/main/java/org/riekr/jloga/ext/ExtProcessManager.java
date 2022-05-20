@@ -23,14 +23,18 @@ import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessManager {
 
+	public static final Pattern VAR_PATTERN = Pattern.compile("%([\\w._]+)%");
+
 	private final List<String> _command;
 	private final File         _workingDirectory;
 	private final Pattern      _matchRegex;
 
 	private Map<String, String> _searchVars;
-	private JTextArea           _stdErr;
-	private List<String>        _lastCommand;
-	private LocalDateTime       _lastStart;
+	private Map<String, String> _allVars;
+
+	private JTextArea     _stdErr;
+	private List<String>  _lastCommand;
+	private LocalDateTime _lastStart;
 
 	public ExtProcessManager(@NotNull File workingDirectory, @NotNull List<String> command, @Nullable Pattern matchRegex) {
 		_workingDirectory = workingDirectory;
@@ -40,10 +44,9 @@ public class ExtProcessManager {
 
 	public SearchPredicate newSearchPredicate() {
 		try {
-			Map<String, String> env = getAllVars(_workingDirectory);
-			Pattern pattern = Pattern.compile("%([\\w._]+)%");
+			Map<String, String> env = getAllVars();
 			_lastCommand = _command.stream()
-					.map((param) -> replaceRegex(param, pattern, env))
+					.map((param) -> replaceRegex(param, VAR_PATTERN, env))
 					.filter((param) -> !param.isEmpty())
 					.collect(toList());
 			return new ExtProcessPipeSearch(_workingDirectory, _lastCommand, _matchRegex) {
@@ -97,16 +100,20 @@ public class ExtProcessManager {
 			_stdErr.append('\n' + toTime(LocalDateTime.now()) + line);
 	}
 
-	private Map<String, String> getAllVars(File workingDir) {
-		Map<String, String> res = new HashMap<>(System.getenv());
-		if (workingDir != null && workingDir.isDirectory())
-			ExtEnv.read(workingDir, res);
-		if (_searchVars != null)
-			res.putAll(_searchVars);
-		return res;
+	public Map<String, String> getAllVars() {
+		if (_allVars == null) {
+			Map<String, String> res = new HashMap<>(System.getenv());
+			if (_workingDirectory.isDirectory())
+				ExtEnv.read(_workingDirectory, res);
+			if (_searchVars != null)
+				res.putAll(_searchVars);
+			_allVars = res;
+		}
+		return _allVars;
 	}
 
 	public void setSearchVars(Map<String, String> searchVars) {
 		_searchVars = searchVars;
+		_allVars = null;
 	}
 }
