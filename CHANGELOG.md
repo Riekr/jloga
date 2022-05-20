@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.3
 - General:
   - Updated to perspective 1.3.13
   - Info in about pane (and "-info" cli switch)
