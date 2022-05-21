@@ -373,20 +373,26 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			_textSourceUnsubscribable.unsubscribe();
 		TextSource old = _textSource;
 		_textSource = textSource;
-		if (old != null)
-			old.close();
+		if (old != null) {
+			if (!RangedTextSource.areCorrelated(old, textSource))
+				old.close();
+		}
 		if (textSource != null) {
 			_header = new HeaderDetector(_parent == null ? null : _parent._header);
 			_header.detect(textSource, this::detectHeaderDone);
+			_fromLine = 0;
+			_allLinesCount = 0;
 			_textSourceUnsubscribable = textSource.subscribeLineCount(this::setFileLineCount);
 			requireText();
 			// I want to check sections only once and after the file has been loaded
 			if (_sections == null) {
 				asyncTask(() -> {
-					try {
-						textSource.getLineCount();
-						EventQueue.invokeLater(this::checkSections);
-					} catch (ExecutionException | InterruptedException ignored) {}
+					if (_textSource == textSource) {
+						try {
+							textSource.getLineCount();
+							EventQueue.invokeLater(this::checkSections);
+						} catch (ExecutionException | InterruptedException ignored) {}
+					}
 				});
 			}
 		}
@@ -407,10 +413,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			Section sec = (Section)comboBox.getSelectedItem();
 			if (sec == null || sec == all)
 				setTextSource(origTextSource);
-			else {
+			else
 				setTextSource(sections.computeIfAbsent(sec, (k) -> new RangedTextSource(origTextSource, k.from, k.to)));
-				System.out.println(sec);
-			}
 		});
 	}
 
@@ -427,10 +431,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private void setFileLineCount(int lineCount) {
 		// +1 to ensure last line is shown even if window borders fall across it
 		if (_allLinesCount != ++lineCount) {
+			int t = _allLinesCount;
 			_allLinesCount = lineCount;
 			recalcScrollBarMaximum();
 			_scrollBar.setEnabled(true); // TODO: moving this line below disables scrollbar
-			if (_fromLine <= lineCount && lineCount <= _fromLine + _lineCount)
+			// if _allLinesCount (t) was 0 I'm loading from setTextSource and a requireText is in progress
+			if (t > 0 && _fromLine <= lineCount && lineCount <= _fromLine + _lineCount)
 				requireText();
 			reNumerate();
 		}

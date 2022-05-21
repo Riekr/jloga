@@ -100,7 +100,7 @@ public class ExtProcessConfig {
 	public Pattern getSectionRegex() {
 		if (sectionRegex != null && !sectionRegex.isBlank()) {
 			try {
-				return Pattern.compile(matchRegex);
+				return Pattern.compile(sectionRegex);
 			} catch (PatternSyntaxException err) {
 				throw popupError("Invalid 'matchRegex' in '" + label + '\'', err);
 			}

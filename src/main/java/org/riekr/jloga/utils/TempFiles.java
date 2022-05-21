@@ -33,7 +33,7 @@ public class TempFiles {
 	public static File createTempFile(@NotNull String name, @Nullable File tempDir) {
 		try {
 			File temp = File.createTempFile("jloga-" + name + '-', null, tempDir);
-			System.out.println("Created " + temp.getAbsolutePath());
+			// System.out.println("Created " + temp.getAbsolutePath());
 			temp.deleteOnExit();
 			return temp;
 		} catch (IOException e) {

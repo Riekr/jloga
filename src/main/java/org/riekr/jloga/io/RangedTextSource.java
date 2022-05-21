@@ -1,5 +1,8 @@
 package org.riekr.jloga.io;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
@@ -16,9 +19,15 @@ import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
 
-import static java.lang.Math.min;
-
 public class RangedTextSource implements TextSource {
+
+	public static boolean areCorrelated(TextSource a, TextSource b) {
+		while (a instanceof RangedTextSource)
+			a = ((RangedTextSource)a)._textSource;
+		while (b instanceof RangedTextSource)
+			b = ((RangedTextSource)b)._textSource;
+		return a == b;
+	}
 
 	private final @NotNull TextSource _textSource;
 	private final          int        _from, _count;
@@ -33,6 +42,13 @@ public class RangedTextSource implements TextSource {
 		return _from + from;
 	}
 
+	private int count(int from, int count) {
+		if (_count < count)
+			count = _count;
+		count = min(count, _count - from);
+		return max(count, 0);
+	}
+
 	@Override
 	public Future<?> defaultAsyncIO(Runnable task) {
 		return _textSource.defaultAsyncIO(task);
@@ -40,12 +56,12 @@ public class RangedTextSource implements TextSource {
 
 	@Override
 	public Future<?> requestText(int fromLine, int count, Consumer<String> consumer) {
-		return _textSource.requestText(from(fromLine), min(_count, count), consumer);
+		return _textSource.requestText(from(fromLine), count(fromLine, count), consumer);
 	}
 
 	@Override
 	public String[] getText(int fromLine, int count) throws ExecutionException, InterruptedException {
-		return _textSource.getText(from(fromLine), min(_count, count));
+		return _textSource.getText(from(fromLine), count(fromLine, count));
 	}
 
 	@Override
@@ -70,7 +86,8 @@ public class RangedTextSource implements TextSource {
 
 	@Override
 	public Unsubscribable subscribeLineCount(IntConsumer consumer) {
-		return TextSource.super.subscribeLineCount(consumer);
+		consumer.accept(_count);
+		return null;
 	}
 
 	@Override
@@ -85,7 +102,7 @@ public class RangedTextSource implements TextSource {
 
 	@Override
 	public Integer getSrcLine(int line) {
-		return TextSource.super.getSrcLine(line);
+		return _textSource.getSrcLine(from(line));
 	}
 
 	@Override

@@ -67,10 +67,11 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 		if (sectionRegex != null) {
 			Matcher sectionMatcher = sectionRegex.matcher("");
 			_onStdOut = _onStdOut.andThen((line) -> {
-				if (sectionMatcher.reset(line).matches())
+				if (sectionMatcher.reset(line).matches()) {
 					if (_sectionTitle != null)
 						_textSource.markSection(_sectionTitle, true);
-				_sectionTitle = sectionMatcher.groupCount() == 0 ? line : sectionMatcher.group(1);
+					_sectionTitle = sectionMatcher.groupCount() == 0 ? line : sectionMatcher.group(1);
+				}
 			});
 		}
 	}

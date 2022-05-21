@@ -123,9 +123,11 @@ public class TempTextSource implements FilteredTextSource {
 
 	public synchronized void markSection(String title, boolean excludeStart) {
 		int from = _sectionList == null || _sectionList.isEmpty() ? 0 : _sectionList.getLast().to;
-		if (excludeStart)
+		int to = Math.toIntExact(_data.size());
+		if (excludeStart) {
 			from++;
-		int to = _lineCountSubject.get();
+			to--;
+		}
 		Section section = new Section(title, from, to);
 		if (_sectionList == null)
 			_sectionList = new LinkedList<>();
