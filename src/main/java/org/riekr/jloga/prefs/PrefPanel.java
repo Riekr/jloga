@@ -84,7 +84,7 @@ public class PrefPanel extends JDialog {
 				ContextMenu.addAction(panel, "Reset", p::reset);
 				String descr = p.description();
 				if (descr != null && !descr.isEmpty()) {
-					if (p.group().equals(Preferences.THEMES)) {
+					if (p == Preferences.THEME) {
 						themePanel = panel;
 					} else if (p.type() != KeyBinding) {
 						panel.setBorder(BorderFactory.createCompoundBorder(

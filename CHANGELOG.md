@@ -1,5 +1,10 @@
 ## In progress:
 
+- General:
+  - Native file dialogs (awt)
+- External scripts:
+  - Support for search output sections (specify a `sectionRegex` in *.jloga.json* file)
+
 ## v0.2.3
 - General:
   - Updated to perspective 1.3.13

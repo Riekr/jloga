@@ -19,7 +19,7 @@ import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.HoverMonitor;
 import org.riekr.jloga.ui.MRUComboWithLabels;
-import org.riekr.jloga.utils.SpringUtils;
+import org.riekr.jloga.utils.SpringLayoutUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public abstract class SearchComponentWithExpandablePanel extends JComponent implements SearchComponent {
@@ -66,7 +66,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			configPaneButtons.setBorder(createEmptyBorder(8, 0, 0, 0));
 			configPane.add(configPaneButtons);
 
-			SpringUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
+			SpringLayoutUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
 
 			_collapsedLabel.addMouseListener(_mouseListener);
 			addMouseListener(new MouseAdapter() {

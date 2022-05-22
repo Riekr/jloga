@@ -108,6 +108,13 @@ See the folder [ext-search-samples](ext-search-samples) for some examples.
 #### Custom parameters
 Inside *.json.jloga* files you can define new variables bound to UI widgets, by now the most complete example is [cyggrep.jloga.json](ext-search-samples/cyggrep.jloga.json).
 
+### Sectioning
+If your external analyzer outputs more sections, you can grab them and see a single section after having
+selected it in the search results viewer.\
+To begin sectioning the output of your external script you must add a `sectionRegex` value in you script
+definition that will match the full line: if a capturing group is specified the contents will be used as
+the title of the section, otherwise the full line will be used as title instead.
+
 ## Finos perspective
 I've fallen in love with [Data Preview](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-preview) for Visual Studio Code then discovered [finos perspective](https://perspective.finos.org/). \
 Perspective is a powerful data analysis tool (check their site) and you can now apply that analysis on your search results. Input data is automatically translated and adapted into a compatible format, perspective is then opened in a standalone browser.\

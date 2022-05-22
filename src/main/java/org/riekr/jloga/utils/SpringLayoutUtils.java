@@ -42,7 +42,7 @@ import java.awt.*;
  * These utilities are used by several programs, such as
  * SpringBox and SpringCompactGrid.
  */
-public class SpringUtils {
+public class SpringLayoutUtils {
 
 	/* Used by makeCompactGrid. */
 	private static SpringLayout.Constraints getConstraintsForCell(
@@ -123,5 +123,5 @@ public class SpringUtils {
 		pCons.setConstraint(SpringLayout.EAST, x);
 	}
 
-	private SpringUtils() {}
+	private SpringLayoutUtils() {}
 }

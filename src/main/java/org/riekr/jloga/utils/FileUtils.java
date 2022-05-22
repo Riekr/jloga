@@ -1,5 +1,7 @@
 package org.riekr.jloga.utils;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Stream.empty;
 import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
 
 import javax.swing.*;
@@ -11,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.Arrays;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
@@ -24,18 +25,20 @@ import org.riekr.jloga.ui.FileChooserWithRecentDirs;
 public class FileUtils {
 
 	public enum DialogType {
-		OPEN_MULTI(true, "Open files", (jfc) -> jfc.showOpenDialog(Main.getMain())),
-		OPEN(false, "Open file", (jfc) -> jfc.showOpenDialog(Main.getMain())),
-		SAVE(false, "Save file", (jfc) -> jfc.showSaveDialog(Main.getMain()));
+		OPEN_MULTI(true, "Open files", (jfc) -> jfc.showOpenDialog(Main.getMain()), FileDialog.LOAD),
+		OPEN(false, "Open file", (jfc) -> jfc.showOpenDialog(Main.getMain()), FileDialog.LOAD),
+		SAVE(false, "Save file", (jfc) -> jfc.showSaveDialog(Main.getMain()), FileDialog.SAVE);
 
 		final boolean                     multi;
 		final String                      defaultTitle;
 		final ToIntFunction<JFileChooser> action;
+		final int                         awt;
 
-		DialogType(boolean multi, String defaultTitle, ToIntFunction<JFileChooser> action) {
+		DialogType(boolean multi, String defaultTitle, ToIntFunction<JFileChooser> action, int awt) {
 			this.multi = multi;
 			this.defaultTitle = defaultTitle;
 			this.action = action;
+			this.awt = awt;
 		}
 	}
 
@@ -103,16 +106,30 @@ public class FileUtils {
 	public static Stream<File> fileDialog(DialogType type, File initialDir, String title, String ext, String extDescription) {
 		if (initialDir == null || !initialDir.isDirectory())
 			initialDir = Preferences.RECENT_DIRS.get().stream().findFirst().orElseGet(() -> new File("."));
-		JFileChooser chooser = new FileChooserWithRecentDirs();
-		if (ext != null && !ext.isBlank())
-			chooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
-		chooser.setMultiSelectionEnabled(type.multi);
-		chooser.setCurrentDirectory(initialDir);
-		chooser.setDialogTitle(title);
-		int userSelection = type.action.applyAsInt(chooser);
-		if (userSelection == JFileChooser.APPROVE_OPTION)
-			return type.multi ? Arrays.stream(chooser.getSelectedFiles()) : Stream.of(chooser.getSelectedFile());
-		return Stream.empty();
+		if (title == null || title.isBlank())
+			title = type.defaultTitle;
+
+		if (Preferences.FILEDIALOG.get()) {
+			FileDialog fd = new FileDialog(Main.getMain(), title, type.awt);
+			fd.setDirectory(initialDir.getAbsolutePath());
+			fd.setMultipleMode(type.multi);
+			if (ext != null && !ext.isBlank())
+				fd.setFilenameFilter((dir, f) -> f != null && f.endsWith(ext));
+			fd.setVisible(true);
+			return stream(fd.getFiles());
+
+		} else {
+			JFileChooser chooser = new FileChooserWithRecentDirs();
+			if (ext != null && !ext.isBlank())
+				chooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
+			chooser.setMultiSelectionEnabled(type.multi);
+			chooser.setCurrentDirectory(initialDir);
+			chooser.setDialogTitle(title);
+			int userSelection = type.action.applyAsInt(chooser);
+			if (userSelection == JFileChooser.APPROVE_OPTION)
+				return type.multi ? stream(chooser.getSelectedFiles()) : Stream.of(chooser.getSelectedFile());
+			return empty();
+		}
 	}
 
 	public static File selectExecutableDialog(Component parent, File initialFile) {

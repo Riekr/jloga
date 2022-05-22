@@ -74,6 +74,11 @@ public interface Preferences extends KeyBindings {
 			.add("Highlight line in parent only", HighlightType.PARENT_ONLY)
 			.add("Highlight line in whole hierarchy", HighlightType.ALL_HIERARCHY);
 
+	GUIPreference<Boolean> FILEDIALOG = of("FileDialog", () -> false)
+			.describe(Type.Toggle, "Use native file dialogs")
+			.group(THEMES)
+			.addDescription("Use native awt file dialogs: no recent files and no descriptions but may be nicer.");
+
 	GUIPreference<Theme> THEME = new ThemePreference("Look and feel")
 			.group(THEMES)
 			.addDescription("Change the current theme:");

@@ -10,7 +10,7 @@ import java.io.File;
 import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.utils.ContextMenu;
-import org.riekr.jloga.utils.SpringUtils;
+import org.riekr.jloga.utils.SpringLayoutUtils;
 
 public class FileChooserWithRecentDirs extends JFileChooser {
 	private static final long serialVersionUID = -4426233513317201106L;
@@ -43,7 +43,7 @@ public class FileChooserWithRecentDirs extends JFileChooser {
 				});
 				vbox.add(btn);
 			}
-			SpringUtils.makeCompactGrid(vbox, recentDirs.size(), 1, 0, 0, 0, 0);
+			SpringLayoutUtils.makeCompactGrid(vbox, recentDirs.size(), 1, 0, 0, 0, 0);
 			ContextMenu.addAction(vbox, "Clear", () -> {
 				recentDirs.clear();
 				Preferences.RECENT_DIRS.set(recentDirs);

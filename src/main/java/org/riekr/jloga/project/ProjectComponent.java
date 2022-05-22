@@ -1,6 +1,6 @@
 package org.riekr.jloga.project;
 
-import static org.riekr.jloga.utils.SpringUtils.makeCompactGrid;
+import static org.riekr.jloga.utils.SpringLayoutUtils.makeCompactGrid;
 
 import javax.swing.*;
 import java.awt.*;
