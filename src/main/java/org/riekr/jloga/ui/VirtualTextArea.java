@@ -288,7 +288,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private String requireHeader(boolean fromDetection) {
 		String header = _header.getHeader();
 		if (header.isEmpty()) {
-			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Text does not seems to be tabular data across the first " + _header.getCheckTarget() + " lines\""));
+			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Text does not seems to be tabular data across the first " + _header.getCheckTarget() + " lines"));
 			return null;
 		}
 		if (!_header.isAssured() && !fromDetection) {
