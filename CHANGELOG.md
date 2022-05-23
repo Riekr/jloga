@@ -7,6 +7,7 @@
 - Grids:
   - Grid view can be forced if header detection result is uncertain
   - Grid columns automatic initial widths
+  - Grid view font is the same as in text viewer
 - External scripts:
   - Support for search output sections (specify a `sectionRegex` in *.jloga.json* file)
 

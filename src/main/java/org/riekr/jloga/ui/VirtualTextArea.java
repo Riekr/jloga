@@ -266,6 +266,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					gridNotAvailable(fromDetection ? null : e.getLocalizedMessage());
 					return;
 				}
+				_gridView.setFont(getFont());
 				_gridView.setRowHeight(_lineHeight);
 				_gridView.getTableHeader().setPreferredSize(new Dimension(_scrollPane.getWidth(), _lineHeight));
 				_scrollPane.setViewportView(_gridView);
