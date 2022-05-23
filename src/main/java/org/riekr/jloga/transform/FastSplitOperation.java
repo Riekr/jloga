@@ -105,8 +105,6 @@ public class FastSplitOperation implements Function<String, String[]> {
 			_cols = res.length;
 		} else
 			res = split(s);
-		if (res.length != _cols)
-			throw new ColumnsChangedException(_cols, res.length, _line);
 		return res;
 	}
 }

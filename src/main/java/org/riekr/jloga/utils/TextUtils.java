@@ -131,5 +131,13 @@ public class TextUtils {
 		return buf.toString();
 	}
 
+	public static String ellipsize(String text, int limit) {
+		if (text == null || text.isEmpty())
+			return "";
+		if (text.length() > limit)
+			text = text.substring(0, limit) + "\u2026";
+		return text;
+	}
+
 	private TextUtils() {}
 }

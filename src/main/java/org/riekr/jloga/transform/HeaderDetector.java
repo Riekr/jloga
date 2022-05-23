@@ -23,9 +23,11 @@ public class HeaderDetector {
 
 	private int       _checkTarget = CHECK_LINES;
 	private int       _colCount    = -1;
-	private String    _header;
 	private Boolean   _own;
 	private Character _delim;
+
+	private String  _header;
+	private boolean _isAssured = true;
 
 	public HeaderDetector(@Nullable HeaderDetector parent) {
 		_parent = parent;
@@ -81,7 +83,7 @@ public class HeaderDetector {
 		}
 		_splitOperation = null;
 		_checkSet = null;
-		if (_header == null) {
+		if (_header == null || _colCount <= 1) {
 			_header = "";
 			if (_own == null)
 				_own = false;
@@ -94,12 +96,7 @@ public class HeaderDetector {
 		if (line == null || line.isEmpty() || _checkSet == null)
 			return false;
 		if (_checkSet.add(lineNumber)) {
-			int count;
-			try {
-				count = _splitOperation.apply(line).length;
-			} catch (ColumnsChangedException e) {
-				count = -1;
-			}
+			int count = _splitOperation.apply(line).length;
 			if (_colCount == -1) {
 				_colCount = count;
 				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount) {
@@ -111,9 +108,10 @@ public class HeaderDetector {
 				}
 				return false;
 			} else if (_colCount != count) {
-				_header = "";
-				_colCount = -1;
-				return true;
+				_isAssured = false;
+				if (count > _colCount)
+					_colCount = count;
+				return false;
 			}
 			return _checkSet != null && _checkSet.size() >= _checkTarget;
 		}
@@ -150,6 +148,14 @@ public class HeaderDetector {
 		return _colCount;
 	}
 
+	public void setAssured(boolean assured) {
+		_isAssured = assured;
+	}
+
+	public boolean isAssured() {
+		return _isAssured;
+	}
+
 	@Override public String toString() {
 		return "HeaderDetector{" +
 				"parent=" + _parent +
@@ -157,6 +163,7 @@ public class HeaderDetector {
 				", header='" + _header + '\'' +
 				", own=" + _own +
 				", delimiter='" + _delim + '\'' +
+				", isAssured='" + _isAssured + '\'' +
 				'}';
 	}
 }

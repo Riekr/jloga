@@ -6,6 +6,7 @@ import static java.lang.Math.max;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
+import static org.riekr.jloga.utils.TextUtils.ellipsize;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,11 +21,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -285,8 +288,31 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private String requireHeader(boolean fromDetection) {
 		String header = _header.getHeader();
 		if (header.isEmpty()) {
-			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Grid column count is not stable across the first " + _header.getCheckTarget() + " lines"));
+			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Text does not seems to be tabular data across the first " + _header.getCheckTarget() + " lines\""));
 			return null;
+		}
+		if (!_header.isAssured() && !fromDetection) {
+			try {
+				AtomicReference<String> newHeader = new AtomicReference<>(header);
+				header = null;
+				Runnable confirm = () -> {
+					if (JOptionPane.showConfirmDialog(this,
+							"Detected header is not certain, do you want to use it?\n" +
+									ellipsize(newHeader.get(), 80),
+							"Use uncertain header?",
+							JOptionPane.YES_NO_OPTION
+					) != JOptionPane.YES_OPTION) {
+						newHeader.set(null);
+						_gridToggle.setSelected(false);
+					} else
+						_header.setAssured(true);
+				};
+				if (EventQueue.isDispatchThread())
+					confirm.run();
+				else
+					EventQueue.invokeAndWait(confirm);
+				header = newHeader.get();
+			} catch (InterruptedException | InvocationTargetException ignored) {}
 		}
 		return header;
 	}

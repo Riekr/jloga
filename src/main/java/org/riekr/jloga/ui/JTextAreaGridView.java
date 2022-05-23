@@ -45,7 +45,11 @@ public class JTextAreaGridView extends JTable {
 			public boolean isCellEditable(int rowIndex, int columnIndex) {return false;}
 
 			@Override
-			public Object getValueAt(int rowIndex, int columnIndex) {return _data[rowIndex][columnIndex];}
+			public Object getValueAt(int rowIndex, int columnIndex) {
+				if (rowIndex < _data.length && columnIndex < _data[rowIndex].length)
+					return _data[rowIndex][columnIndex];
+				return null;
+			}
 		});
 		refresh();
 		ContextMenu.addActionCopy(this, this::getSelectedText);
