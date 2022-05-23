@@ -8,6 +8,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -59,13 +61,16 @@ public class JTextAreaGridView extends JTable {
 		addActionCopy(this, this::getSelectedText);
 	}
 
+	private final Map<Integer, Integer> _colsMax = new HashMap<>();
+
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 		// https://stackoverflow.com/a/25570812/1326326
 		Component component = super.prepareRenderer(renderer, row, column);
-		int rendererWidth = component.getPreferredSize().width;
 		TableColumn tableColumn = getColumnModel().getColumn(column);
-		tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+		int colWidth = Math.max(tableColumn.getPreferredWidth(), component.getPreferredSize().width + getIntercellSpacing().width);
+		int maxWidth = _colsMax.compute(column, (c, prev) -> prev == null ? colWidth : Math.max(colWidth, prev));
+		tableColumn.setPreferredWidth(maxWidth);
 		return component;
 	}
 
