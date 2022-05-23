@@ -56,7 +56,7 @@ public abstract class ProjectField<T, UIType extends Component> implements Suppl
 	}
 
 	public String getDescription() {
-		return label.trim() + ' ' + requireNonNullElse(_src == null ? deflt : _src, "-");
+		return label.trim() + ": " + requireNonNullElse(_src == null ? deflt : _src, "-");
 	}
 
 	@NotNull

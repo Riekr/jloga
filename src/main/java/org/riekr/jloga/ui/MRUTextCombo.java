@@ -62,7 +62,7 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 						setSelectedIndex(0);
 						selection.next(newSelection);
 					} else
-						resend();
+						EventQueue.invokeLater(this::resend);
 					save();
 					break;
 				default:
