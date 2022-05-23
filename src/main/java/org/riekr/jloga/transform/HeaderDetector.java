@@ -99,7 +99,7 @@ public class HeaderDetector {
 			int count = _splitOperation.apply(line).length;
 			if (_colCount == -1) {
 				_colCount = count;
-				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount) {
+				if (_parent != null && _parent.requireComplete() && _parent._colCount == _colCount && _parent.isAssured()) {
 					_header = _parent.getHeader();
 					_own = false;
 				} else {
