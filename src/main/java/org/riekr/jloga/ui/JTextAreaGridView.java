@@ -1,16 +1,19 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS_MATRIX;
+import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
+
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.transform.FastSplitOperation;
-import org.riekr.jloga.utils.ContextMenu;
-
-import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS_MATRIX;
 
 public class JTextAreaGridView extends JTable {
 	private static final long serialVersionUID = -4187398533175075732L;
@@ -51,8 +54,19 @@ public class JTextAreaGridView extends JTable {
 				return null;
 			}
 		});
+		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		refresh();
-		ContextMenu.addActionCopy(this, this::getSelectedText);
+		addActionCopy(this, this::getSelectedText);
+	}
+
+	@Override
+	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+		// https://stackoverflow.com/a/25570812/1326326
+		Component component = super.prepareRenderer(renderer, row, column);
+		int rendererWidth = component.getPreferredSize().width;
+		TableColumn tableColumn = getColumnModel().getColumn(column);
+		tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+		return component;
 	}
 
 	public CharSequence getSelectedText() {

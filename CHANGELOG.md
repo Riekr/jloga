@@ -5,6 +5,7 @@
   - Project panel now opens with a click as default, you can roll back to hovering in settings.
 - Grids:
   - Grid view can be forced if header detection result is uncertain
+  - Grid columns automatic initial widths
 - External scripts:
   - Support for search output sections (specify a `sectionRegex` in *.jloga.json* file)
 
