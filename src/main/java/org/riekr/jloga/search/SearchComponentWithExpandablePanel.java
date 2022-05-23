@@ -17,6 +17,7 @@ import org.riekr.jloga.Main;
 import org.riekr.jloga.prefs.PrefsUtils;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.ui.FitOnScreenComponentListener;
+import org.riekr.jloga.ui.FrameDragListener;
 import org.riekr.jloga.ui.HoverMonitor;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.SpringLayoutUtils;
@@ -51,6 +52,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			_configFrame.setUndecorated(true);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
 			_configFrame.addWindowFocusListener(_mouseListener);
+			FrameDragListener.associate(_configFrame, _configFrame);
 			addKeyStrokeAction(_configFrame, ESC, () -> _configVisible.next(false));
 
 			JPanel configPane = new JPanel(new SpringLayout());

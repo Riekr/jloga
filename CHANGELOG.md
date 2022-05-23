@@ -3,6 +3,7 @@
 - General:
   - Native file dialogs (awt)
   - Project panel now opens with a click as default, you can roll back to hovering in settings.
+  - Project pane can be dragged around
 - Grids:
   - Grid view can be forced if header detection result is uncertain
   - Grid columns automatic initial widths

@@ -4,36 +4,44 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.BooleanSupplier;
 
 public class FrameDragListener extends MouseAdapter {
 
-	public static void associate(JFrame frame, Component component) {
-		FrameDragListener listener = new FrameDragListener(frame);
+	public static void associate(Frame frame, Component component) {
+		FrameDragListener listener = new FrameDragListener(frame, () -> (frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0);
 		component.addMouseListener(listener);
 		component.addMouseMotionListener(listener);
 	}
 
-	private final JFrame frame;
-	private       Point  mouseDownCompCoords = null;
+	public static void associate(JDialog dialog, Component component) {
+		FrameDragListener listener = new FrameDragListener(dialog, () -> true);
+		component.addMouseListener(listener);
+		component.addMouseMotionListener(listener);
+	}
 
-	private FrameDragListener(JFrame frame) {
-		this.frame = frame;
+	private final Window          _window;
+	private final BooleanSupplier _canStart;
+	private       Point           _mouseDownCompCoords = null;
+
+	private FrameDragListener(Window window, BooleanSupplier canStart) {
+		_canStart = canStart;
+		_window = window;
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		mouseDownCompCoords = null;
+		_mouseDownCompCoords = null;
 	}
 
 	public void mousePressed(MouseEvent e) {
-		if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
-			mouseDownCompCoords = frame.getMousePosition();
-		}
+		if (_canStart.getAsBoolean())
+			_mouseDownCompCoords = _window.getMousePosition();
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		if (mouseDownCompCoords != null) {
+		if (_mouseDownCompCoords != null) {
 			Point currCoords = e.getLocationOnScreen();
-			frame.setLocation(currCoords.x - mouseDownCompCoords.x, currCoords.y - mouseDownCompCoords.y);
+			_window.setLocation(currCoords.x - _mouseDownCompCoords.x, currCoords.y - _mouseDownCompCoords.y);
 		}
 	}
 }
