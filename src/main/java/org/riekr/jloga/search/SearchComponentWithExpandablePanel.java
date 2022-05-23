@@ -158,6 +158,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 	protected void search() {
 		SearchPredicate predicate = getSearchPredicate();
 		if (predicate != null && _onSearchConsumer != null) {
+			setExpanded(false);
 			_configVisible.next(false);
 			_onSearchConsumer.accept(predicate);
 		}
