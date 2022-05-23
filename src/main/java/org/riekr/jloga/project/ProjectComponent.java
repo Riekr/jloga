@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.AutoDetect;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
 
 public abstract class ProjectComponent extends SearchComponentWithExpandablePanel implements Project {
@@ -81,6 +82,8 @@ public abstract class ProjectComponent extends SearchComponentWithExpandablePane
 	protected void calcTitle() {
 		if (isReady())
 			setText(getDescription());
+		else if (Preferences.PRJCLICK.get())
+			setText("Hey! Click here!");
 		else
 			setText("Hey! Hover here!");
 	}

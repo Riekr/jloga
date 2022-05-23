@@ -5,11 +5,11 @@ import static org.riekr.jloga.react.Observer.async;
 import static org.riekr.jloga.react.Observer.uniq;
 import static org.riekr.jloga.utils.KeyUtils.ESC;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
+import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
+import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,6 @@ import org.riekr.jloga.ui.FitOnScreenComponentListener;
 import org.riekr.jloga.ui.HoverMonitor;
 import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.SpringLayoutUtils;
-import org.riekr.jloga.utils.UIUtils;
 
 public abstract class SearchComponentWithExpandablePanel extends JComponent implements SearchComponent {
 	private static final long serialVersionUID = 7751803744482675483L;
@@ -37,7 +36,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 	public SearchComponentWithExpandablePanel(String prefsPrefix) {
 		setLayout(new BorderLayout());
 		add(_collapsedLabel, BorderLayout.CENTER);
-		add(UIUtils.newBorderlessButton("Run", this::search, "Run analysis with current parameters"), BorderLayout.LINE_END);
+		add(newBorderlessButton("Run", this::search, "Run analysis with current parameters"), BorderLayout.LINE_END);
 		_prefsPrefix = prefsPrefix;
 	}
 
@@ -51,6 +50,7 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			_configFrame.setVisible(false);
 			_configFrame.setUndecorated(true);
 			_configFrame.addComponentListener(FitOnScreenComponentListener.INSTANCE);
+			_configFrame.addWindowFocusListener(_mouseListener);
 			addKeyStrokeAction(_configFrame, ESC, () -> _configVisible.next(false));
 
 			JPanel configPane = new JPanel(new SpringLayout());
@@ -69,16 +69,12 @@ public abstract class SearchComponentWithExpandablePanel extends JComponent impl
 			SpringLayoutUtils.makeCompactGrid(configPane, configPane.getComponentCount(), 1, 0, 0, 0, 0);
 
 			_collapsedLabel.addMouseListener(_mouseListener);
-			addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					_configVisible.toggle();
-				}
-			});
+			addMouseListener(mouse().onClick((e) -> _configVisible.toggle()));
 			_configVisible.subscribe(async(uniq(this::setExpanded)));
 
 			calcTitle();
 		}
+
 	}
 
 	protected abstract void setupConfigPane(Container configPane);

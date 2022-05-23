@@ -2,6 +2,7 @@
 
 - General:
   - Native file dialogs (awt)
+  - Project panel now opens with a click as default, you can roll back to hovering in settings.
 - External scripts:
   - Support for search output sections (specify a `sectionRegex` in *.jloga.json* file)
 

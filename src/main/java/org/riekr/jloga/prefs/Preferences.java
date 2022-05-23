@@ -74,6 +74,12 @@ public interface Preferences extends KeyBindings {
 			.add("Highlight line in parent only", HighlightType.PARENT_ONLY)
 			.add("Highlight line in whole hierarchy", HighlightType.ALL_HIERARCHY);
 
+	GUIPreference<Boolean> PRJCLICK = of("ProjectClickToOpen", () -> true)
+			.describe(Type.Toggle, "Project panel click")
+			.group(BEHAVIOURS)
+			.addDescription("Click on project instead of hovering with mouse (the old behaviour) to open the project panel.")
+			.addDescription("Uncheck to keep panel open while hovering.");
+
 	GUIPreference<Boolean> FILEDIALOG = of("FileDialog", () -> false)
 			.describe(Type.Toggle, "Use native file dialogs")
 			.group(THEMES)
