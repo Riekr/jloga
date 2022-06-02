@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.4
 - General:
   - Native file dialogs (awt)
   - Project panel now opens with a click as default, you can roll back to hovering in settings.

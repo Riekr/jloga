@@ -53,7 +53,7 @@ dependencies {
 	compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
-def myVersion = '0.2.3'
+def myVersion = '0.2.4'
 
 jar {
 	manifest {
