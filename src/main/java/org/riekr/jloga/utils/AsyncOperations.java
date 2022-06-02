@@ -30,8 +30,7 @@ public class AsyncOperations {
 		private final int           priority;
 
 		NamedThreadFactory(@NotNull String name, int prio) {
-			SecurityManager s = System.getSecurityManager();
-			group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+			group = Thread.currentThread().getThreadGroup();
 			namePrefix = name + "-thread-";
 			priority = prio;
 		}

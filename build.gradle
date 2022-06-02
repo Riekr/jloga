@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'edu.sc.seis.launch4j' version '2.5.1'
-	id 'de.undercouch.download' version '5.0.2'
+	id 'edu.sc.seis.launch4j' version '2.5.3'
+	id 'de.undercouch.download' version '5.1.0'
 }
 
 repositories {
@@ -29,7 +29,7 @@ sourceSets {
 			srcDir 'src/main/java'
 		}
 		resources {
-			srcDir 'src/main/resources'
+//			srcDir 'src/main/resources'
 			srcDir 'src/main/html'
 		}
 	}
@@ -86,7 +86,7 @@ launch4j {
 	textVersion = 'v' + myVersion
 	copyright 'https://github.com/Riekr/jloga'
 	supportUrl 'https://github.com/Riekr/jloga/issues'
-	downloadUrl 'https://adoptium.net/download'
+	downloadUrl 'https://adoptium.net/temurin/releases'
 }
 
 task updatePerspective {

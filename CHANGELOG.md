@@ -1,5 +1,8 @@
 ## In progress:
 
+- Build:
+  - Upgrade to gradle 7.2 to support upcoming java versions
+
 ## v0.2.4
 - General:
   - Native file dialogs (awt)

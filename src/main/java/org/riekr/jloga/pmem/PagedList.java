@@ -78,7 +78,7 @@ public class PagedList<T> implements Closeable {
 			_buf = null;
 		}
 
-		public Page page() {
+		private Page page() {
 			if (_page != null)
 				throw new IllegalStateException("Already paged");
 			try {
