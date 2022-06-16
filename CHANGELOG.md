@@ -1,5 +1,7 @@
 ## In progress:
 
+- General:
+  - Updated FlatLaf themes
 - Build:
   - Upgrade to gradle 7.2 to support upcoming java versions
 
