@@ -2,6 +2,7 @@
 
 - General:
   - Updated FlatLaf themes
+  - Updated to perspective 1.4.0
 - Build:
   - Upgrade to gradle 7.2 to support upcoming java versions
 
