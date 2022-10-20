@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/materialicons/v129/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/materialicons/v139/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Open Sans';
@@ -11,7 +11,7 @@
   font-weight: 300;
   font-stretch: normal;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsiH0C4n.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsiH0C4n.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Open Sans';
@@ -19,7 +19,7 @@
   font-weight: 400;
   font-stretch: normal;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4n.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4n.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Open Sans';
@@ -27,21 +27,21 @@
   font-weight: 700;
   font-stretch: normal;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4n.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4n.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 200;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/robotomono/v21/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_XvqPQw.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_XvqPQw.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url(../fonts.gstatic.com/s/robotomono/v21/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vqPQw.ttf) format('truetype');
+  src: url(../fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vqPQw.ttf) format('truetype');
 }
 
 .material-icons {
