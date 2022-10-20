@@ -44,9 +44,9 @@ compileJava {
 
 dependencies {
 	// flatlaf 2.2 has troubles with JSplitPane programmatic divider positioning
-	implementation 'com.formdev:flatlaf:2.3'
-	implementation 'com.formdev:flatlaf-intellij-themes:2.3'
-	implementation 'org.drjekyll:fontchooser:2.4'
+	implementation 'com.formdev:flatlaf:2.6'
+	implementation 'com.formdev:flatlaf-intellij-themes:2.6'
+	implementation 'org.drjekyll:fontchooser:2.5.2'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
 	implementation 'com.google.code.gson:gson:2.9.0'
 	testImplementation 'junit:junit:4.13.2'
