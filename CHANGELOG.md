@@ -2,6 +2,7 @@
 
 - Build:
   - Get version from _CHANGELOG.md_
+  - Upgrade to gradle 7.5.1 and latest wrapper
 
 ## v0.2.5
 - General:
