@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -39,7 +40,8 @@ class ExtEnv {
 			try (Reader reader = new BufferedReader(new FileReader(envFile))) {
 				Properties props = new Properties();
 				props.load(reader);
-				props.forEach((k, v) -> dest.put(String.valueOf(k), mapper.apply(TextUtils.replaceRegex(String.valueOf(v), selfPropPattern, dest))));
+				BiFunction<String, String, String> f = Boolean.getBoolean("jloga.env.override") ? dest::putIfAbsent : dest::put;
+				props.forEach((k, v) -> f.apply(String.valueOf(k), mapper.apply(TextUtils.replaceRegex(String.valueOf(v), selfPropPattern, dest))));
 			} catch (IOException e) {
 				popupError("Unable to read " + envFile, e);
 			}

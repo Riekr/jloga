@@ -2,6 +2,8 @@
 
 - Build:
   - Upgrade to gradle 7.2 to support upcoming java versions
+- External scripts:
+  - System property `-Djloga.env.override=true` will let os environment variables override the ones defined in _env*.jloga.properties_, this is useful if launching jloga from a workspace.
 
 ## v0.2.4
 - General:
