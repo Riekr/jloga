@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.5
 - General:
   - Updated to perspective 1.7.1
 - External scripts:
