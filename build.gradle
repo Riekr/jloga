@@ -53,7 +53,13 @@ dependencies {
 	compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
-def myVersion = '0.2.4'
+def myVersion = 'dev'
+file('CHANGELOG.md').find {
+	if (it.startsWith('## v')) {
+		myVersion = it.substring(3)
+		return true
+	}
+}
 
 jar {
 	manifest {

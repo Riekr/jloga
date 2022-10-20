@@ -1,5 +1,8 @@
 ## In progress:
 
+- Build:
+  - Get version from _CHANGELOG.md_
+
 ## v0.2.5
 - General:
   - Updated FlatLaf themes and font chooser
