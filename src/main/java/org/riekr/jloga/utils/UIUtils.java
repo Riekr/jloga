@@ -112,7 +112,8 @@ public final class UIUtils {
 
 	public static JButton newButton(String text, Runnable action) {
 		JButton btn = new JButton(text);
-		btn.addActionListener((e) -> action.run());
+		if (action != null)
+			btn.addActionListener((e) -> action.run());
 		return btn;
 	}
 
@@ -351,5 +352,9 @@ public final class UIUtils {
 			currComponentLocation.translate(relativeLocation.x, relativeLocation.y);
 			currComponent = currComponent.getParent();
 		}
+	}
+
+	public static void showComponentMenu(JComponent component) {
+		component.getComponentPopupMenu().show(component, 0, component.getHeight());
 	}
 }

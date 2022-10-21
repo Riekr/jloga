@@ -1,5 +1,9 @@
 ## In progress:
 
+## v0.2.6
+- General:
+  - Preliminary support for favorites folders\
+  specify `-Djloga.favorites=favorites.properties` to enable the menu, check sample [file](favorites-sample.properties)
 - Build:
   - Get version from _CHANGELOG.md_
   - Upgrade to gradle 7.5.1 and latest wrapper

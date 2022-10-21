@@ -25,6 +25,7 @@ Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for
 - Save and reload search parameters
 - Capable of running [external commands](#external-commands) as new analyzers
 - Convert and show data into [finos perspective](#finos-perspective)
+- Favorites folders support
 
 ## File and memory limits
 There is no limit in file size, maximum number of lines is 2<sup>63</sup>-1.\
@@ -127,6 +128,11 @@ You can launch a standalone perspective viewer with:
 java -cp build/libs/jloga-all.jar org.riekr.jloga.httpd.FinosPerspectiveServer input_data.csv
 ```
 Once you close the browser, the app will automatically close.
+
+## Favorites folders
+The app supports a preliminary menu for accessing favorites folders, there is no way other than modifying an external file to list favorites. Create a _properties_ file like [favorites-sample.properties](favorites-sample.properties) and use the system property `-Djloga.favorites=favorites.properties` to specify the file you just created.
+
+If you launch jloga from a workspace configuration you will find this feature useful :)
 
 ## Future and licensing
 This software is free as in speech, do whatever you want with it.

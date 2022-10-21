@@ -29,6 +29,7 @@ import org.riekr.jloga.io.MixFileSource;
 import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
+import org.riekr.jloga.prefs.Favorites;
 import org.riekr.jloga.prefs.KeyBindings;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
@@ -63,8 +64,16 @@ public class MainPanel extends JFrame implements FileDropListener {
 		toolBar.addSeparator();
 		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.addSeparator();
-		toolBar.add(_refreshBtn = newBorderlessButton("\uD83D\uDDD8 Refresh", this::refreshCurrentTab, "Refresh current tab"));
+		_refreshBtn = newBorderlessButton("\uD83D\uDDD8 Refresh", this::refreshCurrentTab, "Refresh current tab");
 		_refreshBtn.setEnabled(false);
+		toolBar.add(_refreshBtn);
+		if (Favorites.hasFavorites()) {
+			toolBar.addSeparator();
+			JButton favoritesBtn = newBorderlessButton("\u2605 Favorites", null, "Open favorites popup");
+			Favorites.setup(favoritesBtn);
+			favoritesBtn.addActionListener((e) -> UIUtils.showComponentMenu(favoritesBtn));
+			toolBar.add(favoritesBtn);
+		}
 		Component glue = Box.createGlue();
 		FrameDragListener.associate(this, glue);
 		toolBar.add(glue);
