@@ -1,5 +1,8 @@
 ## In progress:
 
+- Build:
+  - Fixed double _v_ in version
+
 ## v0.2.6
 - General:
   - Preliminary support for favorites folders\

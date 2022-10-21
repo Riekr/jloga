@@ -22,7 +22,7 @@ public class AboutPane extends JOptionPane {
 	private static String getVersion() {
 		String ver = Main.class.getPackage().getImplementationVersion();
 		if (ver != null)
-			return "v" + ver;
+			return ver;
 		return "<i>dev " + DateTimeFormatter.ofPattern("dd/MM/uuuu").format(LocalDate.now()) + "</i>";
 	}
 
