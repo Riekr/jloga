@@ -6,9 +6,9 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.riekr.jloga.Main;
+import org.riekr.jloga.io.LinkedProperties;
 import org.riekr.jloga.ui.MenuSelectedListener;
 import org.riekr.jloga.ui.TextIcon;
 
@@ -26,9 +26,9 @@ public final class Favorites {
 			if (favoritesFileName != null && !(favoritesFileName = favoritesFileName.trim()).isEmpty()) {
 				List<JMenuItem> menuItems = new ArrayList<>();
 				try (FileReader reader = new FileReader(favoritesFileName)) {
-					Properties props = new Properties();
+					LinkedProperties props = new LinkedProperties();
 					props.load(reader);
-					for (Map.Entry<Object, Object> entry : props.entrySet()) {
+					for (Map.Entry<Object, Object> entry : props.linkedEntrySet()) {
 						String title = entry.getKey().toString();
 						File folder = new File(entry.getValue().toString());
 						if (folder.isDirectory())

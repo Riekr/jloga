@@ -1,5 +1,8 @@
 ## In progress:
 
+- General:
+  - Favorites are ordered as in file
+
 ## v0.2.7
 - General:
   - Added icons in favorites views
