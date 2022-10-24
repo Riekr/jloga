@@ -1,8 +1,10 @@
 ## In progress:
 
-- Build:
-  - Fixed double _v_ in version
+## v0.2.7
+- General:
   - Added icons in favorites views
+- Build:
+    - Fixed double _v_ in version
 
 ## v0.2.6
 - General:
