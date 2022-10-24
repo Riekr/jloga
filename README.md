@@ -146,4 +146,5 @@ As a spare time project sources are updated only when possible, don't expect fas
 - Gson ([home](https://github.com/google/gson) - [license](https://github.com/google/gson/blob/master/LICENSE))
 - Launch4J - Cross-platform Java executable wrapper ([license](https://sourceforge.net/p/launch4j/git/ci/master/tree/LICENSE.txt) - [home](http://launch4j.sourceforge.net/) - [gradle plugin](https://github.com/TheBoegl/gradle-launch4j))
 - Perspective ([home](https://perspective.finos.org/) - [license](https://github.com/finos/perspective/blob/master/LICENSE))
+- Text Icon ([home](https://tips4java.wordpress.com/2009/04/02/text-icon/))
 - Last but not least [IntelliJ Idea Community Edition](https://www.jetbrains.com/idea/)

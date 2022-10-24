@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.riekr.jloga.Main;
 import org.riekr.jloga.ui.MenuSelectedListener;
+import org.riekr.jloga.ui.TextIcon;
 
 public final class Favorites {
 	private Favorites() {}
@@ -53,18 +54,22 @@ public final class Favorites {
 		private static JMenuItem scan(File file, String title) {
 			if (file.isDirectory()) {
 				File[] files = file.listFiles();
+				JMenu menu = new JMenu(title);
 				if (files != null && files.length > 0) {
-					JMenu container = new JMenu(title);
-					container.addMenuListener((MenuSelectedListener)e -> {
-						container.removeAll();
+					menu.addMenuListener((MenuSelectedListener)e -> {
+						menu.removeAll();
 						for (File child : files)
-							container.add(scan(child));
+							menu.add(scan(child));
 					});
-					return container;
-				}
-				return new JMenuItem(title);
+				} else
+					menu.add(new JMenuItem("<empty>"));
+				menu.setIcon(new TextIcon(menu, "\uD83D\uDCC1"));
+				menu.setIconTextGap(0);
+				return menu;
 			} else {
 				JMenuItem container = new JMenuItem(title);
+				container.setIcon(new TextIcon(container, "\uD83D\uDDB9"));
+				container.setIconTextGap(0);
 				container.addActionListener((e) -> Main.getMain().openFile(file));
 				return container;
 			}
