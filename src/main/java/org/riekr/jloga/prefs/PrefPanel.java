@@ -266,10 +266,6 @@ public class PrefPanel extends JDialog {
 	}
 
 	private Component newFileMapComponent(GUIPreference<LinkedHashMap<Object, Object>> pref) {
-		pref.tap((p) -> {
-			if (p.isEmpty())
-				p.put("TEST", new File("test/folder/"));
-		});
 		FileMapComponent comp = new FileMapComponent(
 				() -> pref.get().entrySet(),
 				(key) -> pref.tap(p -> p.remove(key)),
