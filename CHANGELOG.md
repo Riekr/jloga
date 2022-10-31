@@ -1,7 +1,9 @@
 ## In progress:
 
+## v0.2.8
 - General:
   - Favorites are ordered as in file
+  - UI for configuring favorites
 
 ## v0.2.7
 - General:

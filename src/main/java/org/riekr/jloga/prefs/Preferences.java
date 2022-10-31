@@ -2,6 +2,7 @@ package org.riekr.jloga.prefs;
 
 import static java.lang.Runtime.getRuntime;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static org.riekr.jloga.prefs.Preference.of;
 
@@ -10,16 +11,17 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
 import org.riekr.jloga.io.Charsets;
 import org.riekr.jloga.prefs.GUIPreference.Type;
-import org.riekr.jloga.theme.ThemePreference;
-import org.riekr.jloga.theme.Theme;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
+import org.riekr.jloga.theme.Theme;
+import org.riekr.jloga.theme.ThemePreference;
 
 public interface Preferences extends KeyBindings {
 
@@ -31,6 +33,7 @@ public interface Preferences extends KeyBindings {
 	String FORMATS    = "Formats";
 	String IO         = "I/O";
 	String SCRIPTS    = "Scripting";
+	String FAVORITES  = "Favorites";
 
 	//region GUI editable preferences
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
@@ -89,28 +92,34 @@ public interface Preferences extends KeyBindings {
 			.group(THEMES)
 			.addDescription("Change the current theme:");
 
-	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true).describe(Type.Toggle, "Automatic grid")
+	GUIPreference<Boolean> AUTO_GRID = of("Grid.auto", () -> true)
+			.describe(Type.Toggle, "Automatic grid")
 			.group(GRID)
 			.addDescription("When checked files with extensions '.tsv' and '.csv' will be automatically opened in grid view");
 
-	GUIPreference<Boolean> AUTO_TAB_GRID = of("Grid.auto.tab", () -> true).describe(Type.Toggle, "RegEx automatic grid")
+	GUIPreference<Boolean> AUTO_TAB_GRID = of("Grid.auto.tab", () -> true)
+			.describe(Type.Toggle, "RegEx automatic grid")
 			.group(GRID)
 			.addDescription("When checked results of RegEx searches with groups will be automatically opened in grid view");
 
-	GUIPreference<Boolean> BROWSER_SYSTEM = of("browser.sys", () -> false).describe(Type.Toggle, "Use system browser")
+	GUIPreference<Boolean> BROWSER_SYSTEM = of("browser.sys", () -> false)
+			.describe(Type.Toggle, "Use system browser")
 			.group(BROWSER)
 			.addDescription("Try to user system browser, may not work on all operating systems and not all browsers may be supported.");
 
-	GUIPreference<File> BROWSER_CUSTOM = of("browser.custom", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
+	GUIPreference<File> BROWSER_CUSTOM = of("browser.custom", () -> (String)null)
+			.withConversion(File::new, File::getAbsolutePath)
 			.describe(Type.Executable, "Browser executable")
-			.group(BROWSER).require(BROWSER_SYSTEM, false)
+			.group(BROWSER)
+			.require(BROWSER_SYSTEM, false)
 			.addDescription("Select browser executable to launch for opening finos perspective analysis.")
 			.addDescription("URL is the only passed parameter, use a wrapper script eventually to specify additional ones.")
 			.addDescription("If you leave this field blank, a best guess will be used, chromium based browser are suggested.");
 
 	GUIPreference<Boolean> BROWSER_WARN = of("browser.warn", () -> true)
 			.describe(Type.Toggle, "Warn unsupported browser")
-			.group(BROWSER).require(BROWSER_SYSTEM, false)
+			.group(BROWSER)
+			.require(BROWSER_SYSTEM, false)
 			.addDescription("Show a warning when no suggested browser is found.");
 
 	GUIPreference<Charset> CHARSET = of("CharsetCombo", UTF_8)
@@ -150,7 +159,8 @@ public interface Preferences extends KeyBindings {
 			.add("2MB", 1024 * 1024 * 2)
 			.add("4MB", 1024 * 1024 * 4);
 
-	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null).withConversion(File::new, File::getAbsolutePath)
+	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null)
+			.withConversion(File::new, File::getAbsolutePath)
 			.describe(Type.Directory, "Extension scripts folder")
 			.group(SCRIPTS)
 			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.")
@@ -160,6 +170,12 @@ public interface Preferences extends KeyBindings {
 			.describe(Type.Toggle, "Skip \"EXT:\" prefix")
 			.group(SCRIPTS)
 			.addDescription("Skip prefixing external scripts with \"EXT:\" inside search selection dialogs");
+
+	GUIPreference<LinkedHashMap<Object, Object>> USER_FAVORITES = of("fav.user", LinkedHashMap::new)
+			.withConversion(LinkedHashMap::new, identity())
+			.describe(Type.FileMap, "Favorites folders")
+			.group(FAVORITES)
+			.addDescription("List of favorites folders:");
 	//endregion
 
 	//region Hidden (state) preferences

@@ -67,13 +67,11 @@ public class MainPanel extends JFrame implements FileDropListener {
 		_refreshBtn = newBorderlessButton("\uD83D\uDDD8 Refresh", this::refreshCurrentTab, "Refresh current tab");
 		_refreshBtn.setEnabled(false);
 		toolBar.add(_refreshBtn);
-		if (Favorites.hasFavorites()) {
-			toolBar.addSeparator();
-			JButton favoritesBtn = newBorderlessButton("\u2605 Favorites", null, "Open favorites popup");
-			Favorites.setup(favoritesBtn);
-			favoritesBtn.addActionListener((e) -> UIUtils.showComponentMenu(favoritesBtn));
-			toolBar.add(favoritesBtn);
-		}
+		toolBar.addSeparator();
+		JButton favoritesBtn = newBorderlessButton("\u2605 Favorites", null, "Open favorites popup");
+		Favorites.setup(favoritesBtn);
+		favoritesBtn.addActionListener((e) -> UIUtils.showComponentMenu(favoritesBtn));
+		toolBar.add(favoritesBtn);
 		Component glue = Box.createGlue();
 		FrameDragListener.associate(this, glue);
 		toolBar.add(glue);

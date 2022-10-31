@@ -116,6 +116,9 @@ public class PrefPanel extends JDialog {
 					case KeyBinding:
 						panel.add(newKeyBindingComponent((GUIPreference<KeyStroke>)p));
 						break;
+					case FileMap:
+						panel.add(newFileMapComponent((GUIPreference<LinkedHashMap<Object, Object>>)p));
+						break;
 
 					default:
 						System.err.println("PREFERENCE TYPE " + p.type() + " NOT IMPLEMENTED YET!");
@@ -239,7 +242,6 @@ public class PrefPanel extends JDialog {
 		return res;
 	}
 
-	@SuppressWarnings("serial")
 	private Component newKeyBindingComponent(GUIPreference<KeyStroke> keyPref) {
 		KeyStrokeToggleButton btn = register(new KeyStrokeToggleButton(_allButtons, keyPref) {
 			@Override
@@ -261,6 +263,20 @@ public class PrefPanel extends JDialog {
 		res.add(btn, BorderLayout.CENTER);
 		res.add(resetButton, BorderLayout.LINE_END);
 		return res;
+	}
+
+	private Component newFileMapComponent(GUIPreference<LinkedHashMap<Object, Object>> pref) {
+		pref.tap((p) -> {
+			if (p.isEmpty())
+				p.put("TEST", new File("test/folder/"));
+		});
+		FileMapComponent comp = new FileMapComponent(
+				() -> pref.get().entrySet(),
+				(key) -> pref.tap(p -> p.remove(key)),
+				(k, v) -> pref.tap(p -> p.put(k, v))
+		);
+		pref.subscribe(comp, (data) -> comp.reload());
+		return comp;
 	}
 
 	@Override
