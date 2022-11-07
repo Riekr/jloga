@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.theme.ThemePreview;
 import org.riekr.jloga.ui.ComboEntryWrapper;
@@ -159,6 +160,17 @@ public class PrefPanel extends JDialog {
 		EventQueue.invokeLater(() -> setMinimumSize(getSize()));
 	}
 
+	public PrefPanel setSelectedTab(@NotNull String name) {
+		for (int i = 0, len = _tabs.getTabCount(); i < len; i++) {
+			if (name.equals(_tabs.getTitleAt(i))) {
+				_tabs.setSelectedIndex(i);
+				return this;
+			}
+		}
+		System.err.println("No PrefPanel tab named '" + name + '\'');
+		return this;
+	}
+
 	private JButton newRegisteredButton(String text, Runnable action) {
 		return register(newButton(text, action));
 	}
@@ -244,6 +256,8 @@ public class PrefPanel extends JDialog {
 
 	private Component newKeyBindingComponent(GUIPreference<KeyStroke> keyPref) {
 		KeyStrokeToggleButton btn = register(new KeyStrokeToggleButton(_allButtons, keyPref) {
+			private static final long serialVersionUID = 1481165132273129303L;
+
 			@Override
 			protected void disableOthers() {
 				super.disableOthers();

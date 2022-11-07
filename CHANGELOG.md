@@ -2,6 +2,7 @@
 
 - Favorites:
   - Correct inline editing
+  - Right click on "Favorites" button to edit them
 
 ## v0.2.8
 - General:

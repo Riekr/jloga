@@ -1,10 +1,12 @@
 package org.riekr.jloga.ui;
 
+import static java.util.Collections.singletonMap;
 import static org.riekr.jloga.io.TextSource.closeTextSource;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newTabHeader;
+import static org.riekr.jloga.utils.UIUtils.showComponentMenu;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,6 +35,7 @@ import org.riekr.jloga.prefs.Favorites;
 import org.riekr.jloga.prefs.KeyBindings;
 import org.riekr.jloga.prefs.PrefPanel;
 import org.riekr.jloga.prefs.Preferences;
+import org.riekr.jloga.utils.AlternatePopupMenu;
 import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
@@ -68,9 +71,12 @@ public class MainPanel extends JFrame implements FileDropListener {
 		_refreshBtn.setEnabled(false);
 		toolBar.add(_refreshBtn);
 		toolBar.addSeparator();
+
 		JButton favoritesBtn = newBorderlessButton("\u2605 Favorites", null, "Open favorites popup");
+		AlternatePopupMenu.setup(favoritesBtn, singletonMap("Edit", this::editFavorites));
 		Favorites.setup(favoritesBtn);
-		favoritesBtn.addActionListener((e) -> UIUtils.showComponentMenu(favoritesBtn));
+		favoritesBtn.addActionListener((e) -> showComponentMenu(favoritesBtn));
+
 		toolBar.add(favoritesBtn);
 		Component glue = Box.createGlue();
 		FrameDragListener.associate(this, glue);
@@ -141,6 +147,10 @@ public class MainPanel extends JFrame implements FileDropListener {
 
 	private void openPreferences() {
 		new PrefPanel(this).setVisible(true);
+	}
+
+	private void editFavorites() {
+		new PrefPanel(this).setSelectedTab(Preferences.FAVORITES).setVisible(true);
 	}
 
 	public void openFileDialog() {
