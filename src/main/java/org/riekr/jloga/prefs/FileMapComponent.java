@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FileMapComponent extends JScrollPane {
+	private static final long serialVersionUID = -114942181064191852L;
 
 	private static final String REMOVE = "\u274C";
 	private static final String CHANGE = "\uD83D\uDCC2";
@@ -26,6 +27,8 @@ public class FileMapComponent extends JScrollPane {
 	private static final Vector<String> _COLUMNS = new Vector<>(asList("Nick", "Folder", "", ""));
 
 	private final JTable _table = new JTable() {
+		private static final long serialVersionUID = -2420185066877683979L;
+
 		@Override public boolean isCellEditable(int row, int column) {return isDataColumn(column);}
 
 		@Override public boolean isCellSelected(int row, int column) {return isDataColumn(column);}
@@ -121,18 +124,17 @@ public class FileMapComponent extends JScrollPane {
 		int editingCol = _table.getEditingColumn();
 		Object editingKey = _data.get(editingRow).get(0);
 		Object editingVal = _data.get(editingRow).get(1);
-		if ("".equals(editingVal) || "".equals(editingKey))
-			return;
 		switch (editingCol) {
 			case 0: {
 				// System.out.println("KEY START " + editingKey + " " + editingRow + "," + editingCol);
 				_onEditingStopAction = () -> {
 					Object newKey = _data.get(editingRow).get(0);
-					if (!editingKey.equals(newKey)) {
+					if (!("".equals(editingVal) || "".equals(newKey)) && !editingKey.equals(newKey)) {
 						Object value = _data.get(editingRow).get(1);
 						// System.out.println("KEY CHANGE " + newKey + " " + editingRow + "," + editingCol);
 						_removeAction.accept(editingKey);
 						_addAction.accept(newKey, value);
+						reload();
 					}
 				};
 			}
@@ -141,10 +143,11 @@ public class FileMapComponent extends JScrollPane {
 				// System.out.println("VALUE START " + editingKey + " " + editingRow + "," + editingCol);
 				_onEditingStopAction = () -> {
 					Object newValue = _data.get(editingRow).get(1);
-					if (!editingVal.equals(newValue)) {
+					if (!("".equals(newValue) || "".equals(editingKey)) && !editingVal.equals(newValue)) {
 						File file = new File(newValue.toString());
 						// System.out.println("VALUE CHANGE " + file + " " + editingRow + "," + editingCol);
 						_addAction.accept(editingKey, file);
+						reload();
 					}
 				};
 			}

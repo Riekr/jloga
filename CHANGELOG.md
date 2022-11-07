@@ -1,5 +1,8 @@
 ## In progress:
 
+- Favorites:
+  - Correct inline editing
+
 ## v0.2.8
 - General:
   - Favorites are ordered as in file
