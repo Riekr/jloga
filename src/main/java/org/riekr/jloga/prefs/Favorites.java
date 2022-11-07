@@ -1,9 +1,13 @@
 package org.riekr.jloga.prefs;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
 import javax.swing.*;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -17,7 +21,11 @@ import org.riekr.jloga.ui.TextIcon;
 public final class Favorites {
 	private Favorites() {}
 
+	private static final String _DIRECTORY = "\uD83D\uDCC1";
+	private static final String _FILE      = "\uD83D\uDDB9";
+
 	private static final ArrayList<JComponent> _COMPONENTS = new ArrayList<>();
+	private static final Map<String, JMenu>    _PARENTS    = new HashMap<>();
 	private static       JPopupMenu            _MENU;
 
 	static {
@@ -42,24 +50,28 @@ public final class Favorites {
 	}
 
 	private static void refreshMenu() {
-		List<JMenuItem> menuItems = new ArrayList<>();
-		Stream.concat(
-				getSystemFavorites(),
-				Preferences.USER_FAVORITES.get().entrySet().stream()
-		).forEach(entry -> {
-			String title = entry.getKey().toString();
-			File folder = new File(entry.getValue().toString());
-			if (folder.isDirectory())
-				menuItems.add(scan(folder, title));
-		});
-		if (!menuItems.isEmpty()) {
-			JPopupMenu menu = new JPopupMenu();
-			menuItems.forEach(menu::add);
-			_MENU = menu;
-			_COMPONENTS.forEach(comp -> {
-				comp.setComponentPopupMenu(_MENU);
-				comp.setEnabled(true);
+		try {
+			List<JMenuItem> menuItems = new ArrayList<>();
+			Stream.concat(
+					getSystemFavorites(),
+					Preferences.USER_FAVORITES.get().entrySet().stream()
+			).forEach(entry -> {
+				String title = entry.getKey().toString();
+				File folder = new File(entry.getValue().toString());
+				if (folder.isDirectory())
+					menuItems.add(scan(folder, title));
 			});
+			if (!menuItems.isEmpty()) {
+				JPopupMenu menu = new JPopupMenu();
+				menuItems.forEach(menu::add);
+				_MENU = menu;
+				_COMPONENTS.forEach(comp -> {
+					comp.setComponentPopupMenu(_MENU);
+					comp.setEnabled(true);
+				});
+			}
+		} finally {
+			_PARENTS.clear();
 		}
 	}
 
@@ -67,7 +79,10 @@ public final class Favorites {
 		return scan(folder, folder.getName());
 	}
 
-	private static JMenuItem scan(File file, String title) {
+	private static JMenuItem scan(File file, String titlePath) {
+		String[] path = titlePath.split("[\\\\/]");
+		String title = path[path.length - 1];
+		JMenuItem res;
 		if (file.isDirectory()) {
 			File[] files = file.listFiles();
 			JMenu menu = new JMenu(title);
@@ -79,16 +94,27 @@ public final class Favorites {
 				});
 			} else
 				menu.add(new JMenuItem("<empty>"));
-			menu.setIcon(new TextIcon(menu, "\uD83D\uDCC1"));
+			menu.setIcon(new TextIcon(menu, _DIRECTORY));
 			menu.setIconTextGap(0);
-			return menu;
+			res = menu;
 		} else {
 			JMenuItem container = new JMenuItem(title);
-			container.setIcon(new TextIcon(container, "\uD83D\uDDB9"));
+			container.setIcon(new TextIcon(container, _FILE));
 			container.setIconTextGap(0);
 			container.addActionListener((e) -> Main.getMain().openFile(file));
-			return container;
+			res = container;
 		}
+		for (int i = path.length - 2; i >= 0; i--) {
+			String parentTitle = path[i];
+			JMenu parent = _PARENTS.computeIfAbsent(stream(path).limit(i).collect(joining("/")), k -> {
+				JMenu newParent = new JMenu(parentTitle);
+				newParent.setIcon(new TextIcon(newParent, _DIRECTORY));
+				return newParent;
+			});
+			parent.add(res);
+			res = parent;
+		}
+		return res;
 	}
 
 	public static void setup(JComponent component) {
