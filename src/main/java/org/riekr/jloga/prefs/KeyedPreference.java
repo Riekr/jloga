@@ -2,11 +2,14 @@ package org.riekr.jloga.prefs;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Subject;
 import org.riekr.jloga.react.Unsubscribable;
@@ -42,9 +45,28 @@ public class KeyedPreference<T extends Serializable> implements Preference<T> {
 		return res.toString();
 	}
 
+	protected boolean equals(@Nullable T a, @Nullable T b) {
+		if (a == b)
+			return true;
+		if (a == null || b == null)
+			return false;
+		if (a instanceof LinkedHashMap) {
+			if (((LinkedHashMap<?, ?>)a).size() != ((LinkedHashMap<?, ?>)b).size())
+				return false;
+			Iterator<?> ia = ((LinkedHashMap<?, ?>)a).entrySet().iterator();
+			Iterator<?> ib = ((LinkedHashMap<?, ?>)b).entrySet().iterator();
+			while (ia.hasNext()) {
+				if (!ia.next().equals(ib.next()))
+					return false;
+			}
+			return true;
+		}
+		return a.equals(b);
+	}
+
 	@Override
 	public boolean set(T t) {
-		if (!Objects.equals(t, _value)) {
+		if (!equals(t, _value)) {
 			PrefsUtils.save(_key, t);
 			_value = t;
 			_valid = true;

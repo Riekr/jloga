@@ -47,7 +47,7 @@ public class AlternatePopupMenu extends MouseAdapter {
 				_mainPopupMenu = popupMenu;
 				_component.setComponentPopupMenu(_alternatePopupMenu);
 			}
-		} else if (_mainPopupMenu != null)
+		} else if (_mainPopupMenu != null && _component.getComponentPopupMenu() == _alternatePopupMenu)
 			_component.setComponentPopupMenu(_mainPopupMenu);
 	}
 

@@ -4,6 +4,7 @@
   - Correct inline editing
   - Right click on "Favorites" button to edit them
   - Subfolders in aliases (use "/" or "\" to split as a path)
+  - Reordering
 
 ## v0.2.8
 - General:

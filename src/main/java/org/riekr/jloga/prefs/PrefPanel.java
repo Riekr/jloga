@@ -3,6 +3,7 @@ package org.riekr.jloga.prefs;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.prefs.GUIPreference.Type.KeyBinding;
+import static org.riekr.jloga.utils.CollectionUtils.swapRows;
 import static org.riekr.jloga.utils.FileUtils.selectDirectoryDialog;
 import static org.riekr.jloga.utils.FileUtils.selectExecutableDialog;
 import static org.riekr.jloga.utils.FontUtils.describeFont;
@@ -283,7 +284,8 @@ public class PrefPanel extends JDialog {
 		FileMapComponent comp = new FileMapComponent(
 				() -> pref.get().entrySet(),
 				(key) -> pref.tap(p -> p.remove(key)),
-				(k, v) -> pref.tap(p -> p.put(k, v))
+				(k, v) -> pref.tap(p -> p.put(k, v)),
+				(k1, k2) -> pref.tap(p -> swapRows(p, k1, k2))
 		);
 		pref.subscribe(comp, (data) -> comp.reload());
 		return comp;

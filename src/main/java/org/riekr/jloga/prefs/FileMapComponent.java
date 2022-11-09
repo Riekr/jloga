@@ -18,6 +18,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.riekr.jloga.utils.TableReorderMouseHandler;
+
 public class FileMapComponent extends JScrollPane {
 	private static final long serialVersionUID = -114942181064191852L;
 
@@ -40,17 +42,20 @@ public class FileMapComponent extends JScrollPane {
 	private final Supplier<Iterable<Map.Entry<Object, Object>>> _listSupplier;
 	private final Consumer<Object>                              _removeAction;
 	private final BiConsumer<Object, Object>                    _addAction;
+	private final BiConsumer<Object, Object>                    _swapAction;
 
 	private Runnable _onEditingStopAction;
 
 	public FileMapComponent(
 			Supplier<Iterable<Map.Entry<Object, Object>>> listSupplier,
 			Consumer<Object> removeAction,
-			BiConsumer<Object, Object> addAction
+			BiConsumer<Object, Object> addAction,
+			BiConsumer<Object, Object> swapAction
 	) {
 		_listSupplier = listSupplier;
 		_removeAction = removeAction;
 		_addAction = addAction;
+		_swapAction = swapAction;
 		_table.setModel(_model);
 		_table.setShowGrid(false);
 		_table.addMouseListener(mouse().onClick(this::onClick));
@@ -64,6 +69,18 @@ public class FileMapComponent extends JScrollPane {
 					invokeLater(this::onEditingStop);
 			}
 		});
+		if (_swapAction != null) {
+			TableReorderMouseHandler tr = new TableReorderMouseHandler(_table, (from, to) -> {
+				// System.out.println("FROM " + from + " TO " + to);
+				_swapAction.accept(
+						_data.get(from).get(0),
+						_data.get(to).get(0)
+				);
+				_model.moveRow(from, from, to);
+			}, (row) -> row < _data.size() - 1);
+			_table.addMouseListener(tr);
+			_table.addMouseMotionListener(tr);
+		}
 	}
 
 	public void reload() {

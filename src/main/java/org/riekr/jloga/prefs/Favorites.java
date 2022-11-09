@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -29,8 +30,8 @@ public final class Favorites {
 	private static       JPopupMenu            _MENU;
 
 	static {
-		refreshMenu();
-		Preferences.USER_FAVORITES.subscribe((data) -> refreshMenu());
+		refreshMenu(Preferences.USER_FAVORITES.get());
+		Preferences.USER_FAVORITES.subscribe(Favorites::refreshMenu);
 	}
 
 	@NotNull
@@ -49,12 +50,12 @@ public final class Favorites {
 		return Stream.empty();
 	}
 
-	private static void refreshMenu() {
+	private static void refreshMenu(LinkedHashMap<?, ?> userFavorites) {
 		try {
 			List<JMenuItem> menuItems = new ArrayList<>();
 			Stream.concat(
 					getSystemFavorites(),
-					Preferences.USER_FAVORITES.get().entrySet().stream()
+					userFavorites.entrySet().stream()
 			).forEach(entry -> {
 				String title = entry.getKey().toString();
 				File folder = new File(entry.getValue().toString());

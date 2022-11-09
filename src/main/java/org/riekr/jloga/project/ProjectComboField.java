@@ -1,6 +1,6 @@
 package org.riekr.jloga.project;
 
-import static org.riekr.jloga.utils.Utils.findKeyForValue;
+import static org.riekr.jloga.utils.CollectionUtils.findKeyForValue;
 
 import java.util.Map;
 import java.util.Set;

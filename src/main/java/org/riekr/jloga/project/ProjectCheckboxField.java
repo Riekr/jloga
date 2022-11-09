@@ -1,7 +1,7 @@
 package org.riekr.jloga.project;
 
 import static java.lang.Boolean.FALSE;
-import static org.riekr.jloga.utils.Utils.findKeyForValue;
+import static org.riekr.jloga.utils.CollectionUtils.findKeyForValue;
 
 import javax.swing.*;
 import java.util.Map;
