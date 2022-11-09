@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.2.9
 - Favorites:
   - Correct inline editing
   - Right click on "Favorites" button to edit them
