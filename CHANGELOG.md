@@ -1,5 +1,8 @@
 ## In progress:
 
+- Favorites:
+  - Sorting (case-insensitive and directories first)
+
 ## v0.2.9
 - Favorites:
   - Correct inline editing

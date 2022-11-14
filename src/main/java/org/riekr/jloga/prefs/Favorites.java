@@ -5,8 +5,10 @@ import static java.util.stream.Collectors.joining;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import org.riekr.jloga.Main;
 import org.riekr.jloga.io.LinkedProperties;
 import org.riekr.jloga.ui.MenuSelectedListener;
 import org.riekr.jloga.ui.TextIcon;
+import org.riekr.jloga.utils.FileUtils;
 
 public final class Favorites {
 	private Favorites() {}
@@ -44,7 +47,8 @@ public final class Favorites {
 				return props.entrySet().stream();
 			} catch (Throwable e) {
 				System.err.println("Unable to load system favorites from: " + favoritesFileName);
-				e.printStackTrace(System.err);
+				if (!(e instanceof FileNotFoundException))
+					e.printStackTrace(System.err);
 			}
 		}
 		return Stream.empty();
@@ -90,6 +94,7 @@ public final class Favorites {
 			if (files != null && files.length > 0) {
 				menu.addMenuListener((MenuSelectedListener)e -> {
 					menu.removeAll();
+					Arrays.sort(files, FileUtils::sortDirFirstIC);
 					for (File child : files)
 						menu.add(scan(child));
 				});
