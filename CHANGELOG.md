@@ -6,10 +6,12 @@
   - Lazy tab initialization to avoid lag
   - Fixed sizing as in previous versions
   - Added text viewer line height customization
-- General
+- General:
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
   - Updated to perspective 1.9.0
+- Bug Fixes:
+  - Line highlighting determined by caret position
 
 ## v0.2.9
 - Favorites:
