@@ -73,12 +73,17 @@ jar {
 tasks.register('fatJar', Jar) {
 	group "build"
 	manifest.from jar.manifest
-	duplicatesStrategy = 'include'
-	archiveClassifier = 'all'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveClassifier.set('all')
 	from sourceSets.main.output
 	dependsOn configurations.runtimeClasspath
 	from {
-		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }
+				.collect {
+					zipTree(it).matching {
+						exclude('FontChooser*.properties')
+					}
+				}
 	}
 }
 
