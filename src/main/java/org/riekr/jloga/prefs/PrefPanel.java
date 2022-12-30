@@ -46,7 +46,8 @@ public class PrefPanel extends JDialog {
 		Box contents;
 
 		public Tab(List<GUIPreference<?>> prefs) {
-			super(new BorderLayout());
+			super(false);
+			setLayout(new BorderLayout());
 			this.prefs = prefs;
 		}
 
@@ -146,7 +147,7 @@ public class PrefPanel extends JDialog {
 		cp.setBorder(createEmptyBorder(_SPACING, _SPACING, _SPACING, _SPACING));
 		_tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		cp.add(_tabs, BorderLayout.NORTH);
-		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream().sequential()
+		Map<String, List<GUIPreference<?>>> prefsByGroup = Preferences.getGUIPreferences().stream()
 				.filter((p) -> {
 					if (p.group() == null) {
 						System.err.println("Preference '" + p.title() + "' does not belong to a group");

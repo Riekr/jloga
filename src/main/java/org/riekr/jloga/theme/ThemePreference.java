@@ -1,8 +1,5 @@
 package org.riekr.jloga.theme;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.prefs.GUIPreference;
 import org.riekr.jloga.prefs.Preference;
@@ -30,11 +27,6 @@ public class ThemePreference extends GUIPreference<Theme> {
 		super(Preference.of("Theme", () -> getDefault().toString())
 				.withConversion(ThemePreference::getTheme, (p, t) -> t.className), Type.Combo, title);
 		add(ThemeRepository::availableThemes);
-	}
-
-	@Override
-	protected Map<String, Theme> newValuesMap() {
-		return new LinkedHashMap<>();
 	}
 
 	@Override

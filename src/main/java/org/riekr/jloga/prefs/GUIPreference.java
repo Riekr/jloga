@@ -4,11 +4,11 @@ import static java.util.Collections.emptySet;
 import static org.riekr.jloga.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -77,14 +77,10 @@ public class GUIPreference<T> implements Preference<T> {
 		return this;
 	}
 
-	protected Map<String, T> newValuesMap() {
-		return new TreeMap<>();
-	}
-
 	public Set<Map.Entry<String, T>> values() {
 		if (_values == null)
 			return emptySet();
-		Map<String, T> values = newValuesMap();
+		Map<String, T> values = new LinkedHashMap<>();
 		_values.accept(values);
 		return values.entrySet();
 	}

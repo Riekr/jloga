@@ -39,7 +39,17 @@ public interface Preferences extends KeyBindings {
 	GUIPreference<Font> FONT = of("Font", () -> new Font("monospaced", Font.PLAIN, 12))
 			.describe(Type.Font, "Text font")
 			.group(GENERAL)
-			.addDescription("Font used in text viewers, using a monospace font is recommended.");
+			.addDescription("Font used in text viewers, using a monospace unicode font like \"Cascadia\" is recommended.");
+
+	GUIPreference<Float> LINEHEIGHT = of("LineHeight", () -> 1.0f)
+			.describe(Type.Combo, "Line height")
+			.group(GENERAL)
+			.addDescription("The line height in form of percentage of font height")
+			.add("+15%", 1.15f)
+			.add("+5%", 1.05f)
+			.add("No change", 1.0f)
+			.add("-5%", .95f)
+			.add("-15%", .85f);
 
 	GUIPreference<Integer> PAGE_SCROLL_DIVIDER = of("PageDivider", 3, 1, Integer.MAX_VALUE)
 			.describe(Type.Combo, "Page scroll size")

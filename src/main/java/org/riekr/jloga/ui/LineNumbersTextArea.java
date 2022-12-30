@@ -1,8 +1,8 @@
 package org.riekr.jloga.ui;
 
-import org.riekr.jloga.prefs.Preferences;
-
 import javax.swing.*;
+
+import org.riekr.jloga.prefs.Preferences;
 
 public class LineNumbersTextArea extends JTextArea {
 	private static final long serialVersionUID = 3934415485971790115L;

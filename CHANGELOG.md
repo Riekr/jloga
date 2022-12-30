@@ -5,6 +5,7 @@
 - Preferences:
   - Lazy tab initialization to avoid lag
   - Fixed sizing as in previous versions
+  - Added text viewer line height customization
 - General
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
