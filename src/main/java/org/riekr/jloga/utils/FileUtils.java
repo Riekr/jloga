@@ -179,5 +179,11 @@ public class FileUtils {
 		return humanReadableByteCountSI(file.length());
 	}
 
+	public static int sortDirFirstIC(File f1, File f2) {
+		if (f1.isDirectory() == f2.isDirectory())
+			return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+		return f2.isDirectory() ? 1 : -1;
+	}
+
 	private FileUtils() {}
 }

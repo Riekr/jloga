@@ -28,7 +28,7 @@ public class ThemePreview extends JPanel {
 				"Line 10,"
 		));
 		Dimension size = textArea.getMinimumSize();
-		size.height = textArea.getLineHeight() * 11;
+		size.height = textArea.getLineHeight() * 9;
 		textArea.setMinimumSize(size);
 		textArea.setPreferredSize(size);
 	}

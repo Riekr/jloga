@@ -174,8 +174,7 @@ public interface Preferences extends KeyBindings {
 	GUIPreference<LinkedHashMap<Object, Object>> USER_FAVORITES = of("fav.user", LinkedHashMap::new)
 			.withConversion(LinkedHashMap::new, identity())
 			.describe(Type.FileMap, "Favorites folders")
-			.group(FAVORITES)
-			.addDescription("List of favorites folders:");
+			.group(FAVORITES);
 	//endregion
 
 	//region Hidden (state) preferences

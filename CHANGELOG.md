@@ -1,5 +1,10 @@
 ## In progress:
 
+- Favorites:
+  - Sorting (case-insensitive and directories first)
+- Preferences:
+  - Lazy tab initialization to avoid lag
+  - Fixed sizing as in previous versions
 - General
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
