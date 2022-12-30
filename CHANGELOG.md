@@ -8,6 +8,7 @@
 - General
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
+  - Updated to perspective 1.9.0
 
 ## v0.2.9
 - Favorites:
