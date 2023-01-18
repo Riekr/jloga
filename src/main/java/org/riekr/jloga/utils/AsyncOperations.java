@@ -85,7 +85,6 @@ public class AsyncOperations {
 		public synchronized Future<?> submit(@Nullable Path path, Runnable task, boolean block) {
 			ExecutorData ed = _executors.computeIfAbsent(getKey(path), ExecutorData::new);
 			Lock lock = block ? ed.lock.writeLock() : ed.lock.readLock();
-			System.out.println(block);
 			return ed.executorService.submit(() -> {
 				lock.lock();
 				try {
