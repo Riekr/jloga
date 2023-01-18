@@ -4,7 +4,7 @@ import javax.swing.*;
 
 import org.riekr.jloga.prefs.Preferences;
 
-public class LineNumbersTextArea extends JTextArea {
+public class LineNumbersTextArea extends JTextAreaWithFontMetrics {
 	private static final long serialVersionUID = 3934415485971790115L;
 
 	private int _from, _to, _allLines, _width, _delta;

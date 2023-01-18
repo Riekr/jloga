@@ -81,9 +81,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final String          _title;
 	private final VirtualTextArea _parent;
 
-	private final JScrollPane         _scrollPane;
-	private final JTextArea           _text;
-	private final LineNumbersTextArea _lineNumbers;
+	private final JScrollPane              _scrollPane;
+	private final JTextAreaWithFontMetrics _text;
+	private final LineNumbersTextArea      _lineNumbers;
 	private final JScrollBar          _scrollBar;
 
 	private final Box               _floatingButtons;
@@ -113,7 +113,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_lineNumbers = new LineNumbersTextArea();
 		root.add(_lineNumbers, BorderLayout.LINE_START);
 
-		_text = new JTextArea();
+		_text = new JTextAreaWithFontMetrics();
 		_text.addKeyListener(new ROKeyListener() {
 			@Override
 			protected void onPageUp() {
