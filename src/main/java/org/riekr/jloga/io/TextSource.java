@@ -136,7 +136,7 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	}
 
 	default void requestSave(File file, ProgressListener progressListener) {
-		AsyncOperations.IO.submit(file, () -> {
+		AsyncOperations.SAVE.submit(file, () -> {
 			try {
 				final int lineCount = getLineCount();
 				final MutableInt ln = new MutableInt();
@@ -155,7 +155,7 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 				if (file.isFile() && !file.delete())
 					System.err.println("Unable to delete " + file);
 			}
-		});
+		}, false);
 	}
 
 	@NotNull

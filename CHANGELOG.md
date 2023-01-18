@@ -10,6 +10,7 @@
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
   - Updated to perspective 1.9.0
+  - Changed I/O threading to allow scrolling text while searching 
 - Bug Fixes:
   - Line highlighting determined by caret position
 

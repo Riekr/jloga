@@ -1,8 +1,8 @@
 package org.riekr.jloga.utils;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+import static org.riekr.jloga.utils.FileUtils.toRealAbsolutePath;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -12,9 +12,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.LongSupplier;
 
 import org.jetbrains.annotations.NotNull;
@@ -43,34 +47,86 @@ public class AsyncOperations {
 		}
 	}
 
-	public static class ByRoot {
-		private final @NotNull String                           _name;
-		private final          int                              _priority;
-		private final          HashMap<String, ExecutorService> _executors = new HashMap<>();
+	public static class ByFile {
 
-		public ByRoot(@NotNull String name, int priority) {
+		private class ExecutorData {
+			final ExecutorService        executorService;
+			final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+			ExecutorData(String key) {
+				executorService = new ThreadPoolExecutor(0, 2,
+						60L, TimeUnit.SECONDS,
+						new SynchronousQueue<>(),
+						new NamedThreadFactory(key, _priority));
+			}
+		}
+
+		final @NotNull String                        _name;
+		final          int                           _priority;
+		final          HashMap<String, ExecutorData> _executors = new HashMap<>();
+
+		public ByFile(@NotNull String name, int priority) {
 			_name = name;
 			_priority = priority;
 		}
 
+		protected String getKey(Path path) {
+			return path == null ? _name : _name + '-' + toRealAbsolutePath(path);
+		}
+
 		public Future<?> submit(@NotNull Runnable task) {
-			return submit((Path)null, task);
+			return submit((Path)null, task, false);
 		}
 
-		public Future<?> submit(@Nullable File file, Runnable task) {
-			return submit(file == null ? null : file.toPath(), task);
+		public Future<?> submit(@Nullable File file, Runnable task, boolean block) {
+			return submit(file == null ? null : file.toPath(), task, block);
 		}
 
-		public Future<?> submit(@Nullable Path path, Runnable task) {
-			return _executors.computeIfAbsent(
-					path == null ? _name : _name + '-' + path.getRoot(),
-					(k) -> newSingleThreadExecutor(new NamedThreadFactory(k, _priority))
-			).submit(task);
+		public synchronized Future<?> submit(@Nullable Path path, Runnable task, boolean block) {
+			ExecutorData ed = _executors.computeIfAbsent(getKey(path), ExecutorData::new);
+			Lock lock = block ? ed.lock.writeLock() : ed.lock.readLock();
+			System.out.println(block);
+			return ed.executorService.submit(() -> {
+				lock.lock();
+				try {
+					task.run();
+				} finally {
+					lock.unlock();
+				}
+			});
+		}
+
+		public void close(File file, boolean now) {
+			if (file != null)
+				close(file.toPath(), now);
+		}
+
+		public synchronized void close(Path path, boolean now) {
+			if (path != null) {
+				ExecutorData ed = _executors.remove(getKey(path));
+				if (ed != null) {
+					if (now)
+						ed.executorService.shutdownNow();
+					else
+						ed.executorService.shutdown();
+				}
+			}
 		}
 	}
 
-	public static final ByRoot IO    = new ByRoot("io", Thread.NORM_PRIORITY);
-	public static final ByRoot INDEX = new ByRoot("index", Thread.MIN_PRIORITY);
+	public static class ByRoot extends ByFile {
+		public ByRoot(@NotNull String name, int priority) {
+			super(name, priority);
+		}
+
+		@Override
+		protected String getKey(Path path) {
+			return path == null ? _name : _name + '-' + toRealAbsolutePath(path).getRoot();
+		}
+	}
+
+	public static final ByFile IO   = new ByFile("io", Thread.NORM_PRIORITY);
+	public static final ByRoot SAVE = new ByRoot("save", Thread.MIN_PRIORITY);
 
 	private static final ScheduledExecutorService _MONITOR_EXECUTOR = newSingleThreadScheduledExecutor(new NamedThreadFactory("monitor", Thread.NORM_PRIORITY));
 	private static final ExecutorService          _AUX_EXECUTOR     = newCachedThreadPool(new NamedThreadFactory("aux", Thread.NORM_PRIORITY));

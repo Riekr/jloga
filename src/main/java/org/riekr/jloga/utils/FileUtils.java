@@ -10,12 +10,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.Main;
@@ -183,6 +185,15 @@ public class FileUtils {
 		if (f1.isDirectory() == f2.isDirectory())
 			return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
 		return f2.isDirectory() ? 1 : -1;
+	}
+
+	@Contract(value = "null->null; !null->!null", pure = true)
+	public static Path toRealAbsolutePath(Path path) {
+		try {
+			return path == null ? null : path.normalize().toRealPath().toAbsolutePath();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	private FileUtils() {}

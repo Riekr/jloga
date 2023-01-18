@@ -93,14 +93,14 @@ public class TextFileSource implements TextSource {
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
 		setCharset(charset);
-		_indexing = AsyncOperations.INDEX.submit(file, () -> {
+		_indexing = AsyncOperations.IO.submit(file, () -> {
 			try {
 				reindex(indexingListener);
 			} catch (IndexingException e) {
 				closer.run();
 				throw e;
 			}
-		});
+		}, true);
 	}
 
 	public void setCharset(@NotNull Charset charset) {
@@ -293,7 +293,7 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public Future<?> defaultAsyncIO(Runnable task) {
-		return AsyncOperations.IO.submit(_file, task);
+		return AsyncOperations.IO.submit(_file, task, false);
 	}
 
 	@Override
@@ -514,6 +514,7 @@ public class TextFileSource implements TextSource {
 	@Override
 	public void close() {
 		_indexing.cancel(true);
+		AsyncOperations.IO.close(_file, true);
 	}
 
 	@Override
