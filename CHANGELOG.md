@@ -9,7 +9,7 @@
 - General:
   - Upgraded build libraries and laf themes
   - Added non latin text to font dialog preview
-  - Updated to perspective 1.9.0
+  - Updated to perspective 1.9.2
   - Changed I/O threading to allow scrolling text while searching 
 - Grids:
   - Changing number of regex groups correctly updates table view columns
