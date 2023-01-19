@@ -50,6 +50,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.HeaderDetector;
 import org.riekr.jloga.utils.CaretLimiter;
 import org.riekr.jloga.utils.ContextMenu;
+import org.riekr.jloga.utils.PopupUtils;
 import org.riekr.jloga.utils.SelectionHighlight;
 import org.riekr.jloga.utils.UIUtils;
 
@@ -215,6 +216,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_gridToggle = new JToggleButton("\u25A6");
 		_floatingButtons.add(_gridToggle);
 		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected(), false));
+		ContextMenu.addAction(_gridToggle, "Change delimiter", this::changeGridDelimiter);
+		ContextMenu.addAction(_gridToggle, "Change header", this::changeGridHeader);
 		JButton perspectiveBtn = new JButton("\uD83D\uDCC8");
 		perspectiveBtn.addActionListener(e -> openInPerspective());
 		_floatingButtons.add(perspectiveBtn);
@@ -251,6 +254,31 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				_textSourceUnsubscribable = _textSource.subscribeLineCount(this::setFileLineCount);
 				return progressListenerSupplier.get();
 			});
+		}
+	}
+
+	private void changeGridDelimiter() {
+		String delim = JOptionPane.showInputDialog(this, "Enter new grid delimiter character:", _header.getDelim());
+		if (delim != null && !delim.isEmpty()) {
+			if (delim.length() != 1)
+				PopupUtils.popupError("Delimiter must be 1 character", "Invalid delimiter");
+			else {
+				char ch = delim.charAt(0);
+				if (_header.setDelim(ch) && _gridView != null) {
+					_gridView.setDelim(ch);
+					_gridView.refresh();
+				}
+			}
+		}
+	}
+
+	private void changeGridHeader() {
+		String header = JOptionPane.showInputDialog(this, "Enter new grid header (use delimiter between columns):", _header.getHeader());
+		if (header != null && !header.isEmpty()) {
+			if (_header.setHeader(header) && _gridView != null) {
+				_gridView.setHeader(header);
+				_gridView.refresh();
+			}
 		}
 	}
 
@@ -407,9 +435,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				old.close();
 		}
 		if (textSource != null) {
-			_header = new HeaderDetector(_parent == null ? null : _parent._header);
+			_header = new HeaderDetector(textSource, this::detectHeaderDone, _parent == null ? null : _parent._header);
 			setGridView(false, false);
-			_header.detect(textSource, this::detectHeaderDone);
+			_header.detect();
 			_fromLine = 0;
 			_allLinesCount = 0;
 			_textSourceUnsubscribable = textSource.subscribeLineCount(this::setFileLineCount);

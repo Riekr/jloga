@@ -18,11 +18,8 @@ public class HeaderDetectorTest {
 			t.addLine(0, "1|2|3|4");
 			t.addLine(0, "1|2|3|");
 			t.complete();
-			HeaderDetector detector = new HeaderDetector(null);
-			detector.detect(t, () -> {
-				System.out.println(detector);
-				semaphore.release();
-			});
+			HeaderDetector detector = new HeaderDetector(t, semaphore::release, null);
+			detector.detect();
 			semaphore.acquire();
 			assertEquals(4, detector.getColCount());
 			assertTrue(detector.isOwnHeader());

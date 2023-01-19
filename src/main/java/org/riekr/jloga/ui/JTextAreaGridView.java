@@ -21,11 +21,12 @@ public class JTextAreaGridView extends JTable {
 	private static final long serialVersionUID = -4187398533175075732L;
 
 	private final          FastSplitOperation _splitter = new FastSplitOperation();
-	private final          String[]           _header;
 	private final @NotNull VirtualTextArea    _text;
 	private final          boolean            _headerIsEmbedded;
 
-	private String[][] _data = EMPTY_STRINGS_MATRIX;
+	private       String[]              _header;
+	private       String[][]            _data    = EMPTY_STRINGS_MATRIX;
+	private final Map<Integer, Integer> _colsMax = new HashMap<>();
 
 	public JTextAreaGridView(@NotNull VirtualTextArea text, String header, boolean headerIsEmbedded) {
 		_text = text;
@@ -61,8 +62,6 @@ public class JTextAreaGridView extends JTable {
 		addActionCopy(this, this::getSelectedText);
 	}
 
-	private final Map<Integer, Integer> _colsMax = new HashMap<>();
-
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 		// https://stackoverflow.com/a/25570812/1326326
@@ -95,5 +94,13 @@ public class JTextAreaGridView extends JTable {
 			stream = stream.skip(1);
 		_data = stream.map(_splitter).toArray(String[][]::new);
 		this.tableChanged(null);
+	}
+
+	public void setDelim(char delim) {
+		_splitter.setDelim(delim);
+	}
+
+	public void setHeader(String header) {
+		_header = _splitter.apply(header);
 	}
 }

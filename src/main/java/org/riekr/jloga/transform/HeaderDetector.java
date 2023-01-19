@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,8 @@ public class HeaderDetector {
 
 	public static final int CHECK_LINES = 25;
 
+	private final @NotNull  TextSource     source;
+	private final @Nullable Runnable       onComplete;
 	private final @Nullable HeaderDetector _parent;
 
 	private Set<Integer>       _checkSet       = new HashSet<>();
@@ -26,16 +29,20 @@ public class HeaderDetector {
 	private Boolean   _own;
 	private Character _delim;
 
-	private String  _header;
-	private boolean _isAssured = true;
+	private String    _header;
+	private boolean   _isAssured = true;
+	private Future<?> detect;
 
-	public HeaderDetector(@Nullable HeaderDetector parent) {
+	public HeaderDetector(@NotNull TextSource source, @Nullable Runnable onComplete, @Nullable HeaderDetector parent) {
+		this.source = source;
+		this.onComplete = onComplete;
 		_parent = parent;
 	}
 
-	public void detect(@NotNull TextSource source, @Nullable Runnable onComplete) {
-		// using "asyncIO" may lead to thread deadlock
-		asyncTask(() -> {
+	public synchronized void detect() {
+		if (detect != null && !detect.isDone())
+			return;
+		detect = asyncTask(() -> {
 			int lineCount;
 			try {
 				lineCount = source.getLineCount();
@@ -75,9 +82,25 @@ public class HeaderDetector {
 		}
 	}
 
+	public Character getDelim() {
+		return _delim;
+	}
+
+	public synchronized boolean setDelim(char character) {
+		if (_delim == null || _delim != character) {
+			if (detect != null && !detect.isDone())
+				detect.cancel(false);
+			_delim = character;
+			_isAssured = true;
+			return true;
+		}
+		return false;
+	}
+
 	private synchronized void complete() {
 		try {
-			_delim = _splitOperation.getDelim();
+			if (_delim == null)
+				_delim = _splitOperation.getDelim();
 		} catch (IllegalStateException e) {
 			_delim = null;
 		}
@@ -122,6 +145,17 @@ public class HeaderDetector {
 		if (isPending())
 			throw new IllegalStateException("Didn't finish checking");
 		return true;
+	}
+
+	public synchronized boolean setHeader(@NotNull String header) {
+		if (!Objects.equals(_header, header)) {
+			_header = Objects.requireNonNull(header);
+			_isAssured = true;
+			if (detect != null && !detect.isDone())
+				detect.cancel(false);
+			return true;
+		}
+		return false;
 	}
 
 	@NotNull
