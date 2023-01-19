@@ -84,7 +84,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private final JScrollPane              _scrollPane;
 	private final JTextAreaWithFontMetrics _text;
 	private final LineNumbersTextArea      _lineNumbers;
-	private final JScrollBar          _scrollBar;
+	private final JScrollBar               _scrollBar;
 
 	private final Box               _floatingButtons;
 	private final JToggleButton     _gridToggle;
@@ -255,6 +255,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void setGridView(boolean active, boolean fromDetection) {
+		if (active != _gridToggle.isSelected())
+			_gridToggle.setSelected(active);
 		if (active) {
 			if (_gridView == null) {
 				String header = requireHeader(fromDetection);
@@ -406,6 +408,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 		if (textSource != null) {
 			_header = new HeaderDetector(_parent == null ? null : _parent._header);
+			setGridView(false, false);
 			_header.detect(textSource, this::detectHeaderDone);
 			_fromLine = 0;
 			_allLinesCount = 0;
@@ -448,10 +451,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private void detectHeaderDone() {
 		if ((_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find())
 				|| (_textSource.mayHaveTabularData() && Preferences.AUTO_TAB_GRID.get() && !_header.getHeader().isEmpty())) {
-			EventQueue.invokeLater(() -> {
-				_gridToggle.setSelected(true);
-				setGridView(true, true);
-			});
+			EventQueue.invokeLater(() -> setGridView(true, true));
 		}
 	}
 
