@@ -54,8 +54,8 @@ public class AsyncOperations {
 			final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 			ExecutorData(String key) {
-				executorService = new ThreadPoolExecutor(0, 2,
-						60L, TimeUnit.SECONDS,
+				executorService = new ThreadPoolExecutor(0, 4,
+						10L, TimeUnit.SECONDS,
 						new SynchronousQueue<>(),
 						new NamedThreadFactory(key, _priority));
 			}
