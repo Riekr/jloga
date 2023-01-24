@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import static java.awt.EventQueue.invokeLater;
 import static java.lang.Integer.min;
 import static java.lang.Math.floor;
 import static java.lang.Math.max;
@@ -230,7 +231,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 		// finishing
 		Preferences.EXTRA_LINES.subscribe(this, (value) -> _extraLines = value);
-		recalcLineHeight();
+		Preferences.LINEHEIGHT.subscribe(this, (value) -> recalcLineHeight());
 		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
 		CaretLimiter.setup(_text, () -> {
@@ -319,7 +320,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private String requireHeader(boolean fromDetection) {
 		String header = _header.getHeader();
 		if (header.isEmpty()) {
-			EventQueue.invokeLater(() -> gridNotAvailable(fromDetection ? null : "Text does not seems to be tabular data across the first " + _header.getCheckTarget() + " lines"));
+			invokeLater(() -> gridNotAvailable(fromDetection ? null : "Text does not seems to be tabular data across the first " + _header.getCheckTarget() + " lines"));
 			return null;
 		}
 		if (!_header.isAssured() && !fromDetection) {
@@ -448,7 +449,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					if (_textSource == textSource) {
 						try {
 							textSource.getLineCount();
-							EventQueue.invokeLater(this::checkSections);
+							invokeLater(this::checkSections);
 						} catch (ExecutionException | InterruptedException ignored) {}
 					}
 				});
@@ -479,7 +480,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private void detectHeaderDone() {
 		if ((_title != null && Preferences.AUTO_GRID.get() && Pattern.compile("\\.[tc]sv$", Pattern.CASE_INSENSITIVE).matcher(_title).find())
 				|| (_textSource.mayHaveTabularData() && Preferences.AUTO_TAB_GRID.get() && !_header.getHeader().isEmpty())) {
-			EventQueue.invokeLater(() -> setGridView(true, true));
+			invokeLater(() -> setGridView(true, true));
 		}
 	}
 
@@ -510,7 +511,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	private void recalcLineCount() {
-		final int newValue = max(1, (int)floor((float)getHeight() / (float)_lineHeight));
+		final int newValue = 1 + (int)floor((float)getHeight() / (float)_lineHeight);
 		if (newValue != _lineCount) {
 			_lineCount = newValue;
 			_scrollBar.setBlockIncrement(newValue);
@@ -537,7 +538,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					refreshHighlights();
 				else
 					_gridView.refresh();
-				EventQueue.invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
+				invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
 				reNumerate();
 			});
 		}

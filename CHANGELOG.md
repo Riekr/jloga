@@ -1,5 +1,9 @@
 ## In progress:
 
+- Text Viewer:
+  - correctly show last line in viewport
+  - correctly recalculate lines in viewport after line height change
+
 ## v0.3.0
 - Favorites:
   - Sorting (case-insensitive and directories first)
