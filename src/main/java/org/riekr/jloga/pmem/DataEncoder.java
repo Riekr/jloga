@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public interface DataEncoder<T> {
 
-	DataEncoder<String> STRING = (str, dos) -> dos.writeUTF(str);
+	DataEncoder<String> STRING = DataOutputStream::writeUTF;
 
-	void accept(T t, DataOutputStream dataOutputStream) throws IOException;
+	void accept(DataOutputStream dataOutputStream, T t) throws IOException;
 }

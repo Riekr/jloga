@@ -10,9 +10,9 @@ public class PagedIntToObjList<T> extends PagedList<IntToObject<T>> {
 
 	public PagedIntToObjList(@NotNull DataEncoder<T> encoder, @NotNull DataDecoder<T> decoder) {
 		super(
-				(ito, dos) -> {
+				(dos, ito) -> {
 					dos.writeInt(ito.tag);
-					encoder.accept(ito.value, dos);
+					encoder.accept(dos, ito.value);
 				},
 				(dis) -> new IntToObject<>(dis.readInt(), decoder.apply(dis))
 		);

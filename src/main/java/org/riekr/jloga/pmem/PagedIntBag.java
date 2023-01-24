@@ -4,7 +4,7 @@ public class PagedIntBag extends PagedList<int[]> {
 
 	public PagedIntBag() {
 		super(
-				(arr, dos) -> {
+				(dos, arr) -> {
 					dos.writeInt(arr.length);
 					for (int e : arr)
 						dos.writeInt(e);

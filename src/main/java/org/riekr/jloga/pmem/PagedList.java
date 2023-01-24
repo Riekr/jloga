@@ -100,7 +100,7 @@ public class PagedList<T> implements Closeable {
 				throw new IllegalStateException("Already paged");
 			_data.add(value);
 			try {
-				_encoder.accept(value, _buf);
+				_encoder.accept(_buf, value);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
