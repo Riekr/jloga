@@ -1,6 +1,6 @@
 /**
  * Minified by jsDelivr using Terser v5.15.1.
- * Original file: /npm/@finos/perspective-viewer-datagrid@1.9.2/dist/umd/perspective-viewer-datagrid.js
+ * Original file: /npm/@finos/perspective-viewer-datagrid@1.9.3/dist/umd/perspective-viewer-datagrid.js
  *
  * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
  */
