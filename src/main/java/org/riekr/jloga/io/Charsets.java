@@ -32,6 +32,6 @@ public class Charsets {
 	}
 
 	public static Stream<Charset> stream() {
-		return charsets.stream().sequential();
+		return charsets.stream();
 	}
 }

@@ -114,7 +114,7 @@ tasks.register('updatePerspective') {
 		download.run { src "${repo}/perspective-viewer-d3fc"; dest "${local}/perspective-viewer-d3fc.js" }
 		// you can set "wgetExec" in "gradle.properties" file in the same folder of this one (useful for cygwin)
 		delete(file("${local}/res"))
-		def wget = project.hasProperty('wgetExec') ? wgetExec : 'wget'
+		def wget = project.findProperty('wgetExec') ?: 'wget'
 		exec {
 			workingDir "${local}"
 			executable wget
