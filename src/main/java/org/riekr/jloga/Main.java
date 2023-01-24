@@ -1,6 +1,5 @@
 package org.riekr.jloga;
 
-import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 
 import javax.swing.*;
@@ -9,8 +8,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.riekr.jloga.httpd.FinosPerspectiveServer;
 import org.riekr.jloga.prefs.Preferences;
@@ -85,7 +84,7 @@ public class Main {
 			}
 
 			// startup
-			Consumer<List<File>> openFile;
+			Consumer<Stream<File>> openFile;
 			if (InterComm.isAlive())
 				openFile = InterComm::sendFileOpenCommand;
 			else {
@@ -96,12 +95,7 @@ public class Main {
 			}
 
 			// load files
-			openFile.accept(
-					args.stream().sequential()
-							.map(File::new)
-							.filter(File::canRead)
-							.collect(toList())
-			);
+			openFile.accept(args.stream().map(File::new));
 		} catch (Throwable e) {
 			e.printStackTrace(System.err);
 		}

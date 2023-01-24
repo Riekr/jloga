@@ -3,7 +3,6 @@ package org.riekr.jloga;
 import static java.io.File.pathSeparator;
 import static java.util.Collections.list;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -15,10 +14,10 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import java.util.StringTokenizer;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 
 import org.riekr.jloga.ui.MainPanel;
 import org.riekr.jloga.utils.Info;
@@ -48,9 +47,12 @@ public class InterComm extends ServerSocket implements Runnable {
 		return otherPid != 0 && ProcessHandle.of(otherPid).isPresent();
 	}
 
-	static void sendFileOpenCommand(List<File> files) {
-		if (files != null && !files.isEmpty())
-			sendCommand(CMD_OPEN, files.stream().map(File::getAbsolutePath).collect(joining(pathSeparator)));
+	static void sendFileOpenCommand(Stream<File> files) {
+		if (files == null)
+			return;
+		String arg = files.map(File::getAbsolutePath).collect(joining(pathSeparator));
+		if (!arg.isEmpty())
+			sendCommand(CMD_OPEN, arg);
 	}
 
 	static void sendInfoCommand() {
@@ -130,7 +132,6 @@ public class InterComm extends ServerSocket implements Runnable {
 											list(new StringTokenizer(files, pathSeparator)).stream()
 													.map((fileName) -> new File((String)fileName))
 													.filter(File::canRead)
-													.collect(toList())
 									);
 									mainPanel.bringToFront();
 								}

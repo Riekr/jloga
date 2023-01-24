@@ -1,8 +1,11 @@
 package org.riekr.jloga.ui;
 
+import static java.awt.EventQueue.invokeLater;
+import static java.lang.String.join;
 import static java.util.Collections.singletonMap;
 import static org.riekr.jloga.io.TextSource.closeTextSource;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
+import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newTabHeader;
@@ -13,9 +16,11 @@ import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.help.AboutPane;
@@ -158,26 +164,36 @@ public class MainPanel extends JFrame implements FileDropListener {
 		openFiles(FileUtils.fileDialog(
 				FileUtils.DialogType.OPEN_MULTI,
 				Preferences.RECENT_FILES.get().stream().findFirst().map(File::getParentFile).orElse(null)
-		).iterator());
+		));
 	}
 
-	public void openFiles(@NotNull List<File> files) {
-		openFiles(files.iterator());
+	public void openFiles(@NotNull Collection<File> files) {
+		openFiles(files.stream());
 	}
 
-	public void openFiles(@NotNull Iterator<File> files) {
-		if (files.hasNext()) {
-			EventQueue.invokeLater(() -> {
-				openFile(files.next());
+	public void openFiles(@NotNull Stream<File> files) {
+		LinkedHashSet<String> skipped = new LinkedHashSet<>();
+		Iterator<File> it = files.filter((f) -> {
+			if (f.canRead())
+				return true;
+			skipped.add(f.getAbsolutePath());
+			return false;
+		}).iterator();
+		if (it.hasNext()) {
+			invokeLater(() -> {
+				openFile(it.next());
 				int firstOpenedTab = _tabs.getSelectedIndex();
 				// "invokeLater" to avoid ArrayIndexOOB in laf
-				EventQueue.invokeLater(() -> {
-					while (files.hasNext()) {
-						openFile(files.next());
+				invokeLater(() -> {
+					while (it.hasNext()) {
+						openFile(it.next());
 						_tabs.setSelectedIndex(firstOpenedTab);
 					}
 				});
 			});
+		}
+		if (!skipped.isEmpty()) {
+			invokeLater(() -> popupError(join("\n", skipped), "Can't read files"));
 		}
 	}
 
@@ -189,7 +205,8 @@ public class MainPanel extends JFrame implements FileDropListener {
 					(closer) -> new TextFileSource(file.toPath(), Preferences.CHARSET.get(), _progressBar.addJob("Indexing"), closer)
 			);
 			Preferences.LAST_OPEN_PATH.set(file.getParentFile());
-		}
+		} else
+			popupError(file.getAbsolutePath(), "Can't read file");
 	}
 
 	private void onAddFirstTab() {
@@ -278,9 +295,9 @@ public class MainPanel extends JFrame implements FileDropListener {
 		toFront();
 		requestFocus();
 		// https://stackoverflow.com/a/643000/1326326
-		EventQueue.invokeLater(() -> {
+		invokeLater(() -> {
 			setAlwaysOnTop(true);
-			EventQueue.invokeLater(() -> setAlwaysOnTop(false));
+			invokeLater(() -> setAlwaysOnTop(false));
 		});
 	}
 }
