@@ -3,7 +3,7 @@
 ## v0.3.0
 - Favorites:
   - Sorting (case-insensitive and directories first)
-- Prefere****nces:
+- Preferences:
   - Lazy tab initialization to avoid lag
   - Fixed sizing as in previous versions
   - Added text viewer line height customization
