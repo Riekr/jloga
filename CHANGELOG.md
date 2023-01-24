@@ -3,6 +3,8 @@
 - Text Viewer:
   - correctly show last line in viewport
   - correctly recalculate lines in viewport after line height change
+- UI:
+  - "Open in file manager" action in top tab context menu
 
 ## v0.3.0
 - Favorites:

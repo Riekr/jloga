@@ -82,8 +82,9 @@ public class ContextMenu {
 			return;
 		if (value instanceof File) {
 			addActionCopy(component, "Copy name", (p, a) -> ((File)value).getName());
-			addActionCopy(component, "Copy absolute name", (p, a) -> ((File)value).getAbsolutePath());
+			addActionCopy(component, "Copy absolute path", (p, a) -> ((File)value).getAbsolutePath());
 			addActionCopy(component, "Copy parent dir", (p, a) -> ((File)value).getParentFile().getAbsolutePath());
+			addAction(component, "Open in file manager", () -> OSUtils.openInFileManager((File)value));
 		} else
 			addActionCopy(component, COPY, (p, a) -> value.toString());
 	}
