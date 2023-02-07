@@ -4,7 +4,8 @@
   - correctly show last line in viewport
   - correctly recalculate lines in viewport after line height change
 - UI:
-  - "Open in file manager" action in top tab context menu
+  - "Open in file manager" actions on right click menues
+  - Fixed GTK theme selection
 
 ## v0.3.0
 - Favorites:

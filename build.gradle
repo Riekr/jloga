@@ -8,11 +8,8 @@ repositories {
 	mavenCentral()
 }
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(11)
-	}
-}
+sourceCompatibility = 11
+targetCompatibility = 11
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -41,7 +38,10 @@ compileJava {
 	options.warnings = true
 	options.deprecation = true
 	options.debug = true
-	options.compilerArgs = ["-Xlint:unchecked"]
+	options.compilerArgs = [
+			'-Xlint:unchecked',
+			'--add-exports', 'java.desktop/com.sun.java.swing.plaf=ALL-UNNAMED'
+	]
 }
 
 dependencies {

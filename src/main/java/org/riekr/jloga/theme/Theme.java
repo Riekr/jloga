@@ -20,17 +20,29 @@ public class Theme {
 
 	@SuppressWarnings("unchecked")
 	public Theme(String className) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-		Class<? extends LookAndFeel> clazz = (Class<? extends LookAndFeel>)Class.forName(className);
-		LookAndFeel laf = clazz.getConstructor().newInstance();
-		this.name = laf.getName();
 		this.className = className;
-		boolean dark;
-		try {
-			dark = (boolean)clazz.getMethod("isDark").invoke(laf);
-		} catch (Throwable e) {
-			dark = false;
+		switch (className) {
+			case "com.sun.java.swing.plaf.gtk.GTKLookAndFeel":
+				this.name = "GTK+";
+				this.dark = false;
+				break;
+			case "com.sun.java.swing.plaf.motif.MotifLookAndFeel":
+				this.name = "CDE/Motif";
+				this.dark = false;
+				break;
+			default:
+				Class<? extends LookAndFeel> clazz = (Class<? extends LookAndFeel>)Class.forName(className);
+				LookAndFeel laf = clazz.getConstructor().newInstance();
+				this.name = laf.getName();
+				boolean dark;
+				try {
+					dark = (boolean)clazz.getMethod("isDark").invoke(laf);
+				} catch (Throwable e) {
+					dark = false;
+				}
+				this.dark = dark;
+				break;
 		}
-		this.dark = dark;
 	}
 
 	public Theme(LookAndFeelInfo lookAndFeelInfo) {
