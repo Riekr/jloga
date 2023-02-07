@@ -275,6 +275,9 @@ public class MainPanel extends JFrame implements FileDropListener {
 
 			JComponent tabHeader = newTabHeader(searchPanel.toString(), closer, () -> _tabs.setSelectedIndex(_tabs.indexOfComponent(searchPanel)));
 			ContextMenu.addActionCopy(tabHeader, key);
+			if (key instanceof File)
+				ContextMenu.addActionOpenInFileManager(tabHeader, (File)key);
+
 			_tabs.setTabComponentAt(idx, tabHeader);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

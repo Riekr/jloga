@@ -84,7 +84,6 @@ public class ContextMenu {
 			addActionCopy(component, "Copy name", (p, a) -> ((File)value).getName());
 			addActionCopy(component, "Copy absolute path", (p, a) -> ((File)value).getAbsolutePath());
 			addActionCopy(component, "Copy parent dir", (p, a) -> ((File)value).getParentFile().getAbsolutePath());
-			addAction(component, "Open in file manager", () -> OSUtils.openInFileManager((File)value));
 		} else
 			addActionCopy(component, COPY, (p, a) -> value.toString());
 	}
@@ -116,6 +115,11 @@ public class ContextMenu {
 	public static <T extends JComponent> void addAction(T component, String label, Runnable action) {
 		JPopupMenuWithMouseLoc popupMenu = JPopupMenuWithMouseLoc.ensurePopupMenu(component);
 		popupMenu.add(label).addActionListener((a) -> action.run());
+	}
+
+	public static <T extends JComponent> void addActionOpenInFileManager(T component, File file) {
+		if (file != null)
+			addAction(component, "Open in file manager", () -> OSUtils.openInFileManager(file));
 	}
 
 }

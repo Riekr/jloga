@@ -22,6 +22,7 @@ import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
+import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
@@ -85,6 +86,7 @@ public class MainDesktopHelp extends JComponent {
 					snap.remove(recent);
 					Preferences.RECENT_FILES.set(snap);
 				}), openBtn));
+				ContextMenu.addActionOpenInFileManager(openBtn, recent);
 				_recentBox.add(row, ++i);
 			}
 			_recentBox.setVisible(!files.isEmpty());
