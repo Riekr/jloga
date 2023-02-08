@@ -30,6 +30,10 @@ public class Theme {
 				this.name = "CDE/Motif";
 				this.dark = false;
 				break;
+			case "com.sun.java.swing.plaf.windows.WindowsLookAndFeel":
+				this.name = "Windows";
+				this.dark = false;
+				break;
 			default:
 				Class<? extends LookAndFeel> clazz = (Class<? extends LookAndFeel>)Class.forName(className);
 				LookAndFeel laf = clazz.getConstructor().newInstance();
