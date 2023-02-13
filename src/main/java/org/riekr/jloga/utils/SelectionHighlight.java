@@ -92,15 +92,19 @@ public class SelectionHighlight {
 		_tags.forEach(highlighter::removeHighlight);
 		String selection = _highlightedText;
 		if (selection != null) {
+			int selStart = _textArea.getSelectionStart();
+			int selEnd = _textArea.getSelectionEnd();
 			String text = _textArea.getText();
 			int next = 0;
 			int from;
 			while ((from = text.indexOf(selection, next)) != -1) {
 				next = from + selection.length();
-				try {
-					_tags.add(highlighter.addHighlight(from, next, _painter));
-				} catch (BadLocationException e) {
-					e.printStackTrace(System.err);
+				if (from != selStart && next != selEnd) {
+					try {
+						_tags.add(highlighter.addHighlight(from, next, _painter));
+					} catch (BadLocationException e) {
+						e.printStackTrace(System.err);
+					}
 				}
 			}
 		}

@@ -85,6 +85,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private final JScrollPane              _scrollPane;
 	private final JTextAreaWithFontMetrics _text;
+	private final Selection                _textSelection;
 	private final LineNumbersTextArea      _lineNumbers;
 	private final JScrollBar               _scrollBar;
 
@@ -173,6 +174,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		});
 		_text.setAutoscrolls(false);
 		_text.setLineWrap(false);
+		_textSelection = new Selection(() -> _fromLine);
+		_text.addCaretListener(_textSelection);
 
 		_scrollPane = new JScrollPane(_text, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		_scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -533,12 +536,17 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				_prevRequireTextRequest.cancel(false);
 			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (text) -> {
 				_prevRequireTextRequest = null;
+				_textSelection.enabled = false;
 				_text.setText(text);
 				if (_gridView == null)
 					refreshHighlights();
 				else
 					_gridView.refresh();
-				invokeLater(() -> _scrollPane.getHorizontalScrollBar().setValue(0));
+				invokeLater(() -> {
+					_scrollPane.getHorizontalScrollBar().setValue(0);
+					_textSelection.restore(_fromLine, _lineCount, _text);
+					_textSelection.enabled = true;
+				});
 				reNumerate();
 			});
 		}
