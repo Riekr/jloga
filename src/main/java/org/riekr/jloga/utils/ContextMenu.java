@@ -6,6 +6,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -115,6 +116,11 @@ public class ContextMenu {
 	public static <T extends JComponent> void addAction(T component, String label, Runnable action) {
 		JPopupMenuWithMouseLoc popupMenu = JPopupMenuWithMouseLoc.ensurePopupMenu(component);
 		popupMenu.add(label).addActionListener((a) -> action.run());
+	}
+
+	public static <T extends JComponent> void addActionOpenInFileManager(T component, Path file) {
+		if (file != null)
+			addActionOpenInFileManager(component, file.toFile());
 	}
 
 	public static <T extends JComponent> void addActionOpenInFileManager(T component, File file) {
