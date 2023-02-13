@@ -9,6 +9,7 @@
   - Fixed GTK theme selection
 - General:
   - Fixed I/O threading regression under heavy load
+  - PickNMix dates combo works again
 
 ## v0.3.0
 - Favorites:

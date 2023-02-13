@@ -1,5 +1,7 @@
 package org.riekr.jloga.ui;
 
+import static java.awt.EventQueue.invokeLater;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -73,7 +75,7 @@ public class PickNMixDialogEntry extends JComponent {
 	private <T> MRUComboWithLabels<T> newCombo(String key, String label, Consumer<T> consumer, BiFunction<Component, String, T> mapper) {
 		AtomicReference<MRUComboWithLabels<T>> ref = new AtomicReference<>();
 		ref.set(new MRUComboWithLabels<>("PickNMix." + key, label, consumer, (text) -> mapper.apply(ref.get(), text)));
-		EventQueue.invokeLater(() -> ref.get().combo.subject.next((String)ref.get().combo.getSelectedItem()));
+		invokeLater(() -> ref.get().combo.selection.next((String)ref.get().combo.getSelectedItem()));
 		return ref.get();
 	}
 
