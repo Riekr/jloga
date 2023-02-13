@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.3.1
 - Text Viewer:
   - correctly show last line in viewport
   - correctly recalculate lines in viewport after line height change
