@@ -3,14 +3,20 @@ package org.riekr.jloga.io;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.util.Collections.newSetFromMap;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNullElse;
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
+import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
+import static org.riekr.jloga.utils.ContextMenu.addActionOpenInFileManager;
 import static org.riekr.jloga.utils.FileUtils.getFileCreationTime;
+import static org.riekr.jloga.utils.FileUtils.sizeToString;
+import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +36,7 @@ import java.nio.charset.MalformedInputException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -524,5 +531,16 @@ public class TextFileSource implements TextSource {
 
 	public Path getFile() {
 		return _file;
+	}
+
+	@Override
+	public List<JLabel> describe() {
+		JLabel descriptionLabel = addActionCopy(new JLabel(_file.toFile().getAbsolutePath()));
+		descriptionLabel.setToolTipText(sizeToString(_file));
+		descriptionLabel.addMouseListener(mouse()
+				.onEnter(e -> descriptionLabel.setToolTipText(sizeToString(_file)))
+		);
+		addActionOpenInFileManager(descriptionLabel, _file);
+		return singletonList(descriptionLabel);
 	}
 }

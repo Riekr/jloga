@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -142,11 +141,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 			String tabTitle = config.sources.values().stream()
 					.map((sc) -> sc.file.getName())
 					.collect(Collectors.joining("+"));
-			AtomicInteger idx = new AtomicInteger();
-			String tabDescr = config.sources.values().stream()
-					.map((sc) -> idx.getAndIncrement() + " = " + sc.file.getAbsolutePath())
-					.collect(Collectors.joining("<br>"));
-			open(config, tabTitle, "<html>" + tabDescr + "</html>",
+			open(config, tabTitle,
 					(closer) -> new MixFileSource(config, _progressBar.addJob("Mixing"), closer)
 			);
 		}
@@ -201,7 +196,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		if (file.canRead()) {
 			Preferences.RECENT_FILES.tap((p) -> p.roll(file));
 			Preferences.RECENT_DIRS.tap((p) -> p.roll(file.getParentFile()));
-			open(file, file.getName(), file.getAbsolutePath(),
+			open(file, file.getName(),
 					(closer) -> new TextFileSource(file.toPath(), Preferences.CHARSET.get(), _progressBar.addJob("Indexing"), closer)
 			);
 			Preferences.LAST_OPEN_PATH.set(file.getParentFile());
@@ -226,7 +221,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		_refreshBtn.setEnabled(false);
 	}
 
-	public void open(Object key, String title, String description, Function<Runnable, TextSource> src) {
+	public void open(Object key, String title, Function<Runnable, TextSource> src) {
 		if (_openFiles.containsKey(key)) {
 			System.out.println("Already open: " + key);
 			return;
@@ -253,13 +248,12 @@ public class MainPanel extends JFrame implements FileDropListener {
 		TextSource textSource = src.apply(closer);
 		_openFiles.put(key, textSource);
 		try {
-			System.out.println("Opening: " + description);
 			if (_tabs.getParent() == null) {
 				onAddFirstTab();
 				add(_tabs, BorderLayout.CENTER);
 			}
 
-			SearchPanel searchPanel = new SearchPanel(title, description, textSource, _progressBar, new TabNavigation(_tabs));
+			SearchPanel searchPanel = new SearchPanel(title, textSource, _progressBar, new TabNavigation(_tabs));
 			searchPanel.setFileDropListener(this::openFiles);
 			searchPanel.setFont(_font);
 

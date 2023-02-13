@@ -1,8 +1,10 @@
 package org.riekr.jloga.io;
 
+import static java.util.Collections.emptyList;
 import static org.riekr.jloga.utils.AsyncOperations.asyncTask;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -201,4 +203,6 @@ public interface TextSource extends Iterable<String>, AutoCloseable {
 	}
 
 	default List<Section> sections() {return null;}
+
+	default List<JLabel> describe() {return emptyList();}
 }

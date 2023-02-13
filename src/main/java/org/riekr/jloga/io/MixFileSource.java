@@ -1,9 +1,11 @@
 package org.riekr.jloga.io;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.utils.AsyncOperations.monitorProgress;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.time.Duration;
@@ -12,14 +14,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -222,5 +227,17 @@ public class MixFileSource implements TextSource {
 	public void close() {
 		if (_indexing != null)
 			_indexing.cancel(true);
+	}
+
+	@Override
+	public List<JLabel> describe() {
+		Stream<JLabel> res = Arrays.stream(_sources)
+				.map(TextSource::describe)
+				.flatMap(List::stream);
+		if (_padding != -1) {
+			AtomicInteger idx = new AtomicInteger();
+			res = res.peek(label -> label.setText(idx.getAndIncrement() + ": " + label.getText()));
+		}
+		return res.collect(toList());
 	}
 }

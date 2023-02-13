@@ -1,10 +1,7 @@
 package org.riekr.jloga.ui;
 
 import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
-import static org.riekr.jloga.utils.ContextMenu.addActionOpenInFileManager;
-import static org.riekr.jloga.utils.FileUtils.sizeToString;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
-import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
 import static org.riekr.jloga.utils.UIUtils.onClickListener;
 
@@ -12,7 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -20,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.riekr.jloga.io.TextFileSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.KeyBindings;
@@ -48,18 +43,19 @@ public class SearchPanel extends JComponent implements FileDropListener {
 	private       int    _searchId = 0;
 
 	/** Main panel */
-	public SearchPanel(String title, String description, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
+	public SearchPanel(String title, TextSource src, JobProgressBar progressBar, @Nullable TabNavigation tabNavigation) {
 		this(title, progressBar, 0, tabNavigation, null);
-		JLabel descriptionLabel = addActionCopy(new JLabel(description));
-		if (src instanceof TextFileSource) {
-			Path file = ((TextFileSource)src).getFile();
-			descriptionLabel.setToolTipText(sizeToString(file));
-			descriptionLabel.addMouseListener(mouse()
-					.onEnter(e -> descriptionLabel.setToolTipText(sizeToString(file)))
-			);
-			addActionOpenInFileManager(descriptionLabel, file);
+		List<JLabel> descriptionLabels = src.describe();
+		if (!descriptionLabels.isEmpty()) {
+			JComponent descriptionLabel;
+			if (descriptionLabels.size() == 1)
+				descriptionLabel = descriptionLabels.get(0);
+			else {
+				descriptionLabel = Box.createVerticalBox();
+				descriptionLabels.forEach(descriptionLabel::add);
+			}
+			add(descriptionLabel, BorderLayout.NORTH);
 		}
-		add(descriptionLabel, BorderLayout.NORTH);
 		setTextSource(src);
 	}
 
