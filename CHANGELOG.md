@@ -7,6 +7,8 @@
 - UI:
   - "Open in file manager" actions on right click menues
   - Fixed GTK theme selection
+- General:
+  - Fixed I/O threading regression under heavy load
 
 ## v0.3.0
 - Favorites:
