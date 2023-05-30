@@ -1,5 +1,8 @@
 ## In progress:
 
+- General:
+  - Fixed save file regression
+
 ## v0.3.1
 - Text Viewer:
   - correctly show last line in viewport

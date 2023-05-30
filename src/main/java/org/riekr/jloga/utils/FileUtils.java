@@ -190,7 +190,12 @@ public class FileUtils {
 	@Contract(value = "null->null; !null->!null", pure = true)
 	public static Path toRealAbsolutePath(Path path) {
 		try {
-			return path == null ? null : path.normalize().toRealPath().toAbsolutePath();
+			if (path == null)
+				return null;
+			path = path.normalize();
+			if (Files.exists(path))
+				path = path.toRealPath();
+			return path.toAbsolutePath();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
