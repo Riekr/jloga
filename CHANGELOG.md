@@ -2,6 +2,7 @@
 
 - General:
   - Fixed save file regression
+  - Updated to perspective 2.2.1
 
 ## v0.3.1
 - Text Viewer:

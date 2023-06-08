@@ -1,4 +1,6 @@
-const worker = window.perspective.worker();
+import perspective from "./perspective.js";
+
+const worker = perspective.worker();
 const viewer = document.querySelector("perspective-viewer");
 viewer.toggleConfig();
 
