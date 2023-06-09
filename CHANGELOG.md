@@ -3,6 +3,8 @@
 - General:
   - Fixed save file regression
   - Updated to perspective 2.2.1
+  - Better handling of perspective arrow conversions
+  - Asynchronous operations errors dump
 
 ## v0.3.1
 - Text Viewer:

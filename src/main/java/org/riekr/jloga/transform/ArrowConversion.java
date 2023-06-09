@@ -105,15 +105,17 @@ public class ArrowConversion {
 		_recordBuffer.clear();
 		while (data.hasNext() && _recordBuffer.size() < _recSize)
 			_recordBuffer.add(data.next());
-		for (int i = 0; i < _header.length; i++) {
+		for (int i = 0, hlen = _header.length; i < hlen; i++) {
 			if (i != 0)
 				_buffer.append(',');
 			final String colName = _header[i];
 			_buffer.append('"').append(escapeQuotes(colName)).append("\":[");
-			for (int j = 0; j < _recordBuffer.size(); j++) {
+			for (int j = 0, rblen = _recordBuffer.size(); j < rblen; j++) {
 				if (j != 0)
 					_buffer.append(',');
-				_buffer.append('"').append(escapeQuotes(_colTransformers[i].apply(i, _recordBuffer.get(j)[i]))).append('"');
+				String[] rec = _recordBuffer.get(j);
+				String val = i < rec.length ? rec[i] : "";
+				_buffer.append('"').append(escapeQuotes(_colTransformers[i].apply(i, val))).append('"');
 			}
 			_buffer.append(']');
 		}

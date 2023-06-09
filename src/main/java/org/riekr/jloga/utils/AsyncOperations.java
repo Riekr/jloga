@@ -89,6 +89,8 @@ public class AsyncOperations {
 				lock.lock();
 				try {
 					task.run();
+				} catch (Throwable e) {
+					e.printStackTrace(System.err);
 				} finally {
 					lock.unlock();
 				}
