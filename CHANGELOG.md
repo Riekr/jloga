@@ -1,5 +1,9 @@
 ## In progress:
 
+## v0.3.3
+- General:
+  - Updated to perspective 2.6.1
+
 ## v0.3.2
 - General:
   - Fixed save file regression
