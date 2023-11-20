@@ -42,20 +42,35 @@ public class FinosPerspectiveServer extends ResourcesServer {
 					super(data.next());
 				}
 
-				void set() {
-					sendJS("s('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(data) + ')', this::update);
+				void check(String res) {
+					if (!res.equals("OK"))
+						throw new IllegalArgumentException("JS failed: " + res);
+				}
+
+				void title() {
+					sendJS("t" + title, (res) -> {
+						check(res);
+						start();
+					});
+				}
+
+				void start() {
+					sendJS("s" + toArrowChunk(data), this::update);
 				}
 
 				void update(String res) {
-					if (!res.equals("OK"))
-						throw new IllegalArgumentException("JS failed: " + res);
+					check(res);
 					if (data.hasNext())
-						sendJS("u(" + toArrowChunk(data) + ')', this::update);
+						sendJS("u" + toArrowChunk(data), this::update);
 				}
 			}
 			LoadOperation loadOperation = new LoadOperation();
-			if (data.hasNext())
-				loadOperation.set();
+			if (data.hasNext()) {
+				if (title != null && !title.isEmpty())
+					loadOperation.title();
+				else
+					loadOperation.start();
+			}
 		}
 	}
 

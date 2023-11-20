@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class ArrowConversionTest {
 
@@ -63,6 +66,18 @@ public class ArrowConversionTest {
 		c.escapeQuotes(val);
 		System.err.println(val + '\n' + c);
 		Assert.assertEquals("\\\"1\\\",2,\\\"3\\\",4,\\\"5\\\",ciao", c.toString());
+	}
+
+	@Test
+	public void format() {
+		ArrowConversion ac = new ArrowConversion(new String[]{"C1", "C2"});
+		List<String[]> data = Arrays.asList(
+				new String[]{"C1a", "C2a"},
+				new String[]{"C1b", "C2b"}
+		);
+		Iterator<String[]> i = data.iterator();
+		System.out.println(ac.toArrowChunk(i));
+		System.out.println(ac.toArrowChunk(i));
 	}
 
 }
