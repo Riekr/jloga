@@ -109,14 +109,14 @@ tasks.register('updatePerspective') {
 		def repo = "https://cdn.jsdelivr.net/npm/@finos"
 		def local = "src/main/html/org/riekr/jloga/http/perspective/"
 
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.js'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/perspective-viewer.js'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.cpp.wasm'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/perspective_bg.wasm'; dest local }
+		download.run { src "${repo}/perspective/dist/cdn/perspective.js"; dest local }
+		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.js"; dest local }
+		download.run { src "${repo}/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"; dest local }
+		download.run { src "${repo}/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"; dest local }
+		download.run { src "${repo}/perspective/dist/cdn/perspective.cpp.wasm"; dest local }
+		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective_bg.wasm"; dest local }
 //		download.run { src 'https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.arrow'; dest local }
-		download.run { src 'https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.worker.js'; dest local }
+		download.run { src "${repo}/perspective/dist/cdn/perspective.worker.js"; dest local }
 
 		// you can set "wgetExec" in "gradle.properties" file in the same folder of this one (useful for cygwin)
 		delete(file("${local}/res"))

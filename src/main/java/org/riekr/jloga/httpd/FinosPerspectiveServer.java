@@ -36,20 +36,20 @@ public class FinosPerspectiveServer extends ResourcesServer {
 	}
 
 	public void load(String title, Iterator<String[]> data) {
-		class LoadOperation extends ArrowConversion {
+		final class LoadOperation extends ArrowConversion {
 			LoadOperation() {
 				super(data.next());
 			}
 
 			void set() {
-				sendJS("set('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(data) + ')', this::update);
+				sendJS("s('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(data) + ')', this::update);
 			}
 
 			void update(String res) {
 				if (!res.equals("OK"))
 					throw new IllegalArgumentException("JS failed: " + res);
 				if (data.hasNext())
-					sendJS("update(" + toArrowChunk(data) + ')', this::update);
+					sendJS("u(" + toArrowChunk(data) + ')', this::update);
 			}
 		}
 		if (data.hasNext())

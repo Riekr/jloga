@@ -3,6 +3,7 @@
 ## v0.3.3
 - General:
   - Updated to perspective 2.6.1
+  - Minor performance fixes to perspective data loading
 
 ## v0.3.2
 - General:
