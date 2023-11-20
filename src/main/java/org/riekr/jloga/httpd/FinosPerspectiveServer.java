@@ -36,24 +36,27 @@ public class FinosPerspectiveServer extends ResourcesServer {
 	}
 
 	public void load(String title, Iterator<String[]> data) {
-		final class LoadOperation extends ArrowConversion {
-			LoadOperation() {
-				super(data.next());
-			}
+		if (data.hasNext()) {
+			final class LoadOperation extends ArrowConversion {
+				LoadOperation() {
+					super(data.next());
+				}
 
-			void set() {
-				sendJS("s('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(data) + ')', this::update);
-			}
+				void set() {
+					sendJS("s('" + (title == null ? "null" : title.replace("'", "\\'")) + "'," + toArrowChunk(data) + ')', this::update);
+				}
 
-			void update(String res) {
-				if (!res.equals("OK"))
-					throw new IllegalArgumentException("JS failed: " + res);
-				if (data.hasNext())
-					sendJS("u(" + toArrowChunk(data) + ')', this::update);
+				void update(String res) {
+					if (!res.equals("OK"))
+						throw new IllegalArgumentException("JS failed: " + res);
+					if (data.hasNext())
+						sendJS("u(" + toArrowChunk(data) + ')', this::update);
+				}
 			}
+			LoadOperation loadOperation = new LoadOperation();
+			if (data.hasNext())
+				loadOperation.set();
 		}
-		if (data.hasNext())
-			new LoadOperation().set();
 	}
 
 	public static void main(String[] args) {

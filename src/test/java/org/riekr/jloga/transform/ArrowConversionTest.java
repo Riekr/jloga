@@ -56,4 +56,13 @@ public class ArrowConversionTest {
 		Assert.assertFalse(res.endsWith("[UTC]"));
 	}
 
+	@Test
+	public void escapeQuotes() {
+		String val = "\"1\",2,\"3\",4,\"5\",ciao";
+		TestArrowConversion c = new TestArrowConversion();
+		c.escapeQuotes(val);
+		System.err.println(val + '\n' + c);
+		Assert.assertEquals("\\\"1\\\",2,\\\"3\\\",4,\\\"5\\\",ciao", c.toString());
+	}
+
 }

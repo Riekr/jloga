@@ -1,5 +1,6 @@
 package org.riekr.jloga.transform;
 
+import static java.lang.Math.round;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -95,8 +96,20 @@ public class ArrowConversion {
 		_dateTimeFormatters.add(_dateTimeFormatters.removeFirst());
 	}
 
-	private String escapeQuotes(String val) {
-		return val.replace("\"", "\\\"");
+	protected void escapeQuotes(String val) {
+		int pos;
+		int start = 0;
+		do {
+			pos = val.indexOf('"', start);
+			if (pos != -1) {
+				_buffer.ensureCapacity(pos - start + 2);
+				_buffer.append(val, start, pos);
+				_buffer.append("\\\"");
+				start = pos + 1;
+			} else
+				break;
+		} while (true);
+		_buffer.append(val, start, val.length());
 	}
 
 	public final String toArrowChunk(Iterator<String[]> data) {
@@ -109,13 +122,17 @@ public class ArrowConversion {
 			if (i != 0)
 				_buffer.append(',');
 			final String colName = _header[i];
-			_buffer.append('"').append(escapeQuotes(colName)).append("\":[");
+			_buffer.append('"');
+			escapeQuotes(colName);
+			_buffer.append("\":[");
 			for (int j = 0, rblen = _recordBuffer.size(); j < rblen; j++) {
 				if (j != 0)
 					_buffer.append(',');
 				String[] rec = _recordBuffer.get(j);
 				String val = i < rec.length ? rec[i] : "";
-				_buffer.append('"').append(escapeQuotes(_colTransformers[i].apply(i, val))).append('"');
+				_buffer.append('"');
+				escapeQuotes(_colTransformers[i].apply(i, val));
+				_buffer.append('"');
 			}
 			_buffer.append(']');
 		}
@@ -126,7 +143,12 @@ public class ArrowConversion {
 
 	private void checkSize(int len) {
 		int prec = _recSize;
-		_recSize *= _CHUNK_SIZE / (float)len;
+		_recSize *= round(_CHUNK_SIZE / (float)len);
 		System.err.println("records " + prec + " -> " + _recSize);
+	}
+
+	@Override
+	public String toString() {
+		return _buffer.toString();
 	}
 }
