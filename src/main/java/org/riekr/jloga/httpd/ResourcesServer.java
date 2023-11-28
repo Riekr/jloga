@@ -7,6 +7,10 @@ import fi.iki.elonen.NanoHTTPD;
 
 class ResourcesServer {
 
+	static {
+		NanoHTTPD.mimeTypes().put("wasm", "application/wasm");
+	}
+
 	private final String      _package;
 	private final LocalServer _server;
 

@@ -1,5 +1,8 @@
 ## In progress:
 
+- General:
+  - Updated to perspective [2.7.0](https://github.com/finos/perspective/compare/v2.6.1...v2.7.0)
+
 ## v0.3.3
 - General:
   - Updated to perspective 2.6.1
