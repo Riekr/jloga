@@ -22,10 +22,10 @@ socket.onmessage = async (msg) => {
 			break;
 		default:
 			alert('invalid command ' + msg.data.charAt(0));
-		  socket.send(msg.data.substr(0, 8) + "KO");
+		  socket.send(msg.data.substr(0, 9));
 			return;
 	}
-  socket.send(msg.data.substr(0, 8) + "OK");
+  socket.send(msg.data.substr(0, 8) + "K");
 }
 setInterval(() => {
   socket.send("        PING");

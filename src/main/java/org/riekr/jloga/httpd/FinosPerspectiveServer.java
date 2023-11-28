@@ -43,7 +43,7 @@ public class FinosPerspectiveServer extends ResourcesServer {
 				}
 
 				void check(String res) {
-					if (!res.equals("OK"))
+					if (!res.equals("K"))
 						throw new IllegalArgumentException("JS failed: " + res);
 				}
 
