@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.3.4
 - General:
   - Updated to perspective [2.7.1](https://github.com/finos/perspective/compare/v2.6.1...v2.7.1)
   - Minor performance fixes to perspective data loading
