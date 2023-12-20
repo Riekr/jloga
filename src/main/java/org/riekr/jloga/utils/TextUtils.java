@@ -89,23 +89,21 @@ public class TextUtils {
 	}
 
 	public static String toString(@NotNull String[] strings, int count) {
+		if (strings.length < count)
+			count = strings.length;
 		switch (count) {
 			case 0:
 				return "";
 			case 1:
-				return strings.length != 0 ? strings[0] : "";
+				return strings[0];
 			default:
 				if (count < 0)
 					throw new IllegalArgumentException();
 		}
-		StringBuilder buf = new StringBuilder(100 * count);
+		StringBuilder buf = new StringBuilder(160 * count);
 		buf.append(strings[0]);
-		int len = Math.min(strings.length, count);
-		int i = 1;
-		for (; i < len; i++)
+		for (int i = 1; i < count; i++)
 			buf.append('\n').append(strings[i]);
-		for (; i < count; i++)
-			buf.append('\n');
 		return buf.toString();
 	}
 
