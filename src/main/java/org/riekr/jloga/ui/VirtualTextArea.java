@@ -46,7 +46,6 @@ import org.riekr.jloga.misc.FileDropListener;
 import org.riekr.jloga.prefs.ExtraLines;
 import org.riekr.jloga.prefs.HighlightType;
 import org.riekr.jloga.prefs.Preferences;
-import org.riekr.jloga.react.BehaviourSubject;
 import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.transform.HeaderDetector;
 import org.riekr.jloga.utils.CaretLimiter;
@@ -76,9 +75,9 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	private int _lineCount     = 0;
 	private int _allLinesCount = 0;
 
-	private final BehaviourSubject<Integer> _highlightedLine = new BehaviourSubject<>(null);
-	private       Object                    _lineHighlight;
-	private final SelectionHighlight        _selectionHighlight;
+	private       Integer            _highlightedLine = null;
+	private       Object             _lineHighlight;
+	private final SelectionHighlight _selectionHighlight;
 
 	private final String          _title;
 	private final VirtualTextArea _parent;
@@ -157,11 +156,11 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 					Integer line = null;
 					switch (e.getKeyCode()) {
 						case 38: // up
-							if ((line = _highlightedLine.get()) != null)
+							if ((line = _highlightedLine) != null)
 								line = max(0, line - 1);
 							break;
 						case 40: // down
-							if ((line = _highlightedLine.get()) != null)
+							if ((line = _highlightedLine) != null)
 								line = min(_allLinesCount - 1, line + 1);
 							break;
 					}
@@ -235,7 +234,6 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		// finishing
 		Preferences.EXTRA_LINES.subscribe(this, (value) -> _extraLines = value);
 		Preferences.LINEHEIGHT.subscribe(this, (value) -> recalcLineHeight());
-		_highlightedLine.subscribe(this::highlightLine);
 		ContextMenu.addActionCopy(this, _text, _lineNumbers);
 		CaretLimiter.setup(_text, () -> {
 			// _allLinesCount is always +1
@@ -415,8 +413,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void centerOn(int line) {
+		centerOn(line, 0);
+	}
+
+	private void centerOn(int line, int level) {
 		setFromLine(line - _extraLines.apply(_lineCount));
-		_highlightedLine.next(line);
+		setHighlightedLine(line, true, level);
 	}
 
 	@Override
@@ -525,7 +527,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 	private void refreshHighlights() {
 		_selectionHighlight.refresh();
-		highlightLine(_highlightedLine.get());
+		highlightLine(_highlightedLine, Integer.MAX_VALUE);
 	}
 
 	private void requireText() {
@@ -552,7 +554,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 	}
 
-	private void highlightLine(Integer highlightedLine) {
+	private void highlightLine(Integer highlightedLine, int level) {
 		Highlighter highlighter = _text.getHighlighter();
 
 		// remove old highlight
@@ -582,10 +584,15 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		}
 
 		// eventually highlight parent text area
-		if (_parent != null && Preferences.HLTYPE.get() == HighlightType.ALL_HIERARCHY) {
-			Integer parentLine = _textSource.getSrcLine(highlightedLine);
-			if (parentLine != null)
-				_parent.centerOn(parentLine);
+		if (_parent != null) {
+			HighlightType hltype = Preferences.HLTYPE.get();
+			if (hltype != HighlightType.DISABLED) {
+				Integer parentLine = _textSource.getSrcLine(highlightedLine);
+				if (parentLine != null) {
+					if (hltype == HighlightType.ALL_HIERARCHY || (hltype == HighlightType.PARENT_ONLY && level == 0))
+						_parent.centerOn(parentLine, level + 1);
+				}
+			}
 		}
 	}
 
@@ -622,7 +629,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 								ex.printStackTrace(System.err);
 							}
 						}
-						_highlightedLine.next(null);
+						_highlightedLine = null;
 					}
 				}
 			};
@@ -636,11 +643,16 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 	}
 
 	public void setHighlightedLine(Integer line) {
-		setHighlightedLine(line, true);
+		setHighlightedLine(line, true, 0);
 	}
 
 	public void setHighlightedLine(Integer line, boolean scroll) {
-		_highlightedLine.next(line);
+		setHighlightedLine(line, scroll, 0);
+	}
+
+	private void setHighlightedLine(Integer line, boolean scroll, int level) {
+		_highlightedLine = line;
+		highlightLine(line, level);
 		if (scroll && line != null) {
 			if (line < _fromLine)
 				setFromLine(line);
