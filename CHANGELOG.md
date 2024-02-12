@@ -2,6 +2,8 @@
 
 - Text Viewer:
     - fix line highlighting if not whole hierarchy is selected in settings
+- General:
+    - Better detection of other instances    
 
 ## v0.3.4
 - General:

@@ -44,7 +44,9 @@ public class InterComm extends ServerSocket implements Runnable {
 
 	static boolean isAlive() {
 		long otherPid = PREFS.getLong(PREF_PID, 0);
-		return otherPid != 0 && ProcessHandle.of(otherPid).isPresent();
+		return otherPid != 0 && ProcessHandle.of(otherPid).map(h -> h.info().commandLine()
+				.map(cl -> cl.contains(Main.class.getName()))
+				.orElse(false)).orElse(false);
 	}
 
 	static void sendFileOpenCommand(Stream<File> files) {
