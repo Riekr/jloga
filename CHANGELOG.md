@@ -1,9 +1,10 @@
 ## In progress:
 
 - Text Viewer:
-    - fix line highlighting if not whole hierarchy is selected in settings
+  - fix line highlighting if not whole hierarchy is selected in settings
 - General:
-    - Better detection of other instances    
+  - Better detection of other instances    
+  - Updated to flatlaf 3.3
 
 ## v0.3.4
 - General:

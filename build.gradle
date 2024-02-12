@@ -8,10 +8,11 @@ repositories {
 	mavenCentral()
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
-
-compileJava.options.encoding = 'UTF-8'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(11)
+	}
+}
 
 /* Would be nice to use javafx for finos perspective integration but as of now webassembly and workers are not supported
    keeping definitions here for further reference */
@@ -23,18 +24,11 @@ compileJava.options.encoding = 'UTF-8'
 //}
 
 sourceSets {
-	main {
-		java {
-			srcDir 'src/main/java'
-		}
-		resources {
-//			srcDir 'src/main/resources'
-			srcDir 'src/main/html'
-		}
-	}
+	main.resources.srcDir 'src/main/html'
 }
 
 compileJava {
+	options.encoding = 'UTF-8'
 	options.warnings = true
 	options.deprecation = true
 	options.debug = true
@@ -46,13 +40,13 @@ compileJava {
 
 dependencies {
 	// flatlaf 2.2 has troubles with JSplitPane programmatic divider positioning
-	implementation 'com.formdev:flatlaf:3.2.5'
-	implementation 'com.formdev:flatlaf-intellij-themes:3.2.5'
+	implementation 'com.formdev:flatlaf:3.3'
+	implementation 'com.formdev:flatlaf-intellij-themes:3.3'
 	implementation 'org.drjekyll:fontchooser:2.5.2'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
 	implementation 'com.google.code.gson:gson:2.10.1'
 	testImplementation 'junit:junit:4.13.2'
-	compileOnly 'org.jetbrains:annotations:23.1.0'
+	compileOnly 'org.jetbrains:annotations:24.1.0'
 }
 
 def myVersion = 'dev'
