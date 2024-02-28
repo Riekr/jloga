@@ -6,6 +6,7 @@
   - Better detection of other instances    
   - Updated to flatlaf 3.3
   - Increase default page size to 4MB
+  - Updated to perspective 2.8.1
 
 ## v0.3.4
 - General:
