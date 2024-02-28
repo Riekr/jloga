@@ -157,7 +157,7 @@ public interface Preferences extends KeyBindings {
 			.addDescription("Select which threading model should be used for simple searches (eg: plain text and regex).")
 			.add(SimpleSearchPredicate::getThreadModels);
 
-	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024)
+	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024 * 4)
 			.describe(Type.Combo, "Size of disk pages")
 			.group(IO)
 			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase ")
@@ -167,7 +167,9 @@ public interface Preferences extends KeyBindings {
 			.add("512kB", 512 * 1024)
 			.add("1MB", 1024 * 1024)
 			.add("2MB", 1024 * 1024 * 2)
-			.add("4MB", 1024 * 1024 * 4);
+			.add("4MB", 1024 * 1024 * 4)
+			.add("4MB", 1024 * 1024 * 8)
+			.add("4MB", 1024 * 1024 * 16);
 
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null)
 			.withConversion(File::new, File::getAbsolutePath)
