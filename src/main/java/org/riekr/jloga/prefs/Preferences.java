@@ -168,8 +168,8 @@ public interface Preferences extends KeyBindings {
 			.add("1MB", 1024 * 1024)
 			.add("2MB", 1024 * 1024 * 2)
 			.add("4MB", 1024 * 1024 * 4)
-			.add("4MB", 1024 * 1024 * 8)
-			.add("4MB", 1024 * 1024 * 16);
+			.add("8MB", 1024 * 1024 * 8)
+			.add("16MB", 1024 * 1024 * 16);
 
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null)
 			.withConversion(File::new, File::getAbsolutePath)
