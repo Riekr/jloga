@@ -141,8 +141,11 @@ public class TextFileSource implements TextSource {
 			System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
 		} catch (ClosedByInterruptException ignored) {
 			System.out.println("Indexing cancelled");
-		} catch (IOException | InvalidMarkException e) {
+		} catch (IOException e) {
 			popupError("Wrong charset?", "Indexing error", e);
+			throw new IndexingException("Error indexing " + _file, e);
+		} catch (InvalidMarkException e) {
+			popupError("Line too long", "Try increasing page size", e);
 			throw new IndexingException("Error indexing " + _file, e);
 		}
 	}
