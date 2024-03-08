@@ -1,12 +1,13 @@
 ## In progress:
 
 - Text Viewer:
-  - fix line highlighting if not whole hierarchy is selected in settings
+  - Fix line highlighting if not whole hierarchy is selected in settings
 - General:
   - Better detection of other instances    
   - Updated to flatlaf 3.3
   - Increase default page size to 4MB
   - Updated to perspective 2.8.1
+  - Autoscale page size to fit text file line length
 
 ## v0.3.4
 - General:

@@ -1,9 +1,11 @@
 package org.riekr.jloga.prefs;
 
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.react.BoolBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
@@ -83,6 +86,22 @@ public class GUIPreference<T> implements Preference<T> {
 		Map<String, T> values = new LinkedHashMap<>();
 		_values.accept(values);
 		return values.entrySet();
+	}
+
+	@Nullable
+	public T nextOf(T curr) {
+		List<T> values = values().stream()
+				.map(Map.Entry::getValue)
+				.collect(toList());
+		if (values.isEmpty())
+			return null;
+		Iterator<T> i = values.iterator();
+		while (i.hasNext()) {
+			T t = i.next();
+			if (Objects.equals(t, curr) && i.hasNext())
+				return i.next();
+		}
+		return values.get(0);
 	}
 
 	public GUIPreference<T> add(Consumer<Map<String, T>> filler) {

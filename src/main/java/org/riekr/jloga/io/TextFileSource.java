@@ -51,6 +51,7 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.misc.MutableInt;
 import org.riekr.jloga.misc.MutableLong;
 import org.riekr.jloga.prefs.Preferences;
@@ -77,7 +78,7 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	private final int            _pageSize = Preferences.PAGE_SIZE.get();
+	private       int            _pageSize = Preferences.PAGE_SIZE.get();
 	private final Path           _file;
 	private       Charset        _charset;
 	private       CharsetDecoder _charsetDecoder; // for loadPage only
@@ -102,7 +103,7 @@ public class TextFileSource implements TextSource {
 		setCharset(charset);
 		_indexing = AsyncOperations.IO.submit(file, () -> {
 			try {
-				reindex(indexingListener);
+				reindex(indexingListener, true);
 			} catch (IndexingException e) {
 				closer.run();
 				throw e;
@@ -121,7 +122,7 @@ public class TextFileSource implements TextSource {
 				.onUnmappableCharacter(CodingErrorAction.REPLACE);
 	}
 
-	private void reindex(@NotNull ProgressListener indexingListener) {
+	private void reindex(@NotNull ProgressListener indexingListener, boolean autopage) {
 		System.out.println("Indexing " + _file);
 		final long start = currentTimeMillis();
 		_lineCount = 0;
@@ -133,19 +134,32 @@ public class TextFileSource implements TextSource {
 		try (FileChannel fileChannel = FileChannel.open(_file, READ)) {
 			final long totalSize = fileChannel.size();
 			ScheduledFuture<?> updateTask = monitorProgress(_lastPos, totalSize, indexingListener.andThen(() -> _lineCountSubject.next(_lineCount)));
+			boolean allowFinish = true;
 			try {
 				scanFile(fileChannel);
+			} catch (InvalidMarkException e) {
+				if (autopage) {
+					@Nullable Integer next = Preferences.PAGE_SIZE.nextOf(_pageSize);
+					if (next != null && next > _pageSize) {
+						System.err.println("Trying to increment page size from " + _pageSize + " to " + next);
+						_pageSize = next;
+						Preferences.PAGE_SIZE.set(_pageSize);
+						allowFinish = false;
+						reindex(indexingListener, true);
+						return;
+					}
+				}
+				popupError("Line too long", "Try increasing page size", e);
+				throw new IndexingException("Error indexing " + _file, e);
 			} finally {
-				finishIndexing(updateTask, indexingListener);
+				if (allowFinish)
+					finishIndexing(updateTask, indexingListener);
 			}
 			System.out.println("Indexed " + _file + ' ' + _lineCount + " lines in " + (currentTimeMillis() - start) + "ms (" + _index.size() + " pages)");
 		} catch (ClosedByInterruptException ignored) {
 			System.out.println("Indexing cancelled");
 		} catch (IOException e) {
 			popupError("Wrong charset?", "Indexing error", e);
-			throw new IndexingException("Error indexing " + _file, e);
-		} catch (InvalidMarkException e) {
-			popupError("Line too long", "Try increasing page size", e);
 			throw new IndexingException("Error indexing " + _file, e);
 		}
 	}
@@ -265,7 +279,7 @@ public class TextFileSource implements TextSource {
 			final long totalSize = fileChannel.size();
 			if (_lastPos.value > totalSize || !isSameFile()) {
 				System.out.println("Reindex of " + _file);
-				reindex(progressListenerSupplier.get());
+				reindex(progressListenerSupplier.get(), false);
 			} else if (_lastPos.value < totalSize) {
 				System.out.println("Updating " + _file);
 				final long start = currentTimeMillis();
