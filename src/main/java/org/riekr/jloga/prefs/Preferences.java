@@ -157,7 +157,7 @@ public interface Preferences extends KeyBindings {
 			.addDescription("Select which threading model should be used for simple searches (eg: plain text and regex).")
 			.add(SimpleSearchPredicate::getThreadModels);
 
-	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024 * 4)
+	GUIPreference<Integer> PAGE_SIZE = of("page_size", () -> 1024 * 1024 * 2)
 			.describe(Type.Combo, "Size of disk pages")
 			.group(IO)
 			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase ")

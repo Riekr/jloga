@@ -15,6 +15,7 @@ import static org.riekr.jloga.utils.FileUtils.sizeToString;
 import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.PopupUtils.popupWarning;
+import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,6 +63,8 @@ import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.utils.AsyncOperations;
 import org.riekr.jloga.utils.CancellableFuture;
 import org.riekr.jloga.utils.TextUtils;
+
+import raven.toast.Notifications;
 
 public class TextFileSource implements TextSource {
 
@@ -141,7 +144,10 @@ public class TextFileSource implements TextSource {
 				if (autopage) {
 					@Nullable Integer next = Preferences.PAGE_SIZE.nextOf(_pageSize);
 					if (next != null && next > _pageSize) {
-						System.err.println("Trying to increment page size from " + _pageSize + " to " + next);
+						String msg = "Trying to increment page size from " + humanReadableByteCountSI(_pageSize) + " to " + humanReadableByteCountSI(next);
+						System.err.println(msg);
+						Notifications.getInstance()
+								.show(Notifications.Type.SUCCESS, Notifications.Location.BOTTOM_CENTER, msg);
 						_pageSize = next;
 						Preferences.PAGE_SIZE.set(_pageSize);
 						allowFinish = false;

@@ -1,13 +1,17 @@
 ## In progress:
 
+## v0.4.0
+- UI:
+  - Support for [toast message notifications](https://github.com/DJ-Raven/swing-toast-notifications)
 - Text Viewer:
   - Fix line highlighting if not whole hierarchy is selected in settings
+- I/O:
+  - Autoscale page size to fit text file line length
 - General:
   - Better detection of other instances    
-  - Updated to flatlaf 3.3
-  - Increase default page size to 4MB
+  - Updated to flatlaf 3.4
+  - Increase default page size to 2MB
   - Updated to perspective 2.8.1
-  - Autoscale page size to fit text file line length
 
 ## v0.3.4
 - General:

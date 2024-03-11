@@ -45,6 +45,8 @@ import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
+import raven.toast.Notifications;
+
 public class MainPanel extends JFrame implements FileDropListener {
 	private static final long serialVersionUID = -5418006859279219934L;
 
@@ -122,6 +124,9 @@ public class MainPanel extends JFrame implements FileDropListener {
 				e.printStackTrace(System.err);
 			}
 		});
+
+		// notifications
+		Notifications.getInstance().setJFrame(this);
 	}
 
 	private void refreshCurrentTab() {
