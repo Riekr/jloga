@@ -1,5 +1,8 @@
 ## In progress:
 
+- General:
+  - Better detection of other instances    
+
 ## v0.4.0
 - UI:
   - Support for [toast message notifications](https://github.com/DJ-Raven/swing-toast-notifications)
