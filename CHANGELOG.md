@@ -2,6 +2,7 @@
 
 - General:
   - Better detection of other instances    
+  - Updated to perspective 2.9.0
 
 ## v0.4.0
 - UI:
