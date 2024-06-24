@@ -32,7 +32,7 @@ There is no limit in file size, maximum number of lines is 2<sup>63</sup>-1.\
 Each open file is indexed keeping a reference to the position on disk each (for example) 1MB, so the heap impact is minimum even for very big files.\
 Past pages of the files are kept in memory until garbage collection starts in order to reduce disk i/o activity, due to the nature of the application, the best performance is achieved when reading files from a ssd.
 
-jLoga can open many 4GB log files in few senconds and with default jvm settings, you can increase heap if you have a slow disk in order to explicitly cache text pages and reduce disk accesses.
+jLoga can open many 4GB log files in few seconds and with default jvm settings, you can increase heap if you have a slow disk in order to explicitly cache text pages and reduce disk accesses.
 
 You can check current memory usage and limits of a running instance by running the command line in this example:
 ```shell
@@ -141,6 +141,7 @@ As a spare time project sources are updated only when possible, don't expect fas
 
 ### Used libraries includes:
 - FlatLaf - Flat Look and Feel ([home](https://www.formdev.com/flatlaf/) - [license](https://github.com/JFormDesigner/FlatLaf/blob/main/LICENSE))
+- DJ-Raven - Swint toast notifications for FlatLaf ([home](https://github.com/DJ-Raven/swing-toast-notifications) - [license](https://raw.githubusercontent.com/DJ-Raven/swing-toast-notifications/main/LICENSE))
 - fontchooser ([home](https://gitlab.com/dheid/fontchooser) - [license](https://gitlab.com/dheid/fontchooser/-/blob/master/LICENSE))
 - NanoHTTPD – a tiny web server in Java ([home](https://github.com/NanoHttpd/nanohttpd) - [license](https://github.com/NanoHttpd/nanohttpd/blob/master/LICENSE.md))
 - Gson ([home](https://github.com/google/gson) - [license](https://github.com/google/gson/blob/master/LICENSE))
