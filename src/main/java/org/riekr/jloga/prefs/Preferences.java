@@ -186,8 +186,9 @@ public interface Preferences extends KeyBindings {
 
 	GUIPreference<Bag<Object, Object>> EXT_ENV = of("fav.env", Bag::new)
 			.withConversion(Bag::new, identity())
-			.describe(Type.Env, "Environment")
-			.group(SCRIPTS);
+			.describe(Type.Env, "Environment Variables")
+			.group(SCRIPTS)
+			.addDescription("Environment variables to be set during external script execution");
 
 	GUIPreference<LinkedHashMap<Object, Object>> USER_FAVORITES = of("fav.user", LinkedHashMap::new)
 			.withConversion(LinkedHashMap::new, identity())

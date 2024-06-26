@@ -1,5 +1,6 @@
 ## In progress:
 
+## v0.4.1
 - General:
   - Better detection of other instances    
   - Updated to perspective 2.10.1

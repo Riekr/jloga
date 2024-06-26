@@ -324,7 +324,7 @@ public class PrefPanel extends JDialog {
 				(k, v) -> pref.tap(p -> p.add(k, v)),
 				(k1, k2) -> pref.tap(p -> p.swap(k1, k2)));
 		Dimension d = comp.getPreferredSize();
-		d.height = 240;
+		d.height = 120;
 		comp.setPreferredSize(d);
 		pref.subscribe(comp, (data) -> comp.reload());
 		return comp;
