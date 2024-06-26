@@ -22,6 +22,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 import org.riekr.jloga.theme.Theme;
 import org.riekr.jloga.theme.ThemePreference;
+import org.riekr.jloga.utils.Bag;
 
 public interface Preferences extends KeyBindings {
 
@@ -181,7 +182,12 @@ public interface Preferences extends KeyBindings {
 	GUIPreference<Boolean> EXT_PREFIX_SKIP = of("ext.skipPrefix", () -> false)
 			.describe(Type.Toggle, "Skip \"EXT:\" prefix")
 			.group(SCRIPTS)
-			.addDescription("Skip prefixing external scripts with \"EXT:\" inside search selection dialogs");
+			.addDescription("Do not prefix external scripts with \"EXT:\" within search selection dialogs");
+
+	GUIPreference<Bag<Object, Object>> EXT_ENV = of("fav.env", Bag::new)
+			.withConversion(Bag::new, identity())
+			.describe(Type.Env, "Environment")
+			.group(SCRIPTS);
 
 	GUIPreference<LinkedHashMap<Object, Object>> USER_FAVORITES = of("fav.user", LinkedHashMap::new)
 			.withConversion(LinkedHashMap::new, identity())

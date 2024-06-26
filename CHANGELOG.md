@@ -3,6 +3,8 @@
 - General:
   - Better detection of other instances    
   - Updated to perspective 2.10.1
+- External scripts:
+  - Environment variables can be set from preferences panel
 
 ## v0.4.0
 - UI:

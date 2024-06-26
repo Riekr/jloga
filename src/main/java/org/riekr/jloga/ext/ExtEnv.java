@@ -1,5 +1,6 @@
 package org.riekr.jloga.ext;
 
+import static java.util.stream.Collectors.joining;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 
 import java.io.BufferedReader;
@@ -8,12 +9,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.utils.OSUtils;
 import org.riekr.jloga.utils.TextUtils;
 
@@ -28,6 +31,14 @@ class ExtEnv {
 			Pattern pat = Pattern.compile("\\$\\{([\\w_-]+)}");
 			readFile(new File(workingDir, "env-unix.jloga.properties"), dest, (v) -> replaceFromEnv(v, pat), ExtEnv::fixHomePath);
 		}
+		Preferences.EXT_ENV.tap(bag ->
+				bag.stream().map(Map.Entry::getKey).filter(Objects::nonNull).map(Object::toString).distinct().forEach(envName -> {
+					if (!envName.isEmpty()) {
+						String envValue = bag.stream().map(Map.Entry::getValue).filter(Objects::nonNull).map(Object::toString).collect(joining(File.pathSeparator));
+						if (!envValue.isEmpty())
+							dest.put(envName, envValue);
+					}
+				}));
 	}
 
 	private static void readFile(File envFile, Map<String, String> dest, Function<String, String> mapper1, Function<String, String> mapper2) {

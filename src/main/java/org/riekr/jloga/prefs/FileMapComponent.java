@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.riekr.jloga.utils.TableReorderMouseHandler;
@@ -26,8 +25,6 @@ public class FileMapComponent extends JScrollPane {
 	private static final String REMOVE = "\u274C";
 	private static final String CHANGE = "\uD83D\uDCC2";
 
-	private static final Vector<String> _COLUMNS = new Vector<>(asList("Nick", "Folder", "", ""));
-
 	private final JTable _table = new JTable() {
 		private static final long serialVersionUID = -2420185066877683979L;
 
@@ -36,22 +33,26 @@ public class FileMapComponent extends JScrollPane {
 		@Override public boolean isCellSelected(int row, int column) {return isDataColumn(column);}
 	};
 
-	private final Vector<Vector<Object>> _data  = new Vector<>();
-	private final DefaultTableModel      _model = new DefaultTableModel(_data, _COLUMNS);
+	private final Vector<String>         _columns;
+	private final Vector<Vector<Object>> _data = new Vector<>();
+	private final DefaultTableModel      _model;
 
 	private final Supplier<Iterable<Map.Entry<Object, Object>>> _listSupplier;
-	private final Consumer<Object>                              _removeAction;
+	private final BiConsumer<Object, Object>                    _removeAction;
 	private final BiConsumer<Object, Object>                    _addAction;
 	private final BiConsumer<Object, Object>                    _swapAction;
 
 	private Runnable _onEditingStopAction;
 
 	public FileMapComponent(
+			String keyTitle, String valueTitle,
 			Supplier<Iterable<Map.Entry<Object, Object>>> listSupplier,
-			Consumer<Object> removeAction,
+			BiConsumer<Object, Object> removeAction,
 			BiConsumer<Object, Object> addAction,
 			BiConsumer<Object, Object> swapAction
 	) {
+		_columns = new Vector<>(asList(keyTitle, valueTitle, "", ""));
+		_model = new DefaultTableModel(_data, _columns);
 		_listSupplier = listSupplier;
 		_removeAction = removeAction;
 		_addAction = addAction;
@@ -94,7 +95,7 @@ public class FileMapComponent extends JScrollPane {
 			_data.add(row);
 		});
 		_data.add(new Vector<>(asList("", "", "", CHANGE)));
-		_model.setDataVector(_data, _COLUMNS);
+		_model.setDataVector(_data, _columns);
 		_table.tableChanged(null);
 		invokeLater(this::fixColumnWidths);
 	}
@@ -124,7 +125,8 @@ public class FileMapComponent extends JScrollPane {
 			int col = _table.columnAtPoint(point);
 			switch (col) {
 				case 2:
-					_removeAction.accept(_data.get(row).get(0));
+					Vector<Object> r = _data.get(row);
+					_removeAction.accept(r.get(0), r.get(1));
 					break;
 				case 3:
 					Object oldVal = _data.get(row).get(1);
@@ -139,8 +141,9 @@ public class FileMapComponent extends JScrollPane {
 	private void onEditingStart() {
 		int editingRow = _table.getEditingRow();
 		int editingCol = _table.getEditingColumn();
-		Object editingKey = _data.get(editingRow).get(0);
-		Object editingVal = _data.get(editingRow).get(1);
+		Vector<Object> r = _data.get(editingRow);
+		Object editingKey = r.get(0);
+		Object editingVal = r.get(1);
 		switch (editingCol) {
 			case 0: {
 				// System.out.println("KEY START " + editingKey + " " + editingRow + "," + editingCol);
@@ -149,7 +152,7 @@ public class FileMapComponent extends JScrollPane {
 					if (!("".equals(editingVal) || "".equals(newKey)) && !editingKey.equals(newKey)) {
 						Object value = _data.get(editingRow).get(1);
 						// System.out.println("KEY CHANGE " + newKey + " " + editingRow + "," + editingCol);
-						_removeAction.accept(editingKey);
+						_removeAction.accept(editingKey, editingVal);
 						_addAction.accept(newKey, value);
 						reload();
 					}

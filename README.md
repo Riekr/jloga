@@ -103,7 +103,14 @@ more predefined one as in the below table:
 | *Title*     | The title of the search panel                                        |
 | *RootTitle* | The title of the root search panel, ususally contains the file name. |
 
-The variables are read in sequence from: system environment, custom provided variables and search provided variables. Each source takes precedence over the previous ones.
+The variables are read in sequence from:
+1. system environment
+2. custom variables read from `env.jloga.properties` 
+3. custom variables read from `env-unix.jloga.properties` or `env-windows.jloga.properties` according to running OS 
+4. custom variables configure in the preferences panel
+5. search provided variables. 
+
+Each source takes precedence over the previous ones.
 
 See the folder [ext-search-samples](ext-search-samples) for some examples.
 

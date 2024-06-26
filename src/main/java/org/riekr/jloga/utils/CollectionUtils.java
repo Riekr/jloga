@@ -1,6 +1,5 @@
 package org.riekr.jloga.utils;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +24,7 @@ public class CollectionUtils {
 		return -1;
 	}
 
-	public static <K, V> boolean swapRows(LinkedHashMap<K, V> map, K key1, K key2) {
+	public static <K, V> boolean swapRows(Map<K, V> map, K key1, K key2) {
 		Set<K> keys = map.keySet();
 		int index1 = indexOf(keys, key1);
 		if (index1 == -1)
@@ -44,7 +43,13 @@ public class CollectionUtils {
 			key2 = k;
 		}
 		int size = map.size();
-		LinkedHashMap<K, V> temp = new LinkedHashMap<>(size);
+		Map<K, V> temp;
+		try {
+			//noinspection unchecked
+			temp = (Map<K, V>)map.getClass().getConstructor(Integer.TYPE).newInstance(size);
+		} catch (Throwable e) {
+			throw new RuntimeException("Unable to copy map", e);
+		}
 		int i = 0;
 		for (Map.Entry<K, V> e : map.entrySet()) {
 			if (i == index1)

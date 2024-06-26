@@ -24,7 +24,7 @@ import org.riekr.jloga.react.Unsubscribable;
 public class GUIPreference<T> implements Preference<T> {
 
 	public enum Type {
-		Font, Combo, Toggle, Executable, Directory, KeyBinding, FileMap
+		Font, Combo, Toggle, Executable, Directory, KeyBinding, FileMap, Env
 	}
 
 	public final BoolBehaviourSubject enabled = new BoolBehaviourSubject(true);

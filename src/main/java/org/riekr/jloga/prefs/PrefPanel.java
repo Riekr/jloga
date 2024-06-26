@@ -34,6 +34,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.theme.ThemePreview;
 import org.riekr.jloga.ui.ComboEntryWrapper;
 import org.riekr.jloga.ui.KeyStrokeToggleButton;
+import org.riekr.jloga.utils.Bag;
 import org.riekr.jloga.utils.ContextMenu;
 
 public class PrefPanel extends JDialog {
@@ -103,7 +104,10 @@ public class PrefPanel extends JDialog {
 						panel.add(newKeyBindingComponent((GUIPreference<KeyStroke>)p));
 						break;
 					case FileMap:
-						panel.add(newFileMapComponent((GUIPreference<LinkedHashMap<Object, Object>>)p));
+						panel.add(newFileMapComponent((GUIPreference<Map<Object, Object>>)p));
+						break;
+					case Env:
+						panel.add(newEnvComponent((GUIPreference<Bag<Object, Object>>)p));
 						break;
 
 					default:
@@ -301,15 +305,26 @@ public class PrefPanel extends JDialog {
 		return res;
 	}
 
-	private Component newFileMapComponent(GUIPreference<LinkedHashMap<Object, Object>> pref) {
-		FileMapComponent comp = new FileMapComponent(
+	private Component newFileMapComponent(GUIPreference<Map<Object, Object>> pref) {
+		FileMapComponent comp = new FileMapComponent("Nick", "Folder",
 				() -> pref.get().entrySet(),
-				(key) -> pref.tap(p -> p.remove(key)),
-				(k, v) -> pref.tap(p -> p.put(k, v)),
-				(k1, k2) -> pref.tap(p -> swapRows(p, k1, k2))
-		);
+				(k, v) -> pref.tap(p -> p.remove(k, v)), (k, v) -> pref.tap(p -> p.put(k, v)),
+				(k1, k2) -> pref.tap(p -> swapRows(p, k1, k2)));
 		Dimension d = comp.getPreferredSize();
 		d.height = 340;
+		comp.setPreferredSize(d);
+		pref.subscribe(comp, (data) -> comp.reload());
+		return comp;
+	}
+
+	private Component newEnvComponent(GUIPreference<Bag<Object, Object>> pref) {
+		FileMapComponent comp = new FileMapComponent("Name", "Value",
+				pref::get,
+				(k, v) -> pref.tap(p -> p.remove(k, v)),
+				(k, v) -> pref.tap(p -> p.add(k, v)),
+				(k1, k2) -> pref.tap(p -> p.swap(k1, k2)));
+		Dimension d = comp.getPreferredSize();
+		d.height = 240;
 		comp.setPreferredSize(d);
 		pref.subscribe(comp, (data) -> comp.reload());
 		return comp;

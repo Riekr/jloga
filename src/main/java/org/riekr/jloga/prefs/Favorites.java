@@ -61,10 +61,16 @@ public final class Favorites {
 					getSystemFavorites(),
 					userFavorites.entrySet().stream()
 			).forEach(entry -> {
-				String title = entry.getKey().toString();
-				File folder = new File(entry.getValue().toString());
-				if (folder.isDirectory())
-					menuItems.add(scan(folder, title));
+				Object key = entry.getKey();
+				if (key != null) {
+					String title = key.toString();
+					Object val = entry.getValue();
+					if (val != null) {
+						File folder = new File(val.toString());
+						if (folder.isDirectory())
+							menuItems.add(scan(folder, title));
+					}
+				}
 			});
 			if (!menuItems.isEmpty()) {
 				JPopupMenu menu = new JPopupMenu();
