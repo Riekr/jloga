@@ -40,14 +40,14 @@ compileJava {
 
 dependencies {
 	// flatlaf 2.2 has troubles with JSplitPane programmatic divider positioning
-	implementation 'com.formdev:flatlaf:3.4'
-	implementation 'com.formdev:flatlaf-extras:3.4'
-	implementation 'com.formdev:flatlaf-intellij-themes:3.4'
+	implementation 'com.formdev:flatlaf:3.4.1'
+	implementation 'com.formdev:flatlaf-extras:3.4.1'
+	implementation 'com.formdev:flatlaf-intellij-themes:3.4.1'
 
 	// https://github.com/DJ-Raven/swing-toast-notifications
-	implementation files('libs/swing-toast-notifications-1.0.1.jar')
+	implementation files('libs/swing-toast-notifications-1.0.3.jar')
 
-	implementation 'org.drjekyll:fontchooser:2.5.2'
+	implementation 'org.drjekyll:fontchooser:3.1.0'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
 	implementation 'com.google.code.gson:gson:2.10.1'
 
@@ -108,32 +108,45 @@ tasks.register('updatePerspective') {
 	doLast {
 		def repo = "https://cdn.jsdelivr.net/npm/@finos"
 		def local = "src/main/html/org/riekr/jloga/http/perspective/"
-
+		def css = []
+		// https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/
 		download.run { src "${repo}/perspective/dist/cdn/perspective.js"; dest local }
+		download.run { src "${repo}/perspective/dist/cdn/perspective.js.map"; dest local }
+		download.run { src "${repo}/perspective/dist/cdn/perspective-server.wasm"; dest local }
+		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/
 		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.js"; dest local }
+		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.js.map"; dest local }
+		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.wasm"; dest local }
+		css.add("${repo}/perspective-viewer/dist/css/themes.css")
+		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid/dist/cdn/
 		download.run { src "${repo}/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"; dest local }
+		download.run { src "${repo}/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js.map"; dest local }
+		css.add("${repo}/perspective-viewer-datagrid/dist/css/perspective-viewer-datagrid.css")
+		css.add("${repo}/perspective-viewer-datagrid/dist/css/perspective-viewer-datagrid-toolbar.css")
+		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc/dist/cdn/
 		download.run { src "${repo}/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"; dest local }
-		download.run { src "${repo}/perspective/dist/cdn/perspective.cpp.wasm"; dest local }
-		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective_bg.wasm"; dest local }
-//		download.run { src 'https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.arrow'; dest local }
-		download.run { src "${repo}/perspective/dist/cdn/perspective.worker.js"; dest local }
+		download.run { src "${repo}/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js.map"; dest local }
+		css.add("${repo}/perspective-viewer-d3fc/dist/css/perspective-viewer-d3fc.css")
 
 		// you can set "wgetExec" in "gradle.properties" file in the same folder of this one (useful for cygwin)
 		delete(file("${local}/res"))
 		def wget = project.findProperty('wgetExec') ?: 'wget'
-		exec {
-			workingDir "${local}"
-			executable wget
-			args(['-q',
-			      '--page-requisites',
-			      '--convert-links',
-			      '-e', 'robots=off',
-			      '--span-hosts',
-			      '--restrict-file-names=windows',
-			      '--directory-prefix=res',
-			      '--adjust-extension',
-			      "${repo}/perspective-viewer/dist/css/themes.css"
-			])
+
+		css.each { file ->
+			exec {
+				workingDir "${local}"
+				executable wget
+				args(['-q',
+				      '--page-requisites',
+				      '--convert-links',
+				      '-e', 'robots=off',
+				      '--span-hosts',
+				      '--restrict-file-names=windows',
+				      '--directory-prefix=res',
+				      '--adjust-extension',
+				      file
+				])
+			}
 		}
 	}
 }

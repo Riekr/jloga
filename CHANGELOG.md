@@ -1,5 +1,12 @@
 ## In progress:
 
+## v0.4.2
+- General:
+  - Updated to perspective [3.1.3](https://github.com/finos/perspective/compare/v2.7.1...v3.1.3)
+  - Updated to flatlaf 3.4.1
+  - Updated to toast-notifications 1.0.3
+  - Updated to fontchooser 3.1.0****
+
 ## v0.4.1
 - General:
   - Better detection of other instances    
