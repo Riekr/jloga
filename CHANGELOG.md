@@ -1,11 +1,21 @@
 ## In progress:
 
+_v0.5.0_
+- External scripts:
+  - System property `jloga.ext.dir` works as addition to other sources
+  - If `jloga.scripts` exists in classpath, it is loaded as a list of search definitions:
+    - each lines represents a file name to be loaded
+    - lines can start with `res://` to load the file from classpath
+    - if starting with `file://` or no _schema_ prefix is specified, file will be loaded from local file system
+  - _Extension scripts folder_ preference chage is honored if other sources are active 
+
+---
 ## v0.4.2
 - General:
   - Updated to perspective [3.1.3](https://github.com/finos/perspective/compare/v2.7.1...v3.1.3)
   - Updated to flatlaf 3.4.1
   - Updated to toast-notifications 1.0.3
-  - Updated to fontchooser 3.1.0****
+  - Updated to fontchooser 3.1.0
 
 ## v0.4.1
 - General:

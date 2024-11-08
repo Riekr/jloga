@@ -8,12 +8,19 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.MissingResourceException;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
@@ -198,6 +205,35 @@ public class FileUtils {
 			return path.toAbsolutePath();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		}
+	}
+
+	public static BufferedReader emptyReader() {
+		return new BufferedReader(new StringReader(""));
+	}
+
+	@NotNull public static BufferedReader readFrom(String definition, boolean fail) {
+		if (definition == null || definition.isEmpty())
+			return emptyReader();
+		if (definition.startsWith("res://")) {
+			definition = definition.substring(6);
+			InputStream is = FileUtils.class.getClassLoader().getResourceAsStream(definition);
+			if (is == null) {
+				if (fail)
+					throw new MissingResourceException("Can't read resource", FileUtils.class.getName(), definition);
+				return emptyReader();
+			}
+			return new BufferedReader(new InputStreamReader(is));
+		}
+		if (definition.startsWith("file://"))
+			definition = definition.substring(7);
+		try {
+			return new BufferedReader(new FileReader(definition));
+		} catch (FileNotFoundException e) {
+			if (fail)
+				throw new UncheckedIOException(e);
+			System.err.println(e.getMessage());
+			return emptyReader();
 		}
 	}
 
