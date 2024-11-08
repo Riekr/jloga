@@ -1,6 +1,6 @@
 ## In progress:
 
-_v0.5.0_
+## v0.5.0
 - External scripts:
   - System property `jloga.ext.dir` works as addition to other sources
   - If `jloga.scripts` exists in classpath, it is loaded as a list of search definitions:
@@ -8,6 +8,7 @@ _v0.5.0_
     - lines can start with `res://` to load the file from classpath
     - if starting with `file://` or no _schema_ prefix is specified, file will be loaded from local file system
   - _Extension scripts folder_ preference chage is honored if other sources are active 
+  - Removed _Skip "EXT:" prefix_ preference to avoid confusion
 
 ---
 ## v0.4.2

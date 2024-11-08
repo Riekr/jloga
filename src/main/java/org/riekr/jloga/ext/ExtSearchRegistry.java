@@ -33,9 +33,10 @@ public class ExtSearchRegistry {
 			scanDir(_KEY_SYSPROP, new File(extPath));
 
 		try (BufferedReader br = FileUtils.readFrom(_KEY_RES, false)) {
-			load(_KEY_RES, br.lines().flatMap(definition -> {
-				try (BufferedReader src = FileUtils.readFrom(definition, true)) {
-					return fromReader(src);
+			load("RES", _KEY_RES, br.lines().flatMap(definition -> {
+				try (BufferedReader src = FileUtils.readFrom("res://" + definition, true)) {
+					System.err.println("Loading resource " + definition);
+					return fromReader(definition, src);
 				} catch (Throwable e) {
 					System.err.println("Unable to load jloga script " + definition);
 					e.printStackTrace(System.err);
@@ -52,7 +53,7 @@ public class ExtSearchRegistry {
 	public static void scanDir(Object key, File extPath) {
 		if (extPath != null) {
 			try (Stream<Path> files = Files.list(extPath.toPath())) {
-				load(key, files
+				load("EXT", key, files
 						.filter((f) -> Files.isRegularFile(f) && f.toString().toLowerCase().endsWith(".jloga.json"))
 						.flatMap(ExtSearchRegistry::fromFile));
 			} catch (Throwable e) {
@@ -62,7 +63,7 @@ public class ExtSearchRegistry {
 		}
 	}
 
-	private static synchronized void load(Object key, @NotNull Stream<ExtProcessConfig> configStream) {
+	private static synchronized void load(@NotNull String prefix, Object key, @NotNull Stream<ExtProcessConfig> configStream) {
 		try {
 			List<Entry> list = _ENTRIES.computeIfAbsent(key, k -> new ArrayList<>());
 			list.forEach(SearchRegistry::remove);
@@ -71,9 +72,7 @@ public class ExtSearchRegistry {
 					.map((config) -> new Entry(key, config._id, (level) -> config.toComponent(config._id, level), config.description) {
 						@Override
 						public String toString() {
-							if (Preferences.EXT_PREFIX_SKIP.get())
-								return super.toString();
-							return "EXT: " + super.toString();
+							return prefix + ": " + super.toString();
 						}
 					})
 					.peek(SearchRegistry::register)
@@ -87,7 +86,8 @@ public class ExtSearchRegistry {
 	private static @NotNull Stream<ExtProcessConfig> fromFile(Path f) {
 		// System.out.println("LOADING EXT: " + config);
 		try (BufferedReader reader = Files.newBufferedReader(f)) {
-			return fromReader(reader).peek(e -> e.normalize(f));
+			return fromReader(f.getFileName().toString(), reader)
+					.peek(e -> e.guessWorkingDir(f));
 		} catch (Throwable e) {
 			System.err.println("Unable to read " + f);
 			e.printStackTrace(System.err);
@@ -95,11 +95,13 @@ public class ExtSearchRegistry {
 		}
 	}
 
-	private static @NotNull Stream<ExtProcessConfig> fromReader(BufferedReader reader) {
+	private static @NotNull Stream<ExtProcessConfig> fromReader(String fn, BufferedReader reader) {
 		try {
 			final ExtProcessConfig extProcessConfig = new Gson().fromJson(reader, ExtProcessConfig.class);
-			if (extProcessConfig.enabled)
+			if (extProcessConfig.enabled) {
+				extProcessConfig.guessOrdering(fn);
 				return Stream.of(extProcessConfig);
+			}
 		} catch (Throwable e) {
 			System.err.println("Unable to parse");
 			e.printStackTrace(System.err);

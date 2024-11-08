@@ -179,11 +179,6 @@ public interface Preferences extends KeyBindings {
 			.addDescription("A folder that contains a set of '.jloga.json' files describing external scripts to use as search implementations.")
 			.addDescriptionHTML("<b>WARNING:</b> executing unsafe scripts may be a security risk!");
 
-	GUIPreference<Boolean> EXT_PREFIX_SKIP = of("ext.skipPrefix", () -> false)
-			.describe(Type.Toggle, "Skip \"EXT:\" prefix")
-			.group(SCRIPTS)
-			.addDescription("Do not prefix external scripts with \"EXT:\" within search selection dialogs");
-
 	GUIPreference<Bag<Object, Object>> EXT_ENV = of("fav.env", Bag::new)
 			.withConversion(Bag::new, identity())
 			.describe(Type.Env, "Environment Variables")

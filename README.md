@@ -59,7 +59,22 @@ Normally os environment will not override variables contained in properties file
 
 In addition to `env.jloga.properties` a `env-windows.jloga.properties` will be read when running in Windows environment and a `env-unix.jloga.properties` otherwise. The more specific env file will override the less specific properties.
 
-Inside the `.json.jloga` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
+Inside the `.jloga.json` files the `command` tag is an array of strings or other array of string, in the latter case the array contents will be concatenated with the system path separator.
+
+### Bundling
+Jloga can be bundled inside other jars among necessary resources and additiona classpath.
+Inside the new jar you can bundle predefined scripts for having a "ready for distribution" log analysis bundle.
+
+Inside the root of your jar you can include a `jloga.scripts` text file where each line represents another `.jloga.json` file to be loaded as a resource script.
+
+Search scripts loaded from resource file will be marked as `RES:`, other external scripts will be marked as `EXT:` as usual.
+
+The source precedence of the scripts is:
+1. built-in
+2. budled scripts
+3. external scripts
+
+One tier cannot replace an higher tier script.
 
 ### Ordering
 Without any other specification, external scripts are ordered by filename. You can specify order in other ways:
@@ -82,7 +97,7 @@ $ find . -name "*.java" | xargs grep -n printStackTrace
 ./ext/ExtProcessPipeSearch.java:104:                    _err.printStackTrace(System.err);
 ...
 ```
-and you can specify inside the `.json.jloga` file something like:
+and you can specify inside the `.jloga.json` file something like:
 ```
   "command": [...],
   "matchRegex": "^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)",
@@ -95,7 +110,7 @@ Consider that:
 4. specifying `grep` as regular expression will be translated into `^(?<file>[^:]*):(?<line>\\d*):(?<text>.*)` which should be quite common
 
 ### Variables
-By specifing a `%VarName%` in each part of the *.json.jloga* file you can access to system environment variables plus some
+By specifing a `%VarName%` in each part of the *.jloga.json* file you can access to system environment variables plus some
 more predefined one as in the below table:
 
 | Name        | Description                                                          |
@@ -115,7 +130,7 @@ Each source takes precedence over the previous ones.
 See the folder [ext-search-samples](ext-search-samples) for some examples.
 
 #### Custom parameters
-Inside *.json.jloga* files you can define new variables bound to UI widgets, by now the most complete example is [cyggrep.jloga.json](ext-search-samples/cyggrep.jloga.json).
+Inside *.jloga.json* files you can define new variables bound to UI widgets, by now the most complete example is [cyggrep.jloga.json](ext-search-samples/cyggrep.jloga.json).
 
 ### Sectioning
 If your external analyzer outputs more sections, you can grab them and see a single section after having

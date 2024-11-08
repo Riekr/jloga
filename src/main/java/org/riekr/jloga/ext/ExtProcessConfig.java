@@ -51,10 +51,13 @@ public class ExtProcessConfig {
 
 	public transient String _id;
 
-	void normalize(Path f) {
-		_id = f.getFileName().toString();
+	void guessWorkingDir(Path f) {
 		if (workingDirectory == null)
 			workingDirectory = f.getParent().toAbsolutePath().toString();
+	}
+
+	void guessOrdering(String fn) {
+		_id = fn;
 		if (order == null) {
 			Matcher orderExtract = Pattern.compile("^(\\d+)").matcher(_id);
 			if (orderExtract.find())
@@ -119,8 +122,9 @@ public class ExtProcessConfig {
 	}
 
 	public SearchComponent toComponent(String id, int level) {
+		File wd = workingDirectory == null ? new File(".") : new File(workingDirectory);
 		if (params == null || params.isEmpty())
-			return new ExtProcessComponent(id, icon, label, new File(workingDirectory), getCommand(), getMatchRegex(), getSectionRegex());
-		return new ExtProcessComponentProject(id, icon, level, new File(workingDirectory), getCommand(), params, getMatchRegex(), getSectionRegex());
+			return new ExtProcessComponent(id, icon, label, wd, getCommand(), getMatchRegex(), getSectionRegex());
+		return new ExtProcessComponentProject(id, icon, level, wd, getCommand(), params, getMatchRegex(), getSectionRegex());
 	}
 }
