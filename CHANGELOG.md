@@ -1,4 +1,9 @@
 ## In progress:
+- General:
+  - Updated to Finos perspective [3.5.1](https://github.com/finos/perspective/compare/v3.1.3...v3.5.1)
+- Build:
+  - Specify perspective version
+  - Removed perspective jsmap files
 
 ## v0.5.0
 - External scripts:

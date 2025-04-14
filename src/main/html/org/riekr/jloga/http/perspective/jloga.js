@@ -1,4 +1,5 @@
 import perspective from "./perspective.js";
+import "./perspective-server.worker.js";
 import "./perspective-viewer.js";
 import "./perspective-viewer-datagrid.js";
 import "./perspective-viewer-d3fc.js";

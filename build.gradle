@@ -106,27 +106,27 @@ launch4j {
 tasks.register('updatePerspective') {
 	// https://github.com/michel-kraemer/gradle-download-task
 	doLast {
-		def repo = "https://cdn.jsdelivr.net/npm/@finos"
-		def local = "src/main/html/org/riekr/jloga/http/perspective/"
+		// https://perspective.finos.org/guide/how_to/javascript/importing.html
+		def repo = 'https://cdn.jsdelivr.net/npm/@finos'
+		def ver = '@3.5.1'
+		def local = 'src/main/html/org/riekr/jloga/http/perspective/'
+		def wasm = "${local}/wasm"
 		def css = []
 		// https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/
-		download.run { src "${repo}/perspective/dist/cdn/perspective.js"; dest local }
-		download.run { src "${repo}/perspective/dist/cdn/perspective.js.map"; dest local }
-		download.run { src "${repo}/perspective/dist/cdn/perspective-server.wasm"; dest local }
+		download.run { src "${repo}/perspective${ver}/dist/cdn/perspective.js"; dest local }
+		download.run { src "${repo}/perspective${ver}/dist/cdn/perspective-server.worker.js"; dest local }
+		download.run { src "${repo}/perspective${ver}/dist/wasm/perspective-server.wasm"; dest wasm }
 		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/
-		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.js"; dest local }
-		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.js.map"; dest local }
-		download.run { src "${repo}/perspective-viewer/dist/cdn/perspective-viewer.wasm"; dest local }
-		css.add("${repo}/perspective-viewer/dist/css/themes.css")
+		download.run { src "${repo}/perspective-viewer${ver}/dist/cdn/perspective-viewer.js"; dest local }
+		download.run { src "${repo}/perspective-viewer${ver}/dist/wasm/perspective-viewer.wasm"; dest wasm }
+		css.add("${repo}/perspective-viewer${ver}/dist/css/themes.css")
 		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid/dist/cdn/
-		download.run { src "${repo}/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"; dest local }
-		download.run { src "${repo}/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js.map"; dest local }
-		css.add("${repo}/perspective-viewer-datagrid/dist/css/perspective-viewer-datagrid.css")
-		css.add("${repo}/perspective-viewer-datagrid/dist/css/perspective-viewer-datagrid-toolbar.css")
+		download.run { src "${repo}/perspective-viewer-datagrid${ver}/dist/cdn/perspective-viewer-datagrid.js"; dest local }
+		css.add("${repo}/perspective-viewer-datagrid${ver}/dist/css/perspective-viewer-datagrid.css")
+		css.add("${repo}/perspective-viewer-datagrid${ver}/dist/css/perspective-viewer-datagrid-toolbar.css")
 		// https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc/dist/cdn/
-		download.run { src "${repo}/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"; dest local }
-		download.run { src "${repo}/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js.map"; dest local }
-		css.add("${repo}/perspective-viewer-d3fc/dist/css/perspective-viewer-d3fc.css")
+		download.run { src "${repo}/perspective-viewer-d3fc${ver}/dist/cdn/perspective-viewer-d3fc.js"; dest local }
+		css.add("${repo}/perspective-viewer-d3fc${ver}/dist/css/perspective-viewer-d3fc.css")
 
 		// you can set "wgetExec" in "gradle.properties" file in the same folder of this one (useful for cygwin)
 		delete(file("${local}/res"))
@@ -146,6 +146,12 @@ tasks.register('updatePerspective') {
 				      '--adjust-extension',
 				      file
 				])
+			}
+		}
+
+		for (final def f in file("${local}/res/cdn.jsdelivr.net/npm/@finos").listFiles()) {
+			if (f.isDirectory() && f.name.endsWith(ver)) {
+				f.renameTo(f.absolutePath.replace(ver, ''))
 			}
 		}
 	}
