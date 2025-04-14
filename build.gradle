@@ -40,16 +40,16 @@ compileJava {
 
 dependencies {
 	// flatlaf 2.2 has troubles with JSplitPane programmatic divider positioning
-	implementation 'com.formdev:flatlaf:3.4.1'
-	implementation 'com.formdev:flatlaf-extras:3.4.1'
-	implementation 'com.formdev:flatlaf-intellij-themes:3.4.1'
+	implementation 'com.formdev:flatlaf:3.6'
+	implementation 'com.formdev:flatlaf-extras:3.6'
+	implementation 'com.formdev:flatlaf-intellij-themes:3.6'
 
 	// https://github.com/DJ-Raven/swing-toast-notifications
 	implementation files('libs/swing-toast-notifications-1.0.3.jar')
 
 	implementation 'org.drjekyll:fontchooser:3.1.0'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
-	implementation 'com.google.code.gson:gson:2.10.1'
+	implementation 'com.google.code.gson:gson:2.13.0'
 
 	testImplementation 'junit:junit:4.13.2'
 	compileOnly 'org.jetbrains:annotations:24.1.0'

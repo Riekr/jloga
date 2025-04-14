@@ -1,6 +1,8 @@
-## In progress:
+## v0.5.1
 - General:
   - Updated to Finos perspective [3.5.1](https://github.com/finos/perspective/compare/v3.1.3...v3.5.1)
+  - Updated to flatlaf 3.6
+  - Updated to gson 2.13.0
 - Build:
   - Specify perspective version
   - Removed perspective jsmap files
