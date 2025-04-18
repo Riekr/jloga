@@ -1,18 +1,11 @@
 package org.riekr.jloga.pmem;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-public final class IntToObject<T> implements Serializable {
-	private static final long serialVersionUID = 8021199321369057110L;
-
-	public final int tag;
-	public final T   value;
-
-	public IntToObject(int tag, T value) {
-		this.tag = tag;
-		this.value = value;
-	}
+public record IntToObject<T>(int tag, T value) implements Serializable {
+	@Serial private static final long serialVersionUID = 8021199321369057110L;
 
 	@Override
 	public String toString() {

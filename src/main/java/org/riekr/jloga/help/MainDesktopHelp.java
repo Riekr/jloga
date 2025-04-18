@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -27,7 +28,7 @@ import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class MainDesktopHelp extends JComponent {
-	private static final long serialVersionUID = -1736336915951307265L;
+	@Serial private static final long serialVersionUID = -1736336915951307265L;
 
 	private static final char[] _ARROW = new char[]{'\u25B2'};
 

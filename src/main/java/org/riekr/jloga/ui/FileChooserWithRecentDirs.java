@@ -6,6 +6,7 @@ import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.Serial;
 
 import org.riekr.jloga.prefs.LimitedList;
 import org.riekr.jloga.prefs.Preferences;
@@ -13,7 +14,7 @@ import org.riekr.jloga.utils.ContextMenu;
 import org.riekr.jloga.utils.SpringLayoutUtils;
 
 public class FileChooserWithRecentDirs extends JFileChooser {
-	private static final long serialVersionUID = -4426233513317201106L;
+	@Serial private static final long serialVersionUID = -4426233513317201106L;
 
 	@Override
 	protected JDialog createDialog(Component parent) throws HeadlessException {

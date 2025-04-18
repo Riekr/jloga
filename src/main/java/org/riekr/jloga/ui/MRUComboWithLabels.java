@@ -5,11 +5,12 @@ import static org.riekr.jloga.ui.MRUTextCombo.newMRUTextCombo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MRUComboWithLabels<T> extends JComponent {
-	private static final long serialVersionUID = -4669818889063163941L;
+	@Serial private static final long serialVersionUID = -4669818889063163941L;
 
 	public static MRUComboWithLabels<String> forString(String key, String label, Consumer<String> onResult) {
 		return new MRUComboWithLabels<>(key, label, onResult, Function.identity());

@@ -8,6 +8,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.transform.FastSplitOperation;
 
 public class JTextAreaGridView extends JTable {
-	private static final long serialVersionUID = -4187398533175075732L;
+	@Serial private static final long serialVersionUID = -4187398533175075732L;
 
 	private final          FastSplitOperation _splitter = new FastSplitOperation();
 	private final @NotNull VirtualTextArea    _text;
@@ -35,7 +36,7 @@ public class JTextAreaGridView extends JTable {
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		setCellSelectionEnabled(true);
 		setModel(new AbstractTableModel() {
-			private static final long serialVersionUID = -937458072437359755L;
+			@Serial private static final long serialVersionUID = -937458072437359755L;
 
 			@Override
 			public int getRowCount() {return _data.length;}

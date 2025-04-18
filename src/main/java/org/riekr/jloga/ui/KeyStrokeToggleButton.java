@@ -10,6 +10,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.Serial;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,7 +18,7 @@ import org.riekr.jloga.prefs.GUIPreference;
 import org.riekr.jloga.utils.KeyUtils;
 
 public class KeyStrokeToggleButton extends JToggleButton {
-	private static final long serialVersionUID = 4621141411427607287L;
+	@Serial private static final long serialVersionUID = 4621141411427607287L;
 
 	private final GUIPreference<KeyStroke> _keyPref;
 	private final List<AbstractButton>     _allButtons;

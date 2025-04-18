@@ -2,6 +2,7 @@ package org.riekr.jloga.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -15,7 +16,7 @@ import org.riekr.jloga.utils.FileUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanelBottomArea extends JComponent {
-	private static final long serialVersionUID = 8509725982053259245L;
+	@Serial private static final long serialVersionUID = 8509725982053259245L;
 
 	private final String _title;
 	private final int    _level;

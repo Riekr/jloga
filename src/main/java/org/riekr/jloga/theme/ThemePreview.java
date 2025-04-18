@@ -2,12 +2,13 @@ package org.riekr.jloga.theme;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 
 import org.riekr.jloga.io.VolatileTextSource;
 import org.riekr.jloga.ui.VirtualTextArea;
 
 public class ThemePreview extends JPanel {
-	private static final long serialVersionUID = -7755998013962966312L;
+	@Serial private static final long serialVersionUID = -7755998013962966312L;
 
 	public ThemePreview() {
 		super(new BorderLayout());

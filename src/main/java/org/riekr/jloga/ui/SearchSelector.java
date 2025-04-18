@@ -2,6 +2,7 @@ package org.riekr.jloga.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ import org.riekr.jloga.search.SearchRegistry;
 import org.riekr.jloga.utils.UIUtils;
 
 public class SearchSelector extends JComponent {
-	private static final long serialVersionUID = 1562652212113703845L;
+	@Serial private static final long serialVersionUID = 1562652212113703845L;
 
 	private static final String _TITLE = "Choose search type";
 

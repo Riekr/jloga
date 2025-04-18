@@ -79,7 +79,7 @@ public class ContextMenu {
 	}
 
 	public static void addActionCopy(JComponent component, Object value) {
-		if (value == null || (value instanceof CharSequence && ((CharSequence)value).length() == 0))
+		if (value == null || (value instanceof CharSequence && ((CharSequence)value).isEmpty()))
 			return;
 		if (value instanceof File) {
 			addActionCopy(component, "Copy name", (p, a) -> ((File)value).getName());
@@ -96,7 +96,7 @@ public class ContextMenu {
 	public static void addActionCopy(JComponent component, String label, Supplier<? extends CharSequence> value) {
 		addActionCopy(component, label, (p, a) -> {
 			CharSequence val = value.get();
-			return val == null || val.length() == 0 ? null : val.toString();
+			return val == null || val.isEmpty() ? null : val.toString();
 		});
 	}
 

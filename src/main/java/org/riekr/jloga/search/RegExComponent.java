@@ -7,6 +7,7 @@ import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,7 @@ import org.riekr.jloga.ui.MRUTextCombo;
 import org.riekr.jloga.utils.UIUtils;
 
 public class RegExComponent extends JComponent implements SearchComponent {
-	private static final long serialVersionUID = -2681776106341733771L;
+	@Serial private static final long serialVersionUID = -2681776106341733771L;
 
 	public static final String ID = "RegExComponent";
 

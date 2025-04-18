@@ -74,6 +74,11 @@ public interface Preferences extends KeyBindings {
 			.add("No extra lines", ExtraLines.NONE)
 			.add("Half screen", ExtraLines.HALF);
 
+	GUIPreference<Boolean> OPEN_NEWTAB = of("OpenNewTab", () -> false)
+			.describe(Type.Toggle, "New tab on open")
+			.group(BEHAVIOURS)
+			.addDescription("If set, a new search tab will be created for each file opened.");
+
 	GUIPreference<Boolean> FIND_NEWTAB = of("KSFindNewType", () -> false)
 			.describe(Type.Toggle, "New tab on search")
 			.group(BEHAVIOURS)
@@ -163,14 +168,15 @@ public interface Preferences extends KeyBindings {
 			.group(IO)
 			.addDescription("Text files will be read in blocks of this size, a lower size will reduce disk i/o but increase ")
 			.addDescription("memory usage and vice-versa, larger sizes will increase disk i/o but slightly reduce memory.")
-			.addDescription("1MB is generally recommended.")
+			.addDescription("2MB is generally recommended.")
 			.add("256kB", 256 * 1024)
 			.add("512kB", 512 * 1024)
 			.add("1MB", 1024 * 1024)
 			.add("2MB", 1024 * 1024 * 2)
 			.add("4MB", 1024 * 1024 * 4)
 			.add("8MB", 1024 * 1024 * 8)
-			.add("16MB", 1024 * 1024 * 16);
+			.add("16MB", 1024 * 1024 * 16)
+			.add("32MB", 1024 * 1024 * 32);
 
 	GUIPreference<File> EXT_DIR = of("ext.dir", () -> (String)null)
 			.withConversion(File::new, File::getAbsolutePath)

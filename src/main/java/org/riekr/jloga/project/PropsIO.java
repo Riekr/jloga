@@ -21,14 +21,10 @@ class PropsIO {
 
 	private static final String PATH_PREFS_PREFIX = "PropsIO.";
 
-	private static class GetterAndSetter {
-		private final Method getter, setter;
-
-		private GetterAndSetter(Method getter, Method setter) {
-			this.getter = getter;
-			this.setter = setter;
-		}
-	}
+	private record GetterAndSetter(
+			Method getter,
+			Method setter
+	) {}
 
 	private static Map<String, GetterAndSetter> map(Object obj) {
 		TreeMap<String, GetterAndSetter> res = new TreeMap<>();

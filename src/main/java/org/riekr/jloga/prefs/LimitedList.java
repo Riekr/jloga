@@ -1,5 +1,6 @@
 package org.riekr.jloga.prefs;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,7 +8,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class LimitedList<T extends Serializable> extends ArrayList<T> {
-	private static final long serialVersionUID = -2914897583298816672L;
+	@Serial private static final long serialVersionUID = -2914897583298816672L;
 
 	private final int _size;
 

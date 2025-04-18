@@ -1,7 +1,6 @@
 package org.riekr.jloga.prefs;
 
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
 import static org.riekr.jloga.utils.TextUtils.escapeHTML;
 
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class GUIPreference<T> implements Preference<T> {
 	public T nextOf(T curr) {
 		List<T> values = values().stream()
 				.map(Map.Entry::getValue)
-				.collect(toList());
+				.toList();
 		if (values.isEmpty())
 			return null;
 		Iterator<T> i = values.iterator();
@@ -101,7 +100,7 @@ public class GUIPreference<T> implements Preference<T> {
 			if (Objects.equals(t, curr) && i.hasNext())
 				return i.next();
 		}
-		return values.get(0);
+		return values.getFirst();
 	}
 
 	public GUIPreference<T> add(Consumer<Map<String, T>> filler) {

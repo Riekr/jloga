@@ -81,7 +81,7 @@ public class ArrowConversion {
 	protected String fixDate(int col, String dateString) {
 		for (int i = 0, dateTimeFormattersSize = _dateTimeFormatters.size(); i < dateTimeFormattersSize; i++) {
 			try {
-				final DateTimeFormatter formatter = _dateTimeFormatters.get(0);
+				final DateTimeFormatter formatter = _dateTimeFormatters.getFirst();
 				ZonedDateTime localDateTime = formatter.parse(dateString, ZonedDateTime::from);
 				return ISO_LOCAL_DATE_TIME.withZone(_utcZoneId).format(localDateTime.toOffsetDateTime());
 			} catch (DateTimeParseException e) {

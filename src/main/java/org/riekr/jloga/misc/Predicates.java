@@ -22,7 +22,7 @@ public class Predicates {
 		List<Predicate<T>> predicateList = Arrays.stream(predicates).filter(Objects::nonNull).collect(toList());
 		if (predicateList.isEmpty())
 			return (t) -> true;
-		Predicate<T> res = predicateList.remove(0);
+		Predicate<T> res = predicateList.removeFirst();
 		for (Predicate<T> predicate : predicateList)
 			res = res.and(predicate);
 		return res;

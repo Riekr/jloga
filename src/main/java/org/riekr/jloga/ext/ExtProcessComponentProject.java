@@ -2,12 +2,12 @@ package org.riekr.jloga.ext;
 
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.riekr.jloga.ext.ExtProcessManager.VAR_PATTERN;
 import static org.riekr.jloga.utils.TextUtils.replaceRegex;
 
 import java.io.File;
+import java.io.Serial;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,7 +24,7 @@ import org.riekr.jloga.project.ProjectField;
 import org.riekr.jloga.search.SearchPredicate;
 
 public class ExtProcessComponentProject extends ProjectComponent {
-	private static final long serialVersionUID = 2400305540460475435L;
+	@Serial private static final long serialVersionUID = 2400305540460475435L;
 
 	private final @NotNull String             _id;
 	private final          String             _icon;
@@ -33,7 +33,6 @@ public class ExtProcessComponentProject extends ProjectComponent {
 
 	private Map<String, String> _vars = emptyMap();
 
-	@SuppressWarnings("unchecked")
 	public ExtProcessComponentProject(@NotNull String id, String icon, int level, File workingDir, List<String> command, Map<String, Param> params, Pattern matchRegex, Pattern sectionRegex) {
 		super(id, level, id);
 		_id = id;
@@ -64,7 +63,7 @@ public class ExtProcessComponentProject extends ProjectComponent {
 								.filter(Objects::nonNull)
 								.map(String::valueOf)
 								.map((val) -> replaceRegex(val, VAR_PATTERN, env))
-								.collect(toList());
+								.toList();
 						param._field = newSelectField(key, param.description, list.stream()
 								.collect(toMap(identity(), identity())));
 

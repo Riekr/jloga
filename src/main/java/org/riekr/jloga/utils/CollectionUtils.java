@@ -24,7 +24,7 @@ public class CollectionUtils {
 		return -1;
 	}
 
-	public static <K, V> boolean swapRows(Map<K, V> map, K key1, K key2) {
+	@SuppressWarnings("unchecked") public static <K, V> boolean swapRows(Map<K, V> map, K key1, K key2) {
 		Set<K> keys = map.keySet();
 		int index1 = indexOf(keys, key1);
 		if (index1 == -1)
@@ -45,7 +45,6 @@ public class CollectionUtils {
 		int size = map.size();
 		Map<K, V> temp;
 		try {
-			//noinspection unchecked
 			temp = (Map<K, V>)map.getClass().getConstructor(Integer.TYPE).newInstance(size);
 		} catch (Throwable e) {
 			throw new RuntimeException("Unable to copy map", e);

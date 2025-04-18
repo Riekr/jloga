@@ -7,6 +7,7 @@ import static org.riekr.jloga.utils.UIUtils.newToggleButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate;
 import org.riekr.jloga.ui.MRUTextCombo;
 
 public class PlainTextComponent extends JComponent implements SearchComponent {
-	private static final long serialVersionUID = -2002183911884676582L;
+	@Serial private static final long serialVersionUID = -2002183911884676582L;
 
 	public static final String ID = "PlainTextComponent";
 

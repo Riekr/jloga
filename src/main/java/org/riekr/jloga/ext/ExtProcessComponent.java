@@ -2,6 +2,7 @@ package org.riekr.jloga.ext;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -13,7 +14,7 @@ import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.utils.UIUtils;
 
 public class ExtProcessComponent extends JButton implements SearchComponent {
-	private static final long serialVersionUID = 8599529986240844558L;
+	@Serial private static final long serialVersionUID = 8599529986240844558L;
 
 	private final String _id;
 	private final String _icon;

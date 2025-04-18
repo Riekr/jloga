@@ -4,6 +4,7 @@ import static org.riekr.jloga.utils.SpringLayoutUtils.makeCompactGrid;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -14,7 +15,7 @@ import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.search.SearchComponentWithExpandablePanel;
 
 public abstract class ProjectComponent extends SearchComponentWithExpandablePanel implements Project {
-	private static final long serialVersionUID = -1685626672776376188L;
+	@Serial private static final long serialVersionUID = -1685626672776376188L;
 
 	private final String _fileExt;
 	private final String _fileDescr;
@@ -25,7 +26,6 @@ public abstract class ProjectComponent extends SearchComponentWithExpandablePane
 		this(id + '.' + level, "jloga", fileDescr);
 	}
 
-	@Deprecated
 	public ProjectComponent(String prefsPrefix, String fileExt, String fileDescr) {
 		super(prefsPrefix);
 		_fileExt = fileExt;

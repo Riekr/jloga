@@ -1,9 +1,10 @@
 package org.riekr.jloga.search;
 
+import java.io.Serial;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SearchException extends RuntimeException {
-	private static final long serialVersionUID = 3324262040130284875L;
+	@Serial private static final long serialVersionUID = 3324262040130284875L;
 
 	public final AtomicBoolean userHasAlreadyBeenNotified = new AtomicBoolean(false);
 

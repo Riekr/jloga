@@ -2,7 +2,6 @@ package org.riekr.jloga.io;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class VolatileTextSource implements TextSource {
 
@@ -24,7 +23,7 @@ public class VolatileTextSource implements TextSource {
 	}
 
 	@Override
-	public int getLineCount() throws ExecutionException, InterruptedException {
+	public int getLineCount() {
 		return _data.size();
 	}
 }

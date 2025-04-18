@@ -6,6 +6,7 @@ import static org.riekr.jloga.project.StdFields.MinDuration;
 import static org.riekr.jloga.project.StdFields.Restart;
 import static org.riekr.jloga.project.StdFields.Start;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.util.regex.Pattern;
 
@@ -15,7 +16,7 @@ import org.riekr.jloga.project.ProjectEditableField;
 public class DurationAnalysisComponent extends ProjectComponentWithStdWizard {
 	public static final String ID = "DurationAnalysisComponent";
 
-	private static final long serialVersionUID = -5133137752144513068L;
+	@Serial private static final long serialVersionUID = -5133137752144513068L;
 
 	public final ProjectEditableField<Pattern>  patFunc     = newPatternField(Func, "Function pattern:", 1);
 	public final ProjectEditableField<Pattern>  patStart    = newPatternField(Start, "Start pattern:");

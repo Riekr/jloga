@@ -5,7 +5,6 @@ import static org.riekr.jloga.pmem.PagedIntToObjList.newPagedIntToStringList;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -68,7 +67,7 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	@Override
-	public synchronized int getLineCount() throws ExecutionException, InterruptedException {
+	public synchronized int getLineCount() throws InterruptedException {
 		if (!_data.isSealed())
 			wait();
 		return Math.toIntExact(_data.size());
@@ -122,7 +121,7 @@ public class TempTextSource implements FilteredTextSource {
 	}
 
 	public synchronized void markSection(String title, boolean excludeStart) {
-		int from = _sectionList == null || _sectionList.isEmpty() ? 0 : _sectionList.getLast().to;
+		int from = _sectionList == null || _sectionList.isEmpty() ? 0 : _sectionList.getLast().to();
 		int to = Math.toIntExact(_data.size());
 		if (excludeStart) {
 			from++;

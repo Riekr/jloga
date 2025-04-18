@@ -60,9 +60,9 @@ public class PrefsUtils {
 			TaggedObject<T, Object[]> data = load(key, null);
 			DefaultComboBoxModel<T> res = new DefaultComboBoxModel<>();
 			if (data != null) {
-				for (Object o : data.value)
+				for (Object o : data.value())
 					res.addElement((T)o);
-				res.setSelectedItem(data.tag);
+				res.setSelectedItem(data.tag());
 			}
 			return res;
 		} catch (ClassCastException e) {

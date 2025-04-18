@@ -1,5 +1,6 @@
 package org.riekr.jloga.ui;
 
+import static org.riekr.jloga.prefs.Preferences.OPEN_NEWTAB;
 import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
@@ -9,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -26,7 +28,7 @@ import org.riekr.jloga.utils.KeyUtils;
 import org.riekr.jloga.utils.UIUtils;
 
 public class SearchPanel extends JComponent implements FileDropListener {
-	private static final long serialVersionUID = -6368198678080747740L;
+	@Serial private static final long serialVersionUID = -6368198678080747740L;
 
 	private static final String _TAB_PREFIX = "Search ";
 
@@ -49,7 +51,7 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		if (!descriptionLabels.isEmpty()) {
 			JComponent descriptionLabel;
 			if (descriptionLabels.size() == 1)
-				descriptionLabel = descriptionLabels.get(0);
+				descriptionLabel = descriptionLabels.getFirst();
 			else {
 				descriptionLabel = Box.createVerticalBox();
 				descriptionLabels.forEach(descriptionLabel::add);
@@ -79,10 +81,12 @@ public class SearchPanel extends JComponent implements FileDropListener {
 		_bottomTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
 		// add first empty tab
-		String tabTitle = newTabTempTitle();
-		SearchPanelBottomArea tabContent = new SearchPanelBottomArea(getChildTitle(tabTitle), this, _progressBar, _level);
-		_bottomTabs.addTab(null, tabContent);
-		_bottomTabs.setTabComponentAt(0, newTabHeader(tabTitle, tabContent));
+		if (OPEN_NEWTAB.get()) {
+			String tabTitle = newTabTempTitle();
+			SearchPanelBottomArea tabContent = new SearchPanelBottomArea(getChildTitle(tabTitle), this, _progressBar, _level);
+			_bottomTabs.addTab(null, tabContent);
+			_bottomTabs.setTabComponentAt(0, newTabHeader(tabTitle, tabContent));
+		}
 
 		// add new tab code: I can't use a change listener to avoid loops
 		// the "+" tab should never be selected and must stick as last tab

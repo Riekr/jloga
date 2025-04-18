@@ -2,10 +2,12 @@ package org.riekr.jloga.ui;
 
 import javax.swing.*;
 
+import java.io.Serial;
+
 import org.riekr.jloga.prefs.Preferences;
 
 public class LineNumbersTextArea extends JTextAreaWithFontMetrics {
-	private static final long serialVersionUID = 3934415485971790115L;
+	@Serial private static final long serialVersionUID = 3934415485971790115L;
 
 	private int _from, _to, _allLines, _width, _delta;
 

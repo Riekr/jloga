@@ -11,6 +11,7 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.Serial;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
@@ -20,13 +21,13 @@ import java.util.function.Supplier;
 import org.riekr.jloga.utils.TableReorderMouseHandler;
 
 public class FileMapComponent extends JScrollPane {
-	private static final long serialVersionUID = -114942181064191852L;
+	@Serial private static final long serialVersionUID = -114942181064191852L;
 
 	private static final String REMOVE = "\u274C";
 	private static final String CHANGE = "\uD83D\uDCC2";
 
 	private final JTable _table = new JTable() {
-		private static final long serialVersionUID = -2420185066877683979L;
+		@Serial private static final long serialVersionUID = -2420185066877683979L;
 
 		@Override public boolean isCellEditable(int row, int column) {return isDataColumn(column);}
 
@@ -74,8 +75,8 @@ public class FileMapComponent extends JScrollPane {
 			TableReorderMouseHandler tr = new TableReorderMouseHandler(_table, (from, to) -> {
 				// System.out.println("FROM " + from + " TO " + to);
 				_swapAction.accept(
-						_data.get(from).get(0),
-						_data.get(to).get(0)
+						_data.get(from).getFirst(),
+						_data.get(to).getFirst()
 				);
 				_model.moveRow(from, from, to);
 			}, (row) -> row < _data.size() - 1);
@@ -110,12 +111,10 @@ public class FileMapComponent extends JScrollPane {
 	}
 
 	private boolean isDataColumn(int column) {
-		switch (column) {
-			case 0:
-			case 1:
-				return true;
-		}
-		return false;
+		return switch (column) {
+			case 0, 1 -> true;
+			default -> false;
+		};
 	}
 
 	private void onClick(MouseEvent evt) {

@@ -95,8 +95,7 @@ public final class UIUtils {
 
 	public static <T extends JComponent> T makeBorderless(T comp) {
 		comp.setBorder(FLAT_BUTTON_BORDER);
-		if (comp instanceof JButton) {
-			JButton btn = (JButton)comp;
+		if (comp instanceof final JButton btn) {
 			btn.setBorderPainted(false);
 			btn.setContentAreaFilled(false);
 			btn.addMouseListener(new MouseAdapter() {

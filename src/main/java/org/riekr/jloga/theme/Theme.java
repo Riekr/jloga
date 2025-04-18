@@ -69,7 +69,6 @@ public class Theme {
 		}
 		try {
 			UIManager.setLookAndFeel(this.className);
-			//noinspection SpellCheckingInspection
 			if (className.startsWith("com.formdev.flatlaf.")) {
 				defaults.putAll(_FLATLAF_DEFAULTS);
 				_APPLIED_DEFAULTS = _FLATLAF_DEFAULTS;

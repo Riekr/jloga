@@ -1,13 +1,14 @@
 package org.riekr.jloga.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
+import org.jetbrains.annotations.NotNull;
+
 public final class MouseListenerBuilder implements MouseListener {
 
+	@SuppressWarnings("EmptyMethod")
 	private static void nop(MouseEvent e) {}
 
 	public static MouseListenerBuilder mouse() {

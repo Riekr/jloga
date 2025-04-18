@@ -2,13 +2,14 @@ package org.riekr.jloga.search;
 
 import static org.riekr.jloga.project.StdFields.SearchPat;
 
+import java.io.Serial;
 import java.util.regex.Pattern;
 
 import org.riekr.jloga.project.ProjectComponentWithStdWizard;
 import org.riekr.jloga.project.ProjectEditableField;
 
 public class UniqueSearchComponent extends ProjectComponentWithStdWizard {
-	private static final long serialVersionUID = -9087197176161972847L;
+	@Serial private static final long serialVersionUID = -9087197176161972847L;
 
 	public static final String ID = "UniqueSearchComponent";
 

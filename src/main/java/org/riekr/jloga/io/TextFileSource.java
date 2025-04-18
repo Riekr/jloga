@@ -414,7 +414,7 @@ public class TextFileSource implements TextSource {
 	}
 
 	@Override
-	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) {
 		long start = currentTimeMillis();
 		final MutableInt lineNumber = new MutableInt();
 		ScheduledFuture<?> updateTask = monitorProgress(lineNumber, _lineCount, progressListener.andThen(out::dispatchLineCount));

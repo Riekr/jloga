@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -15,7 +16,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 
 public class JobProgressBar extends JProgressBar {
-	private static final long serialVersionUID = -6197337243003830409L;
+	@Serial private static final long serialVersionUID = -6197337243003830409L;
 
 	private static final class Job {
 		public final String descr;

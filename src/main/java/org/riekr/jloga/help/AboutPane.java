@@ -4,10 +4,12 @@ import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.Main;
 import org.riekr.jloga.ui.ROKeyListener;
 import org.riekr.jloga.utils.ContextMenu;
@@ -15,7 +17,7 @@ import org.riekr.jloga.utils.Info;
 import org.riekr.jloga.utils.UIUtils;
 
 public class AboutPane extends JOptionPane {
-	private static final long serialVersionUID = 5267265626558401149L;
+	@Serial private static final long serialVersionUID = 5267265626558401149L;
 
 	private static final String _HOMEPAGE = "https://github.com/Riekr/jloga";
 
@@ -27,7 +29,19 @@ public class AboutPane extends JOptionPane {
 	}
 
 	private static Component compose() {
-		JTabbedPane root = new JTabbedPane(JTabbedPane.LEFT);
+		final JTabbedPane root = new JTabbedPane(JTabbedPane.LEFT);
+		final JLabel about = getWelcomeLabel();
+		root.add("About", about);
+		final JTextArea info = new JTextArea(Info.get());
+		info.setBorder(BorderFactory.createEmptyBorder(0, UIUtils.VSPACE, 0, 0));
+		info.addKeyListener(new ROKeyListener());
+		ContextMenu.addActionCopy(info);
+		info.setBackground(about.getBackground());
+		root.add("Info", info);
+		return root;
+	}
+
+	private static @NotNull JLabel getWelcomeLabel() {
 		JLabel about = new JLabel(
 				"<html>" +
 						"Welcome to <b>JLogA</b> " + getVersion() + "<br><br>" +
@@ -39,15 +53,7 @@ public class AboutPane extends JOptionPane {
 						"but please log consciously.<p><br>" +
 						"</html>");
 		about.setBorder(BorderFactory.createEmptyBorder(0, UIUtils.VSPACE, 0, 0));
-		root.add("About", about);
-
-		JTextArea info = new JTextArea(Info.get());
-		info.setBorder(BorderFactory.createEmptyBorder(0, UIUtils.VSPACE, 0, 0));
-		info.addKeyListener(new ROKeyListener());
-		ContextMenu.addActionCopy(info);
-		info.setBackground(about.getBackground());
-		root.add("Info", info);
-		return root;
+		return about;
 	}
 
 	public AboutPane() {

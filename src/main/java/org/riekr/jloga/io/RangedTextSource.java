@@ -5,8 +5,6 @@ import static java.lang.Math.min;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.BooleanSupplier;
@@ -121,27 +119,14 @@ public class RangedTextSource implements TextSource {
 	}
 
 	@Override
-	public Spliterator<String> spliterator() {
-		return TextSource.super.spliterator();
-	}
-
-	@Override
 	public Iterator<String> iterator(int fromInclusive, int toExclusive) {
 		return _textSource.iterator(from(fromInclusive), min(from(_count), toExclusive));
-	}
-
-	@Override
-	public Stream<String> stream() {
-		return TextSource.super.stream();
 	}
 
 	@Override
 	public Future<?> requestStream(Consumer<Stream<String>> streamConsumer) {
 		return TextSource.super.requestStream(streamConsumer);
 	}
-
-	@Override
-	public void close() {}
 
 	@Override
 	public boolean isIndexing() {
@@ -154,14 +139,9 @@ public class RangedTextSource implements TextSource {
 	}
 
 	@Override
-	public boolean supportsReload() {return false;}
-
-	@Override
 	public Future<?> requestReload(Supplier<ProgressListener> progressListenerSupplier) {return null;}
 
 	@Override
 	public void reload(Supplier<ProgressListener> progressListenerSupplier) {}
 
-	@Override
-	public List<Section> sections() {return null;}
 }

@@ -4,10 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class JPopupMenuWithMouseLoc extends JPopupMenu {
-	private static final long serialVersionUID = 4128574454805066731L;
+	@Serial private static final long serialVersionUID = 4128574454805066731L;
 
 	public final AtomicReference<Point> lastClick;
 

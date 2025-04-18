@@ -1,3 +1,9 @@
+### v0.5.2
+- General:
+  - Minimum java version is now 21!
+- UI:
+  - When opening file a new search tab is no longer opened (configurable in preferences)
+
 ## v0.5.1
 - General:
   - Updated to Finos perspective [3.5.1](https://github.com/finos/perspective/compare/v3.1.3...v3.5.1)

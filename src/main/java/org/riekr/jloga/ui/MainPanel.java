@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,7 +49,7 @@ import org.riekr.jloga.utils.UIUtils;
 import raven.toast.Notifications;
 
 public class MainPanel extends JFrame implements FileDropListener {
-	private static final long serialVersionUID = -5418006859279219934L;
+	@Serial private static final long serialVersionUID = -5418006859279219934L;
 
 	private final JTabbedPane             _tabs;
 	private final JobProgressBar          _progressBar;
@@ -143,7 +144,7 @@ public class MainPanel extends JFrame implements FileDropListener {
 		});
 		MixFileSource.Config config = PickNMixOptionPane.show(inputFiles, this);
 		if (config != null) {
-			String tabTitle = config.sources.values().stream()
+			String tabTitle = config.sources().values().stream()
 					.map((sc) -> sc.file.getName())
 					.collect(Collectors.joining("+"));
 			open(config, tabTitle,

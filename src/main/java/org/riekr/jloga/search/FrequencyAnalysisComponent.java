@@ -3,6 +3,7 @@ package org.riekr.jloga.search;
 import static org.riekr.jloga.project.StdFields.Func;
 import static org.riekr.jloga.project.StdFields.Period;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
@@ -11,7 +12,7 @@ import org.riekr.jloga.project.ProjectComponentWithStdWizard;
 import org.riekr.jloga.project.ProjectEditableField;
 
 public class FrequencyAnalysisComponent extends ProjectComponentWithStdWizard {
-	private static final long serialVersionUID = -3621473265054156767L;
+	@Serial private static final long serialVersionUID = -3621473265054156767L;
 
 	public static final String ID = "FrequencyAnalysisComponent";
 

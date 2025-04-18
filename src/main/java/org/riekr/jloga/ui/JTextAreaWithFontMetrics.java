@@ -4,16 +4,17 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 import java.text.CharacterIterator;
 
 import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.prefs.Preferences;
 
 public class JTextAreaWithFontMetrics extends javax.swing.JTextArea {
-	private static final long serialVersionUID = 5071286309976476695L;
+	@Serial private static final long serialVersionUID = 5071286309976476695L;
 
 	static class FontMetricsWrapper extends FontMetrics {
-		private static final long serialVersionUID = 3329608676061154280L;
+		@Serial private static final long serialVersionUID = 3329608676061154280L;
 
 		static class LineMetricsWrapper extends LineMetrics {
 

@@ -1,9 +1,7 @@
 package org.riekr.jloga.utils;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +35,12 @@ public final class CancellableFuture implements Future<Void> {
 	}
 
 	@Override
-	public Void get() throws InterruptedException, ExecutionException {
+	public Void get() {
 		return null;
 	}
 
 	@Override
-	public Void get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+	public Void get(long timeout, @NotNull TimeUnit unit) {
 		return null;
 	}
 }

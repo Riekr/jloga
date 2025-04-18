@@ -22,6 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.Serial;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -55,10 +56,10 @@ import org.riekr.jloga.utils.SelectionHighlight;
 import org.riekr.jloga.utils.UIUtils;
 
 public class VirtualTextArea extends JComponent implements FileDropListener {
-	private static final long serialVersionUID = -2704231180724047955L;
+	@Serial private static final long serialVersionUID = -2704231180724047955L;
 
 	public static class Dummy extends VirtualTextArea {
-		private static final long serialVersionUID = 8358979652181379726L;
+		@Serial private static final long serialVersionUID = 8358979652181379726L;
 
 		public Dummy(String title) {
 			super(null, title, null);
@@ -478,7 +479,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 			if (sec == null || sec == all)
 				setTextSource(origTextSource);
 			else
-				setTextSource(sections.computeIfAbsent(sec, (k) -> new RangedTextSource(origTextSource, k.from, k.to)));
+				setTextSource(sections.computeIfAbsent(sec, (k) -> new RangedTextSource(origTextSource, k.from(), k.to())));
 		});
 	}
 

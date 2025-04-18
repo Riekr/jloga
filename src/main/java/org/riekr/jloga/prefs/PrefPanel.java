@@ -23,6 +23,7 @@ import static org.riekr.jloga.utils.UIUtils.newButton;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -38,10 +39,10 @@ import org.riekr.jloga.utils.Bag;
 import org.riekr.jloga.utils.ContextMenu;
 
 public class PrefPanel extends JDialog {
-	private static final long serialVersionUID = 3940084083723252336L;
+	@Serial private static final long serialVersionUID = 3940084083723252336L;
 
 	private class Tab extends JPanel {
-		private static final long serialVersionUID = 7427857846628153672L;
+		@Serial private static final long serialVersionUID = 7427857846628153672L;
 
 		final List<GUIPreference<?>> prefs;
 		Box contents;
@@ -282,7 +283,7 @@ public class PrefPanel extends JDialog {
 
 	private Component newKeyBindingComponent(GUIPreference<KeyStroke> keyPref) {
 		KeyStrokeToggleButton btn = register(new KeyStrokeToggleButton(_allButtons, keyPref) {
-			private static final long serialVersionUID = 1481165132273129303L;
+			@Serial private static final long serialVersionUID = 1481165132273129303L;
 
 			@Override
 			protected void disableOthers() {

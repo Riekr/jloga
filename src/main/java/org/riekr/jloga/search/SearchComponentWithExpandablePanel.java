@@ -10,6 +10,7 @@ import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,7 @@ import org.riekr.jloga.ui.MRUComboWithLabels;
 import org.riekr.jloga.utils.SpringLayoutUtils;
 
 public abstract class SearchComponentWithExpandablePanel extends JComponent implements SearchComponent {
-	private static final long serialVersionUID = 7751803744482675483L;
+	@Serial private static final long serialVersionUID = 7751803744482675483L;
 
 	private final String               _prefsPrefix;
 	private final BoolBehaviourSubject _configVisible = new BoolBehaviourSubject();

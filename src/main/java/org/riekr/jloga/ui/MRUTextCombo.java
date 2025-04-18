@@ -10,13 +10,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.Serial;
 import java.util.function.BiFunction;
 
 import org.riekr.jloga.prefs.PrefsUtils;
 import org.riekr.jloga.react.Subject;
 
 public class MRUTextCombo<T> extends JComboBox<T> {
-	private static final long serialVersionUID = -3289527560220826466L;
+	@Serial private static final long serialVersionUID = -3289527560220826466L;
 
 	public static MRUTextCombo<String> newMRUTextCombo(String key, String deflt) {
 		return new MRUTextCombo<>(key, (newValue, oldValue) -> newValue == null ? deflt : newValue);

@@ -5,6 +5,7 @@ import static java.awt.EventQueue.invokeLater;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.Serial;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
@@ -19,7 +20,7 @@ import org.riekr.jloga.misc.AutoDetect;
 import org.riekr.jloga.utils.UIUtils;
 
 public class PickNMixDialogEntry extends JComponent {
-	private static final long serialVersionUID = -5071232382364124273L;
+	@Serial private static final long serialVersionUID = -5071232382364124273L;
 
 	private final BiConsumer<Boolean, PickNMixDialogEntry> _consumer;
 

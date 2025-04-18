@@ -1,7 +1,9 @@
 package org.riekr.jloga.io;
 
+import java.io.Serial;
+
 public class IndexingException extends RuntimeException {
-	private static final long serialVersionUID = -645668282024058592L;
+	@Serial private static final long serialVersionUID = -645668282024058592L;
 
 	public IndexingException() {}
 

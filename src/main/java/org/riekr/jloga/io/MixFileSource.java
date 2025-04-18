@@ -57,17 +57,11 @@ public class MixFileSource implements TextSource {
 		}
 	}
 
-	public static final class Config {
-		public final @NotNull  Map<TextSource, SourceConfig> sources;
-		public final @Nullable Predicate<Instant>            predicate;
-		public final           boolean                       prefixWithID;
-
-		public Config(@NotNull Map<TextSource, SourceConfig> sources, @Nullable Predicate<Instant> predicate, boolean prefixWithID) {
-			this.sources = sources;
-			this.predicate = predicate;
-			this.prefixWithID = prefixWithID;
-		}
-	}
+	public record Config(
+			@NotNull Map<TextSource, SourceConfig> sources,
+			@Nullable Predicate<Instant> predicate,
+			boolean prefixWithID
+	) {}
 
 	static final class ScanData implements Comparable<ScanData> {
 		final int          idx;

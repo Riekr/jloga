@@ -1,9 +1,10 @@
 package org.riekr.jloga.misc;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class SearchComboEntry implements Serializable {
-	private static final long serialVersionUID = -6828265343399858457L;
+	@Serial private static final long serialVersionUID = -6828265343399858457L;
 
 	public final String pattern;
 
