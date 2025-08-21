@@ -4,8 +4,9 @@
   - Updated to launch4j [4.0.0](https://github.com/TheBoegl/gradle-launch4j/blob/develop/VERSION.md#version-400)
   - Updated undercouch download gradle plugin to [5.6.0](https://github.com/michel-kraemer/gradle-download-task/releases/tag/5.6.0)
   - Updated to gson [2.13.1](https://github.com/google/gson/releases/tag/gson-parent-2.13.1)
+  - Updated jetbrains annotations to [26.0.2](https://github.com/JetBrains/java-annotations/compare/24.1.0...26.0.2)
 
-### v0.5.2
+## v0.5.2
 - General:
   - Minimum java version is now 21!
 - UI:
