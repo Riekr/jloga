@@ -49,7 +49,7 @@ dependencies {
 
 	implementation 'org.drjekyll:fontchooser:3.1.0'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'
-	implementation 'com.google.code.gson:gson:2.13.0'
+	implementation 'com.google.code.gson:gson:2.13.1'
 
 	testImplementation 'junit:junit:4.13.2'
 	compileOnly 'org.jetbrains:annotations:24.1.0'
