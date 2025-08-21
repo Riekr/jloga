@@ -2,6 +2,7 @@
   - Updated to Finos perspective [3.7.4](https://github.com/finos/perspective/compare/v3.5.1...v3.7.4)
   - Updated to flatlaf [3.6.1](https://github.com/JFormDesigner/FlatLaf/releases/tag/3.6.1)
   - Updated to launch4j [4.0.0](https://github.com/TheBoegl/gradle-launch4j/blob/develop/VERSION.md#version-400)
+  - Updated undercouch download gradle plugin to [5.6.0](https://github.com/michel-kraemer/gradle-download-task/releases/tag/5.6.0)
 
 ### v0.5.2
 - General:
