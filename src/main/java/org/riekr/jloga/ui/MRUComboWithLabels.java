@@ -9,6 +9,9 @@ import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class MRUComboWithLabels<T> extends JComponent {
 	@Serial private static final long serialVersionUID = -4669818889063163941L;
 
@@ -19,7 +22,7 @@ public class MRUComboWithLabels<T> extends JComponent {
 	public final MRUTextCombo<String> combo;
 	public final JLabel               error;
 
-	public MRUComboWithLabels(String key, String label, Consumer<T> onResult, Function<String, T> mapper) {
+	public MRUComboWithLabels(@NotNull String key, @Nullable String label, @Nullable Consumer<T> onResult, @NotNull Function<String, T> mapper) {
 		setLayout(new BorderLayout());
 
 		if (label != null && !(label = label.trim()).isEmpty())
@@ -38,7 +41,8 @@ public class MRUComboWithLabels<T> extends JComponent {
 			T res = mapper.apply(text);
 			if (res == null)
 				combo.setSelectedIndex(-1);
-			onResult.accept(res);
+			if (onResult != null)
+				onResult.accept(res);
 		}));
 	}
 

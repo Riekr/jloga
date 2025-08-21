@@ -26,6 +26,7 @@ Head directly to [this page](https://github.com/Riekr/jloga/releases/latest) for
 - Capable of running [external commands](#external-commands) as new analyzers
 - Convert and show data into [finos perspective](#finos-perspective)
 - Favorites folders support
+- Cobol copybooks and datafile opening using [jRecord](https://github.com/bmTas/JRecord)
 
 ## File and memory limits
 There is no limit in file size, maximum number of lines is 2<sup>63</sup>-1.\

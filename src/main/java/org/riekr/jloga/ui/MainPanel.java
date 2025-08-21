@@ -7,6 +7,7 @@ import static org.riekr.jloga.io.TextSource.closeTextSource;
 import static org.riekr.jloga.utils.KeyUtils.addKeyStrokeAction;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.TextUtils.TAB_ADD;
+import static org.riekr.jloga.utils.UIUtils.ICO_OPEN;
 import static org.riekr.jloga.utils.UIUtils.newBorderlessButton;
 import static org.riekr.jloga.utils.UIUtils.newTabHeader;
 import static org.riekr.jloga.utils.UIUtils.showComponentMenu;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.riekr.jloga.cobol.CobolOpenDialog;
 import org.riekr.jloga.help.AboutPane;
 import org.riekr.jloga.help.MainDesktopHelp;
 import org.riekr.jloga.io.MixFileSource;
@@ -63,15 +65,17 @@ public class MainPanel extends JFrame implements FileDropListener {
 		setSize(UIUtils.half(Toolkit.getDefaultToolkit().getScreenSize()));
 		_tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		_progressBar = new JobProgressBar();
-		JToolBar toolBar = new JToolBar();
 
+		final JToolBar toolBar = new JToolBar();
 		CharsetCombo charsetCombo = new CharsetCombo();
 		charsetCombo.setMaximumSize(charsetCombo.getPreferredSize());
 		charsetCombo.setToolTipText("Select next file charset");
 		Preferences.CHARSET.subscribe(charsetCombo::setSelectedItem);
 
-		toolBar.add(newBorderlessButton("\uD83D\uDCC1 Open", this::openFileDialog, "Open file in new tab"));
+		toolBar.add(newBorderlessButton(ICO_OPEN + " Open", this::openFileDialog, "Open file in new tab"));
 		addKeyStrokeAction(this, KeyBindings.KB_OPENFILE, this::openFileDialog);
+		toolBar.addSeparator();
+		toolBar.add(newBorderlessButton("\uD83D\uDDB9 Cobol Copybook", this::openCobolCopybookDialog, "Open a cobol copybook and corresponding datafile in new tab"));
 		toolBar.addSeparator();
 		toolBar.add(newBorderlessButton("\u292D Mix", this::openMixDialog, "Pick'n'mix open log files"));
 		toolBar.addSeparator();
@@ -166,6 +170,10 @@ public class MainPanel extends JFrame implements FileDropListener {
 				FileUtils.DialogType.OPEN_MULTI,
 				Preferences.RECENT_FILES.get().stream().findFirst().map(File::getParentFile).orElse(null)
 		));
+	}
+
+	public void openCobolCopybookDialog() {
+		new CobolOpenDialog(this).setVisible(true);
 	}
 
 	public void openFiles(@NotNull Collection<File> files) {

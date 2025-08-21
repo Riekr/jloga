@@ -5,7 +5,7 @@ import java.util.List;
 
 public class VolatileTextSource implements TextSource {
 
-	private final List<String> _data;
+	protected final List<String> _data;
 
 	public VolatileTextSource(String... data) {
 		this(Arrays.asList(data));

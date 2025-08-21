@@ -38,6 +38,9 @@ import org.riekr.jloga.ui.MRUComboWithLabels;
 
 public final class UIUtils {
 
+	public static final String ICO_OPEN   = "\uD83D\uDDC1";
+	public static final String ICO_CANCEL = "\uD83D\uDDD9";
+
 	public static final int VSPACE = 6;
 
 	public static final Border FLAT_BUTTON_BORDER = new EmptyBorder(VSPACE, 8, VSPACE, 8);

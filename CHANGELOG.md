@@ -1,3 +1,6 @@
+## v0.6.0
+- **New features**:
+  - Cobol copybooks and datafile opening using [jRecord](https://github.com/bmTas/JRecord)
 - General:
   - Updated to Finos perspective [3.7.4](https://github.com/finos/perspective/compare/v3.5.1...v3.7.4)
   - Updated to flatlaf [3.6.1](https://github.com/JFormDesigner/FlatLaf/releases/tag/3.6.1)
