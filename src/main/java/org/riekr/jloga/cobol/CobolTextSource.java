@@ -90,4 +90,9 @@ public class CobolTextSource extends VolatileTextSource {
 				new JLabel("Datafile: " + _datafile)
 		);
 	}
+
+	@Override
+	public boolean mayHaveTabularData() {
+		return true;
+	}
 }

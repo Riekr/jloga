@@ -1,3 +1,6 @@
+- Fixes
+  - Cobol datafiles are opened in grid view (if enabled)
+
 ## v0.6.0
 - **New features**:
   - Cobol copybooks and datafile opening using [jRecord](https://github.com/bmTas/JRecord)
