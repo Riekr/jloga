@@ -1,3 +1,7 @@
+- General:
+  - Updated to Finos perspective [3.7.4](https://github.com/finos/perspective/compare/v3.5.1...v3.7.4)
+
+
 ### v0.5.2
 - General:
   - Minimum java version is now 21!

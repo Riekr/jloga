@@ -108,7 +108,7 @@ tasks.register('updatePerspective') {
 	doLast {
 		// https://perspective.finos.org/guide/how_to/javascript/importing.html
 		def repo = 'https://cdn.jsdelivr.net/npm/@finos'
-		def ver = '@3.5.1'
+		def ver = '@3.7.4'
 		def local = 'src/main/html/org/riekr/jloga/http/perspective/'
 		def wasm = "${local}/wasm"
 		def css = []
