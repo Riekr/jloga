@@ -6,10 +6,12 @@ import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.Serial;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nls;
@@ -28,8 +30,8 @@ public class JTextAreaGridView extends JTable {
 
 	public JTextAreaGridView(@NotNull VirtualTextArea text, String header, boolean headerIsEmbedded) {
 		_text = text;
-		_header = _splitter.apply(header);
 		_headerIsEmbedded = headerIsEmbedded;
+		setHeader(header);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		setCellSelectionEnabled(true);
 		setModel(new AbstractTableModel() {
@@ -57,16 +59,6 @@ public class JTextAreaGridView extends JTable {
 		addActionCopy(this, this::getSelectedText);
 	}
 
-	@Override
-	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-		// https://stackoverflow.com/a/25570812/1326326
-		Component component = super.prepareRenderer(renderer, row, column);
-		int rendererWidth = component.getPreferredSize().width;
-		TableColumn tableColumn = getColumnModel().getColumn(column);
-		tableColumn.setMinWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
-		return component;
-	}
-
 	public CharSequence getSelectedText() {
 		StringBuilder res = new StringBuilder();
 		String delim = Character.toString(_splitter.getDelim());
@@ -82,11 +74,52 @@ public class JTextAreaGridView extends JTable {
 		return res;
 	}
 
+	// @Override // OLD IMPLEMENTATION not accounting for header sizes
+	// public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+	// 	// https://stackoverflow.com/a/25570812/1326326
+	// 	Component component = super.prepareRenderer(renderer, row, column);
+	// 	int rendererWidth = component.getPreferredSize().width;
+	// 	TableColumn tableColumn = getColumnModel().getColumn(column);
+	// 	tableColumn.setMinWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+	// 	return component;
+	// }
+
 	public void refresh() {
 		Stream<String> stream = Pattern.compile("[\r\n]+").splitAsStream(_text.getDisplayedText());
 		if (_text.getFromLine() == 0 && _headerIsEmbedded)
 			stream = stream.skip(1);
 		_data = stream.map(_splitter).toArray(String[][]::new);
+
+		// https://stackoverflow.com/a/79310627/1326326
+		JTable table = this;
+		Collections.list(table.getColumnModel().getColumns()).forEach(col -> {
+			int colIndex = col.getModelIndex();
+			final int columnIndex = col.getModelIndex();
+			final TableCellRenderer headerRenderer = Objects.requireNonNullElse(col.getHeaderRenderer(),
+					table.getTableHeader().getDefaultRenderer());
+			final Object headerValue = col.getHeaderValue();
+
+			// set minimum width of column to max of content
+			col.setMinWidth(IntStream.range(-1, table.getRowCount())
+					// map rows (including header) to their preferred width
+					.map(rowIndex -> {
+						final TableCellRenderer renderer = rowIndex == -1
+								? headerRenderer
+								: table.getCellRenderer(rowIndex, columnIndex);
+						final Object value = rowIndex == -1
+								? headerValue
+								: table.getValueAt(rowIndex, columnIndex);
+
+						Component component = renderer.getTableCellRendererComponent(table, value, false,
+								false, rowIndex, colIndex);
+
+						// sum preferred width, intercell spacing, and additional padding
+						return component.getPreferredSize().width + table.getIntercellSpacing().width + 5;
+					})
+					.max().orElse(0)
+			);
+		});
+
 		repaint();
 	}
 

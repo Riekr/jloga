@@ -1,3 +1,6 @@
+- Fixes
+  - Grid view takes int account header sizes when sizing columns
+
 ## v0.6.1
 - Fixes
   - Cobol datafiles are opened in grid view (if enabled)
