@@ -22,6 +22,10 @@ import org.riekr.jloga.utils.TempFiles;
 
 public class PagedList<T> implements Closeable {
 
+	public static PagedList<String> ofStrings() {
+		return new PagedList<>(DataEncoder.STRING, DataDecoder.STRING);
+	}
+
 	class Page {
 		private final     File                        _file;
 		private @Nullable WeakReference<ArrayList<T>> _cache;

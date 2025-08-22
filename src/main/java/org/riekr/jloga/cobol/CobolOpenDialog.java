@@ -56,7 +56,7 @@ public class CobolOpenDialog extends JDialog {
 
 		verticalBox.add(Box.createVerticalGlue());
 		verticalBox.add(Box.createVerticalStrut(borer));
-		verticalBox.add(atStart(new JLabel("<html><b>WARNING:</b> opening cobol copybook is experimental and whole datafile is stored in memory.</html>")));
+		verticalBox.add(atStart(new JLabel("<html><b>WARNING:</b> opening cobol copybook is still experimental.</html>")));
 		verticalBox.add(Box.createVerticalStrut(borer));
 
 		final Box buttons = Box.createHorizontalBox();
@@ -94,7 +94,7 @@ public class CobolOpenDialog extends JDialog {
 					() -> _main.getProgressBar().addJob("Opening cobol datafile...")
 			);
 
-			_main.open(datafile, datafile, closer -> textSource);
+			_main.open(datafile, new File(datafile).getName(), closer -> textSource);
 
 			setVisible(false);
 		} catch (Throwable e) {

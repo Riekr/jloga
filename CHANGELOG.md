@@ -1,7 +1,9 @@
 - Fixes
   - Cobol datafiles are opened in grid view (if enabled)
+  - Cobol datafile title is now the file name only
 - General:
   - Cobol datafile async (re)loading and progress bar
+  - Decoded cobol datafiles are paged to disk: no more file size limit.
 
 ## v0.6.0
 - **New features**:

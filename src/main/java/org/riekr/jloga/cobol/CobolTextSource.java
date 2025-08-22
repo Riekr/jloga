@@ -21,6 +21,7 @@ import org.riekr.jloga.io.FilteredTextSource;
 import org.riekr.jloga.io.IndexingException;
 import org.riekr.jloga.io.ProgressListener;
 import org.riekr.jloga.io.VolatileTextSource;
+import org.riekr.jloga.pmem.PagedJavaList;
 import org.riekr.jloga.search.SearchPredicate;
 
 import net.sf.JRecord.Common.FieldDetail;
@@ -62,6 +63,7 @@ public class CobolTextSource extends VolatileTextSource {
 			@Nullable Integer dialect,
 			@Nullable Supplier<ProgressListener> progressListenerSupplier
 	) {
+		super(PagedJavaList.ofStrings());
 		_copybook = copybook;
 		_datafile = datafile;
 		_copybookFileFormat = copybookFileFormat == null ? Cb2xmlConstants.USE_STANDARD_COLUMNS : copybookFileFormat;

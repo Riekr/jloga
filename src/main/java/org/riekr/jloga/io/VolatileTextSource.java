@@ -1,7 +1,7 @@
 package org.riekr.jloga.io;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.IntConsumer;
 
+import org.jetbrains.annotations.NotNull;
 import org.riekr.jloga.react.IntBehaviourSubject;
 import org.riekr.jloga.react.Observer;
 import org.riekr.jloga.react.Unsubscribable;
@@ -17,12 +18,16 @@ import org.riekr.jloga.react.Unsubscribable;
 public class VolatileTextSource implements TextSource {
 
 	private final IntBehaviourSubject _lineCountSubject = new IntBehaviourSubject();
-	private final List<String>        _data             = new LinkedList<>();
+	private final List<String>        _data;
 	private final ReadWriteLock       _readWriteLock    = new ReentrantReadWriteLock();
 
-	public VolatileTextSource() {}
+	public VolatileTextSource(@NotNull List<String> backend) {
+		_data = backend;
+	}
 
-	public VolatileTextSource(String... lines) {
+	public VolatileTextSource(String firstLine, String... lines) {
+		_data = new ArrayList<>(lines.length + 1);
+		_data.add(firstLine);
 		Collections.addAll(_data, lines);
 	}
 
