@@ -9,8 +9,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.Serial;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -25,9 +23,8 @@ public class JTextAreaGridView extends JTable {
 	private final @NotNull VirtualTextArea    _text;
 	private final          boolean            _headerIsEmbedded;
 
-	private       String[]              _header;
-	private       String[][]            _data    = EMPTY_STRINGS_MATRIX;
-	private final Map<Integer, Integer> _colsMax = new HashMap<>();
+	private String[]   _header;
+	private String[][] _data = EMPTY_STRINGS_MATRIX;
 
 	public JTextAreaGridView(@NotNull VirtualTextArea text, String header, boolean headerIsEmbedded) {
 		_text = text;
@@ -49,9 +46,6 @@ public class JTextAreaGridView extends JTable {
 			public String getColumnName(int columnIndex) {return _header[columnIndex];}
 
 			@Override
-			public boolean isCellEditable(int rowIndex, int columnIndex) {return false;}
-
-			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				if (rowIndex < _data.length && columnIndex < _data[rowIndex].length)
 					return _data[rowIndex][columnIndex];
@@ -67,10 +61,9 @@ public class JTextAreaGridView extends JTable {
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 		// https://stackoverflow.com/a/25570812/1326326
 		Component component = super.prepareRenderer(renderer, row, column);
+		int rendererWidth = component.getPreferredSize().width;
 		TableColumn tableColumn = getColumnModel().getColumn(column);
-		int colWidth = Math.max(tableColumn.getPreferredWidth(), component.getPreferredSize().width + getIntercellSpacing().width);
-		int maxWidth = _colsMax.compute(column, (c, prev) -> prev == null ? colWidth : Math.max(colWidth, prev));
-		tableColumn.setPreferredWidth(maxWidth);
+		tableColumn.setMinWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
 		return component;
 	}
 
@@ -94,7 +87,7 @@ public class JTextAreaGridView extends JTable {
 		if (_text.getFromLine() == 0 && _headerIsEmbedded)
 			stream = stream.skip(1);
 		_data = stream.map(_splitter).toArray(String[][]::new);
-		this.tableChanged(null);
+		repaint();
 	}
 
 	public void setDelim(char delim) {
