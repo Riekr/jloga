@@ -90,7 +90,8 @@ public class CobolOpenDialog extends JDialog {
 					_font.getValue(),
 					_fileOrganization.getValue(),
 					_splitting.getValue(),
-					_dialect.getValue()
+					_dialect.getValue(),
+					() -> _main.getProgressBar().addJob("Opening cobol datafile...")
 			);
 
 			_main.open(datafile, datafile, closer -> textSource);

@@ -311,4 +311,8 @@ public class MainPanel extends JFrame implements FileDropListener {
 			invokeLater(() -> setAlwaysOnTop(false));
 		});
 	}
+
+	public JobProgressBar getProgressBar() {
+		return _progressBar;
+	}
 }

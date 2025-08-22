@@ -4,17 +4,32 @@ import static java.util.stream.Collectors.joining;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.riekr.jloga.io.FileProgressInputStream;
+import org.riekr.jloga.io.FilteredTextSource;
+import org.riekr.jloga.io.IndexingException;
+import org.riekr.jloga.io.ProgressListener;
 import org.riekr.jloga.io.VolatileTextSource;
+import org.riekr.jloga.search.SearchPredicate;
 
 import net.sf.JRecord.Common.FieldDetail;
 import net.sf.JRecord.Common.IFieldDetail;
 import net.sf.JRecord.Common.IFileStructureConstants;
 import net.sf.JRecord.Details.AbstractLine;
+import net.sf.JRecord.Details.LayoutDetail;
+import net.sf.JRecord.Details.RecordDecider;
+import net.sf.JRecord.Details.RecordDetail;
 import net.sf.JRecord.Details.fieldValue.IFieldValue;
 import net.sf.JRecord.External.CopybookLoader;
 import net.sf.JRecord.IO.AbstractLineReader;
@@ -27,8 +42,15 @@ public class CobolTextSource extends VolatileTextSource {
 
 	private static final String _DELIM = "|";
 
-	private final String _copybook;
-	private final String _datafile;
+	private final @NotNull String  _copybook;
+	private final @NotNull String  _datafile;
+	private final @NotNull Integer _copybookFileFormat;
+	private final @NotNull String  _font;
+	private final @NotNull Integer _fileOrganization;
+	private final @NotNull Integer _splitCopybook;
+	private final @NotNull Integer _dialect;
+
+	private Future<?> _indexing;
 
 	public CobolTextSource(
 			@NotNull String copybook,
@@ -37,49 +59,106 @@ public class CobolTextSource extends VolatileTextSource {
 			@Nullable String font,
 			@Nullable Integer fileOrganization,
 			@Nullable Integer splitCopybook,
-			@Nullable Integer dialect
-	) throws IOException {
-		super(new LinkedList<>());
+			@Nullable Integer dialect,
+			@Nullable Supplier<ProgressListener> progressListenerSupplier
+	) {
 		_copybook = copybook;
 		_datafile = datafile;
+		_copybookFileFormat = copybookFileFormat == null ? Cb2xmlConstants.USE_STANDARD_COLUMNS : copybookFileFormat;
+		_font = font == null || font.isBlank() ? "CP037" : font;
+		_fileOrganization = fileOrganization == null ? IFileStructureConstants.IO_FIXED_LENGTH : fileOrganization;
+		_splitCopybook = splitCopybook == null ? CopybookLoader.SPLIT_NONE : splitCopybook;
+		_dialect = dialect == null ? ICopybookDialects.FMT_MAINFRAME : dialect;
+		_indexing = defaultAsyncIO(() -> reload(progressListenerSupplier == null ? () -> ProgressListener.NOP : progressListenerSupplier));
+	}
 
-		if (copybookFileFormat == null)
-			copybookFileFormat = Cb2xmlConstants.USE_STANDARD_COLUMNS;
-		if (font == null || font.isBlank())
-			font = "CP037";
-		if (fileOrganization == null)
-			fileOrganization = IFileStructureConstants.IO_FIXED_LENGTH;
-		if (splitCopybook == null)
-			splitCopybook = CopybookLoader.SPLIT_NONE;
-		if (dialect == null)
-			dialect = ICopybookDialects.FMT_MAINFRAME;
+	@Override
+	public boolean supportsReload() {
+		return true;
+	}
 
-		final ICobolIOBuilder builder = JRecordInterface1.COBOL.newIOBuilder(copybook)
-				.setFileOrganization(fileOrganization)
-				.setSplitCopybook(splitCopybook)
-				.setDialect(dialect)
-				.setCopybookFileFormat(copybookFileFormat)
-				.setFont(font);
+	public Future<?> requestReload(Supplier<ProgressListener> progressListenerSupplier) {
+		if (_indexing == null || _indexing.isDone())
+			_indexing = defaultAsyncIO(() -> reload(progressListenerSupplier));
+		return _indexing;
+	}
 
-		final List<FieldDetail> header = builder.getLayout().getRecordsAsList().stream()
-				.flatMap(l -> l.getFields().stream())
-				.toList();
-		_data.add(header.stream().map(IFieldDetail::getName).collect(joining(_DELIM)));
+	@Override
+	public void close() {
+		_indexing.cancel(true);
+	}
 
-		AbstractLineReader reader = null;
+	@Override
+	public boolean isIndexing() {
+		return !_indexing.isDone();
+	}
+
+	@Override
+	public void search(SearchPredicate predicate, FilteredTextSource out, ProgressListener progressListener, BooleanSupplier running) throws ExecutionException, InterruptedException {
+		_indexing.get();
+		super.search(predicate, out, progressListener, running);
+	}
+
+	@Override
+	public int getLineCount() throws ExecutionException, InterruptedException {
+		_indexing.get();
+		return super.getLineCount();
+	}
+
+	@Override
+	public void reload(Supplier<ProgressListener> progressListenerSupplier) {
 		try {
-			reader = builder.newReader(datafile);
+			clear();
 
-			AbstractLine aline;
-			while ((aline = reader.read()) != null) {
-				_data.add(header.stream()
-						.map(aline::getFieldValue)
-						.map(IFieldValue::asString)
-						.collect(joining(_DELIM)));
+			final ICobolIOBuilder builder = JRecordInterface1.COBOL.newIOBuilder(_copybook)
+					.setFileOrganization(_fileOrganization)
+					.setSplitCopybook(_splitCopybook)
+					.setDialect(_dialect)
+					.setCopybookFileFormat(_copybookFileFormat)
+					.setFont(_font);
+
+			// final Map<Integer, RecordDetail> records = new LinkedHashMap<>();
+			final Map<String, IFieldDetail> header = new LinkedHashMap<>();
+			final LayoutDetail layout = builder.getLayout();
+			for (final RecordDetail recordDetail : layout.getRecordsAsList()) {
+				System.out.println("Record: " + recordDetail.getRecordName() + '/' + recordDetail.getParentRecordIndex());
+				// records.put(recordDetail.getSourceIndex(), recordDetail);
+				for (final FieldDetail field : recordDetail.getFields()) {
+					if (header.put(field.getName(), field) != null)
+						System.err.println("Duplicate field: " + field.getName());
+				}
 			}
-		} finally {
-			if (reader != null)
-				reader.close();
+			RecordDecider decider = layout.getDecider();
+			if (decider == null)
+				add(String.join(_DELIM, header.keySet()));
+			else
+				add("R" + _DELIM + String.join(_DELIM, header.keySet()));
+
+			AbstractLineReader reader = null;
+			try (FileProgressInputStream fis = new FileProgressInputStream(progressListenerSupplier.get(), _datafile)) {
+				reader = builder.newReader(fis);
+
+				AbstractLine line;
+				while ((line = reader.read()) != null) {
+					final Stream<String> values = header.values().stream()
+							.map(line::getFieldValue)
+							.map(IFieldValue::asString);
+					if (decider == null)
+						add(values.collect(joining(_DELIM)));
+					else {
+						add(Stream.concat(
+								IntStream.of(decider.getPreferedIndex(line)).mapToObj(Integer::toString),
+								values
+						).collect(joining(_DELIM)));
+					}
+				}
+			} finally {
+				if (reader != null)
+					reader.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			throw new IndexingException("Error reloading " + _datafile, e);
 		}
 	}
 

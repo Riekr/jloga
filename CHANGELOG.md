@@ -1,5 +1,7 @@
 - Fixes
   - Cobol datafiles are opened in grid view (if enabled)
+- General:
+  - Cobol datafile async (re)loading and progress bar
 
 ## v0.6.0
 - **New features**:
