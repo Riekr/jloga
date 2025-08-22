@@ -122,14 +122,16 @@ public class ContextMenu {
 		popupMenu.add(label).addActionListener((a) -> action.run());
 	}
 
-	public static <T extends JComponent> void addActionOpenInFileManager(T component, Path file) {
+	public static <T extends JComponent> T addActionOpenInFileManager(T component, Path file) {
 		if (file != null)
 			addActionOpenInFileManager(component, file.toFile());
+		return component;
 	}
 
-	public static <T extends JComponent> void addActionOpenInFileManager(T component, File file) {
+	public static <T extends JComponent> T addActionOpenInFileManager(T component, File file) {
 		if (file != null)
-			addAction(component, "Open in file manager", () -> OSUtils.openInFileManager(file));
+			addAction(component, "Open \"" + file.getName() + "\" in file manager", () -> OSUtils.openInFileManager(file));
+		return component;
 	}
 
 }

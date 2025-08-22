@@ -1,8 +1,12 @@
 package org.riekr.jloga.cobol;
 
 import static java.util.stream.Collectors.joining;
+import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
+import static org.riekr.jloga.utils.ContextMenu.addActionOpenInFileManager;
+import static org.riekr.jloga.utils.FileUtils.sizeToString;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -166,10 +170,19 @@ public class CobolTextSource extends VolatileTextSource {
 
 	@Override
 	public List<JLabel> describe() {
-		return List.of(
-				new JLabel("Copybook: " + _copybook),
-				new JLabel("Datafile: " + _datafile)
-		);
+
+		final JLabel copybookLabel = new JLabel("Copybook: " + _copybook);
+		final File copybookFile = new File(_copybook);
+		addActionOpenInFileManager(copybookLabel, copybookFile);
+		addActionCopy(copybookLabel, "Copy \"" + copybookFile.getName() + "\" absolute path", copybookFile::getAbsolutePath);
+
+		final JLabel datafileLabel = new JLabel("Datafile: " + _datafile);
+		final File datafileFile = new File(_datafile);
+		addActionOpenInFileManager(datafileLabel, datafileFile);
+		addActionCopy(datafileLabel, "Copy \"" + datafileFile.getName() + "\" absolute path", datafileFile::getAbsolutePath);
+		datafileLabel.setToolTipText(sizeToString(datafileFile));
+
+		return List.of(copybookLabel, datafileLabel);
 	}
 
 	@Override

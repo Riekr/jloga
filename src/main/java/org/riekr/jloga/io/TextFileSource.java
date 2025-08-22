@@ -12,7 +12,6 @@ import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
 import static org.riekr.jloga.utils.ContextMenu.addActionOpenInFileManager;
 import static org.riekr.jloga.utils.FileUtils.getFileCreationTime;
 import static org.riekr.jloga.utils.FileUtils.sizeToString;
-import static org.riekr.jloga.utils.MouseListenerBuilder.mouse;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
@@ -20,6 +19,7 @@ import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
@@ -560,12 +560,11 @@ public class TextFileSource implements TextSource {
 
 	@Override
 	public List<JLabel> describe() {
-		JLabel descriptionLabel = addActionCopy(new JLabel(_file.toFile().getAbsolutePath()));
-		descriptionLabel.setToolTipText(sizeToString(_file));
-		descriptionLabel.addMouseListener(mouse()
-				.onEnter(e -> descriptionLabel.setToolTipText(sizeToString(_file)))
-		);
+		final File file = _file.toFile();
+		final JLabel descriptionLabel = new JLabel(file.getAbsolutePath());
+		addActionCopy(descriptionLabel, "Copy \"" + file.getName() + "\" absolute path", descriptionLabel::getText);
 		addActionOpenInFileManager(descriptionLabel, _file);
+		descriptionLabel.setToolTipText(sizeToString(_file));
 		return singletonList(descriptionLabel);
 	}
 }

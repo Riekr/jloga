@@ -1,6 +1,9 @@
 - Fixes
   - Grid view takes int account header sizes when sizing columns
-  - Fixed grid view copy to clipboard actions 
+  - Fixed grid view copy to clipboard actions
+- General:
+  - Cobol view subheaders context menus and size tooltip
+  - Text view subheaders shows file name in context menu
 
 ## v0.6.1
 - Fixes
