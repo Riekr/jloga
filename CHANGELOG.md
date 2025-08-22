@@ -4,6 +4,7 @@
 - General:
   - Cobol datafile async (re)loading and progress bar
   - Decoded cobol datafiles are paged to disk: no more file size limit.
+  - Added tooltips to open cobol dialog
 
 ## v0.6.0
 - **New features**:
