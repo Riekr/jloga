@@ -537,6 +537,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		else {
 			if (_prevRequireTextRequest != null)
 				_prevRequireTextRequest.cancel(false);
+			final JScrollBar horizontalScrollBar = _scrollPane.getHorizontalScrollBar();
+			final int hpos = horizontalScrollBar.getValue();
 			_prevRequireTextRequest = _textSource.requestText(_fromLine, _lineCount, (text) -> {
 				_prevRequireTextRequest = null;
 				_textSelection.enabled = false;
@@ -546,7 +548,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				else
 					_gridView.refresh();
 				invokeLater(() -> {
-					_scrollPane.getHorizontalScrollBar().setValue(0);
+					horizontalScrollBar.setValue(hpos);
 					_textSelection.restore(_fromLine, _lineCount, _text);
 					_textSelection.enabled = true;
 				});
