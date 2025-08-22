@@ -2,6 +2,7 @@
   - Grid view takes into account header sizes when sizing columns
   - Fixed grid view copy to clipboard context menu actions
 - General:
+  - Cobol open file dialog supports dropping files
   - Cobol view subheaders context menus and size tooltip
   - Text view subheaders shows file name in context menu
 

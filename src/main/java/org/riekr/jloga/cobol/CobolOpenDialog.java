@@ -9,6 +9,7 @@ import static org.riekr.jloga.utils.UIUtils.ICO_OPEN;
 import static org.riekr.jloga.utils.UIUtils.atStart;
 import static org.riekr.jloga.utils.UIUtils.horizontalBox;
 import static org.riekr.jloga.utils.UIUtils.newButton;
+import static org.riekr.jloga.utils.UIUtils.setSingleFileDropListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -130,11 +131,13 @@ public class CobolOpenDialog extends JDialog {
 		setContentPane(verticalBox);
 
 		verticalBox.add(horizontalBox(new JLabel("Copybook:"), _copybook, newButton(ICO_OPEN, this::selectCopybook)));
+		setSingleFileDropListener(_copybook, _copybook::setValue);
 		verticalBox.add(_copybookFileFormat);
 
 		verticalBox.add(Box.createVerticalStrut(borer));
 
 		verticalBox.add(horizontalBox(new JLabel("Datafile:"), _datafile, newButton(ICO_OPEN, this::selectDatafile)));
+		setSingleFileDropListener(_datafile, _datafile::setValue);
 		verticalBox.add(_font);
 		verticalBox.add(_fileOrganization);
 		verticalBox.add(_splitting);

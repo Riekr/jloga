@@ -250,6 +250,13 @@ public final class UIUtils {
 		));
 	}
 
+	public static void setSingleFileDropListener(@NotNull Component component, Consumer<String> consumer) {
+		setFileDropListener(component, files -> {
+			if (files != null && !files.isEmpty())
+				consumer.accept(files.getFirst().getAbsolutePath());
+		});
+	}
+
 	public static void setFileDropListener(@NotNull Component component, Consumer<List<File>> consumer) {
 		try {
 			DropTarget dropTarget = new DropTarget();
