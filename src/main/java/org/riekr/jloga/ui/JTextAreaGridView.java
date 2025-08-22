@@ -1,6 +1,7 @@
 package org.riekr.jloga.ui;
 
 import static org.riekr.jloga.misc.Constants.EMPTY_STRINGS_MATRIX;
+import static org.riekr.jloga.utils.ContextMenu.COPY;
 import static org.riekr.jloga.utils.ContextMenu.addActionCopy;
 
 import javax.swing.*;
@@ -56,20 +57,28 @@ public class JTextAreaGridView extends JTable {
 		});
 		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		refresh();
-		addActionCopy(this, this::getSelectedText);
+		addActionCopy(this);
+		addActionCopy(this, COPY + " with delimiter '" + _splitter.getDelim() + '\'', this::getSelectedText);
 	}
 
 	public CharSequence getSelectedText() {
 		StringBuilder res = new StringBuilder();
 		String delim = Character.toString(_splitter.getDelim());
 		String escaped = "\\" + delim;
+		int rows = 0;
 		for (int row : getSelectedRows()) {
+			int cols = 0;
 			for (int col : getSelectedColumns()) {
-				if (isCellSelected(row, col))
+				if (isCellSelected(row, col)) {
+					if (cols == 0 && rows > 0)
+						res.append('\n');
+					if (cols > 0)
+						res.append(delim);
 					res.append(_data[row][col].replace(delim, escaped));
-				res.append(delim);
+					cols++;
+				}
+				rows++;
 			}
-			res.append('\n');
 		}
 		return res;
 	}

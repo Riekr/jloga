@@ -1,5 +1,6 @@
 - Fixes
   - Grid view takes int account header sizes when sizing columns
+  - Fixed grid view copy to clipboard actions 
 
 ## v0.6.1
 - Fixes

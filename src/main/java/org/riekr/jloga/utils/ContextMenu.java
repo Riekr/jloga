@@ -93,6 +93,10 @@ public class ContextMenu {
 		addActionCopy(component, COPY, value);
 	}
 
+	public static void addActionCopy(JTable table) {
+		addAction(table, COPY, () -> table.getTransferHandler().exportToClipboard(table, table.getToolkit().getSystemClipboard(), TransferHandler.COPY));
+	}
+
 	public static void addActionCopy(JComponent component, String label, Supplier<? extends CharSequence> value) {
 		addActionCopy(component, label, (p, a) -> {
 			CharSequence val = value.get();
