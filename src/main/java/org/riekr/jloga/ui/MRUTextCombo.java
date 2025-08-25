@@ -62,8 +62,8 @@ public class MRUTextCombo<T> extends JComboBox<T> {
 						_model.insertElementAt(newSelection, 0);
 						setSelectedIndex(0);
 						selection.next(newSelection);
-					} else
-						EventQueue.invokeLater(this::resend);
+					}
+					EventQueue.invokeLater(this::resend);
 					save();
 					break;
 				default:
