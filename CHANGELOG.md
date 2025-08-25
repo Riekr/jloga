@@ -3,6 +3,7 @@
   - Fixed grid view copy to clipboard context menu actions
   - Fixed value not being updated in some case in MRU text combos
   - Cobol open file dialog better error and extensions handling
+  - Do not persist page size when opening files
 - General:
   - Cobol open file dialog supports dropping files
   - Cobol view subheaders context menus and size tooltip

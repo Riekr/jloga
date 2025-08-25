@@ -149,7 +149,6 @@ public class TextFileSource implements TextSource {
 						Notifications.getInstance()
 								.show(Notifications.Type.SUCCESS, Notifications.Location.BOTTOM_CENTER, msg);
 						_pageSize = next;
-						Preferences.PAGE_SIZE.set(_pageSize);
 						allowFinish = false;
 						reindex(indexingListener, true);
 						return;
