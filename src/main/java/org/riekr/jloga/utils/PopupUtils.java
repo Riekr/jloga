@@ -1,5 +1,7 @@
 package org.riekr.jloga.utils;
 
+import static java.awt.EventQueue.invokeAndWait;
+
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -9,12 +11,14 @@ import org.riekr.jloga.Main;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.ui.MainPanel;
 
-import static java.awt.EventQueue.invokeAndWait;
-
 public class PopupUtils {
 
 	public static <E extends Throwable> E popupError(@NotNull E err) {
 		return popupError(null, err);
+	}
+
+	public static void popupError(String message) {
+		popupError(message, "Error");
 	}
 
 	public static <E extends Throwable> E popupError(String message, E err) {

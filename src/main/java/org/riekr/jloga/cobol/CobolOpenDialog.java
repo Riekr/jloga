@@ -173,6 +173,15 @@ public class CobolOpenDialog extends JDialog {
 	private void doOpen() {
 		try {
 			final String datafile = _datafile.getValue();
+			if (datafile == null || datafile.isBlank()) {
+				popupError("No input datafile");
+				return;
+			}
+			final File datafileFile = new File(datafile);
+			if (!datafileFile.canRead()) {
+				popupError("Can't read " + datafileFile.getAbsolutePath());
+				return;
+			}
 			@SuppressWarnings("resource") CobolTextSource textSource = new CobolTextSource(
 					_copybook.getValue(),
 					datafile,
@@ -184,7 +193,7 @@ public class CobolOpenDialog extends JDialog {
 					() -> _main.getProgressBar().addJob("Opening cobol datafile...")
 			);
 
-			_main.open(datafile, new File(datafile).getName(), closer -> textSource);
+			_main.open(datafile, datafileFile.getName(), closer -> textSource);
 
 			setVisible(false);
 		} catch (Throwable e) {
