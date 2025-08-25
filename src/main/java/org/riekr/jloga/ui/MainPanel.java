@@ -67,10 +67,6 @@ public class MainPanel extends JFrame implements FileDropListener {
 		_progressBar = new JobProgressBar();
 
 		final JToolBar toolBar = new JToolBar();
-		CharsetCombo charsetCombo = new CharsetCombo();
-		charsetCombo.setMaximumSize(charsetCombo.getPreferredSize());
-		charsetCombo.setToolTipText("Select next file charset");
-		Preferences.CHARSET.subscribe(charsetCombo::setSelectedItem);
 
 		toolBar.add(newBorderlessButton(ICO_OPEN + " Open", this::openFileDialog, "Open file in new tab"));
 		addKeyStrokeAction(this, KeyBindings.KB_OPENFILE, this::openFileDialog);
@@ -95,7 +91,12 @@ public class MainPanel extends JFrame implements FileDropListener {
 		toolBar.add(glue);
 		toolBar.add(newBorderlessButton("\u2699 Settings", this::openPreferences, "Change preferences"));
 		addKeyStrokeAction(this, KeyBindings.KB_SETTINGS, this::openPreferences);
+
+		final CharsetCombo charsetCombo = new CharsetCombo();
+		charsetCombo.setMaximumSize(charsetCombo.getPreferredSize());
+		Preferences.CHARSET.subscribe(charsetCombo::setSelectedItem);
 		toolBar.add(charsetCombo);
+
 		toolBar.add(UIUtils.newBorderlessButton("\uD83D\uDEC8 About", () -> new AboutPane().createDialog("About").setVisible(true)));
 
 		// help

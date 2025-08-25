@@ -22,6 +22,7 @@ import static org.riekr.jloga.utils.UIUtils.newButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.Serial;
 import java.util.ArrayList;
@@ -231,9 +232,11 @@ public class PrefPanel extends JDialog {
 		JComboBox<ComboEntryWrapper<?>> combo = new JComboBox<>(values);
 		_subscriptions.add(comboPref.subscribe((selectedItem) -> combo.setSelectedIndex(ComboEntryWrapper.indexOf(selectedItem, values))));
 		combo.addItemListener(e -> {
-			Object selectedItem = combo.getSelectedItem();
-			if (selectedItem instanceof ComboEntryWrapper)
-				comboPref.set(((ComboEntryWrapper<?>)selectedItem).value);
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				Object selectedItem = combo.getSelectedItem();
+				if (selectedItem instanceof ComboEntryWrapper)
+					comboPref.set(((ComboEntryWrapper<?>)selectedItem).value);
+			}
 		});
 		combo.setAlignmentX(0);
 		return combo;

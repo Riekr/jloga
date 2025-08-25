@@ -3,6 +3,7 @@ package org.riekr.jloga.ui;
 import static java.util.Objects.requireNonNull;
 
 import javax.swing.*;
+import java.awt.event.ItemEvent;
 import java.io.Serial;
 import java.nio.charset.Charset;
 
@@ -13,7 +14,11 @@ public class CharsetCombo extends JComboBox<Charset> {
 
 	public CharsetCombo() {
 		super(Charset.availableCharsets().values().toArray(Charset[]::new));
-		addItemListener(e -> Preferences.CHARSET.set((Charset)requireNonNull(getSelectedItem())));
+		addItemListener(e -> {
+			if (e.getStateChange() == ItemEvent.SELECTED)
+				Preferences.CHARSET.set((Charset)requireNonNull(getSelectedItem()));
+		});
+		setToolTipText("Select charset of next opened file.\nCheck settings → formats for autodetection.");
 	}
 
 }

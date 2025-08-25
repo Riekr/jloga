@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.riekr.jloga.io.Charsets;
 import org.riekr.jloga.prefs.GUIPreference.Type;
 import org.riekr.jloga.search.RegExComponent;
 import org.riekr.jloga.search.simple.SimpleSearchPredicate;
@@ -23,6 +22,7 @@ import org.riekr.jloga.search.simple.SimpleSearchPredicate.ThreadModel;
 import org.riekr.jloga.theme.Theme;
 import org.riekr.jloga.theme.ThemePreference;
 import org.riekr.jloga.utils.Bag;
+import org.riekr.jloga.utils.CharsetUtils;
 
 public interface Preferences extends KeyBindings {
 
@@ -147,8 +147,8 @@ public interface Preferences extends KeyBindings {
 	GUIPreference<Boolean> CHARSET_DETECT = of("charset.detect", () -> true)
 			.describe(Type.Toggle, "Charset auto detection")
 			.group(FORMATS)
-			.addDescription("Try to automatically detect the charset of the opened file, the result will be set in this page.")
-			.addDescription("Tried charsets are: " + Charsets.stream().map(Charset::name).collect(joining(", ")));
+			.addDescription("Try to automatically detect the charset when openeing a file.")
+			.addDescription("Preferred charsets are: " + CharsetUtils.PREFERRED_CHARSETS.stream().map(Charset::name).collect(joining(", ")));
 
 	GUIPreference<Locale> LOCALE = of("locale.default", Locale.ENGLISH)
 			.describe(Type.Combo, "Locale")

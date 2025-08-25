@@ -13,7 +13,6 @@ import static org.riekr.jloga.utils.ContextMenu.addActionOpenInFileManager;
 import static org.riekr.jloga.utils.FileUtils.getFileCreationTime;
 import static org.riekr.jloga.utils.FileUtils.sizeToString;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
-import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
 
 import javax.swing.*;
@@ -33,12 +32,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
-import java.nio.charset.MalformedInputException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +61,7 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.search.SearchPredicate;
 import org.riekr.jloga.utils.AsyncOperations;
 import org.riekr.jloga.utils.CancellableFuture;
+import org.riekr.jloga.utils.CharsetUtils;
 import org.riekr.jloga.utils.TextUtils;
 
 import raven.toast.Notifications;
@@ -81,10 +81,12 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	private       int            _pageSize = Preferences.PAGE_SIZE.get();
+	private       int            _pageSize         = Preferences.PAGE_SIZE.get();
 	private final Path           _file;
+	private       boolean        _charsetGuess     = Preferences.CHARSET_DETECT.get();
 	private       Charset        _charset;
 	private       CharsetDecoder _charsetDecoder; // for loadPage only
+	private final JLabel         _descriptionLabel = new JLabel();
 
 	private Future<?>                   _indexing;
 	private TreeMap<Integer, IndexData> _index;
@@ -100,6 +102,7 @@ public class TextFileSource implements TextSource {
 
 	private final ByteBuffer _fingerPrint = ByteBuffer.allocate(100);
 	private       FileTime   _fileCreationTime;
+
 
 	public TextFileSource(@NotNull Path file, @NotNull Charset charset, @NotNull ProgressListener indexingListener, @NotNull Runnable closer) {
 		_file = file;
@@ -169,12 +172,28 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
+	private Charset guessCharset(ByteBuffer byteBuffer) {
+		if (_charsetGuess) {
+			_charsetGuess = false;
+			byteBuffer.flip();
+			byteBuffer = byteBuffer.slice(0, 100);
+			final Charset origCharset = _charset;
+			final Charset newCharset = CharsetUtils.guessCharset(byteBuffer);
+			if (newCharset != null && !Objects.equals(origCharset, newCharset)) {
+				_descriptionLabel.setText(_file.toFile().getAbsolutePath() + " (" + newCharset + ')');
+				return newCharset;
+			}
+		}
+		return _charset;
+	}
+
 	private void scanFile(FileChannel fileChannel) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(_pageSize);
 		long read = fileChannel.read(byteBuffer);
 		if (read > 0) {
+			setCharset(guessCharset(byteBuffer));
 			CharBuffer charBuffer = CharBuffer.allocate(_pageSize);
-			CharsetDecoder decoder = newCharsetDecoder();
+			CharsetDecoder decoder = _charsetDecoder;
 			CharsetEncoder encoder = _charset.newEncoder();
 			char lastChar = 0;
 			long lastPos = read;
@@ -385,31 +404,9 @@ public class TextFileSource implements TextSource {
 	}
 
 	private String[] loadPage(int fromLine, int toLine, long pos) throws IOException {
-		String[] lines = new String[toLine - fromLine];
-		try {
-			loadPage(pos, lines);
-			return lines;
-		} catch (MalformedInputException e) {
-			if (Preferences.CHARSET_DETECT.get()) {
-				// cycle all but one (the first)
-				Charset orig = _charset;
-				for (Charset charset : Charsets.nextOf(orig)) {
-					try {
-						setCharset(charset);
-						loadPage(pos, lines);
-						System.out.println("Changed charset from " + orig + " to " + _charset);
-						Preferences.CHARSET.set(_charset);
-						popupWarning("Charset has been automatically changed to " + _charset + ",\n"
-										+ "if text is corrupted please select correct charset and reopen the file.\n"
-										+ "You can disable charset auto detection in preferences.",
-								"Charset changed");
-						return lines;
-					} catch (MalformedInputException ignored) {}
-				}
-				setCharset(orig);
-			}
-			throw e;
-		}
+		final String[] lines = new String[toLine - fromLine];
+		loadPage(pos, lines);
+		return lines;
 	}
 
 	@Override
@@ -560,10 +557,10 @@ public class TextFileSource implements TextSource {
 	@Override
 	public List<JLabel> describe() {
 		final File file = _file.toFile();
-		final JLabel descriptionLabel = new JLabel(file.getAbsolutePath());
-		addActionCopy(descriptionLabel, "Copy \"" + file.getName() + "\" absolute path", descriptionLabel::getText);
-		addActionOpenInFileManager(descriptionLabel, _file);
-		descriptionLabel.setToolTipText(sizeToString(_file));
-		return singletonList(descriptionLabel);
+		_descriptionLabel.setText(file.getAbsolutePath());
+		addActionCopy(_descriptionLabel, "Copy \"" + file.getName() + "\" absolute path", file::getAbsolutePath);
+		addActionOpenInFileManager(_descriptionLabel, _file);
+		_descriptionLabel.setToolTipText(sizeToString(_file));
+		return singletonList(_descriptionLabel);
 	}
 }
