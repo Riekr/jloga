@@ -2,7 +2,7 @@
   - Grid view takes into account header sizes when sizing columns
   - Fixed grid view copy to clipboard context menu actions
   - Fixed value not being updated in some case in MRU text combos
-  - Cobol open file dialog better error handling
+  - Cobol open file dialog better error and extensions handling
 - General:
   - Cobol open file dialog supports dropping files
   - Cobol view subheaders context menus and size tooltip

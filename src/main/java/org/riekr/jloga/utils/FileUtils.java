@@ -1,6 +1,7 @@
 package org.riekr.jloga.utils;
 
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Stream.empty;
 import static org.riekr.jloga.utils.TextUtils.humanReadableByteCountSI;
 
@@ -20,6 +21,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.List;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
@@ -109,10 +112,14 @@ public class FileUtils {
 	}
 
 	public static Stream<File> fileDialog(DialogType type, File initialDir, String title) {
-		return fileDialog(type, initialDir, title, null, null);
+		return fileDialog(type, initialDir, title, emptyMap());
 	}
 
 	public static Stream<File> fileDialog(DialogType type, File initialDir, String title, String ext, String extDescription) {
+		return fileDialog(type, initialDir, title, Map.of(List.of(ext), extDescription));
+	}
+
+	public static Stream<File> fileDialog(DialogType type, File initialDir, String title, Map<List<String>, String> extensions) {
 		if (initialDir == null || !initialDir.isDirectory())
 			initialDir = Preferences.RECENT_DIRS.get().stream().findFirst().orElseGet(() -> new File("."));
 		if (title == null || title.isBlank())
@@ -122,15 +129,19 @@ public class FileUtils {
 			FileDialog fd = new FileDialog(Main.getMain(), title, type.awt);
 			fd.setDirectory(initialDir.getAbsolutePath());
 			fd.setMultipleMode(type.multi);
-			if (ext != null && !ext.isBlank())
-				fd.setFilenameFilter((dir, f) -> f != null && f.endsWith(ext));
+			if (extensions != null && !extensions.isEmpty()) {
+				fd.setFilenameFilter((dir, f) -> f != null
+						&& extensions.keySet().stream().flatMap(List::stream).anyMatch(suffix -> f.toLowerCase().endsWith(suffix.toLowerCase())));
+			}
 			fd.setVisible(true);
 			return stream(fd.getFiles());
 
 		} else {
 			JFileChooser chooser = new FileChooserWithRecentDirs();
-			if (ext != null && !ext.isBlank())
-				chooser.setFileFilter(new FileNameExtensionFilter(extDescription, ext));
+			if (extensions != null && !extensions.isEmpty()) {
+				extensions.forEach((ext, extDescription) ->
+						chooser.addChoosableFileFilter(new FileNameExtensionFilter(extDescription, ext.toArray(String[]::new))));
+			}
 			chooser.setMultiSelectionEnabled(type.multi);
 			chooser.setCurrentDirectory(initialDir);
 			chooser.setDialogTitle(title);

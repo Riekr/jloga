@@ -14,6 +14,8 @@ import static org.riekr.jloga.utils.UIUtils.setSingleFileDropListener;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import org.riekr.jloga.ui.ComboBoxWithLabelAndTooltips;
 import org.riekr.jloga.ui.MRUTextCombo;
@@ -159,7 +161,9 @@ public class CobolOpenDialog extends JDialog {
 	}
 
 	private void selectCopybook() {
-		FileUtils.fileDialog(OPEN, new File(_copybook.getValue()), "Select copybook:", "cbl", "Cobol file")
+		FileUtils.fileDialog(OPEN, new File(_copybook.getValue()), "Select copybook:",
+						Map.of(List.of("cbl", "cob"), "Cobol file")
+				)
 				.findFirst()
 				.ifPresent(f -> _copybook.setValue(f.getAbsolutePath()));
 	}
