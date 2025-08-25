@@ -1,3 +1,4 @@
+## v0.6.2
 - Fixes
   - Grid view takes into account header sizes when sizing columns
   - Fixed grid view copy to clipboard context menu actions
