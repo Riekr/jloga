@@ -1,5 +1,6 @@
+## v0.6.3
 - Fixes
-  - Wrong page increase when opening text files
+  - Wrong page increase when opening text files (regression)
 - General:
   - Added toast notification when automatically changing charset
   - Pressing control and scrolling with the mouse wheel changes font size
