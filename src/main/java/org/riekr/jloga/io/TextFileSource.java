@@ -172,13 +172,18 @@ public class TextFileSource implements TextSource {
 		}
 	}
 
-	private Charset guessCharset(ByteBuffer byteBuffer) {
+	private Charset guessCharset(final ByteBuffer byteBuffer) {
 		if (_charsetGuess) {
 			_charsetGuess = false;
+			int pos = byteBuffer.position();
+			int lim = byteBuffer.limit();
 			byteBuffer.flip();
-			byteBuffer = byteBuffer.slice(0, 100);
+			final ByteBuffer slice = byteBuffer.slice(0, 100);
+			// restore bytebuffer as if a flip has never been done
+			byteBuffer.limit(lim);
+			byteBuffer.position(pos);
 			final Charset origCharset = _charset;
-			final Charset newCharset = CharsetUtils.guessCharset(byteBuffer);
+			final Charset newCharset = CharsetUtils.guessCharset(slice);
 			if (newCharset != null && !Objects.equals(origCharset, newCharset)) {
 				_descriptionLabel.setText(_file.toFile().getAbsolutePath() + " (" + newCharset + ')');
 				Notifications.getInstance()

@@ -1,3 +1,5 @@
+- Fixes
+  - Wrong page increase when opening text files
 - General:
   - Added toast notification when automatically changing charset
 
