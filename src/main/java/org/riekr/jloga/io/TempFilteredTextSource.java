@@ -17,7 +17,10 @@ import org.riekr.jloga.react.Unsubscribable;
 import org.riekr.jloga.utils.CancellableFuture;
 import org.riekr.jloga.utils.TextUtils;
 
-public class TempTextSource implements FilteredTextSource {
+/**
+ * Can be used in both root panes and search panes but it is slower than {@link VolatileTextSource}.
+ */
+public class TempFilteredTextSource implements FilteredTextSource {
 
 	private final PagedIntToObjList<String> _data             = newPagedIntToStringList();
 	private final IntBehaviourSubject       _lineCountSubject = new IntBehaviourSubject();

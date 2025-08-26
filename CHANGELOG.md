@@ -1,3 +1,6 @@
+- General:
+  - Rework volatile text sources for future implementations
+
 ## v0.6.3
 - Fixes
   - Wrong page increase when opening text files (regression)

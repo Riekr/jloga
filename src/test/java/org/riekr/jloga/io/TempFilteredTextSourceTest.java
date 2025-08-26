@@ -9,11 +9,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.riekr.jloga.utils.TempFiles;
 
-public class TempTextSourceTest {
+public class TempFilteredTextSourceTest {
 
 	@Test
-	public void main() throws ExecutionException, InterruptedException {
-		try (TempTextSource tts = new TempTextSource()) {
+	public void run() throws ExecutionException, InterruptedException {
+		try (TempFilteredTextSource tts = new TempFilteredTextSource()) {
 			int lines = 200000;
 			for (int i = 0; i < lines; i++)
 				tts.addLine(i, i + " XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.riekr.jloga.io.FilteredTextSource;
-import org.riekr.jloga.io.TempTextSource;
+import org.riekr.jloga.io.TempFilteredTextSource;
 import org.riekr.jloga.io.TextSource;
 import org.riekr.jloga.search.SearchException;
 import org.riekr.jloga.search.SearchPredicate;
@@ -26,14 +26,14 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 	private final List<String>     _command;
 	private       Consumer<String> _onStdOut;
 
-	private volatile int            _line;
-	private          TempTextSource _textSource;
-	private          BufferedWriter _toProc;
-	private          ReadThread     _stdOutReader;
-	private          ReadThread     _stdErrReader;
-	private volatile Throwable      _err;
-	private          Process        _process;
-	private          String         _sectionTitle;
+	private volatile int                    _line;
+	private          TempFilteredTextSource _textSource;
+	private          BufferedWriter         _toProc;
+	private          ReadThread             _stdOutReader;
+	private          ReadThread             _stdErrReader;
+	private volatile Throwable              _err;
+	private          Process                _process;
+	private          String                 _sectionTitle;
 
 	public ExtProcessPipeSearch(@NotNull File workingDir, @NotNull List<String> command, @Nullable Pattern matchRegex, @Nullable Pattern sectionRegex) {
 		if (command.isEmpty())
@@ -89,7 +89,7 @@ public class ExtProcessPipeSearch implements SearchPredicate {
 			throw new UncheckedIOException(e);
 		}
 		_toProc = new BufferedWriter(new OutputStreamWriter(_process.getOutputStream()));
-		_textSource = new TempTextSource();
+		_textSource = new TempFilteredTextSource();
 		_stdOutReader = new ReadThread(_process.getInputStream(), _onStdOut, this::onError, "stdout").startNow();
 		_stdErrReader = new ReadThread(_process.getErrorStream(), this::onStdErr, this::onError, "stderr").startNow();
 		return _textSource;
