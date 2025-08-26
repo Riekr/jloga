@@ -1,3 +1,6 @@
+- General:
+  - Added toast notification when automatically changing charset
+
 ## v0.6.2
 - Fixes
   - Grid view takes into account header sizes when sizing columns

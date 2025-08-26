@@ -181,6 +181,9 @@ public class TextFileSource implements TextSource {
 			final Charset newCharset = CharsetUtils.guessCharset(byteBuffer);
 			if (newCharset != null && !Objects.equals(origCharset, newCharset)) {
 				_descriptionLabel.setText(_file.toFile().getAbsolutePath() + " (" + newCharset + ')');
+				Notifications.getInstance()
+						.show(Notifications.Type.SUCCESS, Notifications.Location.BOTTOM_CENTER,
+								"Switching charset from " + _charset + " to " + newCharset);
 				return newCharset;
 			}
 		}
