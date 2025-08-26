@@ -72,6 +72,12 @@ public class ROKeyListener implements KeyListener {
 			case 115: // F4
 			case 116: // F5
 				return;
+			case 96: // 0 numeric pad
+			case 48: // 0 upper row
+				if (e.isControlDown()) {
+					onCtrl0();
+					return;
+				}
 		}
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
 		if (KeyBindings.getGUIKeyBindings().stream().noneMatch((pref) -> keyStroke.equals(pref.get())))
@@ -89,4 +95,6 @@ public class ROKeyListener implements KeyListener {
 	protected void onPreviousTab() {}
 
 	protected void onNextTab() {}
+
+	protected void onCtrl0() {}
 }

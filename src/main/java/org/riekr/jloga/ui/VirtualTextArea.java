@@ -55,6 +55,8 @@ import org.riekr.jloga.utils.PopupUtils;
 import org.riekr.jloga.utils.SelectionHighlight;
 import org.riekr.jloga.utils.UIUtils;
 
+import raven.toast.Notifications;
+
 public class VirtualTextArea extends JComponent implements FileDropListener {
 	@Serial private static final long serialVersionUID = -2704231180724047955L;
 
@@ -118,6 +120,12 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 
 		_text = new JTextAreaWithFontMetrics();
 		_text.addKeyListener(new ROKeyListener() {
+
+			@Override
+			protected void onCtrl0() {
+				resetFontSize();
+			}
+
 			@Override
 			protected void onPageUp() {
 				pageUp();
@@ -194,6 +202,8 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 				JScrollBar scrollBar = _scrollPane.getHorizontalScrollBar();
 				int incr = (scrollBar.getMaximum() - scrollBar.getMinimum()) / 10;
 				scrollBar.setValue(scrollBar.getValue() + (e.getWheelRotation() * incr));
+			} else if (e.isControlDown()) {
+				setFontSize(e.getWheelRotation() < 0);
 			} else {
 				if (e.getWheelRotation() < 0)
 					pageUp();
@@ -422,12 +432,41 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		setHighlightedLine(line, true, level);
 	}
 
+	public void resetFontSize() {
+		Font font = _text.getFont();
+		float size = font.getSize2D();
+		font = Preferences.FONT.get();
+		float newsize = font.getSize2D();
+		if (size != newsize) {
+			setFont(font);
+			Notifications.getInstance()
+					.show(Notifications.Type.INFO, Notifications.Location.BOTTOM_CENTER,
+							"Resetted font size to " + font.getSize2D() + "pt");
+		}
+	}
+
+	public void setFontSize(boolean increment) {
+		final float incr = increment ? 1 : -1;
+		final Font font = _text.getFont();
+		final float curr = font.getSize2D();
+		final float newsize = curr + incr;
+		setFont(font.deriveFont(newsize));
+		final Notifications notifications = Notifications.getInstance();
+		notifications.clear(Notifications.Location.BOTTOM_CENTER);
+		notifications.show(Notifications.Type.INFO, Notifications.Location.BOTTOM_CENTER,
+				"Increased font size from " + curr + "pt to " + newsize + "pt" +
+						"\nReset with <ctrl>+<0>");
+	}
+
 	@Override
 	public void setFont(Font f) {
 		_text.setFont(f);
-		if (_text.getDocument() != null)
-			recalcLineHeight();
 		_lineNumbers.setFont(f);
+		recalcLineHeight();
+		if (_gridView != null) {
+			_gridView.setFont(f);
+			_gridView.setRowHeight(_lineHeight);
+		}
 	}
 
 	public void setTextSource(TextSource textSource) {

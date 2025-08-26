@@ -2,6 +2,7 @@
   - Wrong page increase when opening text files
 - General:
   - Added toast notification when automatically changing charset
+  - Pressing control and scrolling with the mouse wheel changes font size
 
 ## v0.6.2
 - Fixes
