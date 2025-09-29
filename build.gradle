@@ -44,7 +44,7 @@ dependencies {
 	implementation 'com.formdev:flatlaf-intellij-themes:3.6.1'
 
 	// https://github.com/DJ-Raven/swing-toast-notifications
-	implementation files('libs/swing-toast-notifications-1.0.3.jar')
+	implementation files('libs/swing-toast-notifications-1.0.5r.jar')
 
 	implementation 'org.drjekyll:fontchooser:3.1.0'
 	implementation 'org.nanohttpd:nanohttpd-websocket:2.3.1'

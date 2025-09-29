@@ -1,5 +1,7 @@
 - General:
   - Rework volatile text sources for future implementations
+- Fixes:
+  - Workaround for "PERPIXEL_TRANSLUCENT" errors in remote desktops
 
 ## v0.6.3
 - Fixes
