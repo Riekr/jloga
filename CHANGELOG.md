@@ -1,3 +1,4 @@
+## v0.6.4
 - General:
   - Rework volatile text sources for future implementations
 - Fixes:
