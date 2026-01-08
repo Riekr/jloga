@@ -1,5 +1,7 @@
 package org.riekr.jloga.httpd;
 
+import static org.riekr.jloga.utils.ExecUtils.validateCommand;
+import static org.riekr.jloga.utils.ExecUtils.validateFlatpak;
 import static org.riekr.jloga.utils.PopupUtils.popupError;
 import static org.riekr.jloga.utils.PopupUtils.popupWarning;
 
@@ -8,9 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import org.riekr.jloga.prefs.Preferences;
 import org.riekr.jloga.utils.OSUtils;
@@ -18,48 +22,53 @@ import org.riekr.jloga.utils.OSUtils;
 class Browser {
 	private Browser() {}
 
-	private static void addIfExists(String file, List<String> dest) {
+	private static void addIfExists(String file, Collection<String> dest) {
 		if (file != null && !file.isEmpty() && new File(file).exists())
 			dest.add(file);
 	}
 
 	private static String[] findWindowsExecutable(String url) {
-		List<String> programFiles = new ArrayList<>();
-		addIfExists(System.getenv("ProgramFiles(x86)"), programFiles);
-		addIfExists(System.getenv("ProgramFiles"), programFiles);
-		addIfExists(System.getenv("LocalAppData"), programFiles);
-		for (String programFilesDir : programFiles) {
+		final Set<String> binDirs = new LinkedHashSet<>();
+		addIfExists(System.getenv("ProgramFiles(x86)"), binDirs);
+		addIfExists(System.getenv("ProgramFiles"), binDirs);
+		addIfExists(System.getenv("LocalAppData"), binDirs);
+		for (String binDir : binDirs) {
 			File f;
 			// "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory="Personale"
-			if ((f = new File(programFilesDir, "Microsoft\\Edge\\Application\\msedge.exe")).canExecute())
+			if ((f = new File(binDir, "Microsoft\\Edge\\Application\\msedge.exe")).canExecute())
 				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
 			// https://stackoverflow.com/questions/40674914/google-chrome-path-in-windows-10
-			if ((f = new File(programFilesDir, "Google\\Chrome\\Application\\chrome.exe")).canExecute())
+			if ((f = new File(binDir, "Google\\Chrome\\Application\\chrome.exe")).canExecute())
 				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
-			// TODO: add other chromium browsers, firefox unfortunately does not work with finos perspective
+			// TODO: add other chromium browsers
+			// TODO: add firefox
 		}
 		return null;
 	}
 
 	private static String[] findUnixExecutable(String url) {
-		// TODO: to be checked
-		List<String> programFiles = new ArrayList<>();
-		addIfExists("/usr/bin", programFiles);
-		addIfExists("/usr/local/bin", programFiles);
-		addIfExists("/opt/bin", programFiles);
-		for (String programFilesDir : programFiles) {
-			File f;
-			if ((f = new File(programFilesDir, "chromium-freeworld")).canExecute())
-				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
-			if ((f = new File(programFilesDir, "chromium")).canExecute())
-				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
-			if ((f = new File(programFilesDir, "google-chrome")).canExecute())
-				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
-			if ((f = new File(programFilesDir, "microsoft-edge")).canExecute())
-				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
-			// TODO: add other chromium browsers, firefox unfortunately does not work with finos perspective
-		}
-		return null;
+		final Set<String> binDirs = new LinkedHashSet<>();
+		addIfExists("/usr/bin", binDirs);
+		addIfExists("/usr/local/bin", binDirs);
+		addIfExists("/opt/bin", binDirs);
+		Optional.of(System.getenv("PATH")).stream()
+				.flatMap(s -> Arrays.stream(s.split(":")))
+				.forEach(binDirs::add);
+		return validateCommand(binDirs, "chromium-freeworld", "--new-window", "--app=" + url)
+				.or(() -> validateFlatpak("io.github.ungoogled_software.ungoogled_chromium", "--new-window", "--app=" + url))
+				.or(() -> validateCommand(binDirs, "chromium", "--new-window", "--app=" + url))
+				.or(() -> validateFlatpak("org.chromium.Chromium", "--new-window", "--app=" + url))
+				// google chrome
+				.or(() -> validateCommand(binDirs, "google-chrome", "--new-window", "--app=" + url))
+				.or(() -> validateFlatpak("com.google.Chrome", "--new-window", "--app=" + url))
+				// microsoft edge
+				.or(() -> validateCommand(binDirs, "microsoft-edge", "--new-window", "--app=" + url))
+				.or(() -> validateFlatpak("com.microsoft.Edge", "--new-window", "--app=" + url))
+				// firefox (does not support "app" look and feel)
+				.or(() -> validateCommand(binDirs, "firefox", "--private-window=" + url))
+				.or(() -> validateFlatpak("org.mozilla.firefox", "--new-window", "--app=" + url))
+				.or(() -> validateFlatpak("org.mozilla.Firefox", "--new-window", "--app=" + url))
+				.orElse(null);
 	}
 
 	private static void exec(String[] command) {

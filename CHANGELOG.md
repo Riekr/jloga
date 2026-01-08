@@ -1,3 +1,6 @@
+- General:
+  - Support linux [flatpak](https://flatpak.org/) browsers for opening Finos perspective
+
 ## v0.6.4
 - General:
   - Rework volatile text sources for future implementations
