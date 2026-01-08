@@ -232,7 +232,7 @@ public class VirtualTextArea extends JComponent implements FileDropListener {
 		_gridToggle.addActionListener((e) -> setGridView(_gridToggle.isSelected(), false));
 		ContextMenu.addAction(_gridToggle, "Change delimiter", this::changeGridDelimiter);
 		ContextMenu.addAction(_gridToggle, "Change header", this::changeGridHeader);
-		JButton perspectiveBtn = new JButton("\uD83D\uDCC8");
+		final JButton perspectiveBtn = new JButton("\uD83D\uDDE0");
 		perspectiveBtn.addActionListener(e -> openInPerspective());
 		_floatingButtons.add(perspectiveBtn);
 		_floatingButtons.add(Box.createRigidArea(new Dimension(_scrollBar.getPreferredSize().width, 0)));

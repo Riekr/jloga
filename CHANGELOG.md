@@ -1,6 +1,8 @@
+## v0.6.5
 - General:
   - Support linux [flatpak](https://flatpak.org/) browsers for opening Finos perspective
   - Updated to Finos perspective [3.8.0](https://github.com/finos/perspective/compare/v3.7.4...v3.8.0)
+  - Fixed Finos perspective button icon
 
 ## v0.6.4
 - General:
