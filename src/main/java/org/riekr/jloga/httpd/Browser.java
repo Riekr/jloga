@@ -40,6 +40,8 @@ class Browser {
 			// https://stackoverflow.com/questions/40674914/google-chrome-path-in-windows-10
 			if ((f = new File(binDir, "Google\\Chrome\\Application\\chrome.exe")).canExecute())
 				return new String[]{f.getAbsolutePath(), "--new-window", "--app=" + url};
+			if ((f = new File(binDir, "Mozilla Firefox\\firefox.exe")).canExecute())
+				return new String[]{f.getAbsolutePath(), "--private-window=" + url};
 			// TODO: add other chromium browsers
 			// TODO: add firefox
 		}
@@ -66,8 +68,8 @@ class Browser {
 				.or(() -> validateFlatpak("com.microsoft.Edge", "--new-window", "--app=" + url))
 				// firefox (does not support "app" look and feel)
 				.or(() -> validateCommand(binDirs, "firefox", "--private-window=" + url))
-				.or(() -> validateFlatpak("org.mozilla.firefox", "--new-window", "--app=" + url))
-				.or(() -> validateFlatpak("org.mozilla.Firefox", "--new-window", "--app=" + url))
+				.or(() -> validateFlatpak("org.mozilla.firefox", "--private-window=" + url))
+				.or(() -> validateFlatpak("org.mozilla.Firefox", "--private-window=" + url))
 				.orElse(null);
 	}
 

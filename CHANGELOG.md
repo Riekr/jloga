@@ -1,3 +1,6 @@
+- General:
+  - support [Firefox](https://www.firefox.com/) on Windows
+
 ## v0.6.5
 - General:
   - Support linux [flatpak](https://flatpak.org/) browsers for opening Finos perspective
